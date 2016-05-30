@@ -104,7 +104,7 @@ Installation using a virtual environment (recommended)
 
   ``source activate qmworks``
   
-- Change to directory *$HOME/escience/workflow-engine* and type:
+- Change to directory *$HOME/escience/noodles* and type:
 
   ``pip install .``  
 
