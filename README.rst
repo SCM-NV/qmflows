@@ -74,7 +74,7 @@ Installation using a virtual environment (recommended)
 
   - ``conda create -n qmworks python`` 
 
-- Active the new virtual environment
+- Activate the new virtual environment
   
   - ``source activate qmworks``
 
