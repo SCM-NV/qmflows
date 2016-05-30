@@ -1,0 +1,6 @@
+{
+    "optimize": ["Task.RunType","GO"],
+    "ts": ["Task.RunType","TS"],
+    "constraint" :"constraints"
+}
+

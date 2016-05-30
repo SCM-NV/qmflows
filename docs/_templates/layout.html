@@ -1,0 +1,9 @@
+{% extends "!layout.html" %}
+
+{%- block sidebarlogo %}
+{%- if logo %}
+<p class="logo"><a href="http://www.scm.com/">
+  <img class="logo" src="{{ pathto('_static/' + logo, 1) }}" alt="Logo"/>
+</a></p>
+{%- endif %}
+{%- endblock %}

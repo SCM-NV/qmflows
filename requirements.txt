@@ -1,0 +1,6 @@
+dill
+numpy
+h5py
+pymonad
+pyparsing
+six

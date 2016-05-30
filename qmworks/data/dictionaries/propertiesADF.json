@@ -1,0 +1,5 @@
+{
+	"energy": ["Energy","Bond Energy"],
+	"dipole": ["Properties", "Dipole"],
+	"charges": ["Properties", "AtomCharge Mulliken"]
+}

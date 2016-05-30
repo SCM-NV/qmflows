@@ -1,0 +1,9 @@
+<<<<<<< HEAD
+recursive-include qmworks/data/templates/*.json
+recursive-include qmworks/data/dictionaries/*.json
+=======
+recursive-include qmworks-data/templates/*.json
+recursive-include qmworks-data/dictionaries/*.json
+>>>>>>> master
+
+
