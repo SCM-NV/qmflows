@@ -89,8 +89,8 @@ Installation using a virtual environment (recommended)
 - Clone the packages using the following commands:
   
    - ``git clone -b escience git@gitlab.pyadf.org:e-science/plams.git``
-   - ``git clone git@gitlab.pyadf.org:e-science/workflow-engine.git``    
-   - ``git clone git@gitlab.pyadf.org:e-science/qmworks.git``
+   - ``git clone -b devel git@github.com:NLeSC/noodles.git``    
+   - ``git clone git@github.com:SciSoftTech/qmworks.git``
 
 - Change to directory *$HOME/escience/plams* and type:
   
