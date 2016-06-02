@@ -37,7 +37,8 @@ class CP2K(Package):
         pass
 
     def run_job(self, settings, mol, work_dir=None, hdf5_file="quantum.hdf5",
-                input_file_name=None, out_file_name=None, store_in_hdf5=True):
+                input_file_name=None, out_file_name=None, store_in_hdf5=True,
+                nHOMOS=100, nLUMOS=100):
         """
         Call the Cp2K binary using plams interface.
 
@@ -45,9 +46,15 @@ class CP2K(Package):
         :type settings: :class:`~qmworks.Settings`
         :param mol: molecular Geometry
         :type mol: plams Molecule
-        :param file_h5: Path to the HDF5 file that contains the
+        :param hdf5_file: Path to the HDF5 file that contains the
         numerical results.
-        :type file_h5: String
+        :type hdf5_file: String
+        :param input_file_name: Optional name for the input.
+        :type input_file_name: String
+        :param out_file_name: Optional name for the output.
+        :type out_file_name: String
+        :param store_in_hdf5: wether to store the output arrays in HDF5 format.
+        :type store_in_hdf5: Bool
         """
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
@@ -60,14 +67,16 @@ class CP2K(Package):
         output_file = join(job.path, job._filename('out'))
 
         if store_in_hdf5:
-            self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file)
+            self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
+                              nLUMOS)
 
         return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file)
 
     def postrun(self):
         pass
 
-    def dump_to_hdf5(self, file_h5, settings, work_dir, output_file):
+    def dump_to_hdf5(self, file_h5, settings, work_dir, output_file, nHOMOS,
+                     nLUMOS):
         """
         Store the result in HDF5 format.
 
@@ -111,7 +120,7 @@ class CP2K(Package):
                                  "print", "ao_matrices", "filename"]
 
         # Arguments to store the properties in HDF5
-        nOrbitals, nOrbFuns = read_cp2k_number_of_orbitals(output_file)
+        nOccupied, nOrbitals, nOrbFuns = read_cp2k_number_of_orbitals(output_file)
         path_MO = get_file_path(settings_file_MO)
         path_overlap = get_file_path(settings_file_overlap)
 
@@ -122,7 +131,8 @@ class CP2K(Package):
             pathEs = join(work_dir, "cp2k/mo/eigenvalues")
             pathCs = join(work_dir, "cp2k/mo/coefficients")
             k = InputKey('orbitals',
-                         [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs])
+                         [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
+                          nOccupied, nHOMOS, nLUMOS])
             keys.append(k)
             # Remove this file after it has been processed
             files_to_remove.append(path_MO)

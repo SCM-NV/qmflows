@@ -181,12 +181,14 @@ def read_cp2k_number_of_orbitals(file_name):
     try:
         with open(file_name, 'r') as f:
             for line in f:
+                if re.search("Number of occupied orbitals", line):
+                    nOccupied = line.split()[-1]
                 if re.search("Number of molecular orbitals", line):
                     nOrbitals = line.split()[-1]
                 if re.search("Number of orbital functions", line):
                     nOrbFuns = line.split()[-1]
                     break
-            return int(nOrbitals), int(nOrbFuns)
+            return int(nOccupied), int(nOrbitals), int(nOrbFuns)
     except nameError:
         msg1 = 'There is a problem  with the output file: {}\n'.format(file_name)
         raise RuntimeError(msg1)

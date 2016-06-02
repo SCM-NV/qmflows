@@ -12,6 +12,7 @@ from os.path import join
 
 # ==================> Internal modules <==========
 from plams import KFReader
+from qmworks.common import InfoMO
 from qmworks.parsers.cp2KParser import (readCp2KBasis, readCp2KCoeff, readCp2KOverlap)
 from qmworks.parsers.turbomoleParser import (readTurbomoleBasis, readTurbomoleMO)
 from qmworks.utils import zipWith
@@ -64,9 +65,10 @@ class StoreasHDF5:
         """
         Store the basis set.
 
-        :parameter parserFun: Function to parse the file containing the information about
-                              the primitive contracted Gauss functions.
-        :parameter pathBasis: Absolute path to the file containing the basis sets information
+        :parameter parserFun: Function to parse the file containing the
+        information about the primitive contracted Gauss functions.
+        :parameter pathBasis: Absolute path to the file containing the basis
+        sets information.
         :type pathBasis: String.
         :returns: **None**
         """
@@ -88,7 +90,8 @@ class StoreasHDF5:
             self.funHDF5_attrs("basisFormat", str(fs), path, css)
 
     def saveMO(self, parserFun, pathMO, nOrbitals=None, nOrbFuns=None,
-               pathEs=None, pathCs=None):
+               pathEs=None, pathCs=None, nOccupied=None, nHOMOS=100,
+               nLUMOS=100):
         """
         Save Molecular orbital eigenvalues and eigenvectors.
 
@@ -111,7 +114,16 @@ class StoreasHDF5:
         pathCs = pathCs if pathCs is not None else join(self.name, "mo",
                                                         "coefficients")
 
-        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
+        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns, nOccupied, nHOMOS,
+                           nLUMOS)
+
+        # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
+        if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
+            ess, css  = infoMO
+            eigenVals = ess[nOccupied - nHOMOS, nOccupied + nLUMOS]
+            coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
+            infoMO = InfoMO(eigenVals, coefficients)
+
         zipWith(self.funHDF5)([pathEs, pathCs])([infoMO.eigenVals, infoMO.coeffs])
 
     def saveOverlap(self, parserFun, pathOverlap, nOrbitals=None, path=None):
