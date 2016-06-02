@@ -119,7 +119,7 @@ class StoreasHDF5:
         # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
         if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
             ess, css  = infoMO
-            eigenVals = ess[nOccupied - nHOMOS, nOccupied + nLUMOS]
+            eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
             coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
             infoMO = InfoMO(eigenVals, coefficients)
 
