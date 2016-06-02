@@ -114,8 +114,7 @@ class StoreasHDF5:
         pathCs = pathCs if pathCs is not None else join(self.name, "mo",
                                                         "coefficients")
 
-        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns, nOccupied, nHOMOS,
-                           nLUMOS)
+        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
 
         # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
         if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
