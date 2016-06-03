@@ -120,8 +120,9 @@ class StoreasHDF5:
         if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
             ess, css  = infoMO
             eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
+            css = np.transpose(css)
             coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
-            infoMO = InfoMO(eigenVals, coefficients)
+            infoMO = InfoMO(eigenVals, np.transpose(coefficients))
 
         zipWith(self.funHDF5)([pathEs, pathCs])([infoMO.eigenVals, infoMO.coeffs])
 
