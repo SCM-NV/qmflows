@@ -96,9 +96,12 @@ Installation using a virtual environment (recommended)
   
   ``pip install .``
 
-- Add the following line to the ``$HOME/miniconda3/envs/qmworks/bin/activate`` file,
+- Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
   
-  ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py``
+  ``$HOME/miniconda3/envs/qmworks/bin/activate`` or
+  ``$HOME/anaconda/envs/qmworks/bin/activate``
+  
+  You can find the path to your activation file running the command ``conda info --envs``.
 
 - Type in your terminal,
 
