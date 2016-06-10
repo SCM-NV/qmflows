@@ -39,11 +39,16 @@ temp.atoms[48].move_to((0.0,0.0,0.0))
 # Replace dummy atoms by new groups, generate coordinates only for new atoms
 job_list = []
 for mod,smirks in list_of_modifications.items():
+    print(mod)
     temp2 = rdkitTools.apply_smirks(temp, smirks)[0]
     temp2 = rdkitTools.apply_smirks(temp2, smirks)[0]
-    temp3 = rdkitTools.gen_coords(temp2)
+    freeze = rdkitTools.gen_coords(temp2)
+    #rdkitTools.write_molblock(temp2)
     # generate job
-    job_list.append(adf(templates.singlepoint, temp3, job_name=mod))
+    s = Settings()
+    s.freeze = [a+1 for a in freeze]
+    partial_geometry = adf(templates.geometry.overlay(s), temp2, job_name="partial_opt_"+mod)
+    job_list.append(adf(templates.ts, partial_geometry.molecule, job_name="ts_"+mod))
 
 results = run(gather(*job_list), n_processes=1)
 
