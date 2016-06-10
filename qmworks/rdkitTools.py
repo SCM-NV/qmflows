@@ -135,26 +135,37 @@ def apply_smirks(plams_mol, reaction_smirks):
 def gen_coords(plams_mol):
     """ Calculate 3D positions for atoms without coordinates """
     rdmol = plams2rdkit(plams_mol)
-    conf = rdmol.GetConformer(0)
+    ref = plams2rdkit(plams_mol)
+    conf = rdmol.GetConformer()
     coordDict = {}
+    freeze=[]
+    map=[]
     # Put known coordinates in coordDict
     for i in range(rdmol.GetNumAtoms()):
         pos = conf.GetAtomPosition(i)
         if (-0.0001 < pos.x < 0.0001) and (-0.0001 < pos.y < 0.0001) and (-0.0001 < pos.z < 0.0001):
             continue # atom without coordinates
-        coordDict[i] = Geometry.Point3D(pos.x, pos.y, pos.z)
+        coordDict[i] = pos
+        freeze.append(i)
+        map.append((i,i))
     # compute coordinates for new atoms, keeping known coordinates
-    seed = 1
-    i = -1
-    while i == -1:
-        i = AllChem.EmbedMolecule(rdmol,
-                                  ignoreSmoothingFailures=True,
-                                  randomSeed=seed,
-                                  useBasicKnowledge=True,
-                                  coordMap=coordDict,
-                                  forceTol=0.01)
-        seed += 1
-    return rdkit2plams(rdmol)
+    rms=1
+    rs = 1
+    # repeat embedding and alignment until the rms of mapped atoms is sufficiently small
+    while rms > 0.1:
+        print(AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs, useBasicKnowledge=True))
+        # align new molecule to original coordinates
+        rms = AllChem.AlignMol(rdmol,ref,atomMap=map)
+        rs+=1
+
+    conf = rdmol.GetConformer()
+    for a in range(len(plams_mol.atoms)):
+        pos = conf.GetAtomPosition(a)
+        atom = plams_mol.atoms[a]
+        atom._setx(pos.x)
+        atom._sety(pos.y)
+        atom._setz(pos.z)
+    return freeze
 
 def write_molblock(plams_mol, file=sys.stdout):
     file.write(Chem.MolToMolBlock(plams2rdkit(plams_mol)))
