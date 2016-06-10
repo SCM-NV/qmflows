@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='QuantumWorkflows',
-    version='0.1.1',
+    version='0.1.2',
     description='Automation of computations in quantum chemistry',
     license='',
     url='',
@@ -27,5 +27,6 @@ setup(
         'topic :: scientific/engineering :: chemistry'
     ],
     install_requires=['cython', 'h5py', 'numpy', 'plams',
-                      'pymonad', 'pyparsing', 'six']
+                      'pymonad', 'pyparsing', 'six'],
+    dependency_links = ['https://github.com/SCM-NV/qmworks/tarball/master#egg=package-0.1.2']
 )
