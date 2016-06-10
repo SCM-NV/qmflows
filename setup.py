@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 setup(
@@ -27,6 +27,7 @@ setup(
         'topic :: scientific/engineering :: chemistry'
     ],
     install_requires=['cython', 'h5py', 'numpy', 'plams',
-                      'pymonad', 'pyparsing', 'six'],
-    dependency_links = ['https://github.com/SCM-NV/qmworks/tarball/master#egg=package-0.1.2']
+                      'pymonad', 'pyparsing', 'six']
 )
+
+

@@ -90,11 +90,6 @@ Installation using a virtual environment (recommended)
   
    - ``git clone -b escience git@gitlab.pyadf.org:e-science/plams.git``
    - ``git clone -b devel git@github.com:NLeSC/noodles.git``    
-   - ``git clone git@github.com:SciSoftTech/qmworks.git``
-
-- Change to directory *$HOME/escience/plams* and type:
-  
-  ``pip install .``
 
 - Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
   
@@ -103,17 +98,22 @@ Installation using a virtual environment (recommended)
   
   You can find the path to your activation file running the command ``conda info --envs``.
 
+
 - Type in your terminal,
 
   ``source activate qmworks``
+
+- Change to directory *$HOME/escience/plams* and type:
   
+  ``pip install .``
+
 - Change to directory *$HOME/escience/noodles* and type:
 
   ``pip install .``  
 
-- Change to directory *$HOME/escience/qmworks* and type:
+- Change to directory *$HOME/escience* and type:
   
-  ``pip install .``
+  ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=QuantumWorkflows-0.1.2``
 
 Now you are ready to use *qmworks*. To exit the virtual environment type  ``source deactivate``.
  
@@ -141,44 +141,6 @@ If you want to use the *pyXenon* interface available with noodles you need to,
   Java Development Kit (JDK_). Usually the JDK is install by default in most of the supercomputers. If you
   are using *Xenon* to communicate with remote server from your local machine, see JDK_.
 
-
-.. _source:  
-Installation from source
-========================
-
-
-- Download and install *python3.5* from: download_.
-
-
-- Download RDKit from sourceforge_, extract it and follow the instructions inside the RDKit
-  folder at *Docs/Book/Install.rst*
-    
-
-- Clone the packages using the following commands:
-  
-   - ``git clone -b escience git@gitlab.pyadf.org:e-science/plams.git``
-   - ``git clone git@gitlab.pyadf.org:e-science/workflow-engine.git``    
-   - ``git clone git@gitlab.pyadf.org:e-science/qmworks.git``
-
-- Change to directory *$HOME/escience/plams* and type:
-  
-  ``pip install . --user``
-
-- Add the following line to the ``$HOME/.bash_profile`` (or ``$HOME/.bashrc``) file,
-  
-  ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py``
-
-- Type in your terminal,
-
-  ``source ~/.bash_profile``
-  
-- Change to directory *$HOME/escience/workflow-engine* and type:
-
-  ``pip install . --user``  
-
-- Change to directory *$HOME/escience/qmworks* and type:
-  
-  ``pip install . --user``
 
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
