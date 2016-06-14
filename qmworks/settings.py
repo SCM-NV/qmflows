@@ -83,16 +83,3 @@ class Settings(plams.Settings, Storable):
         ret.update(other)
         return ret
 
-    def get_value_recursively(self, xs):
-        """
-        :param xs: List of keys
-        :type xs: String List
-        """
-        s = self.copy()
-        for x in xs:
-            s = s.get(x)
-            if s is None:
-                break
-            else:
-                s
-        return s

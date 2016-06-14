@@ -105,13 +105,28 @@ class CP2K(Package):
             else:
                 return None
 
+        def get_value_recursively(st, xs):
+            """
+            :param xs: List of keys
+            :type xs: String List
+            """
+            s = st.copy()
+            for x in xs:
+                s = s.get(x)
+                if s is None:
+                    break
+                else:
+                    s
+            return s
+
         def get_file_path(xs):
             """
             Search for a result file requested in the settings.
             CP2K renames thew files appending a number an a `Log` to the
             end of the filename.
             """
-            path = settings.get_value_recursively(xs)
+
+            path = get_value_recursively(settings, xs)
             if path is None:
                 return None
             else:
