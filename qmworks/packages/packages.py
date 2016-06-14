@@ -1,5 +1,5 @@
 
-__all__ = ['finish', 'init', 'Package', 'run', 'registry', 'Result',
+__all__ = ['Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
 # ========>  Standard and third party Python Libraries <======
@@ -11,11 +11,9 @@ import pkg_resources as pkg
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial,
                      run_parallel)
-# from noodles.run.xenon import (run_xenon, XenonConfig, RemoteJobConfig)
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
-# from qmworks.errorHandling     import WorkflowError
 from qmworks.settings import Settings
 from qmworks.fileFunctions import json2Settings
 
@@ -113,17 +111,6 @@ class Package:
         return self.pkg_name
 
 
-@schedule_hint()
-def init():
-    plams.init()
-    return True
-
-
-@schedule_hint()
-def finish():
-    plams.finish()
-
-
 def run(job, runner=None, **kwargs):
     """
     Pickup a runner and initialize it.
@@ -162,8 +149,11 @@ def call_xenon(job, **kwargs):
     # return run_xenon(job, nproc, xenon_config, job_config)
         
 
-
 class SerMolecule(Serialiser):
+    """
+    Based on the Plams molecule this class encode and decode the
+    information related to the molecule using the JSON format.
+    """
     def __init__(self):
         super(SerMolecule, self).__init__(plams.Molecule)
 
@@ -175,6 +165,11 @@ class SerMolecule(Serialiser):
 
 
 class SerSettings(Serialiser):
+    """
+    Class to encode and decode the ~qmworks.Settings class using
+    its internal dictionary structure.
+    """
+
     def __init__(self):
         super(SerSettings, self).__init__(Settings)
 
@@ -186,6 +181,12 @@ class SerSettings(Serialiser):
 
 
 def registry():
+    """
+    This function pass to the noodles infrascture all the information
+    related to the Structure of the Package object that is schedule.
+    This *Registry* class contains hints that help Noodles to encode
+    and decode this Package object.
+    """
     return Registry(
         parent=serial.base(),
         types={
