@@ -22,7 +22,7 @@ from qmworks.utils import zipWith
 
 class StoreasHDF5:
     """
-    Add some docs to this class
+    Class to store inside a HDF5 file numerical array with optional attributes.
     """
     def  __init__(self, file_h5, packageName):
         self.file_h5 = file_h5
@@ -81,10 +81,10 @@ class StoreasHDF5:
 
         for ps, es in zip(pathsExpo, [xs.exponents for xs in vals]):
             self.funHDF5(ps, es)
-        # zipWith(self.funHDF5)(pathsExpo)(xs.exponents for xs in vals)
 
         fss = [xs.basisFormat for xs in keys]
         css = [xs.coefficients for xs in vals]
+
         # save basis set coefficients and their correspoding format
         for path, fs, css in zip(pathsCoeff, fss, css):
             self.funHDF5_attrs("basisFormat", str(fs), path, css)
@@ -100,12 +100,21 @@ class StoreasHDF5:
         :type pathMO: String
         :parameter nOrbitals: Number of orbitals
         :type nOrbitals: Int
+        :param nOrbFuns: Number of Atomic orbitals function that made up
+        each of the molecular orbitals.
+        :type nOrbFuns: Int
         :parameter pathEs: Path to the MO eigenvalues in the HDF5 file
                            (default is: <softwareName>/mo/eigenvalues).
         :type pathEs: String
         :parameter pathCs: Path to the MO coefficients in the HDF5 file
                            (default is: <softwareName>/mo/coefficients).
         :type pathCs: String
+        :param nOccupied: Number of occupied molecular orbitals.
+        :type nOccupied: Int
+        :param nHOMOS: number of HOMO orbitals to store in HDF5.
+        :type nHOMOS: Int
+        :param nLUMOS: number of HUMO orbitals to store in HDF5.
+        :type nLUMOS: Int
         :returns: **None**
         """
 
@@ -140,7 +149,6 @@ class StoreasHDF5:
         :type path: String
         :returns: **None**
         """
-
         mtx = parserFun(pathOverlap, nOrbitals)
         path = path if path is not None  else join(self.name, "overlap")
         self.funHDF5(path, mtx)
@@ -156,7 +164,8 @@ H5Args = namedtuple("H5Args", ("path", "h5File", "keys"))
 
 def adf2hdf5(file_h5, keys):
     """
-    serialize the numerical arrays specfied by ``keys`` named tuples
+    serialize the numerical arrays specfied by ``keys`` named tuples.
+
     :parameter file_h5: HDF5 file storing the numerical arrays
     :type      file_h5: h5py handler
     :parameter    keys: Properties to store
@@ -252,11 +261,3 @@ def turbomoleOpts(file_h5, key):
 def dirac2hdf5():
     pass
 
-
-# NWChem Interface
-def nwChem2hdf5():
-    pass
-
-
-def save_Dirac_Info():
-    pass
