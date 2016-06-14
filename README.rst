@@ -59,6 +59,8 @@ Installation using a virtual environment (recommended)
   
   - ``source activate qmworks``
 
+To exit the virtual environment type  ``source deactivate``.
+    
     
 .. _dependecies:
 Dependencies installation
@@ -67,7 +69,7 @@ Dependencies installation
 Using the conda environment the following packages should be installed:    
 
 
-- install rdkit using the following command:
+- install rdkit_ using the following command:
 
   - ``conda install -y -q -c https://conda.anaconda.org/rdkit rdkit``
 
@@ -85,10 +87,14 @@ Package installation
 
 - Move to the *escience* folder.
   
-- Clone the packages using the following commands:
+- Clone Plams_  using the following commands:
   
    - ``git clone -b escience git@gitlab.pyadf.org:e-science/plams.git``
 
+- Change to directory *$HOME/escience/plams* and type:
+  
+  ``pip install .``
+     
 - Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
   
   ``$HOME/miniconda3/envs/qmworks/bin/activate`` or
@@ -100,16 +106,11 @@ Package installation
 
   ``source activate qmworks``
 
-- Change to directory *$HOME/escience/plams* and type:
-  
-  ``pip install .``
-
 - Change to directory *$HOME/escience* and type:
   
-  -``pip install https://github.com/NLeSC/noodles/tarball/devel#egg=Noodles``
-  - ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=QuantumWorkflows-0.1.2``
+  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks -e git://github.com/NLeSC/noodles.git@devel#egg=Noodles``
 
-Now you are ready to use *qmworks*. To exit the virtual environment type  ``source deactivate``.
+Now you are ready to use *qmworks*. 
  
 
 **Notes:**
@@ -126,4 +127,5 @@ Now you are ready to use *qmworks*. To exit the virtual environment type  ``sour
 .. _Noodles: https://gitlab.pyadf.org/e-science/workflow-engine
 .. _HDF5: http://www.h5py.org/ 
 .. _here: https://www.python.org/downloads/
-
+.. _rdkit: http://www.rdkit.org
+.. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/

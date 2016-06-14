@@ -4,7 +4,7 @@ from setuptools import setup
 
 
 setup(
-    name='QuantumWorkflows',
+    name='qmworks',
     version='0.1.2',
     description='Automation of computations in quantum chemistry',
     license='',
