@@ -3,11 +3,11 @@ from noodles import (Storable)
 import pkg_resources as pkg
 import plams
 
-# ==================> Internal Modules  <=====================
+# ========================> Internal Modules  <================================
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result
 from qmworks.fileFunctions import json2Settings
-# ========================= ADF ============================
+# ============================= Orca ==========================================
 
 
 class _PropertyGetter(Storable):
@@ -25,6 +25,10 @@ class _PropertyGetter(Storable):
 
 class ORCA(Package):
     """
+    This class prepare the input to run a Orca job using both Plams and
+    templates. It also does the manangement of the input/output files resulting
+    from running Orca and returns a Results object that containing the methods
+    and data required to retrieve the output.
     """
     def __init__(self):
         super(ORCA, self).__init__("orca")
@@ -38,7 +42,8 @@ class ORCA(Package):
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
         print(orca_settings)
-        result = plams.ORCAJob(molecule=mol, settings=orca_settings, name=job_name).run()
+        result = plams.ORCAJob(molecule=mol, settings=orca_settings,
+                               name=job_name).run()
 
         return ORCA_Result(orca_settings, mol, result)
 
@@ -50,7 +55,7 @@ class ORCA(Package):
 
 
 class ORCA_Result(Result):
-    """Class providing access to PLAMS OrcaJob result results"""
+    """Class providing access to PLAMS OrcaJob results"""
 
     def __init__(self, settings, molecule, result):
         self.settings = settings
