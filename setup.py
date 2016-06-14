@@ -13,6 +13,7 @@ setup(
     keywords='chemistry workflows simulation materials',
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
+              "qmworks.examplesWorkflows"
               "qmworks.hdf5",
               "qmworks.packages", "qmworks.parsers",
               "qmworks.templates", "qmworks.sshConfig"],
@@ -26,7 +27,7 @@ setup(
         'intended audience :: science/research',
         'topic :: scientific/engineering :: chemistry'
     ],
-    install_requires=['cython', 'h5py', 'numpy', 'plams',
+    install_requires=['cython', 'h5py', 'numpy', 'noodles', 'plams',
                       'pymonad', 'pyparsing', 'six']
 )
 
