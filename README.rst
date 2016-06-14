@@ -23,14 +23,13 @@ procedures and manual data processing.
 
 Description
 ===========
-This library consists of a set of modules written in Python 3.5,
-offering the following features:
-
- 1. Quantum chemistry Workflows execution using Noodles_.
-
- 2. Automatic input generation for several quantum packages.
- 
- 3. Broadcasting numerical results between quantum chemistry.
+This library consists of a set of modules written in Python 3.5 to
+automate the following tasks:
+ 1. Input generation.
+ 2. Handle tasks dependencies (Noodles_).
+ 3. Distribution in heterogeneous hardware platforms.
+ 4. Numerical data storage and manipulation (HDF5_).
+ 5. Jobs failure detection and recovery.
 
  
 Installation
@@ -75,7 +74,7 @@ Using the conda environment the following packages should be installed:
 
 - install HDF5_ using conda:
 
-  -``conda install -c anaconda hdf5``
+  - ``conda install -c anaconda hdf5``
     
 
 .. _installation:
