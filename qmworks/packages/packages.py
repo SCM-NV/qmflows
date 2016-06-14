@@ -10,7 +10,7 @@ import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial,
-                     run_parallel, run_process)
+                     run_parallel)
 # from noodles.run.xenon import (run_xenon, XenonConfig, RemoteJobConfig)
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
@@ -90,7 +90,7 @@ class Package:
                             v = value
                         key = key[0]
                     if v:
-                        if isinstance(v,dict):
+                        if isinstance(v, dict):
                             v = Settings(v)
                         specific_from_generic_settings.specific[self.pkg_name][key] = v
                     else:
@@ -160,14 +160,7 @@ def call_xenon(job, **kwargs):
     # job_config = RemoteJobConfig(registry=serial.base, time_out=1)
 
     # return run_xenon(job, nproc, xenon_config, job_config)
-
         
-# def run(job, n_processes=1):
-#     # return run_process(
-#     #     job, n_processes = 1,
-#     #     registry = registry, init=init, finish=finish,
-#     #     verbose=False, deref=True)
-#     return run_parallel(job, n_threads=n_processes)
 
 
 class SerMolecule(Serialiser):
