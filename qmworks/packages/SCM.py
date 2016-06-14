@@ -1,6 +1,6 @@
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import (Storable, schedule, files)
+from noodles import files
 import pkg_resources as pkg
 import plams
 
@@ -14,6 +14,9 @@ from qmworks.fileFunctions import json2Settings
 class ADF(Package):
     """
     This class takes care of calling the *ADF* quantum package.
+    it uses both Plams and the Templates module to create the input
+    files, while Plams takes care of running the Job.
+    It returns a ``ADF_Result`` object containing the output data.
     """
     def __init__(self):
         super(ADF, self).__init__("adf")
@@ -92,6 +95,8 @@ class ADF_Result(Result):
 
     def as_dict(self):
         """
+        Method to serialize as a JSON dictionary the results given
+        by an ADF computation.
         """
         return {
             "settings": self.settings,
@@ -208,7 +213,7 @@ class DFTB_Result(Result):
             type = self.result.read('Properties', 'Type(' + str(i + 1) + ')').strip()
             subtype = self.result.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
             value = self.result.read('Properties', 'Value(' + str(i + 1) + ')')
-            props[type][subtype]=value
+            props[type][subtype] = value
         return props
 
     def __getattr__(self, prop):
@@ -221,7 +226,6 @@ class DFTB_Result(Result):
             dipole = result.properties.dipole
 
         """
-        import sys
         if 'properties' in dir(self) and 'prop_dict' in dir(self):
             return self.properties[self.prop_dict[prop]]
         else:
