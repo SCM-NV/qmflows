@@ -2,9 +2,8 @@ Tutorial
 ========
 What is QMWorks?
 ~~~~~~~~~~~~~~~~
-Research on modern computational quantum chemistry relies on a set of computational tools to carry out calculations. These calculations are performed by scripts: launch the computation in a cluster, read the output and feed it to another program, report some results, etc.
-
-.. image:: _images/tree.png
+Research on modern computational quantum chemistry relies on a set of computational tools to carry out calculations. The complexity of the calculations usually requires
+intercommunication between the aforementioned tools, such communication is usually done through scripts  (e.g. Bash, Python, Perl, etc.) that try to automatize input/output actions like: launching the computations in a cluster, reading the resulting output and feeding the relevant numerical result to another program. Such scripts are difficult to maintain and extend, requiring a significant programming expertise to work with them. Being then desirable a set of automatic and extensible tools that allows to perfom complex simulations in heterogeneous hardware plaftorms. This library tackles the construction and efficient execution of computational chemistry workflows. This allows computational chemists to use the emerging massively parallel compute environments in an easy manner and focus on interpretation of scientific data rather than on tedious job submission procedures and manual data processing.
 
 But scripts are dificult to maintain and extend, requiring a significant programming expertise. In this context,
 **QMWorks** stands as a robust and flexible python library, that allows both begginers and experts to automate the following tasks:
@@ -15,6 +14,10 @@ But scripts are dificult to maintain and extend, requiring a significant program
 * Jobs failure detection and recovery.
 * Control over the granularity of parallelism.
 
+.. image:: _images/mindmap.png
+    :scale: 75 %
+  
+  
 The first noteworththy features of *QMWorks* is that it uses *Python3.5* if you have previous experience with
 *Python2.* and want to know what are the mayor diferences have a look at python2andpython3_.
   
