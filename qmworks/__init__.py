@@ -7,7 +7,6 @@ from .rdkitTools import *
 from .templates import *
 # from .components import *
 from .settings import Settings
-# from .sshConfig import *
 from .utils import * 
 
 try:
