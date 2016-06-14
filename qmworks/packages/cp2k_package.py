@@ -28,6 +28,11 @@ charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
 
 class CP2K(Package):
     """
+    This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
+    It uses plams together with the templates to generate the stucture input and
+    also uses Plams to invoke the binary CP2K code.
+    This class is not intended to be called directly by the user, instead the
+    **cp2k** function should be called.
     """
     def __init__(self):
         super(CP2K, self).__init__("cp2k")
@@ -252,7 +257,7 @@ class CP2K(Package):
 class CP2K_Farming(CP2K):
     """
     Run CP2K Job in Groups according to:
-    https://manual.cp2k.org/trunk/CP2K_INPUT/FARMING.html
+    <https://manual.cp2k.org/trunk/CP2K_INPUT/FARMING.html>
     """
     def run_job(self, settings, mol=None, hdf5_file="quantum.hdf5",
                 work_dirs=None, input_files=None, output_files=None,
@@ -451,20 +456,6 @@ class CP2K_Result(Result):
                                  sections))
 
         return paths_to_prop
-        # rs = []
-        # try:
-        #     with h5py.File(self.hdf5_file, 'r') as f5:
-        #         for path in paths_to_prop:
-        #             dset = f5[path]
-        #             xs = dset[...]
-        #             rs.append(xs)
-        #         return rs
-        # except KeyError:
-        #     msg = "There is not {} stored in the HDF5".format(prop)
-        #     raise KeyError(msg)
-        # except FileNotFoundError:
-        #     msg = "there is not HDF5 file containing the numerical results"
-        #     raise RuntimeError(msg)
 
 
 class CP2K_Farming_Result(CP2K_Result):
