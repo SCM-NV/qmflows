@@ -15,17 +15,42 @@ The Java script object notation **JSON** is a widely used data format. This form
 
 For Example, the default parameter for a geometry optimization using ADF are given by: ::
   
-    "specific": {
-       "adf": {
-       	    "basis": {"type": "SZ"},
-       	    "xc": {"lda": ""},
-       	    "integration": {"accint": 6.0},
-       	    "scf": {
-       	         "converge": 1e-6,
-       	         "iterations": 100},
-       	    "geometry": {"optim": "delocal"} }
 	
-
+  {
+    "specific": {
+        "adf": {
+            "basis": {"type": "SZ"},
+            "xc": {"lda": ""},
+            "integration": {"accint": 4.0},
+            "scf": {
+        	"converge": 1e-6,
+        	"iterations": 100} },
+        "dftb": {
+            "task": {"runtype": "SP"},
+            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
+        "cp2k" : {
+          "FORCE_EVAL": {
+              "DFT": {
+                  "BASIS_SET_FILE_NAME": "",
+                  "MGRID": {
+                      "CUTOFF": 400,
+                      "NGRIDS": 4
+                  },
+                  "POTENTIAL_FILE_NAME": "",
+                  "PRINT": {
+                      "MO": {
+                          "ADD_LAST"  : "NUMERIC",
+                          "EACH": {
+                              "QS_SCF": 0
+                          },
+                          "EIGENVALUES" : "",
+                          "EIGENVECTORS": "",
+                          "FILENAME": "./mo.data",
+                          "NDIGITS": 36,
+                          "OCCUPATION_NUMBERS": ""
+                      }
+                  },
+       ................
 
 
 .. autofunction:: get_template
