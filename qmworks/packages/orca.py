@@ -85,7 +85,7 @@ class ORCA_Result(Result):
             dipole = result.properties.dipole
 
         """
-        r = self.result.awk_output(script = self.prop_dict[prop])
+        r = self.result.awk_output(script=self.prop_dict[prop])
         try:
             result = [float(i) for i in r]
         except:
