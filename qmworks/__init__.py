@@ -5,7 +5,7 @@ from .packages import *
 from .parsers import *
 from .rdkitTools import *
 from .templates import *
-# from .components import *
+from .components import (PES_scan, select_max)
 from .settings import Settings
 from .utils import * 
 
