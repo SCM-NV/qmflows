@@ -66,10 +66,10 @@ DIRAC
 CP2k
 ~~~~
 
-.. autoclass:: qmworks.packages.cp2k.CP2K
+.. autoclass::  qmworks.cp2k_package.CP2K
    :members:
 
-.. autoclass:: qmworks.packages.cp2k.CP2K_Result
+.. autoclass:: qmworks.cp2k_package.CP2K_Result
    :members:
 
 ORCA

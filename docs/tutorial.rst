@@ -71,10 +71,13 @@ of *ADF* as shown at **(3)**. Finally in line **(4)** the user's keywords are me
    Lda
   End
 
+.. Hint::
+  One noteworthy features of *QMWorks* is that it uses *Python3.5* if you have previous experience with *Python2.* and want to know what are the mayor diferences have a look at python2andpython3_.
+
   
 A simple Example
 ~~~~~~~~~~~~~~~~
-Suppose you have a water molecule and you want to calculate a first approximation to the structure of minimal energy (e.g. using DFTB), then using this first approximation you want to perform a more accurate calculation for the optimized structure. In this section we will explore that simple *Workflow*, so fire up your favorite editor an copy the following code snippet to it: ::
+Suppose you have a water molecule and you want to calculate a first approximation to the structure of minimal energy (e.g. using DFTB), then using this first approximation you want to perform a more accurate calculation for the optimized structure. In this section we will explore that simple *Workflow*, so fire up your favorite editor an copy the following code snippet to it ::
 
   from qmworks import Settings, templates
   from plams import Molecule
@@ -85,14 +88,13 @@ Suppose you have a water molecule and you want to calculate a first approximatio
   from qmworks.packages import run
 
   plams.init()   # (1) 
-
   h2o = Molecule('h2o.xyz', 'xyz')  # (2)
-
   h2o_geometry = dftb(templates.geometry, h2o)  # (3)
 
   s = Settings() #  (4)
   # generic keyword "basis" must be present in the generic dictionary
   s.basis = "DZP"
+
   # "specific" allows the user to apply specific keywords for a
   # package that are not in a generic dictionary
   s.specific.adf.basis.core = "large"
@@ -100,7 +102,6 @@ Suppose you have a water molecule and you want to calculate a first approximatio
   # (5)
   h2o_singlepoint = adf(templates.singlepoint.overlay(s), h2o_geometry.molecule)
 
-  )
   dipole = h2o_singlepoint.dipole  # (6)
 
   final_result = run(dipole, n_processes=1)  # (7)
@@ -108,14 +109,18 @@ Suppose you have a water molecule and you want to calculate a first approximatio
   print(final_result)
 
 
+
 *QMWorks* uses the *Plams* package for both generating the input and calling the package that do the ``ab initio`` simulation.  *Plams* has an ``init`` function as shown in **(1)**, that initialize its enviroment and set all the variables to do the booking of creating unique folders, keeping track of the files, etc. that is required to do an ``ab initio`` simulation. Also, *QMWorks* use the *Plams* Molecule to store among other possible thing the molecular geometry coordinates. As shown at **(2)** the Molecule object is initialized with a path to the file containing the geometry and a string stating that file is of type ``xyz``. 
 
-In line **(3)** the *QMWorks* starts to show its power by declaring that a DFTB calculation is going to be carry out using as arguments the defaults available at `~qmworks.templates.geometry`
+In line **(3)** the *QMWorks* starts to show its power by declaring that a DFTB calculation is going to be carry out using as arguments the defaults for a ``geometry optimization`` available at `~qmworks.templates.geometry`. The :funct:`~qmworks.SCM.dftb` function takes as arguments the |Settings| and a *Molecule* object and it returns a :ref:`promise` object as result. You can regard this :ref:`promise` object like a suspended computation that is not yet evaluated. 
+
+In block **(4)** we set the input for a new computation using the *adf* but we use the previous computation using the syntax :: `h2o_geometry.molecule`
 
 As Previously discussed in the `tutorial templates`_ section
 
-.. Hint::
-  One noteworthy features of *QMWorks* is that it uses *Python3.5* if you have previous experience with *Python2.* and want to know what are the mayor diferences have a look at python2andpython3_.
+
+.. technical:: 
+  Under the hook the function *adf* is an instance of the class :class:`~qmworks.packages.SCM.ADF`
 
 
 Finally in Line **(7)** 
@@ -123,6 +128,7 @@ Finally in Line **(7)**
 .. toctree::
    running
 
+  
 
 
 A more Advance Example
