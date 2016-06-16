@@ -150,8 +150,9 @@ class CP2K(Package):
         keys = []
         files_to_remove = []
         if path_MO is not None:
-            pathEs = join(project_name, "cp2k/mo/eigenvalues")
-            pathCs = join(project_name, "cp2k/mo/coefficients")
+            relative_cwd = work_dir.split('/')[-1]
+            pathEs = join(project_name, relative_cwd, "cp2k/mo/eigenvalues")
+            pathCs = join(project_name, relative_cwd, "cp2k/mo/coefficients")
             k = InputKey('orbitals',
                          [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
                           nOccupied, nHOMOS, nLUMOS])
@@ -334,8 +335,8 @@ class CP2K_Farming(CP2K):
         r = farm_job.run(runner)
         r.wait()
 
-        # Name of the folder were the output is stored
-        folder_names = [f.split('/')[-1] for f in work_dirs]
+        # # Name of the folder were the output is stored
+        # folder_names = [f.split('/')[-1] for f in work_dirs]
 
         # Dump the numerical results to HDF5
         for s, outFile, folder in zip(job_settings, output_files, work_dirs):
@@ -469,10 +470,12 @@ class CP2K_Result(Result):
         ..
             overlap_matrix = result.overlap
         """
+        relative_cwd = self.archive['work_dir'].split('/')[-1]
+        hdf5_path_to_prop = join(self.project_name, relative_cwd)
         sections = self.prop_dict[prop]
         # paths_to_prop = list(map(lambda x: join(self.archive['work_dir'], x),
         #                          sections))
-        paths_to_prop = list(map(lambda x: join(self.project_name, x), sections))
+        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x), sections))
 
         return paths_to_prop
 
