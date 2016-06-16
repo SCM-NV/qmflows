@@ -41,8 +41,9 @@ class CP2K(Package):
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, work_dir=None, hdf5_file="quantum.hdf5",
-                input_file_name=None, out_file_name=None, store_in_hdf5=True,
+    def run_job(self, settings, mol, work_dir=None, project_name=None,
+                hdf5_file="quantum.hdf5", input_file_name=None,
+                out_file_name=None, store_in_hdf5=True,
                 nHOMOS=100, nLUMOS=100):
         """
         Call the Cp2K binary using plams interface.
@@ -75,7 +76,8 @@ class CP2K(Package):
             self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
                               nLUMOS)
 
-        return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file)
+        return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file,
+                           project_name)
 
     def postrun(self):
         pass
@@ -413,7 +415,8 @@ class CP2K_Result(Result):
   
     :param settings:
     """
-    def __init__(self, settings, molecule, plams_dir, work_dir, file_h5):
+    def __init__(self, settings, molecule, plams_dir, work_dir, file_h5,
+                 project_name):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -429,6 +432,7 @@ class CP2K_Result(Result):
         # self.archive = result_path
         self.archive = {"plams_dir": files.Path(plams_dir),
                         'work_dir': work_dir}
+        self.project_name = project_name
         
     def as_dict(self):
         return {
@@ -466,9 +470,9 @@ class CP2K_Result(Result):
             overlap_matrix = result.overlap
         """
         sections = self.prop_dict[prop]
-        # paths_to_prop = map(lambda x: join(self.archive, x), sections)
-        paths_to_prop = list(map(lambda x: join(self.archive['work_dir'], x),
-                                 sections))
+        # paths_to_prop = list(map(lambda x: join(self.archive['work_dir'], x),
+        #                          sections))
+        paths_to_prop = list(map(lambda x: join(self.project_name, x), sections))
 
         return paths_to_prop
 
