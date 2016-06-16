@@ -74,7 +74,7 @@ class CP2K(Package):
 
         if store_in_hdf5:
             self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
-                              nLUMOS)
+                              nLUMOS, project_name=project_name)
 
         return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file,
                            project_name)
@@ -83,7 +83,7 @@ class CP2K(Package):
         pass
 
     def dump_to_hdf5(self, file_h5, settings, work_dir, output_file, nHOMOS,
-                     nLUMOS):
+                     nLUMOS, project_name=None):
         """
         Store the result in HDF5 format.
 
@@ -150,8 +150,8 @@ class CP2K(Package):
         keys = []
         files_to_remove = []
         if path_MO is not None:
-            pathEs = join(work_dir, "cp2k/mo/eigenvalues")
-            pathCs = join(work_dir, "cp2k/mo/coefficients")
+            pathEs = join(project_name, "cp2k/mo/eigenvalues")
+            pathCs = join(project_name, "cp2k/mo/coefficients")
             k = InputKey('orbitals',
                          [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
                           nOccupied, nHOMOS, nLUMOS])
