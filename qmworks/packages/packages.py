@@ -10,7 +10,8 @@ import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial,
-                     run_parallel)
+                     run_process)
+from noodles.run.run_with_prov import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
@@ -131,7 +132,12 @@ def call_default(job, n_processes=1):
     """
     Run locally using several threads.
     """
-    return run_parallel(job, n_threads=n_processes)
+    return run_parallel(
+        job,
+        n_threads=n_processes,
+        registry=registry,
+        jobdb_file="cache.json"
+        )
 
 
 def call_xenon(job, **kwargs):
