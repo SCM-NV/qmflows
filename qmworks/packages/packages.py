@@ -10,7 +10,8 @@ import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial,
-                     run_parallel)
+                     run_process)
+from noodles.run.run_with_prov import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
@@ -131,23 +132,25 @@ def call_default(job, n_processes=1):
     """
     Run locally using several threads.
     """
-    return run_parallel(job, n_threads=n_processes)
+    return run_parallel(
+        job, n_threads=n_processes,
+        registry=registry, jobdb_file='cache.json')
 
 
 def call_xenon(job, **kwargs):
     """
     See : https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    pass 
+    pass
     # nproc = kwargs.get('n_processes')
     # nproc = nproc if nproc is not None else 1
-    
+
     # xenon_config = XenonConfig(jobs_scheme='local')
 
     # job_config = RemoteJobConfig(registry=serial.base, time_out=1)
 
     # return run_xenon(job, nproc, xenon_config, job_config)
-        
+
 
 class SerMolecule(Serialiser):
     """
@@ -194,4 +197,3 @@ def registry():
             plams.Molecule: SerMolecule(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
-
