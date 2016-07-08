@@ -9,6 +9,8 @@ from qmworks.packages import run
 
 
 plams.init()  # This is a plams requirement we like to get rid of
+# global config
+config.log.stdout = -1000
 
 h2o = Molecule('h2o.xyz', 'xyz')
 

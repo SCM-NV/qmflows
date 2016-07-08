@@ -17,6 +17,7 @@ def bond_distance(r1, r2):
 # ========== =============
 
 plams.init()
+config.log.stdout = -1000
 
 # Read the Molecule from file
 cnc = Molecule('C-N-C.mol', 'mol')
@@ -44,7 +45,7 @@ lt = PES_scan([dftb, adf], settings, cnc, scan)
 apprTS = select_max(lt, "energy")
 
 # Run the TS optimization, using the default TS template
-ts = run(adf(templates.ts.overlay(settings), apprTS.molecule), n_processes = 1)
+ts = run(adf(templates.ts.overlay(settings), apprTS.molecule), n_processes=2)
 
 # Retrieve the molecular coordinates
 mol = ts.molecule
@@ -53,4 +54,3 @@ r2 = mol.atoms[4].coords
 
 print("TS Bond distance:", bond_distance(r1, r2))
 print("TS Energy:", ts.energy)
-

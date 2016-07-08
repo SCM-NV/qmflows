@@ -1,7 +1,4 @@
 
-__all__ = ['Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
-
 # ========>  Standard and third party Python Libraries <======
 from os.path import join
 
@@ -9,9 +6,9 @@ import plams
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
-from noodles import (schedule_hint, has_scheduled_methods, serial,
-                     run_process)
-from noodles.run.run_with_prov import run_parallel
+from noodles import (schedule_hint, has_scheduled_methods, serial)
+from noodles.display import (NCDisplay)
+from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
@@ -19,6 +16,8 @@ from qmworks.settings import Settings
 from qmworks.fileFunctions import json2Settings
 
 # ==============================================================
+__all__ = ['Package', 'run', 'registry', 'Result',
+           'SerMolecule', 'SerSettings']
 
 
 class Result:
@@ -32,18 +31,22 @@ class Package:
     |Package| is the base class to handle the invocation to different
     quantum package.
     The only relevant attribute of this class is ``self.pkg_name`` which is a
-    string representing the quantum package name that is going to be used to carry
-    out the compuation.
+    string representing the quantum package name that is going to be used to
+    carry out the compuation.
+
     Only two arguments are required
     """
     def __init__(self, pkg_name):
         super(Package, self).__init__()
         self.pkg_name = pkg_name
 
-    @schedule_hint(display="Running {self.pkg_name} ...")
+    @schedule_hint(
+        display="Running {self.pkg_name} ...",
+        store=True, confirm=True)
     def __call__(self, settings, mol, **kwargs):
         """
-        This function performs a job with the package specified by self.pkg_name
+        This function performs a job with the package specified by
+        self.pkg_name
 
         :parameter settings: user settings
         :type settings: |Settings|
@@ -64,8 +67,9 @@ class Package:
         """
         Traverse all the key, value pairs of the ``settings``, translating
         the generic keys into package specific keys as defined in the specific
-        dictionary. If one key is not in the specific dictionary an error is raised
-        These new specific settings take preference over existing specific settings.
+        dictionary. If one key is not in the specific dictionary an error
+        is raised. These new specific settings take preference over existing
+        specific settings.
 
         :parameter settings: Settings provided by the user.
         :type      settings: Settings
@@ -91,11 +95,14 @@ class Package:
                     if v:
                         if isinstance(v, dict):
                             v = Settings(v)
-                        specific_from_generic_settings.specific[self.pkg_name][key] = v
+                        specific_from_generic_settings \
+                            .specific[self.pkg_name][key] = v
                     else:
-                        specific_from_generic_settings.specific[self.pkg_name][key]
+                        specific_from_generic_settings \
+                            .specific[self.pkg_name][key]
                 else:
-                    self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
+                    self.handle_special_keywords(
+                        specific_from_generic_settings, k, v, mol)
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self):
@@ -132,28 +139,28 @@ def call_default(job, n_processes=1):
     """
     Run locally using several threads.
     """
-    return run_parallel(
-        job,
-        n_threads=n_processes,
-        registry=registry,
-        jobdb_file="cache.json"
-        )
+    with NCDisplay() as display:
+        return run_parallel_opt(
+            job, n_threads=n_processes,
+            registry=registry, jobdb_file='cache.json',
+            display=display)
 
 
 def call_xenon(job, **kwargs):
     """
-    See : https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
+    See :
+        https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    pass 
+    pass
     # nproc = kwargs.get('n_processes')
     # nproc = nproc if nproc is not None else 1
-    
+
     # xenon_config = XenonConfig(jobs_scheme='local')
 
     # job_config = RemoteJobConfig(registry=serial.base, time_out=1)
 
     # return run_xenon(job, nproc, xenon_config, job_config)
-        
+
 
 class SerMolecule(Serialiser):
     """
@@ -200,4 +207,3 @@ def registry():
             plams.Molecule: SerMolecule(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
-
