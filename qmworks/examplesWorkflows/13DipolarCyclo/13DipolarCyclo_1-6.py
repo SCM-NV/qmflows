@@ -13,6 +13,7 @@ import plams
 # ========== =============
 
 plams.init()
+config.log.stdout = -1000
 
 hartree2kcal = 627.5095
 startvalue = {'C': 2.1, 'N': 1.9, 'O': 1.8}
