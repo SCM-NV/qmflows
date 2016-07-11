@@ -6,9 +6,7 @@
                 "core": "None",
                 "type": "DZP"
                 },
-            "xc": {
-                "gga": "PBE"
-                }
+            "xc": {"__block_replace": true, "lda": ""}
             },
         "dftb": {
             "task": {"runtype": "Frequencies"},

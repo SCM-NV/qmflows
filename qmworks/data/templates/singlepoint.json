@@ -2,7 +2,7 @@
     "specific": {
         "adf": {
             "basis": {"type": "SZ"},
-            "xc": {"lda": ""},
+            "xc": {"__block_replace": true, "lda": ""},
             "integration": {"accint": 4.0},
             "scf": {
         	"converge": 1e-6,
