@@ -1,10 +1,10 @@
 {
-    "basis": "BASIS.type",
+    "basis": "basis.type",
     "optimize": "geometry.optim",
-    "ts": "geometry.TransitionState",
+    "ts": "geometry.transitionstate",
     "constraint": "constraints",
-    "charge": "Charge",
-    "functional": ["XC", {
+    "charge": "charge",
+    "functional": ["xc", {
         "hf": "hartreefock",
         "bp86": {"gga":"BP86"},
         "pbe": {"gga":"PBE"},

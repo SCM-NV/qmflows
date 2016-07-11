@@ -1,13 +1,13 @@
 {
     "specific": {
         "adf": {
-            "Analyticalfreq": {},
-            "BASIS": {
+            "analyticalfreq": {},
+            "basis": {
                 "core": "None",
                 "type": "DZP"
                 },
-            "XC": {
-                "GGA": "PBE"
+            "xc": {
+                "gga": "PBE"
                 }
             },
         "dftb": {
