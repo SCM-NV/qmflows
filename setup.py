@@ -28,7 +28,7 @@ setup(
         'topic :: scientific/engineering :: chemistry'
     ],
     install_requires=['cython', 'h5py', 'numpy', 'noodles', 'plams',
-                      'pymonad', 'pyparsing', 'six']
+                      'pymonad', 'pyparsing', 'six', 'tinydb']
 )
 
 
