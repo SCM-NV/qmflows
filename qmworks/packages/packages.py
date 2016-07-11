@@ -41,9 +41,9 @@ class Package:
         self.pkg_name = pkg_name
 
     @schedule_hint(
-        display="Running {self.pkg_name} ...",
+        display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
-    def __call__(self, settings, mol, **kwargs):
+    def __call__(self, settings, mol, job_name='', **kwargs):
         """
         This function performs a job with the package specified by
         self.pkg_name
@@ -53,6 +53,9 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
+
+        if job_name != '':
+            kwargs['job_name'] = job_name
 
         self.prerun()
 
