@@ -8,6 +8,7 @@ import pkg_resources as pkg
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (NCDisplay)
+from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
@@ -204,6 +205,7 @@ def registry():
         parent=serial.base(),
         types={
             Package: AsDict(Package),
+            Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
