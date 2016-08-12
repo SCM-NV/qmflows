@@ -1,4 +1,5 @@
-.. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000 :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
+.. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000
+   :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
 ================
