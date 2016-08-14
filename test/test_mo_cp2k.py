@@ -1,20 +1,24 @@
 
 # ================> Python Standard  and third-party <==========
 from collections import namedtuple
+from nose.plugins.attrib import attr
 from noodles import schedule  # Workflow Engine
 from os.path import join
-from qmworks import (Settings, templates)
+from qmworks import (run, Settings, templates)
 from qmworks.packages import cp2k
+from qmworks.utils import (chunksOf, flatten)
 
 import fnmatch
 import getpass
+import h5py
 import os
 import plams
-
+import shutil
 # ===================================<>========================================
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
+@attr('cp2k')
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
@@ -28,42 +32,100 @@ def test_ethylene():
     s.potential = "GTH-PBE"
     s.cell_parameters = [12.74] * 3
     s.specific.cp2k.force_eval.dft.scf.added_mos = 50
-    s.specific.cp2k.force_eval.dft.scf.diagonalization.jacobi_threshold = 1e-6
+    s.specific.cp2k.force_eval.dft.scf.eps_scf = 1e-4
 
     # User variables
-    home = os.path.expanduser('~')  # HOME Path
+    # home = os.path.expanduser('~')  # HOME Path
     username = getpass.getuser()
     # Work_dir
-    scratch = "./"
+    scratch = "/tmp"
     scratch_path = join(scratch, username, project_name)
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
 
     # Cp2k configuration files
-    basiscp2k = join(home, "test/test_files/BASIS_MOLOPT")
-    potcp2k = join(home, "test/test_files/GTH_POTENTIALS")
+    # Copy the basis and potential to a tmp file
+    shutil.copy('test/test_files/BASIS_MOLOPT', scratch_path)
+    shutil.copy('test/test_files/GTH_POTENTIALS', scratch_path)
+    basiscp2k = join(scratch_path, 'BASIS_MOLOPT')
+    potcp2k = join(scratch_path, 'GTH_POTENTIALS')
     cp2k_config = {"basis": basiscp2k, "potential": potcp2k}
 
     # HDF5 path
-    path_hdf5 = join(scratch_path, 'quantum.hdf5')
+    path_hdf5 = join(scratch_path, 'ethylene.hdf5')
 
     # all_geometries type :: [String]
-    geometries = split_file_geometries(path_traj_xyz)
-
+    path_xyz = 'test/test_files/ethylene.xyz'
+    geometries = split_file_geometries(path_xyz)
 
     # Input/Output Files
     file_xyz = join(scratch_path, 'coordinates.xyz')
     file_inp = join(scratch_path, 'ethylene.inp')
     file_out = join(scratch_path, 'ethylene.out')
-    file_MO =  join(scratch_path, 'mo_coeffs.out')
+    file_MO = join(scratch_path, 'mo_coeffs.out')
 
     files = JobFiles(file_xyz, file_inp, file_out, file_MO)
 
+    schedule_job = schedule(prepare_job_cp2k)
+
+    promise = schedule_job(geometries[0], files, s, scratch_path,
+                           project_name=project_name, hdf5_file=path_hdf5,
+                           wfn_restart_job=None, store_in_hdf5=True, nHOMOS=25,
+                           nLUMOS=25, package_config=cp2k_config)
+
+    cp2k_result = run(promise)
+
+    path_properties = cp2k_result.orbitals
+
+    with h5py.File(path_hdf5) as f5:
+        assert(all(p in f5 for p in path_properties))
 
     plams.finish()
 
 
-def prepare_cp2k_settings(geometry, files, cp2k_args, k, work_dir,
+def prepare_job_cp2k(geometry, files, settings, work_dir,
+                     project_name=None, hdf5_file=None, wfn_restart_job=None,
+                     store_in_hdf5=True, nHOMOS=25, nLUMOS=25,
+                     package_config=None):
+    """
+    Fills in the parameters for running a single job in CP2K.
+
+    :param geometry: Molecular geometry stored as String
+    :type geometry: String
+    :param files: Tuple containing the IO files to run the calculations
+    :type files: nameTuple
+    :parameter settings: Dictionary contaning the data to
+    fill in the template
+    :type      settings: Dict
+    :param k: nth Job
+    :type k: Int
+    :parameter work_dir: Name of the Working folder
+    :type      work_dir: String
+    :param hdf5_file: Path to the HDF5 file that contains the
+    numerical results.
+    :type hdf5_file: String
+    :param wfn_restart_job: Path to *.wfn cp2k file use as restart file.
+    :type wfn_restart_job: String
+    :param farming_use_guess: Use a guess for the WF using a previous job.
+    :type farming_use_guess: Bool
+    :param nHOMOS: number of HOMOS to store in HDF5.
+    :type nHOMOS: Int
+    :param nLUMOS: number of HOMOS to store in HDF5.
+    :type nLUMOS: Int
+    :returns: ~qmworks.CP2K
+    """
+    job_settings = prepare_cp2k_settings(geometry, files, settings,
+                                         work_dir, wfn_restart_job,
+                                         store_in_hdf5, package_config)
+
+    return cp2k(job_settings, plams.Molecule(files.get_xyz), work_dir=work_dir,
+                project_name=project_name, hdf5_file=hdf5_file,
+                input_file_name=files.get_inp,
+                out_file_name=files.get_out, store_in_hdf5=store_in_hdf5,
+                nHOMOS=nHOMOS, nLUMOS=nLUMOS)
+
+
+def prepare_cp2k_settings(geometry, files, cp2k_args, work_dir,
                           wfn_restart_job, store_in_hdf5, cp2k_config):
     """
     Fills in the parameters for running a single job in CP2K.
@@ -72,11 +134,9 @@ def prepare_cp2k_settings(geometry, files, cp2k_args, k, work_dir,
     :type geometry: String
     :param files: Tuple containing the IO files to run the calculations
     :type files: nameTuple
-    :parameter dict_input: Dictionary contaning the data to
+    :parameter settings: Dictionary contaning the data to
     fill in the template
-    :type  dict_input: Dict
-    :param k: nth Job
-    :type k: Int
+    :type  settings: ~qmworks.Settings
     :parameter work_dir: Name of the Working folder
     :type      work_dir: String
     :param wfn_restart_job: Path to *.wfn cp2k file use as restart file.
@@ -99,7 +159,7 @@ def prepare_cp2k_settings(geometry, files, cp2k_args, k, work_dir,
     force.dft.potential_file_name = potential_file
     force.dft['print']['mo']['filename'] = files.get_MO
     force.subsys.topology.coord_file_name = files.get_xyz
-    cp2k_args.specific.cp2k['global']['project'] = 'point_{}'.format(k)
+    cp2k_args.specific.cp2k['global']['project'] = 'ethylene'
 
     if wfn_restart_job is not None:
         output_dir = getattr(wfn_restart_job.archive['plams_dir'], 'path')
@@ -120,45 +180,17 @@ def prepare_cp2k_settings(geometry, files, cp2k_args, k, work_dir,
     return input_args
 
 
-@schedule
-def prepare_job_cp2k(geometry, files, dict_input, k, work_dir,
-                     project_name=None, hdf5_file=None, wfn_restart_job=None,
-                     store_in_hdf5=True, nHOMOS=25, nLUMOS=25,
-                     package_config=None):
+def split_file_geometries(pathXYZ):
     """
-    Fills in the parameters for running a single job in CP2K.
+    Reads a set of molecular geometries in xyz format and returns
+    a list of string, where is element a molecular geometry
 
-    :param geometry: Molecular geometry stored as String
-    :type geometry: String
-    :param files: Tuple containing the IO files to run the calculations
-    :type files: nameTuple
-    :parameter dict_input: Dictionary contaning the data to
-    fill in the template
-    :type      dict_input: Dict
-    :param k: nth Job
-    :type k: Int
-    :parameter work_dir: Name of the Working folder
-    :type      work_dir: String
-    :param hdf5_file: Path to the HDF5 file that contains the
-    numerical results.
-    :type hdf5_file: String
-    :param wfn_restart_job: Path to *.wfn cp2k file use as restart file.
-    :type wfn_restart_job: String
-    :param farming_use_guess: Use a guess for the WF using a previous job.
-    :type farming_use_guess: Bool
-    :param nHOMOS: number of HOMOS to store in HDF5.
-    :type nHOMOS: Int
-    :param nLUMOS: number of HOMOS to store in HDF5.
-    :type nLUMOS: Int
-    :returns: ~qmworks.CP2K
+    :returns: String list containing the molecular geometries.
     """
-    job_settings = prepare_cp2k_settings(geometry, files, dict_input, k,
-                                         work_dir, wfn_restart_job,
-                                         store_in_hdf5, package_config)
-    project_name = project_name if project_name is not None else work_dir
+    # Read Cartesian Coordinates
+    with open(pathXYZ) as f:
+        xss = f.readlines()
 
-    return cp2k(job_settings, plams.Molecule(files.get_xyz), work_dir=work_dir,
-                project_name=project_name, hdf5_file=hdf5_file,
-                input_file_name=files.get_inp,
-                out_file_name=files.get_out, store_in_hdf5=store_in_hdf5,
-                nHOMOS=nHOMOS, nLUMOS=nLUMOS)
+    numat = int(xss[0].split()[0])
+    return list(map(flatten, chunksOf(xss, numat + 2)))
+
