@@ -50,6 +50,6 @@ def freq_calc(mol):
     s.specific.adf.beckegrid.quality = "good"
     s.specific.adf.scf.iterations = "99"
     s.specific.adf.scf.converge = "0.0000001"
-    s.specific.adf = "analyticalfreq"
+    s.specific.adf.analyticalfreq
 
     return adf(s, mol)
