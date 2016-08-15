@@ -1,7 +1,10 @@
 .. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000
    :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
+.. image:: https://travis-ci.org/SCM-NV/qmworks.svg?branch=master
+   :target: https://travis-ci.org/SCM-NV/qmworks 
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
+	   
 ================
 QMWorks
 ================
