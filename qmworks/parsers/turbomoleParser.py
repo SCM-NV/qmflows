@@ -3,14 +3,15 @@ __author__ = "Felipe Zapata"
 __all__ = ['readTurbomoleBasis', 'readTurbomoleMO']
 
 # ==========> Standard libraries and third-party <===============
-from pyparsing   import *
+from pyparsing import *
 import numpy as np
 
 # ==================> Internal modules <====================
-from qmworks.common         import AtomBasisData, AtomBasisKey, InfoMO
-from qmworks.parsers.parser import floatNumber, floatNumberDot, natural
-from qmworks.utils          import concat, concatMap, fst, snd, swapCoeff, zipWith, zipWith3
+from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
+from qmworks.parsers.parser import (floatNumber, floatNumberDot, natural)
+from qmworks.utils import (concat, concatMap, fst, snd, zipWith, zipWith3)
 
+from .cp2KParser import swapCoeff
 
 # ===============> <===============
 brackets = nestedExpr('[', ']', Word(alphanums))
@@ -42,16 +43,16 @@ contraction = Suppress(parenthesis + slash + brackets) + openBra + basisFormat +
 
 basisHeader = natural + restOfLine
 
-parseContr  = pound + Suppress(Word(alphas, max=2)) + contraction
+parseContr = pound + Suppress(Word(alphas, max=2)) + contraction
 
-parseCoeff  = Suppress(basisHeader) + OneOrMore(floatNumber)
+parseCoeff = Suppress(basisHeader) + OneOrMore(floatNumber)
 
 parseBasisData = OneOrMore(Group(parseCoeff.setResultsName("contractions")))
 
 parseBasis = star + parseKey + parseContr.setResultsName("format") + star + \
              parseBasisData.setResultsName("coeffs")
-                       
-topParseB   = Suppress(header) + OneOrMore(Group(parseBasis))
+
+topParseB = Suppress(header) + OneOrMore(Group(parseBasis))
 
 # ==================> MOs <==================
 headerMO = Suppress(SkipTo(Literal("[MO]")) + restOfLine)
@@ -60,7 +61,7 @@ sym = Literal("Sym") + restOfLine
 
 spin = Literal("Spin") + restOfLine
 
-occ  = Literal("Occ") + restOfLine
+occ = Literal("Occ") + restOfLine
 
 numEntry = Suppress(natural + natural + Word(alphas) + natural + Word(alphanums)) + floatNumberDot
 
@@ -71,7 +72,7 @@ eigenVector = OneOrMore(numEntry)
 pair = eigenValue.setResultsName("eigenValue") + eigenVector.setResultsName("eigenVector")
 
 topParserMO = Suppress(headerMO) + OneOrMore(Group(pair))
-# ================================================================================
+# =============================================================================
 # Parsing From File
 
 
@@ -90,7 +91,7 @@ def readTurbomoleBasis(path):
     coeffs = list(map(mapFloat, [concatMap(snd, swapCoeff(2, rawData[i]))
                                  for i in range(len(rawData))]))
     basisData = zipWith(AtomBasisData)(expos)(coeffs)
-    basiskey  = zipWith3(AtomBasisKey)(atoms)(names)(formats_int)
+    basiskey = zipWith3(AtomBasisKey)(atoms)(names)(formats_int)
 
     return basiskey, basisData
 
