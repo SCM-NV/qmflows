@@ -7,7 +7,8 @@ import plams
 # User Defined imports
 from qmworks.packages.SCM import adf
 
-@attr('adf')
+
+@attr('slow')
 def test_ADFGeometry_Constraint():
     """
     Test "freeze" and "selected_atoms" keywords for constrained geometry optimizations

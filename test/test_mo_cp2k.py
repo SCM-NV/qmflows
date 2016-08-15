@@ -18,7 +18,7 @@ import shutil
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
-@attr('cp2k')
+@attr('slow')
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
@@ -117,7 +117,8 @@ def prepare_job_cp2k(geometry, files, settings, work_dir,
     job_settings = prepare_cp2k_settings(geometry, files, settings,
                                          work_dir, wfn_restart_job,
                                          store_in_hdf5, package_config)
-
+    print("CP2K Settings: ", job_settings)
+    
     return cp2k(job_settings, plams.Molecule(files.get_xyz), work_dir=work_dir,
                 project_name=project_name, hdf5_file=hdf5_file,
                 input_file_name=files.get_inp,

@@ -1,7 +1,10 @@
 .. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000
    :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
+.. image:: https://travis-ci.org/SCM-NV/qmworks.svg?branch=master
+   :target: https://travis-ci.org/SCM-NV/qmworks 
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
+	   
 ================
 QMWorks
 ================
@@ -95,7 +98,7 @@ Package installation
 
 - Then
 
-  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks -e git://github.com/SCM-NV/plams.git@master#egg=Plams -e git://github.com/NLeSC/noodles.git@devel#egg=Noodles``
+  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams https://github.com/NLeSC/noodles/tarball/master#egg=noodles --upgrade``
 
 
 - Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
