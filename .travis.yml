@@ -7,7 +7,7 @@ install:
   - sudo apt-get update
   # Install Cp2k
   - sudo apt-get install cp2k
-  - which cp2k.popt
+  - cp2k.popt --help
   # Install python
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
@@ -26,8 +26,8 @@ install:
 
   # Package dependencies
   - pip install nose coverage
-  - pip install -e git://github.com/SCM-NV/plams.git@master#egg=Plams
-  - pip install -e git://github.com/NLeSC/noodles.git@devel#egg=Noodles
+  - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams
+  - pip install https://github.com/NLeSC/noodles/tarball/master#egg=noodles
 
   # Install qmworks package
   - pip install .

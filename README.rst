@@ -98,7 +98,7 @@ Package installation
 
 - Then
 
-  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks -e git://github.com/SCM-NV/plams.git@master#egg=Plams -e git://github.com/NLeSC/noodles.git@devel#egg=Noodles``
+  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams https://github.com/NLeSC/noodles/tarball/master#egg=noodles --upgrade``
 
 
 - Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
