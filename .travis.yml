@@ -7,7 +7,7 @@ install:
   - sudo apt-get update
   # Install Cp2k
   - sudo apt-get install cp2k
-  - cp2k.popt --help
+  - cp2k --help
   # Install python
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
