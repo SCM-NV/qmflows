@@ -5,17 +5,16 @@ from plams import Molecule
 import plams
 
 
-@attr('adf')
+@attr('slow')
 def test_freq():
     """
     Do some constraint optimizations then launch a freq calc.
     """
     plams.init()
 
-    jobs = geo_opt()
-    mols = [j.molecule for j in jobs]
-    rs = freq_calc(mols)
-    results = run(gather(*rs))
+    job = geo_opt()
+    rs = freq_calc(job.molecule)
+    results = run(rs)
     plams.finish()
 
     assert False
@@ -36,16 +35,12 @@ def geo_opt():
     s.specific.adf.geometry.optim = "delocalized"
     s.specific.adf.scf.iterations = "99"
     s.specific.adf.scf.converge = "0.0000001"
-    distance = [1.4, 1.5]
-    jobs = []
-    for dis in distance:
-        s.specific.adf.constraints.dist = "1 2 {:f}".format(dis)
-        jobs.append(adf(s, mol))
+    s.specific.adf.constraints.dist = "1 2 1.4"
 
-    return jobs
+    return adf(s, mol)
 
 
-def freq_calc(mols):
+def freq_calc(mol):
     """
     Read geometries from an optimization job and do freq calculations.
     """
@@ -57,4 +52,4 @@ def freq_calc(mols):
     s.specific.adf.scf.converge = "0.0000001"
     s.specific.adf = "analyticalfreq"
 
-    return [adf(s, m) for m in mols]
+    return adf(s, mol)

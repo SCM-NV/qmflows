@@ -5,10 +5,6 @@ python:
   - "3.5"
 install:
   - sudo apt-get update
-  # Install Cp2k
-  - sudo apt-get install build-essential
-  - sudo apt-get install cp2k
-  - cp2k.popt --help
   # Install python
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
@@ -35,4 +31,4 @@ install:
   
 script:
   # Run the unitary tests excluding the ADF tests
-  - nosetests --with-coverage --cover-erase --cover-package=qmworks -a '!adf' -v
+  - nosetests --with-coverage --cover-erase --cover-package=qmworks -a '!slow' -v

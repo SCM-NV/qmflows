@@ -18,7 +18,7 @@ import shutil
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
-@attr('cp2k')
+@attr('slow')
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
