@@ -25,7 +25,7 @@ def geo_opt():
     """
     create some optimizations jobs
     """
-    mol = Molecule("ethene.xyz", "xyz")
+    mol = Molecule("test/test_files/ethene.xyz", "xyz")
 
     s = Settings()
     s.specific.adf.xc.GGA = "BP86"
