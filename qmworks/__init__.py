@@ -15,9 +15,7 @@ from .templates import (freq, geometry, get_template, singlepoint, ts)
 from .components import (PES_scan, select_max)
 from .settings import Settings
 from .utils import (chunksOf, concat, concatMap, dict2Setting, flatten,
-                    floatArray, fst, head, repeatN, replicate,
-                    settings2Dict, snd, stringDict2Settings, stringVal2Dict,
-                    zipWith, zipWith3)
+                    repeatN, replicate, settings2Dict, zipWith, zipWith3)
 
 
 __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
@@ -26,13 +24,12 @@ __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
            'apply_smirks',
            'apply_template', 'chunksOf', 'concat', 'concatMap', 'cp2k',
            'cp2k2hdf5', 'cp2k_farming', 'dftb', 'dict2Setting', 'flatten',
-           'floatArray', 'freq', 'fst', 'gen_coords', 'geometry',
-           'get_template', 'head', 'json2Settings', 'manyXYZ', 'modify_atom',
+           'freq', 'gen_coords', 'geometry',
+           'get_template', 'json2Settings', 'manyXYZ', 'modify_atom',
            'orca', 'parse_string_xyz', 'plams2rdkit', 'rdkit2plams',
            'readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
            'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
            'read_cp2k_number_of_orbitals', 'registry', 'repeatN', 'replicate',
            'run', 'save_ADF_Info', 'search_environ_var', 'select_max',
            'sequence2plams', 'settings2Dict', 'singlepoint', 'smiles2plams',
-           'snd', 'stringDict2Settings', 'stringVal2Dict', 'ts',
-           'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']
+           'ts', 'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']

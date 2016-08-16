@@ -2,16 +2,13 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
-           'floatArray', 'fst', 'head', 'repeatN', 'replicate',
-           'settings2Dict', 'snd', 'stringDict2Settings', 'stringVal2Dict',
-           'zipWith', 'zipWith3']
+           'repeatN', 'replicate', 'settings2Dict', 'zipWith', 'zipWith3']
 
-# ================> Python Standard  and third-party <==========
+# ======================> Python Standard  and third-party <===================
 from functools import reduce
 from itertools import chain
 from pymonad   import curry
 
-import numpy    as np
 # ======================> List Functions <========================
 
 
@@ -31,16 +28,8 @@ def concatMap(f, xss):
     return concat(list(map(f, xss)))
 
 
-def fst(xs):
-    return xs[0]
-
-
 def flatten(xs):
     return reduce(lambda x, y: x + y, xs)
-
-
-def head(xs):
-    return xs[0]
 
 
 def repeatN(n, a):
@@ -52,10 +41,6 @@ def replicate(n, a):
     return list(repeatN(n, a))
 
 
-def snd(xs):
-    return xs[1]
-
-    
 @curry
 def zipWith(f, xs, ys):
     """zipWith generalises zip by zipping with the function given as the first argument"""
@@ -77,7 +62,7 @@ from qmworks.settings   import Settings
 
 def settings2Dict(s):
     """
-    Transform a Settings object into a dict
+    Transform a Settings object into a dict.
     """
     d = {}
     for k, v in s.items():
@@ -91,6 +76,7 @@ def settings2Dict(s):
 
 def dict2Setting(d):
     """
+    Transform recursively a dict into a Settings object.
     """
     r = Settings()
     for k, v in d.items():
@@ -100,27 +86,3 @@ def dict2Setting(d):
             r[k] = v
 
     return r
-
-
-def stringVal2Dict(xs, v):
-    """
-    """
-    ys = reversed(xs.split('.'))
-
-    go = lambda acc, x: {x: acc}
-    return  reduce(go, ys, v)
-
-
-def stringDict2Settings(xs):
-    r = Settings()
-    for k, v in xs.items():
-        d = stringVal2Dict(k, v)
-        s = dict2Setting(d)
-        r = r.merge(s)
-    return r
-
-
-# -------------Array Functions -----------------------#
-floatArray = np.vectorize(float)
-
-

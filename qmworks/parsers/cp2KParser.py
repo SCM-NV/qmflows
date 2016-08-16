@@ -18,8 +18,8 @@ import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
-from qmworks.utils import (chunksOf, concat, flatten, floatArray, fst,
-                           replicate, snd, zipWith, zipWith3)
+from qmworks.utils import (chunksOf, concat, flatten, replicate, zipWith,
+                           zipWith3)
 
 # =========================<>=============================
 # Molecular Orbitals Parsing
@@ -37,6 +37,9 @@ from qmworks.utils import (chunksOf, concat, flatten, floatArray, fst,
 #     4     1 cd  3pz      -0.0015557487597731    -0.0005486094359245
 #     5     1 cd  3px      -0.0013339995106232    -0.0100914249163043
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
+
+
+floatArray = np.vectorize(float)
 
 
 def readCp2KCoeff(path, nOrbitals, nOrbFuns):
@@ -252,14 +255,13 @@ def readCp2KBasis(path):
     rss = zipWith(swapCoeff2)(nCoeffs)(list(map(float, cs.coeffs[:]))
                                        for cs in bss)
     tss = [headTail(xs) for xs in rss]
-    basisData = [AtomBasisData(fst(xs), snd(xs)) for xs in tss]
+    basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
     basiskey = zipWith3(AtomBasisKey)(atoms)(names)(formats)
 
     return (basiskey, basisData)
 
 # ============================<>=======================================
 # Auxiliar functions
-
 
 def cp2KBasistoStandard(fs):
     """

@@ -10,7 +10,7 @@ from pyparsing import (alphanums, alphas, delimitedList, Group, Literal,
 
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, floatNumberDot, natural)
-from qmworks.utils import (concat, concatMap, fst, snd, zipWith, zipWith3)
+from qmworks.utils import (concat, concatMap, zipWith, zipWith3)
 
 from .cp2KParser import swapCoeff
 
@@ -88,6 +88,8 @@ def readTurbomoleBasis(path):
                                    for xs in fss], formats)
     rss = [rs.coeffs[:] for rs in bss]
     rawData = [[x.contractions[:] for x in rss[i]] for i in range(len(rss))]
+    fst = lambda xs: xs[0]
+    snd = lambda xs: xs[1]
     expos = list(map(mapFloat, [concatMap(fst, swapCoeff(2, rawData[i]))
                                 for i in range(len(rawData))]))
     coeffs = list(map(mapFloat, [concatMap(snd, swapCoeff(2, rawData[i]))
