@@ -46,7 +46,7 @@ class ADF(Package):
         result = plams.ADFJob(name=job_name, molecule=mol,
                               settings=adf_settings).run()
 
-        return ADF_Result(adf_settings, mol, result._kf)
+        return ADF_Result(adf_settings, mol, result._kf, job_name)
 
     def postrun(self):
         pass
@@ -84,7 +84,7 @@ class ADF(Package):
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
-    def __init__(self, settings, molecule, result):
+    def __init__(self, settings, molecule, result, job_name):
         self.settings = settings
         self._molecule = molecule
         self.result = result
@@ -92,6 +92,7 @@ class ADF_Result(Result):
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
         self.archive = files.Path(result.path)
+        self.job_name = job_name
 
     def as_dict(self):
         """
@@ -175,7 +176,7 @@ class DFTB(Package):
         result = plams.DFTBJob(name=job_name, molecule=mol,
                                settings=dftb_settings).run()
 
-        return DFTB_Result(dftb_settings, mol, result._kf)
+        return DFTB_Result(dftb_settings, mol, result._kf, job_name)
 
     def postrun(self):
         pass
@@ -187,7 +188,7 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, result):
+    def __init__(self, settings, molecule, result, job_name):
         self.settings = settings
         self._molecule = molecule
         self.result = result
@@ -196,6 +197,7 @@ class DFTB_Result(Result):
         self.prop_dict = json2Settings(xs)
         self.properties = self.extract_properties()
         self.archive = files.Path(result.path)
+        self.job_name = job_name
 
     def as_dict(self):
         return {
