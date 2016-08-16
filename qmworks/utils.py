@@ -7,13 +7,11 @@ __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
            'zipWith', 'zipWith3']
 
 # ================> Python Standard  and third-party <==========
-import numpy    as np
-import operator as op
-
 from functools import reduce
 from itertools import chain
 from pymonad   import curry
 
+import numpy    as np
 # ======================> List Functions <========================
 
 
