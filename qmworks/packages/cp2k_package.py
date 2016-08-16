@@ -44,7 +44,7 @@ class CP2K(Package):
     def run_job(self, settings, mol, work_dir=None, project_name=None,
                 hdf5_file="quantum.hdf5", input_file_name=None,
                 out_file_name=None, store_in_hdf5=True,
-                nHOMOS=100, nLUMOS=100):
+                nHOMOS=100, nLUMOS=100, job_name='cp2k_job'):
         """
         Call the Cp2K binary using plams interface.
 
@@ -64,7 +64,7 @@ class CP2K(Package):
         """
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        job = plams.Cp2kJob(settings=cp2k_settings, molecule=mol)
+        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings, molecule=mol)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
@@ -77,7 +77,7 @@ class CP2K(Package):
                               nLUMOS, project_name=project_name)
 
         return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file,
-                           project_name)
+                           project_name, job_name)
 
     def postrun(self):
         pass
@@ -417,7 +417,7 @@ class CP2K_Result(Result):
     :param settings:
     """
     def __init__(self, settings, molecule, plams_dir, work_dir, file_h5,
-                 project_name):
+                 project_name, job_name):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -434,6 +434,7 @@ class CP2K_Result(Result):
         self.archive = {"plams_dir": files.Path(plams_dir),
                         'work_dir': work_dir}
         self.project_name = project_name
+        self.job_name = job_name
         
     def as_dict(self):
         return {
