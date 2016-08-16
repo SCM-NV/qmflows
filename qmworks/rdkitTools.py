@@ -1,3 +1,8 @@
+
+__all__ = ['apply_smirks', 'apply_template', 'gen_coords', 'modify_atom',
+           'plams2rdkit', 'rdkit2plams', 'sequence2plams', 'smiles2plams',
+           'write_molblock']
+
 """
 @author: Lars Ridder
 @description: RDKit tools
@@ -6,10 +11,11 @@ This is a series of functions that apply RDKit functionality on PLAMS molecules
 """
 
 from rdkit import Chem, Geometry
-from rdkit.Chem import AllChem, rdMolTransforms
-from plams import Molecule, Bond, Atom
+from rdkit.Chem import (AllChem, rdMolTransforms)
+from plams import (Molecule, Bond, Atom)
 from io import StringIO
 import sys
+
 
 def rdkit2plams(rdkit_mol):
     """

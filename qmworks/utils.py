@@ -1,8 +1,8 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten', 
-           'floatArray', 'fst', 'head', 'headTail', 'repeatN', 'replicate',
+__all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
+           'floatArray', 'fst', 'head', 'repeatN', 'replicate',
            'settings2Dict', 'snd', 'stringDict2Settings', 'stringVal2Dict',
            'zipWith', 'zipWith3']
 
@@ -17,12 +17,9 @@ from pymonad   import curry
 # ======================> List Functions <========================
 
 
-def chunksOf(xs, 
-n):
+def chunksOf(xs, n):
     """Yield successive n-sized chunks from xs"""
-    for i in range(0, 
-len(xs), 
-n):
+    for i in range(0, len(xs), n):
         yield xs[i:i + n]
 
 
@@ -31,11 +28,9 @@ def concat(xss):
     return list(chain(*xss))
 
 
-def concatMap(f, 
-xss):
+def concatMap(f, xss):
     """Map a function over all the elements of a container and concatenate the resulting lists"""
-    return concat(list(map(f, 
-xss)))
+    return concat(list(map(f, xss)))
 
 
 def fst(xs):
@@ -43,9 +38,7 @@ def fst(xs):
 
 
 def flatten(xs):
-    return reduce(lambda x, 
-y: x + y, 
-xs)
+    return reduce(lambda x, y: x + y, xs)
 
 
 def head(xs):
