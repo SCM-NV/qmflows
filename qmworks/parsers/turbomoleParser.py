@@ -2,11 +2,12 @@ __author__ = "Felipe Zapata"
 
 __all__ = ['readTurbomoleBasis', 'readTurbomoleMO']
 
-# ==========> Standard libraries and third-party <===============
-from pyparsing import *
+# ===============> Standard libraries and third-party <=========================
 import numpy as np
+from pyparsing import (alphanums, alphas, delimitedList, Group, Literal,
+                       nestedExpr, nums, OneOrMore, restOfLine, SkipTo,
+                       Suppress, Word)
 
-# ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, floatNumberDot, natural)
 from qmworks.utils import (concat, concatMap, fst, snd, zipWith, zipWith3)
@@ -49,8 +50,9 @@ parseCoeff = Suppress(basisHeader) + OneOrMore(floatNumber)
 
 parseBasisData = OneOrMore(Group(parseCoeff.setResultsName("contractions")))
 
-parseBasis = star + parseKey + parseContr.setResultsName("format") + star + \
-             parseBasisData.setResultsName("coeffs")
+parseBasis = (star + parseKey +
+              parseContr.setResultsName("format") + star +
+              parseBasisData.setResultsName("coeffs"))
 
 topParseB = Suppress(header) + OneOrMore(Group(parseBasis))
 

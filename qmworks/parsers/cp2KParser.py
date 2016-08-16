@@ -4,10 +4,12 @@ __author__ = "Felipe Zapata"
 __all__ = ['readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
            'read_cp2k_number_of_orbitals']
 
-# ==========> Standard libraries and third-party <==============
+# ==================> Standard libraries and third-party <=====================
 from itertools import islice
 from pymonad import curry
-from pyparsing import *
+from pyparsing import (alphanums, alphas, CaselessLiteral, Empty, FollowedBy,
+                       Group, Literal, nums, NotAny, oneOf, OneOrMore,
+                       Optional, restOfLine, srange, Suppress, Word)
 
 import numpy as np
 import os
@@ -151,8 +153,7 @@ def oddParserOverlap(n):
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
-parseAtomLabel = Word(srange("[A-Z]"), max=1) + \
-                 Optional(Word(srange("[a-z]"), max=1))
+parseAtomLabel = Word(srange("[A-Z]"), max=1) + Optional(Word(srange("[a-z]"), max=1))
 
 parserBasisName = Word(alphanums + "-") + Suppress(restOfLine)
 
@@ -191,7 +192,7 @@ def read_cp2k_number_of_orbitals(file_name):
                     nOrbFuns = line.split()[-1]
                     break
             return int(nOccupied), int(nOrbitals), int(nOrbFuns)
-    except nameError:
+    except NameError:
         msg1 = 'There is a problem with the output file: \
         {}\n'.format(file_name)
         raise RuntimeError(msg1)
@@ -235,6 +236,12 @@ def readCp2KOverlap(path, nOrbitals):
 
 
 def readCp2KBasis(path):
+    """
+    Read the Contracted Gauss function primitives format from a text file.
+    
+    :param path: Path to the file containing the basis.
+    :type path: String
+    """
     bss = topParseBasis.parseFile(path)
     atoms = [flatten(xs.atom[:]).lower() for xs in bss]
     names = [' '.join(xs.basisName[:]).upper() for xs in bss]
@@ -258,7 +265,7 @@ def cp2KBasistoStandard(fs):
     """
     CP2K 2 0 3 7 3 3 2 1 -> Standard {777/777/77/7}
     """
-    # lmin, lmax, nc = fs[1], fs[2], fs[3]
+    _lmin, _lmax, nc = fs[1], fs[2], fs[3]
     return [replicate(l, nc) for l in fs[4:]]
 
 
@@ -280,7 +287,6 @@ def swapCoeff2(n, rs):
 
 @curry
 def swapCoeff(n, rss):
-
     if n == 1:
         return [rss]
     else:
@@ -288,6 +294,9 @@ def swapCoeff(n, rss):
 
 
 def headTail(xs):
+    """
+    Return the head and tail from a list.
+    """
     it = iter(xs)
     head = next(it)
     tail = list(it)
