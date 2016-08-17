@@ -7,13 +7,11 @@ import plams
 # User Defined imports
 from qmworks.packages.SCM import adf
 
-
 @attr('slow')
 def test_ADFGeometry_Constraint():
     """
     Test "freeze" and "selected_atoms" keywords for constrained geometry optimizations
     """
-    plams.init()
     an = plams.Molecule('test/test_files/an.xyz', 'xyz')
     
     # optimize only H atoms

@@ -4,8 +4,7 @@ from qmworks import (Settings, templates, dftb, run)
 from plams import Molecule
 import plams
 
-plams.init()
-
+@attr('slow')
 def test_freq():
     """
     Do some constraint optimizations then launch a freq calc.
