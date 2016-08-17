@@ -1,4 +1,10 @@
+.. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000
+   :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
+.. image:: https://travis-ci.org/SCM-NV/qmworks.svg?branch=master
+   :target: https://travis-ci.org/SCM-NV/qmworks 
+.. image:: https://img.shields.io/badge/python-3.5-blue.svg
 
+	   
 ================
 QMWorks
 ================
@@ -52,7 +58,7 @@ Installation using a virtual environment (recommended)
 
 - Create a new virtual environment using the following commands:
 
-  - ``conda create -n qmworks python`` 
+  - ``conda create -n qmworks python=3.5`` 
 
 - Activate the new virtual environment
   
@@ -70,11 +76,11 @@ Using the conda environment the following packages should be installed:
 
 - install rdkit_ using the following command:
 
-  - ``conda install -y -q -c https://conda.anaconda.org/rdkit rdkit``
+  - ``conda install -y -q --name qmworks -c https://conda.anaconda.org/rdkit rdkit``
 
 - install HDF5_ using conda:
 
-  - ``conda install -c anaconda hdf5``
+  - ``conda install -y -q --name qmworks -c anaconda hdf5``
     
 
 .. _installation:
@@ -85,15 +91,16 @@ Package installation
 - Create a new directory *escience* in your home folder.
 
 - Move to the *escience* folder.
-  
-- Clone Plams_  using the following commands:
-  
-   - ``git clone -b escience git@gitlab.pyadf.org:e-science/plams.git``
 
-- Change to directory *$HOME/escience/plams* and type:
-  
-  ``pip install .``
-     
+- Type in your terminal,
+
+  ``source activate qmworks``  
+
+- Then
+
+  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams https://github.com/NLeSC/noodles/tarball/master#egg=noodles --upgrade``
+
+
 - Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
   
   ``$HOME/miniconda3/envs/qmworks/bin/activate`` or
@@ -101,14 +108,7 @@ Package installation
   
   You can find the path to your activation file running the command ``conda info --envs``.
 
-- Type in your terminal,
-
-  ``source activate qmworks``
-
-- Change to directory *$HOME/escience* and type:
   
-  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks -e git://github.com/NLeSC/noodles.git@devel#egg=Noodles``
-
 Now you are ready to use *qmworks*. 
  
 

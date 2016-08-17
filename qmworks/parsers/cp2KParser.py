@@ -4,20 +4,22 @@ __author__ = "Felipe Zapata"
 __all__ = ['readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
            'read_cp2k_number_of_orbitals']
 
-# ==========> Standard libraries and third-party <==============
+# ==================> Standard libraries and third-party <=====================
 from itertools import islice
-from pymonad     import curry
-from pyparsing   import *
+from pymonad import curry
+from pyparsing import (alphanums, alphas, CaselessLiteral, Empty, FollowedBy,
+                       Group, Literal, nums, NotAny, oneOf, OneOrMore,
+                       Optional, restOfLine, srange, Suppress, Word)
 
-import numpy     as np
+import numpy as np
 import os
 import re
 import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
-from qmworks.utils import (chunksOf, concat, flatten, floatArray, fst, headTail,
-                           replicate, snd, swapCoeff, zipWith, zipWith3)
+from qmworks.utils import (chunksOf, concat, flatten, replicate, zipWith,
+                           zipWith3)
 
 # =========================<>=============================
 # Molecular Orbitals Parsing
@@ -35,6 +37,9 @@ from qmworks.utils import (chunksOf, concat, flatten, floatArray, fst, headTail,
 #     4     1 cd  3pz      -0.0015557487597731    -0.0005486094359245
 #     5     1 cd  3px      -0.0013339995106232    -0.0100914249163043
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
+
+
+floatArray = np.vectorize(float)
 
 
 def readCp2KCoeff(path, nOrbitals, nOrbFuns):
@@ -57,9 +62,9 @@ def readCp2KCoeff(path, nOrbitals, nOrbFuns):
             return remove_trailing(xs)
         else:
             return xs
-    
+
     # Check if the Molecular orbitals came from a restart
-    with open(path, 'r')  as f:
+    with open(path, 'r') as f:
         xs = list(islice(f, 4))
     if "AFTER SCF STEP -1" in ''.join(xs):
         move_restart_coeff(path)
@@ -99,28 +104,30 @@ def readCp2KCoeff(path, nOrbitals, nOrbFuns):
 
 # =====================> Orbital Parsers <===================
 
-xyz  = oneOf(['x', 'y', 'z'])
+xyz = oneOf(['x', 'y', 'z'])
 
 orbS = Literal("s")
 
 orbP = Literal("p") + xyz
 
-orbD = Literal("d") + (Literal('0') | (minusOrplus + Word(srange("[1-2]"), max=1)) |
+orbD = Literal("d") + (Literal('0') |
+                       (minusOrplus + Word(srange("[1-2]"), max=1)) |
                        (xyz + oneOf(['2', '3', 'y', 'z'])))
 
-orbF = Literal("f") + (Literal('0') | (minusOrplus + Word(srange("[1-3]"), max=1)) |
+orbF = Literal("f") + (Literal('0') |
+                       (minusOrplus + Word(srange("[1-3]"), max=1)) |
                        (xyz + oneOf(['2', '3', 'y', 'z']) +
                         Optional(oneOf(['2', 'y', 'z']))))
 
 orbitals = Word(nums, max=1) + (orbS | orbP | orbD | orbF)
 
 # Orbital Information:"        12     1 cd  4d+1"
-orbInfo  = natural * 2 + Word(alphas, max=2) + orbitals
+orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 
 
 def funCoefficients(x):
     """Parser Coeffcients"""
-    fun = OneOrMore(Suppress(orbInfo)  + floatNumber * x)
+    fun = OneOrMore(Suppress(orbInfo) + floatNumber * x)
     return fun.setResultsName("coeffs")
 
 
@@ -133,7 +140,7 @@ def funOrbNumber(x):
 
 # ==================> Overlap Matrix <=====================
 
-headerOverlap    = CaselessLiteral("OVERLAP MATRIX")
+headerOverlap = CaselessLiteral("OVERLAP MATRIX")
 
 topParserOverlap = Suppress(headerOverlap) + \
     OneOrMore(Group(Suppress(funOrbNumber(4)) + funCoefficients(4)))
@@ -153,8 +160,7 @@ parseAtomLabel = Word(srange("[A-Z]"), max=1) + Optional(Word(srange("[a-z]"), m
 
 parserBasisName = Word(alphanums + "-") + Suppress(restOfLine)
 
-
-parserFormat    = OneOrMore(natural + NotAny(FollowedBy(point)))
+parserFormat = OneOrMore(natural + NotAny(FollowedBy(point)))
 
 parserKey = parseAtomLabel.setResultsName("atom") + \
     parserBasisName.setResultsName("basisName") + \
@@ -166,7 +172,7 @@ parserBasis = parserKey + parserFormat.setResultsName("format") + \
     parserBasisData.setResultsName("coeffs")
 
 
-topParseBasis   = OneOrMore(Suppress(comment)) + \
+topParseBasis = OneOrMore(Suppress(comment)) + \
     OneOrMore(Group(parserBasis + Suppress(Optional(OneOrMore(comment)))))
 
 
@@ -189,8 +195,9 @@ def read_cp2k_number_of_orbitals(file_name):
                     nOrbFuns = line.split()[-1]
                     break
             return int(nOccupied), int(nOrbitals), int(nOrbFuns)
-    except nameError:
-        msg1 = 'There is a problem  with the output file: {}\n'.format(file_name)
+    except NameError:
+        msg1 = 'There is a problem with the output file: \
+        {}\n'.format(file_name)
         raise RuntimeError(msg1)
     except FileNotFoundError:
         msg2 = 'There is not a file: {}\n'.format(file_name)
@@ -224,37 +231,43 @@ def readCp2KOverlap(path, nOrbitals):
     :parameter nOrbitals: Number of MO to read
     :type      nOrbitals: Int
     """
-    n      = nOrbitals % 4
+    n = nOrbitals % 4
     parser = topParserOverlap + oddParserOverlap(n)
-    xss    = parser.parseFile(path)
-    rss    = concatSwapCoeff(xss, 4, n)
+    xss = parser.parseFile(path)
+    rss = concatSwapCoeff(xss, 4, n)
     return floatArray(rss)
 
 
 def readCp2KBasis(path):
-    bss     = topParseBasis.parseFile(path)
-    atoms   = [flatten(xs.atom[:]).lower() for xs in bss]
-    names   = [' '.join(xs.basisName[:]).upper() for xs in bss]
+    """
+    Read the Contracted Gauss function primitives format from a text file.
+    
+    :param path: Path to the file containing the basis.
+    :type path: String
+    """
+    bss = topParseBasis.parseFile(path)
+    atoms = [flatten(xs.atom[:]).lower() for xs in bss]
+    names = [' '.join(xs.basisName[:]).upper() for xs in bss]
     formats = [list(map(int, xs.format[:])) for xs in bss]
     # for example 2 0 3 7 3 3 2 1 there are sum(3 3 2 1) =9 Lists
     # of Coefficients + 1 lists of exponents
     nCoeffs = [int(sum(xs[4:]) + 1) for xs in formats]
-    rss     = zipWith(swapCoeff2)(nCoeffs)(list(map(float, cs.coeffs[:])) for cs in bss)
-    tss     = [headTail(xs) for xs in rss]
-    basisData = [AtomBasisData(fst(xs), snd(xs)) for xs in tss]
-    basiskey  = zipWith3(AtomBasisKey)(atoms)(names)(formats)
+    rss = zipWith(swapCoeff2)(nCoeffs)(list(map(float, cs.coeffs[:]))
+                                       for cs in bss)
+    tss = [headTail(xs) for xs in rss]
+    basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
+    basiskey = zipWith3(AtomBasisKey)(atoms)(names)(formats)
 
     return (basiskey, basisData)
 
 # ============================<>=======================================
 # Auxiliar functions
 
-
 def cp2KBasistoStandard(fs):
     """
     CP2K 2 0 3 7 3 3 2 1 -> Standard {777/777/77/7}
     """
-    # lmin, lmax, nc = fs[1], fs[2], fs[3]
+    _lmin, _lmax, nc = fs[1], fs[2], fs[3]
     return [replicate(l, nc) for l in fs[4:]]
 
 
@@ -272,3 +285,22 @@ def swapCoeff2(n, rs):
         return rs
     else:
         return [rs[i::n] for i in range(n)]
+
+
+@curry
+def swapCoeff(n, rss):
+    if n == 1:
+        return [rss]
+    else:
+        return [[rs[i::n] for i in range(n)] for rs in rss]
+
+
+def headTail(xs):
+    """
+    Return the head and tail from a list.
+    """
+    it = iter(xs)
+    head = next(it)
+    tail = list(it)
+    return (head, tail)
+

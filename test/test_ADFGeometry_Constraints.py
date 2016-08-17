@@ -1,11 +1,14 @@
+
+from nose.plugins.attrib import attr
+from noodles import gather
 from qmworks import Settings, templates, run
 import plams
-from noodles import gather
 
 # User Defined imports
 from qmworks.packages.SCM import adf
 
 
+@attr('slow')
 def test_ADFGeometry_Constraint():
     """
     Test "freeze" and "selected_atoms" keywords for constrained geometry optimizations

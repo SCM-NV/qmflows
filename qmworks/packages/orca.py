@@ -57,13 +57,14 @@ class ORCA(Package):
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, result):
+    def __init__(self, settings, molecule, result, job_name):
         self.settings = settings
         self._molecule = molecule
         self.result = result
         properties = 'data/dictionaries/propertiesORCA.json'
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
+        self.job_name = job_name
 
     def as_dict(self):
         return {
@@ -97,5 +98,5 @@ class ORCA_Result(Result):
     @property
     def molecule(self):
         pass
-    
+
 orca = ORCA()
