@@ -70,7 +70,7 @@ class ORCA_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path
+            "filename": self.result.path,
             "job_name": self.job_name}
 
     @classmethod
