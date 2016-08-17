@@ -1,5 +1,6 @@
 # Default imports
-from qmworks import Settings, templates, draw_workflow
+from qmworks import Settings, templates
+from qmworks.draw_workflow import draw_workflow
 from plams import Molecule
 import plams
 
