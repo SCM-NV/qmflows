@@ -102,11 +102,12 @@ class ADF_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path}
+            "filename": self.result.path,
+            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename):
-        return ADF_Result(settings, molecule, plams.kftools.KFFile(filename))
+    def from_dict(cls, settings, molecule, filename, job_name):
+        return ADF_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
 
     def get_property(self, prop, section=None):
         return self.result.read(section, prop)
@@ -203,11 +204,12 @@ class DFTB_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path}
+            "filename": self.result.path,
+            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename):
-        return DFTB_Result(settings, molecule, plams.kftools.KFFile(filename))
+    def from_dict(cls, settings, molecule, filename, job_name):
+        return DFTB_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
 
     def extract_properties(self):
         props = Settings()
@@ -229,7 +231,11 @@ class DFTB_Result(Result):
 
         """
         if 'properties' in dir(self) and 'prop_dict' in dir(self):
-            return self.properties[self.prop_dict[prop]]
+            if isinstance(self.prop_dict[prop], str):
+                return self.properties[self.prop_dict[prop]]
+            else:
+                print(self.prop_dict[prop])
+                return self.result.read(*self.prop_dict[prop])
         else:
             raise Exception("NNOETHUNTHN")
         #return '3.23'

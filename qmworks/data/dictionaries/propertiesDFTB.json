@@ -1,4 +1,5 @@
 {
 	"energy": "energy.dftb final energy",
-	"charges": "atomic charge.net"
+	"charges": "atomic charge.net",
+	"frequencies": ["Vibrations", "Frequencies[cm-1]"]
 }

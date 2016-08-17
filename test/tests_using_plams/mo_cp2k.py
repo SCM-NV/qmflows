@@ -23,7 +23,6 @@ def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
     """
-    plams.init()
     project_name = 'ethylene'
 
     # create Settings for the Cp2K Jobs

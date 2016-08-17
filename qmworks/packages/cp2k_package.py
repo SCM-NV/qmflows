@@ -76,8 +76,8 @@ class CP2K(Package):
             self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
                               nLUMOS, project_name=project_name)
 
-        return CP2K_Result(cp2k_settings, mol, r.job.path, work_dir, hdf5_file,
-                           project_name, job_name)
+        return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
+                           hdf5_file, project_name)
 
     def postrun(self):
         pass
@@ -416,8 +416,8 @@ class CP2K_Result(Result):
   
     :param settings:
     """
-    def __init__(self, settings, molecule, plams_dir, work_dir, file_h5,
-                 project_name, job_name):
+    def __init__(self, settings, molecule, job_name, plams_dir, work_dir,
+                 file_h5, project_name):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -440,24 +440,27 @@ class CP2K_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.archive}
+            "filename": self.archive,
+            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, plams_dir=None, work_dir=None,
-                  file_h5='quantum.hdf5'):
+    def from_dict(cls, settings, molecule, job_name, plams_dir=None,
+                  work_dir=None, file_h5='quantum.hdf5'):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
 
         :param cls:
-        :param settings: Job Settings
-        :param molecule: molecular Geometry
+        :param settings: Job Settings.
+        :param molecule: molecular Geometry.
+        :param job_name: Name of the job.
         :param plams_dir: Absolute path to plams output folder
         :param work_dir: Absolute path to the folder where the calculation
         was performed.
         :param file_h5: Path to the HDF5 file that contains the numerical results
         """
-        return CP2K_Result(settings, molecule, plams_dir, work_dir, file_h5)
+        return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
+                           file_h5)
 
     def get_property(self, prop, section=None):
         pass
