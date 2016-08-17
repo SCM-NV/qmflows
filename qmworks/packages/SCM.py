@@ -231,7 +231,11 @@ class DFTB_Result(Result):
 
         """
         if 'properties' in dir(self) and 'prop_dict' in dir(self):
-            return self.properties[self.prop_dict[prop]]
+            if isinstance(self.prop_dict[prop], str):
+                return self.properties[self.prop_dict[prop]]
+            else:
+                print(self.prop_dict[prop])
+                return self.result.read(*self.prop_dict[prop])
         else:
             raise Exception("NNOETHUNTHN")
         #return '3.23'
