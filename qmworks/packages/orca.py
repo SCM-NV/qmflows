@@ -45,7 +45,7 @@ class ORCA(Package):
         result = plams.ORCAJob(molecule=mol, settings=orca_settings,
                                name=job_name).run()
 
-        return ORCA_Result(orca_settings, mol, result)
+        return ORCA_Result(orca_settings, mol, result, job_name)
 
     def postrun(self):
         pass
@@ -70,10 +70,11 @@ class ORCA_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path}
+            "filename": self.result.path
+            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename):
+    def from_dict(cls, settings, molecule, filename, job_name):
         pass
 
     def __getattr__(self, prop):
