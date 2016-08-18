@@ -1,6 +1,6 @@
 
 
-__all__ = ['cp2k', 'cp2k_farming', 'CP2K', 'CP2K_Farming', 'CP2K_Result']
+__all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
 from noodles import files
@@ -272,148 +272,10 @@ class CP2K(Package):
         return funs[key](settings, value, mol, key)
 
 
-class CP2K_Farming(CP2K):
-    """
-    Run CP2K Job in Groups according to:
-    <https://manual.cp2k.org/trunk/CP2K_INPUT/FARMING.html>
-    """
-    def run_job(self, settings, mol=None, hdf5_file="quantum.hdf5",
-                work_dirs=None, input_files=None, output_files=None,
-                coordinates_files=None, jobs_to_harvest=None, nGroups=None,
-                initial_guess=None):
-        """
-        Runs a CP2K Farming Job
-
-        :param settings: Farming Job Settings
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        :param hdf5_file: Path to the HDF5 file that contains the
-        numerical results.
-        :type hdf5_file: String
-        :param work_dirs: List of directories containing the information to
-        run a single job (e.g. coordinates).
-        :type work_dirs: String List
-        :param input_file_names: Names of the input files to be included in the
-        farming job.
-        :type input_file_names: String List
-        :param out_file_names: Output File Names for the different jobs
-        included in the farming.
-        :type out_file_names: String List
-        :param nGroups: Number of Jobs to run in parallel inside the Farming.
-        :type nGroups: Int
-        :returns: `~CP2K_Result`
-        """
-        # Execute initial_guess
-        if initial_guess is not None:
-                    initial_guess.orbitals
-        
-        # Create the input files for the Jobs to be run in Farming mode
-        mols = [plams.Molecule(xyz) for xyz in coordinates_files]
-        job_settings = [self.generic2specific(j, m)
-                        for j, m in zip(jobs_to_harvest, mols)]
-
-        # Use plams to generate the input of the jobs to farm
-        plams_settings = [Settings() for x in job_settings]
-        for cp2k_plams, s, input_file in zip(plams_settings, job_settings,
-                                             input_files):
-            cp2k_plams.input = s.specific.cp2k
-            job = plams.Cp2kJob(settings=cp2k_plams)
-
-            # Generate Input with Plams to use it during the farming
-            input = job.get_input()
-            with open(input_file, 'w') as f:
-                f.write(input)
-
-        # pass arguments in Plams input settings format
-        cp2k_settings = Settings()
-        cp2k_settings.input = settings.specific.cp2k
-        farm_job = plams.Cp2kJob(name='farming', settings=cp2k_settings)
-
-        # Create a Farming Job
-        runner = plams.JobRunner(parallel=True)
-        r = farm_job.run(runner)
-        r.wait()
-
-        # # Name of the folder were the output is stored
-        # folder_names = [f.split('/')[-1] for f in work_dirs]
-
-        # Dump the numerical results to HDF5
-        for s, outFile, folder in zip(job_settings, output_files, work_dirs):
-            self.dump_to_hdf5(hdf5_file, s, folder, outFile)
-
-        return CP2K_Farming_Result(cp2k_settings, mol, r.job.path, work_dirs,
-                                   hdf5_file)
-
-    def handle_special_keywords(self, settings, key, value, mol):
-        """
-        Create the settings input for complex cp2k keys
-
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param key: Special key declared in ``settings``.
-        :param value: Value store in ``settings``.
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        def expand_farming_jobs(s, values, mol, key):
-            """
-            The Input for a Farming CP2K job resemble the following structure,
-
-             &GLOBAL
-                PROJECT farming
-                PROGRAM FARMING
-                RUN_TYPE NONE
-             &END GLOBAL
-
-             &FARMING
-               GROUP_SIZE 1
-
-               &JOB
-                 DIRECTORY dir-1
-                 INPUT_FILE_NAME job1.inp
-                 JOB_ID 1
-               &END JOB
-
-               &JOB
-                 DEPENDENCIES 1
-                 DIRECTORY dir-2
-                 INPUT_FILE_NAME job2.inp
-                 JOB_ID 2
-               &END JOB
-
-               ...........................
-               ...........................
-
-               &JOB
-                 DEPENDENCIES 31
-                 DIRECTORY dir-32
-                 INPUT_FILE_NAME job32.inp
-                 JOB_ID 32
-               &END JOB
-
-             &END FARMING
-            """
-            job_ids, job_names, workDirs = [list(t) for t in zip(*values)]
-            s.specific.cp2k.farming.job.directories = workDirs
-            s.specific.cp2k.farming.job.input_file_names = job_names
-            s.specific.cp2k.farming.job.job_ids = job_ids
-
-            return s
-                    
-        funs = {'farming_jobs': expand_farming_jobs}
-
-        try:
-            return super(CP2K_Farming,
-                         self).handle_special_keywords(settings, key, value, mol)
-        except KeyError:
-            return funs[key](settings, value, mol, key)
-
-
 class CP2K_Result(Result):
     """
     Class providing access to CP2K result.
-  
+
     :param settings:
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir,
@@ -484,44 +346,5 @@ class CP2K_Result(Result):
         return paths_to_prop
 
 
-class CP2K_Farming_Result(CP2K_Result):
-    """
-    """
-    def __init__(self, settings, mol, plams_dir, work_dirs, file_h5):
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry.
-        :type mol: plams Molecule
-        :param plams_dir: Absolute path to plams output folder
-        :type plams_dir: String
-        :param work_dir: Absolute path to the folder where the calculation
-        was performed.
-        :type work_dirs: String
-        :param file_h5: Path to the HDF5 file that contains the numerical results.
-        :type file_h5: String
-        """
-        super(CP2K_Farming_Result, self).__init__(settings, mol, plams_dir,
-                                                  work_dirs, file_h5)
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dirs': work_dirs}
-        
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-        The property is extracted from a  result file, which is recursively
-        search for in the CP2K settings
-
-        Example:
-        ..
-            overlap_matrix = result.overlap
-        """
-        sections = self.prop_dict[prop]
-        work_dirs = self.archive['work_dirs']
-        paths_to_prop = list(map(lambda folder:
-                                 list(map(lambda x: join(folder, x), sections)), work_dirs))
-
-        return paths_to_prop
-
-
 cp2k = CP2K()
-cp2k_farming = CP2K_Farming()
+
