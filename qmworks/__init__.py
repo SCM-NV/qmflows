@@ -1,6 +1,6 @@
 from .common import (AtomBasisKey, AtomBasisData, AtomXYZ, CGF, InfoMO,
                      InputKey, MO)
-from .fileFunctions  import (json2Settings, search_environ_var)
+from .fileFunctions  import json2Settings
 from .hdf5 import (StoreasHDF5, adf2hdf5, save_ADF_Info, cp2k2hdf5,
                    turbomole2hdf5)
 from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
@@ -30,6 +30,6 @@ __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
            'readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
            'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
            'read_cp2k_number_of_orbitals', 'registry', 'repeatN', 'replicate',
-           'run', 'save_ADF_Info', 'search_environ_var', 'select_max',
+           'run', 'save_ADF_Info', 'select_max',
            'sequence2plams', 'settings2Dict', 'singlepoint', 'smiles2plams',
            'ts', 'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']
