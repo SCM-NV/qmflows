@@ -28,10 +28,10 @@ def test_store_basisSet():
             try_to_remove(path_hdf5)
             assert False
 
-            
+
 def test_store_MO_h5():
     """
-    test if the MO are stored in the HDF5 format
+    test if the turbomole MO are stored in the HDF5 format.
     """
     path = join('/turbomole', 'test', 'ethylene')
     path_es = join(path, 'eigenvalues')
@@ -49,8 +49,8 @@ def test_store_MO_h5():
         else:
             try_to_remove(path_hdf5)
             assert False
-            
-            
+
+
 def dump_MOs_coeff(handle_hdf5, path_es, path_css, number_of_orbs,
                    number_of_orb_funs):
     """
@@ -61,6 +61,7 @@ def dump_MOs_coeff(handle_hdf5, path_es, path_css, number_of_orbs,
     :param job: Output File
     :type  job: String
     """
+    path_MO = 'test/test_files/aomix_ethylene.in'
     key = InputKey('orbitals', [path_MO, number_of_orbs, number_of_orb_funs,
                                 path_es, path_css])
 
@@ -69,7 +70,6 @@ def dump_MOs_coeff(handle_hdf5, path_es, path_css, number_of_orbs,
     return path_es, path_css
 
 
-            
 def try_to_remove(path):
     """
     Remove a file if it exists
