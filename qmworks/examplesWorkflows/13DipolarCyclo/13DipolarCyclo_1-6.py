@@ -34,19 +34,19 @@ def calc_reactant(name):
         templates.geometry.overlay(settings),
         dftb(templates.geometry.overlay(settings), mol,
              job_name=name + "_reactant_DFTB").molecule,
-        job_name=name+"_reactant")
+        job_name=name + "_reactant")
     return reactant
 
 
 def calc_productAndTS(name):
-    smiles = 'C1'+name[0]+"="+name[1:]+'C1'
+    smiles = 'C1' + name[0] + "=" + name[1:] + 'C1'
     mol = rdkitTools.smiles2plams(smiles)
     mol.properties.smiles = smiles
     product = adf(
         templates.geometry.overlay(settings),
         dftb(templates.geometry.overlay(settings),
              mol, job_name=name + "_product_DFTB").molecule,
-        job_name=name+"_product")
+        job_name=name + "_product")
 
     constraint1 = "dist 1 2"
     constraint2 = "dist 4 5"
@@ -73,7 +73,7 @@ def calc_productAndTS(name):
     # PES = gathered (promised) result objects for each point in the scan
     PES = PES_scan(
         [dftb, adf], settings, product.molecule, scan,
-        job_name=name+"_PES")
+        job_name=name + "_PES")
 
     # get the object presenting the molecule with the maximum energy
     # calculated from the scan
@@ -81,7 +81,7 @@ def calc_productAndTS(name):
 
     DFTB_freq = dftb(
         templates.freq.overlay(settings), apprTS.molecule,
-        job_name=name+"_DFTBfreq")
+        job_name=name + "_DFTBfreq")
 
     t = Settings()
     t.specific.adf.geometry.inithess = DFTB_freq.archive.path
@@ -89,7 +89,7 @@ def calc_productAndTS(name):
     # Run the TS optimization, using the default TS template
     TS = adf(
         templates.ts.overlay(settings).overlay(t),
-        DFTB_freq.molecule, job_name=name+"_TS")
+        DFTB_freq.molecule, job_name=name + "_TS")
 
     adf_freq = adf(
         templates.freq.overlay(settings), TS.molecule,
@@ -103,7 +103,7 @@ def calc_productAndTS(name):
 reaction_names = set()
 for a1 in ('C', 'N'):
     for a3 in ('C', 'N', 'O'):
-        name = a1+'N'+a3
+        name = a1 + 'N' + a3
         reaction_names.add(name)
         print(name)
 
