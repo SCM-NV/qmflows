@@ -11,9 +11,9 @@ def test_overlay_cp2k_singlepoint():
     dft = s.specific.cp2k.force_eval.dft
     force = s.specific.cp2k.force_eval
     dft.scf.scf_guess = 'atomic'
-    dft.scf.ot.minimizer = 'DIIS'
+    dft.scf.ot.minimizer = 'diis'
     dft.scf.ot.n_diis = 7
-    dft.scf.ot.preconditioner = 'FULL_SINGLE_INVERSE'
+    dft.scf.ot.preconditioner = 'full_single_inverse'
     dft.scf.added_mos = 0
     dft.scf.eps_scf = 5e-06
 
@@ -24,7 +24,7 @@ def test_overlay_cp2k_singlepoint():
     dft.mgrid.ngrids = 4
 
     dft.potential_file_name = ''
-    dft['print']['mo']['add_last'] = 'NUMERIC'
+    dft['print']['mo']['add_last'] = 'numeric'
     dft['print']['mo']['each']['qs_scf'] = 0
     dft['print']['mo']['eigenvalues'] = ''
     dft['print']['mo']['eigenvectors'] = ''
@@ -34,21 +34,21 @@ def test_overlay_cp2k_singlepoint():
 
     dft.scf.max_scf = 200
     dft.scf.scf_guess = 'atomic'
-    dft.xc.xc_functional = 'PBE'
+    dft.xc.xc_functional = 'pbe'
 
-    dft.qs.method = 'GPW'
-    force.subsys.cell.periodic = 'XYZ'
-    force.subsys.topology.coordinate = 'XYZ'
+    dft.qs.method = 'gpw'
+    force.subsys.cell.periodic = 'xyz'
+    force.subsys.topology.coordinate = 'xyz'
     force.subsys.topology.coord_file_name = ''
 
     g = s['specific']['cp2k']['global']
-    g.print_level = 'LOW'
-    g.project = "QMWORKS-CP2K"
-    g.run_type = "ENERGY_FORCE"
+    g.print_level = 'low'
+    g.project = "qmworks-cp2k"
+    g.run_type = "energy_force"
 
     print(s.specific.cp2k.force_eval)
     print(r.specific.cp2k.force_eval)
-    
+
     assert s.specific.cp2k == r.specific.cp2k
 
 
@@ -58,7 +58,7 @@ def test_overlay_adf_freq():
     write by hand.
     """
     s = Settings()
-    s.specific.adf.xc.GGA = "BP86"
+    s.specific.adf.xc.gga = "bp86"
     s.specific.adf.beckegrid.quality = "good"
     s.specific.adf.scf.iterations = "99"
     s.specific.adf.scf.converge = "0.0000001"
@@ -69,4 +69,6 @@ def test_overlay_adf_freq():
     s.specific.adf.basis.type = "DZP"
     s.specific.adf.basis.core = "None"
 
+    print(s.specific.adf)
+    print(r.specific.adf)
     assert s.specific.adf == r.specific.adf
