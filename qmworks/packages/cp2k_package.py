@@ -218,12 +218,12 @@ class CP2K(Package):
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
-                s.specific.cp2k.force_eval.subsys.cell.PERIODIC = 'XYZ'
+                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
             else:
                 a, b, c = value  # Pattern match list
                 abc = ' [angstrom] {} {} {}'.format(a, b, c)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
-                s.specific.cp2k.force_eval.subsys.cell.PERIODIC = 'XYZ'
+                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
 
             return s
 
