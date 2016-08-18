@@ -4,7 +4,7 @@ from plams import Molecule
 import plams
 
 # User Defined imports
-from qmworks.packages.SCM import adf, dftb
+from qmworks.packages.SCM import dftb
 from qmworks.packages.orca import orca
 from qmworks.packages import run
 
