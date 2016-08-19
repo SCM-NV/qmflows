@@ -19,6 +19,21 @@ JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 @attr('slow')
 def test_ethylene():
+    # User variables
+    home = os.path.expanduser('~')  # HOME Path
+    # Work_dir
+    scratch_path = join(home, '.test_qmworks')
+    if not os.path.exists(scratch_path):
+        os.makedirs(scratch_path)
+    try:
+        fun_ethylene(scratch_path)
+    finally:
+        # remove tmp data and clean global config
+        shutil.rmtree(scratch_path)
+        plams.finish()
+
+
+def fun_ethylene(scratch_path):
     """
     run a single point calculation using CP2K and store the MOs.
     """
@@ -32,16 +47,6 @@ def test_ethylene():
     dft = s.specific.cp2k.force_eval.dft
     dft.scf.added_mos = 50
     dft.scf.eps_scf = 1e-4
-
-    dft['print']['ao_matrices']['overlap'] = ''
-    dft['print']['ao_matrices']['filename'] = './overlap.data'
-
-    # User variables
-    home = os.path.expanduser('~')  # HOME Path
-    # Work_dir
-    scratch_path = join(home, '.test_qmworks')
-    if not os.path.exists(scratch_path):
-        os.makedirs(scratch_path)
 
     # Cp2k configuration files
     # Copy the basis and potential to a tmp file
