@@ -302,11 +302,10 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
         CP2K renames thew files appending a number an a `Log` to the
         end of the filename.
         """
-
         path = get_value_recursively(settings, xs)
-        if os.path.exists(path):
+        if path is None or os.path.exists(path):
             return path
-        else:
+        else:  # The software renamed the filename given by the user
             root, file_pattern = os.path.split(path)
             real_name = match_file(file_pattern)
             return join(root, real_name)
