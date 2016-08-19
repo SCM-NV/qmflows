@@ -15,7 +15,7 @@ def test_opt_orca():
     """
     Test Orca input generation and run functions.
     """
-    h2o = Molecule('h2o.xyz', 'xyz', charge=0, multiplicity=1)
+    h2o = Molecule('test/test_files/h2o.xyz', 'xyz', charge=0, multiplicity=1)
 
     h2o_geometry = dftb(templates.geometry, h2o)
 
