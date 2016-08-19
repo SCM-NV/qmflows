@@ -19,9 +19,10 @@ JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 @attr('slow')
 def test_ethylene():
-    # User variables
+    """
+    run a single point calculation using CP2K and store the MOs.
+    """
     home = os.path.expanduser('~')  # HOME Path
-    # Work_dir
     scratch_path = join(home, '.test_qmworks')
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
@@ -30,12 +31,11 @@ def test_ethylene():
     finally:
         # remove tmp data and clean global config
         shutil.rmtree(scratch_path)
-        plams.finish()
 
 
 def fun_ethylene(scratch_path):
     """
-    run a single point calculation using CP2K and store the MOs.
+    Test Ethylene singlw
     """
     project_name = 'ethylene'
 
@@ -84,10 +84,6 @@ def fun_ethylene(scratch_path):
 
     with h5py.File(path_hdf5) as f5:
         assert(all(p in f5 for p in path_properties))
-
-    # remove tmp data and clean global config
-    shutil.rmtree(scratch_path)
-    plams.finish()
 
 
 def prepare_job_cp2k(geometry, files, settings, work_dir,
