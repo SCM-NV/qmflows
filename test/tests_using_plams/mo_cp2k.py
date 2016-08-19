@@ -9,7 +9,6 @@ from qmworks.packages import cp2k
 from qmworks.utils import (chunksOf, flatten)
 
 import fnmatch
-import getpass
 import h5py
 import os
 import plams
@@ -30,15 +29,17 @@ def test_ethylene():
     s.basis = "DZVP-MOLOPT-SR-GTH"
     s.potential = "GTH-PBE"
     s.cell_parameters = [12.74] * 3
-    s.specific.cp2k.force_eval.dft.scf.added_mos = 50
-    s.specific.cp2k.force_eval.dft.scf.eps_scf = 1e-4
+    dft = s.specific.cp2k.force_eval.dft
+    dft.scf.added_mos = 50
+    dft.scf.eps_scf = 1e-4
+
+    dft['print']['ao_matrices']['overlap'] = ''
+    dft['print']['ao_matrices']['filename'] = './overlap.data'
 
     # User variables
-    # home = os.path.expanduser('~')  # HOME Path
-    username = getpass.getuser()
+    home = os.path.expanduser('~')  # HOME Path
     # Work_dir
-    scratch = "/tmp"
-    scratch_path = join(scratch, username, project_name)
+    scratch_path = join(home, '.test_qmworks')
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
 
@@ -79,6 +80,8 @@ def test_ethylene():
     with h5py.File(path_hdf5) as f5:
         assert(all(p in f5 for p in path_properties))
 
+    # remove tmp data and clean global config
+    shutil.rmtree(scratch_path)
     plams.finish()
 
 
