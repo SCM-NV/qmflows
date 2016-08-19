@@ -48,10 +48,13 @@ def fun_ethylene(scratch_path):
     dft.scf.added_mos = 50
     dft.scf.eps_scf = 1e-4
 
-    # Cp2k configuration files
+    dft['print']['ao_matrices']['overlap'] = ''
+    dft['print']['ao_matrices']['filename'] = join(scratch_path, 'overlap.out')
+
     # Copy the basis and potential to a tmp file
     shutil.copy('test/test_files/BASIS_MOLOPT', scratch_path)
     shutil.copy('test/test_files/GTH_POTENTIALS', scratch_path)
+    # Cp2k configuration files
     basiscp2k = join(scratch_path, 'BASIS_MOLOPT')
     potcp2k = join(scratch_path, 'GTH_POTENTIALS')
     cp2k_config = {"basis": basiscp2k, "potential": potcp2k}
