@@ -1,5 +1,6 @@
 # Default imports
 from math import sqrt
+from nose.plugins.attrib import attr
 from plams import Molecule
 from qmworks import (Settings, templates)
 
@@ -9,6 +10,7 @@ from qmworks.packages.orca import orca
 from qmworks.packages import run
 
 
+@attr('slow')
 def test_opt_orca():
     """
     Test Orca input generation and run functions.
