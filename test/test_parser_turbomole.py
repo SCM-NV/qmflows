@@ -17,16 +17,14 @@ def test_store_basisSet():
     path_basis = 'test/test_files/basis_turbomole'
     keyBasis = InputKey("basis", [path_basis])
 
-    try_to_remove(path_hdf5)
     with h5py.File(path_hdf5, chunks=True) as f5:
         try:
             # Store the basis sets
             turbomole2hdf5(f5, [keyBasis])
             if not f5["turbomole/basis"]:
                 assert False
-        except RuntimeError:
+        finally:
             try_to_remove(path_hdf5)
-            assert False
 
 
 def test_store_MO_h5():
@@ -39,16 +37,14 @@ def test_store_MO_h5():
     number_of_orbs = 36
     number_of_orb_funs = 38
 
-    try_to_remove(path_hdf5)
     with h5py.File(path_hdf5) as f5:
         path_es, path_css = dump_MOs_coeff(f5, path_es, path_css,
                                            number_of_orbs, number_of_orb_funs)
-        if f5[path_es] and f5[path_css]:
+        try:
+            if not f5[path_es] and f5[path_css]:
+                assert False
+        finally:
             try_to_remove(path_hdf5)
-            assert True
-        else:
-            try_to_remove(path_hdf5)
-            assert False
 
 
 def dump_MOs_coeff(handle_hdf5, path_es, path_css, number_of_orbs,
