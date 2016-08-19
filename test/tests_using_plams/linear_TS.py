@@ -27,7 +27,7 @@ def test_linear_ts():
 
     # scan input
     scan = {'constraint': [constraint1, constraint2],
-            'surface': {'nsteps': 6, 'start': [2.3, 2.3],
+            'surface': {'nsteps': 2, 'start': [2.3, 2.3],
                         'stepsize': [0.1, 0.1]}}
 
     # returns a set of results object containing the output of
@@ -44,4 +44,3 @@ def test_linear_ts():
     expected_energy = -3.219708290363864
 
     assert abs(ts.energy - expected_energy) < 1.0e-6
-    
