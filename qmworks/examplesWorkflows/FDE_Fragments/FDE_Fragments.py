@@ -25,8 +25,7 @@ def fragmentsjob(settings, mol, *frozen_frags):
     mol_tot = Molecule()
     frag_settings = Settings()
     for i, frag in enumerate(frozen_frags):
-        i += 1
-        frag_id = 'frag' + str(i)
+        frag_id = 'frag' + str(i+1)
         for m in frag.mol_list:
             for a in m:
                 a.fragment = frag_id
@@ -36,7 +35,7 @@ def fragmentsjob(settings, mol, *frozen_frags):
         frag_settings.specific.adf.fde.PW91k = ""
     mol_tot += mol
 
-    return adf(settings.overlay(frag_settings), mol_tot)
+    return adf(settings.overlay(frag_settings), mol_tot, job_name = "fde")
 # ----------------------------------------------------------------
 
 
@@ -56,10 +55,10 @@ settings.basis = 'SZ'
 settings.specific.adf.nosymfit = ''
 
 # Prepare first water molecule
-r_h2o_1 = adf(templates.singlepoint.overlay(settings), m_h2o_1)
+r_h2o_1 = adf(templates.singlepoint.overlay(settings), m_h2o_1, job_name="h2o_1")
 
 # Prepare second water molecule
-r_h2o_2 = adf(templates.singlepoint.overlay(settings), m_h2o_2)
+r_h2o_2 = adf(templates.singlepoint.overlay(settings), m_h2o_2, job_name="h2o_2")
 
 frozen_frags = [Fragment(r_h2o_1, [m_h2o_1]),
                 Fragment(r_h2o_2, [m_h2o_2])]
