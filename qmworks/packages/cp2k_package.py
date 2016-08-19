@@ -304,8 +304,8 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
         """
 
         path = get_value_recursively(settings, xs)
-        if path is None:
-            return None
+        if os.path.exists(path):
+            return path
         else:
             root, file_pattern = os.path.split(path)
             real_name = match_file(file_pattern)
