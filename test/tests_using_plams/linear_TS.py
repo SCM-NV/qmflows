@@ -14,7 +14,7 @@ def test_linear_ts():
     compute a first approximation to the TS.
     """
     # Read the Molecule from file
-    cnc = Molecule('C-N-C.mol', 'mol')
+    cnc = Molecule('test/test_files/C-N-C.mol', 'mol')
 
     # User define Settings
     settings = Settings()
