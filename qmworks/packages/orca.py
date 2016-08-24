@@ -45,7 +45,7 @@ class ORCA(Package):
         result = plams.ORCAJob(molecule=mol, settings=orca_settings,
                                name=job_name).run()
 
-        return ORCA_Result(orca_settings, mol, result.job.path, job_name)
+        return ORCA_Result(orca_settings, mol, result.job.path, result.job.name)
 
     def postrun(self):
         pass
@@ -57,25 +57,25 @@ class ORCA(Package):
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, path, job_name):
+    def __init__(self, settings, molecule, path, name):
         self.settings = settings
         self._molecule = molecule
         self.path = path
         properties = 'data/dictionaries/propertiesORCA.json'
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
-        self.job_name = job_name
+        self.name = name
 
     def as_dict(self):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
             "path": self.path,
-            "job_name": self.job_name}
+            "name": self.name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, path, job_name):
-        return ORCA_Result(settings, molecule, path, job_name)
+    def from_dict(cls, settings, molecule, path, name):
+        return ORCA_Result(settings, molecule, path, name)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
@@ -87,14 +87,7 @@ class ORCA_Result(Result):
             dipole = result.dipole
 
         """
-        r = self.awk_output(script=self.prop_dict[prop])
-        try:
-            result = [float(i) for i in r]
-        except:
-            result = r
-        if len(result) == 1:
-            result = result[0]
-        return result
+        return self.awk_output(script=self.prop_dict[prop])
 
     @property
     def molecule(self):

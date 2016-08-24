@@ -176,8 +176,8 @@ class DFTB(Package):
         dftb_settings.input = settings.specific.dftb
         result = plams.DFTBJob(name=job_name, molecule=mol,
                                settings=dftb_settings).run()
-
-        return DFTB_Result(dftb_settings, mol, result._kf, job_name)
+        #print('===>', result.path, result._kf)
+        return DFTB_Result(dftb_settings, mol, result.job.path, result.job.name)
 
     def postrun(self):
         pass
@@ -189,34 +189,36 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, result, job_name):
+    def __init__(self, settings, molecule, path, name):
         self.settings = settings
         self._molecule = molecule
-        self.result = result
+        self.path = path
+        self.name = name
+        kf_filename = self.path + '/' + name + '.rkf'
+        self.kf = plams.kftools.KFFile(kf_filename)
         properties = 'data/dictionaries/propertiesDFTB.json'
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
         self.properties = self.extract_properties()
-        self.archive = files.Path(result.path)
-        self.job_name = job_name
+        self.archive = files.Path(self.kf)
 
     def as_dict(self):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path,
-            "job_name": self.job_name}
+            "path": self.path,
+            "name": self.name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename, job_name):
-        return DFTB_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
+    def from_dict(cls, settings, molecule, path, name):
+        return DFTB_Result(settings, molecule, path, filename, name)
 
     def extract_properties(self):
         props = Settings()
-        for i in range(self.result.read('Properties', 'nEntries')):
-            type = self.result.read('Properties', 'Type(' + str(i + 1) + ')').strip()
-            subtype = self.result.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
-            value = self.result.read('Properties', 'Value(' + str(i + 1) + ')')
+        for i in range(self.kf.read('Properties', 'nEntries')):
+            type = self.kf.read('Properties', 'Type(' + str(i + 1) + ')').strip()
+            subtype = self.kf.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
+            value = self.kf.read('Properties', 'Value(' + str(i + 1) + ')')
             props[type][subtype] = value
         return props
 
@@ -230,12 +232,15 @@ class DFTB_Result(Result):
             dipole = result.properties.dipole
 
         """
-        if 'properties' in dir(self) and 'prop_dict' in dir(self):
-            if isinstance(self.prop_dict[prop], str):
-                return self.properties[self.prop_dict[prop]]
+        if 'properties' in dir(self) and prop in self.prop_dict:
+            prop_query = self.prop_dict[prop]
+            if isinstance(prop_query, str):
+                if prop_query[:4] == 'awk|':
+                    return self.awk_output(script=prop_query[4:])
+                return self.properties[prop_query]
             else:
-                print(self.prop_dict[prop])
-                return self.result.read(*self.prop_dict[prop])
+                print(prop_query)
+                return self.kf.read(*prop_query)
         else:
             raise Exception("NNOETHUNTHN")
         #return '3.23'
@@ -245,7 +250,7 @@ class DFTB_Result(Result):
         """WARNING: Cheap copy from PLAMS, do not keep this!!!"""
         m = self._molecule.copy()
         natoms = len(m)
-        coords = self.result.read('Molecule', 'Coords')
+        coords = self.kf.read('Molecule', 'Coords')
         coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
 
         if len(coords) > natoms:

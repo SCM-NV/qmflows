@@ -29,7 +29,7 @@ class Result:
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)
         Shortcut for :meth:`~Results.awk_file` on the output file."""
-        output = self.job_name + ".out"
+        output = self.name + ".out"
         return self.awk_file(output, script, progfile, **kwargs)
 
     def awk_file(self, filename, script='', progfile=None, **kwargs):
@@ -55,7 +55,13 @@ class Result:
         ret = subprocess.check_output(cmd + [filename], cwd=self.path).decode('utf-8').split('\n')
         if ret[-1] == '':
             ret = ret[:-1]
-        return ret
+        try:
+            result = [float(i) for i in ret]
+        except:
+            result = ret
+        if len(result) == 1:
+            result = result[0]
+        return result
 
 
 @has_scheduled_methods
@@ -93,6 +99,7 @@ class Package:
         self.prerun()
 
         job_settings = self.generic2specific(settings, mol)
+        #print(job_settings)
         result = self.run_job(job_settings, mol, **kwargs)
 
         self.postrun()
