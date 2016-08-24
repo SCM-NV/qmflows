@@ -1,6 +1,7 @@
 
 # ========>  Standard and third party Python Libraries <======
 from os.path import join
+import subprocess
 
 import plams
 import pkg_resources as pkg
