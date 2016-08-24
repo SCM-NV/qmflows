@@ -72,7 +72,7 @@ class ADF(Package):
             if isinstance(value[0], int):
                 for a in range(1, len(mol) + 1):
                     if a not in value:
-                         settings.specific.adf.constraints['atom ' + str(a)] = ""
+                        settings.specific.adf.constraints['atom ' + str(a)] = ""
             else:
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:

@@ -28,7 +28,7 @@ def rdkit2plams(rdkit_mol):
     for atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(atom.GetIdx())
         ch = atom.GetFormalCharge()
-        plams_mol.add_atom(Atom(atom.GetAtomicNum(),coords = (pos.x,pos.y,pos.z), charge=ch))
+        plams_mol.add_atom(Atom(atom.GetAtomicNum(), coords=(pos.x,pos.y,pos.z), charge=ch))
         total_charge += ch
     for bond in rdkit_mol.GetBonds():
         at1 = plams_mol.atoms[bond.GetBeginAtomIdx()]
@@ -175,3 +175,103 @@ def gen_coords(plams_mol):
 
 def write_molblock(plams_mol, file=sys.stdout):
     file.write(Chem.MolToMolBlock(plams2rdkit(plams_mol)))
+
+def add_prot_Hs(rdmol):
+    """
+    Add hydrogens to molecules read from PDB
+    Makes sure that the hydrogens get the correct PDBResidue info
+    """
+    retmol = Chem.AddHs(rdmol, addCoords=True)
+    for atom in retmol.GetAtoms():
+        if atom.GetPDBResidueInfo() is None and atom.GetSymbol() == 'H':
+            bond = atom.GetBonds()[0]
+            if bond.GetBeginAtom().GetIdx() == atom.GetIdx:
+                connected_atom = bond.GetEndAtom()
+            else:
+                connected_atom = bond.GetBeginAtom()
+            try:
+                ResInfo = connected_atom.GetPDBResidueInfo()
+                atom.SetMonomerInfo(Chem.AtomPDBResidueInfo())
+                atom.GetPDBResidueInfo().SetName(' H  ')
+                atom.GetPDBResidueInfo().SetResidueName(ResInfo.GetResidueName())
+                atom.GetPDBResidueInfo().SetResidueNumber(ResInfo.GetResidueNumber())
+                atom.GetPDBResidueInfo().SetChainId(ResInfo.GetChainId())
+            except:
+                print('Hydrogen annotation failed:',  connected_atom.GetIdx(), atom.GetIdx())
+    return retmol
+
+def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None, bond_order=None):
+    molconf = rwmol.GetConformer()
+    fragconf = frag.GetConformer()
+    new_indices = []
+    for a in frag.GetAtoms():
+        new_index = rwmol.AddAtom(a)
+        new_indices.append(new_index)
+        molconf.SetAtomPosition(new_index, fragconf.GetAtomPosition(a.GetIdx()))
+    for b in frag.GetBonds():
+        ba = b.GetBeginAtomIdx()
+        ea = b.GetEndAtomIdx()
+        rwmol.AddBond(new_indices[ba], new_indices[ea], b.GetBondType())
+    if bond_order:
+        rwmol.AddBond(rwmol_atom_idx, new_indices[frag_atom_idx], Chem.BondType.values[bond_order])
+        rwmol.GetAtomWithIdx(new_indices[frag_atom_idx]).SetNumRadicalElectrons(0)
+
+def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
+    molconf = mol.GetConformer()
+    fragment = Chem.RWMol(Chem.Mol())
+    fragconf = Chem.Conformer()
+    # Put atoms in fragment
+    for i in indices:
+        atom = mol.GetAtomWithIdx(i)
+        new_index = fragment.AddAtom(atom)
+        pos = molconf.GetAtomPosition(i)
+        fragconf.SetAtomPosition(new_index, pos)
+    # Put bonds in fragment
+    for b in mol.GetBonds():
+        ba = b.GetBeginAtomIdx()
+        ea = b.GetEndAtomIdx()
+        if ba in indices and ea in indices:
+            fragment.AddBond(indices.index(ba),indices.index(ea), b.GetBondType())
+            continue
+        if not incl_expl_Hs:
+            continue
+        if ba in indices and mol.GetAtomWithIdx(ea).GetSymbol() == 'H':
+            hi = fragment.AddAtom(mol.GetAtomWithIdx(ea))
+            fragconf.SetAtomPosition(hi, molconf.GetAtomPosition(ea))
+            fragment.AddBond(indices.index(ba), hi, Chem.BondType.SINGLE)
+            continue
+        if ea in indices and mol.GetAtomWithIdx(ba).GetSymbol() == 'H':
+            hi = fragment.AddAtom(mol.GetAtomWithIdx(ba))
+            fragconf.SetAtomPosition(hi, molconf.GetAtomPosition(ba))
+            fragment.AddBond(indices.index(ea), hi, Chem.BondType.SINGLE)
+    ret_frag = fragment.GetMol()
+    Chem.SanitizeMol(ret_frag)
+    if neutralize:
+        for atom in ret_frag.GetAtoms():
+            nrad = atom.GetNumRadicalElectrons()
+            if nrad > 0:
+                atom.SetNumExplicitHs(atom.GetNumExplicitHs() + nrad)
+                atom.SetNumRadicalElectrons(0)
+    Chem.SanitizeMol(ret_frag)
+    ret_frag.AddConformer(fragconf)
+    return ret_frag
+
+def partition_protein(rdmol, cap=None):
+    caps=[]
+    pept_bond = Chem.MolFromSmarts('[C;X4;H1,H2][CX3](=O)[NX3][C;X4;H1,H2][CX3](=O)')
+    em = Chem.RWMol(rdmol)
+    for match in rdmol.GetSubstructMatches(pept_bond):
+        # Generate cap fragment
+        cap = get_fragment(rdmol, match[0:5])
+        cap = add_prot_Hs(cap)
+        caps.append(cap)
+        cap_o_ind = cap.GetSubstructMatch(Chem.MolFromSmarts('[C;X4][CX3]=O'))
+        cap_o = get_fragment(cap, cap_o_ind, neutralize=False)
+        cap_n_ind = cap.GetSubstructMatch(Chem.MolFromSmarts('O=[CX3][NX3][C;X4]'))[2:]
+        cap_n = get_fragment(cap, cap_n_ind, neutralize=False)
+        em.RemoveBond(match[1], match[3])
+        add_fragment(em, cap_o, match[3], 1, 1)
+        add_fragment(em, cap_n, match[1], 0, 1)
+        Chem.SanitizeMol(em)
+    frags = Chem.GetMolFrags(em.GetMol(), asMols=True)
+    return frags, caps
