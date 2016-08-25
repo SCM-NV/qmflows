@@ -2,9 +2,11 @@
 # ========>  Standard and third party Python Libraries <======
 from os.path import join
 import subprocess
+import base64
 
 import plams
 import pkg_resources as pkg
+from rdkit import Chem
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
@@ -15,6 +17,7 @@ from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
 from qmworks.settings import Settings
+from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
 
 # ==============================================================
@@ -92,6 +95,9 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
+
+        if isinstance(mol, Chem.Mol):
+            mol = rdkitTools.rdkit2plams(mol)
 
         if job_name != '':
             kwargs['job_name'] = job_name
@@ -220,6 +226,21 @@ class SerMolecule(Serialiser):
         return plams.Molecule.from_dict(**data)
 
 
+class SerMol(Serialiser):
+    """
+    Based on the RDKit molecule this class encodes and decodes the
+    information related to the molecule using a string.
+    """
+    def __init__(self):
+        super(SerMol, self).__init__(Chem.Mol)
+
+    def encode(self, obj, make_rec):
+        return make_rec(base64.b64encode(obj.ToBinary()).decode('ascii'))
+
+    def decode(self, cls, data):
+        return Chem.Mol(base64.b64decode(data.encode('ascii')))
+
+
 class SerSettings(Serialiser):
     """
     Class to encode and decode the ~qmworks.Settings class using
@@ -249,5 +270,6 @@ def registry():
             Package: AsDict(Package),
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
+            Chem.Mol: SerMol(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
