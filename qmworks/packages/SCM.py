@@ -211,7 +211,7 @@ class DFTB_Result(Result):
 
     @classmethod
     def from_dict(cls, settings, molecule, path, name):
-        return DFTB_Result(settings, molecule, path, filename, name)
+        return DFTB_Result(settings, molecule, path, name)
 
     def extract_properties(self):
         props = Settings()
