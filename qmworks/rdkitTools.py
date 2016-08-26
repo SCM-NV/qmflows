@@ -209,6 +209,7 @@ def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None, bond_orde
         ea = b.GetEndAtomIdx()
         rwmol.AddBond(new_indices[ba], new_indices[ea], b.GetBondType())
     if bond_order:
+        print(new_indices, frag_atom_idx, rwmol_atom_idx)
         rwmol.AddBond(rwmol_atom_idx, new_indices[frag_atom_idx], Chem.BondType.values[bond_order])
         rwmol.GetAtomWithIdx(new_indices[frag_atom_idx]).SetNumRadicalElectrons(0)
 
@@ -254,10 +255,10 @@ def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
 
 def partition_protein(rdmol, cap=None):
     caps=[]
-    pept_bond = Chem.MolFromSmarts('[C;X4;H1,H2][CX3](=O)[NX3][C;X4;H1,H2][CX3](=O)')
     em = Chem.RWMol(rdmol)
+    # Split peptide bonds
+    pept_bond = Chem.MolFromSmarts('[C;X4;H1,H2][CX3](=O)[NX3][C;X4;H1,H2][CX3](=O)')
     for match in rdmol.GetSubstructMatches(pept_bond):
-        # Generate cap fragment
         cap = get_fragment(rdmol, match[0:5])
         cap = add_prot_Hs(cap)
         caps.append(cap)
@@ -268,6 +269,18 @@ def partition_protein(rdmol, cap=None):
         em.RemoveBond(match[1], match[3])
         add_fragment(em, cap_o, match[3], 1, 1)
         add_fragment(em, cap_n, match[1], 0, 1)
-        Chem.SanitizeMol(em)
+    # Split disulfide bonds
+    ss_bond = Chem.MolFromSmarts('[C;X4;H1,H2]SS[C;X4;H1,H2]')
+    for match in rdmol.GetSubstructMatches(ss_bond):
+        cap = get_fragment(rdmol, match[0:5])
+        cap = add_prot_Hs(cap)
+        caps.append(cap)
+        cap_s_ind = cap.GetSubstructMatch(Chem.MolFromSmarts('[C;X4]SS[C;X4]'))
+        cap_s1 = get_fragment(cap, cap_s_ind[0:2], neutralize=False)
+        cap_s2 = get_fragment(cap, cap_s_ind[2:4], neutralize=False)
+        em.RemoveBond(match[1], match[2])
+        add_fragment(em, cap_s1, match[2], 1, 1)
+        add_fragment(em, cap_s2, match[1], 0, 1)
+    Chem.SanitizeMol(em)
     frags = Chem.GetMolFrags(em.GetMol(), asMols=True)
     return frags, caps
