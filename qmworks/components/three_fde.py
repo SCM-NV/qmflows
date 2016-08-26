@@ -5,30 +5,34 @@ from qmworks.settings import Settings
 from qmworks.packages import Result, run
 from noodles import gather, schedule
 
+import numpy as np
+
 @schedule
-def mfcc(package, frags, caps, settings):
-    mfcc_result = MFCC_Result()
-    frag_jobs = [package(templates.singlepoint, rdkitTools.rdkit2plams(frag), job_name="mfcc_frag_" + str(i))
-                 for i, frag in enumerate(frags)]
-    frag_results = gather(*frag_jobs)
-    cap_jobs = [package(templates.singlepoint, rdkitTools.rdkit2plams(cap), job_name="mfcc_cap_" + str(i))
-                for i, cap in enumerate(caps)]
-    cap_results = gather(*cap_jobs)
-    mfcc_result.results = run(gather(frag_results, cap_results))
-    return mfcc_result
-
 class MFCC_Result(Result):
-    def __init__(self):
-        self.results = [[], []]
+    def __init__(self, frags, caps):
+        self.frags = frags
+        self.caps = caps
 
-    def get_dipole_vector(self):
-        # pylint: disable-msg=E1101
-        import numpy
-        dipole = numpy.zeros(3)
+    @property
+    def dipole(self):
+        dipole = np.zeros(3)
         # loop over fragments
-        for frag_result in self.results[0]:
+        for frag_result in self.frags:
             dipole += frag_result.dipole
-        for cap_result in self.results[1]:
+        # loop over caps
+        for cap_result in self.caps:
             dipole -= cap_result.dipole
         return dipole
+
+
+def mfcc(package, frags, caps, settings=None):
+    mfcc_settings = templates.singlepoint
+    if settings:
+        mfcc_settings = mfcc_settings.overlay(settings)
+    frag_jobs = [package(mfcc_settings, frag, job_name="mfcc_frag_" + str(i))
+                 for i, frag in enumerate(frags)]
+    cap_jobs = [package(mfcc_settings, cap, job_name="mfcc_cap_" + str(i))
+                for i, cap in enumerate(caps)]
+    return MFCC_Result(gather(*frag_jobs), gather(*cap_jobs))
+
 

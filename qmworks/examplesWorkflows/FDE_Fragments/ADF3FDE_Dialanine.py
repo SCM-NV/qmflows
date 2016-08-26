@@ -16,22 +16,23 @@ from qmworks.packages.SCM import dftb, adf
 rdmol = Chem.MolFromPDBFile('Dialanine.pdb')
 supermol = rdopp.add_prot_Hs(rdmol)
 
-settings = Settings ()
-settings.functional = 'BP86'
-settings.specific.adf.xc.accint = 2.0
-
-settings.basis = 'SZ'
-settings.specific.adf.basis.core = 'Large'
+# settings = Settings ()
+# settings.functional = 'bp86'
+#
+# settings.basis = 'DZP'
+# settings.specific.adf.basis.core = 'Large'
 
 # supermolecule calculation
-#supermol_results =  adf(templates.singlepoint.overlay(settings), rdkitTools.rdkit2plams(supermol), job_name = 'supermol_singlepoint')
-supermol_results =  dftb(templates.singlepoint, rdkitTools.rdkit2plams(supermol), job_name = 'supermol_singlepoint')
-print(run(supermol_results.dipole))
+# supermol_job =  adf(templates.singlepoint.overlay(settings), supermol, job_name = 'supermol_singlepoint')
+supermol_job =  dftb(templates.singlepoint, supermol, job_name = 'supermol_singlepoint')
 # supermol_dipole = supermol_results.get_dipole_vector()
 
 #frags,caps = rdkitTools.partition_protein(supermol, cap=None)
 frags, caps = rdopp.partition_protein(supermol, cap=None)
+# mfcc_job = mfcc(adf, frags, caps, settings)
+mfcc_job = mfcc(dftb, frags, caps)
 
-mfcc_result = run(mfcc(dftb, frags, caps, settings))
+supermol_result, mfcc_result = run(gather(supermol_job, mfcc_job))
 
-print(mfcc_result.get_dipole_vector())
+print(supermol_result.dipole)
+print(mfcc_result.dipole)
