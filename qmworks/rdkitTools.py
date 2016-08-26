@@ -191,11 +191,7 @@ def add_prot_Hs(rdmol):
                 connected_atom = bond.GetBeginAtom()
             try:
                 ResInfo = connected_atom.GetPDBResidueInfo()
-                atom.SetMonomerInfo(Chem.AtomPDBResidueInfo())
-                atom.GetPDBResidueInfo().SetName(' H  ')
-                atom.GetPDBResidueInfo().SetResidueName(ResInfo.GetResidueName())
-                atom.GetPDBResidueInfo().SetResidueNumber(ResInfo.GetResidueNumber())
-                atom.GetPDBResidueInfo().SetChainId(ResInfo.GetChainId())
+                atom.SetMonomerInfo(ResInfo)
             except:
                 print('Hydrogen annotation failed:',  connected_atom.GetIdx(), atom.GetIdx())
     return retmol
