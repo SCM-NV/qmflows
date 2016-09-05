@@ -131,8 +131,10 @@ class StoreasHDF5:
 
         elif nOrbitals is not None:
             infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
-            if nOrbitals > nHOMOS + nLUMOS:
-                # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
+            if not (nHOMOS is None and nLUMOS is None) and \
+               nOrbitals > nHOMOS + nLUMOS:
+                # Drop Coefficients that below and above nHOMOS and nLUMOS,
+                # respectively.
                 ess, css  = infoMO
                 css = np.transpose(css)
                 eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
