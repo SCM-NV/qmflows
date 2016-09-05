@@ -123,12 +123,14 @@ class StoreasHDF5:
         pathCs = pathCs if pathCs is not None else join(self.name, "mo",
                                                         "coefficients")
 
-        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
-
-        if nHOMOS  is None and nLUMOS is None:
-            pass  # keep all the orbitals
+        # Save all the frontier orbitals.
+        # NOTE: IT ASSUMES THAT The USER HAVE SELECTED A RANGE OF MO
+        # TO PRINT.
+        if not (nHOMOS is None and nLUMOS is None):
+            infoMO = parserFun(pathMO, nHOMOS + nLUMOS, nOrbFuns)
 
         elif nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
+            infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
             # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
             ess, css  = infoMO
             css = np.transpose(css)
