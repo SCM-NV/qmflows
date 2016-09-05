@@ -129,15 +129,16 @@ class StoreasHDF5:
         if not (nHOMOS is None and nLUMOS is None):
             infoMO = parserFun(pathMO, nHOMOS + nLUMOS, nOrbFuns)
 
-        elif nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
+        elif nOrbitals is not None:
             infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
-            # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
-            ess, css  = infoMO
-            css = np.transpose(css)
-            eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
-            coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
-            infoMO = InfoMO(eigenVals, np.transpose(coefficients))
-            
+            if nOrbitals > nHOMOS + nLUMOS:
+                # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
+                ess, css  = infoMO
+                css = np.transpose(css)
+                eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
+                coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
+                infoMO = InfoMO(eigenVals, np.transpose(coefficients))
+
         zipWith(self.funHDF5)([pathEs, pathCs])([infoMO.eigenVals, infoMO.coeffs])
 
     def saveOverlap(self, parserFun, pathOverlap, nOrbitals=None, path=None):
