@@ -90,8 +90,8 @@ class StoreasHDF5:
             self.funHDF5_attrs("basisFormat", str(fs), path, css)
 
     def saveMO(self, parserFun, pathMO, nOrbitals=None, nOrbFuns=None,
-               pathEs=None, pathCs=None, nOccupied=None, nHOMOS=100,
-               nLUMOS=100):
+               pathEs=None, pathCs=None, nOccupied=None, nHOMOS=None,
+               nLUMOS=None):
         """
         Save Molecular orbital eigenvalues and eigenvectors.
 
@@ -125,14 +125,17 @@ class StoreasHDF5:
 
         infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
 
-        # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
-        if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
+        if nHOMOS  is None and nLUMOS is None:
+            pass  # keep all the orbitals
+
+        elif nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
+            # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
             ess, css  = infoMO
-            eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
             css = np.transpose(css)
+            eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
             coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
             infoMO = InfoMO(eigenVals, np.transpose(coefficients))
-
+            
         zipWith(self.funHDF5)([pathEs, pathCs])([infoMO.eigenVals, infoMO.coeffs])
 
     def saveOverlap(self, parserFun, pathOverlap, nOrbitals=None, path=None):

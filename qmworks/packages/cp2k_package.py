@@ -44,7 +44,7 @@ class CP2K(Package):
     def run_job(self, settings, mol, work_dir=None, project_name=None,
                 hdf5_file="quantum.hdf5", input_file_name=None,
                 out_file_name=None, store_in_hdf5=True,
-                nHOMOS=100, nLUMOS=100, job_name='cp2k_job'):
+                nHOMOS=None, nLUMOS=None, job_name='cp2k_job'):
         """
         Call the Cp2K binary using plams interface.
 
