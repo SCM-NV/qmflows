@@ -1,12 +1,13 @@
 
 # ========>  Standard and third party Python Libraries <======
 from os.path import join
+from rdkit import Chem
 import subprocess
 import base64
 
+import os
 import plams
 import pkg_resources as pkg
-from rdkit import Chem
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
@@ -39,15 +40,21 @@ class Result:
         """awk_file(filename, script='', progfile=None, **kwargs)
         Execute an AWK script on a file given by *filename*.
 
-        The AWK script can be supplied in two ways: either by directly passing the contents of the script (should be a single string) as a *script* argument, or by providing the path (absolute or relative to the file pointed by *filename*) to some external file containing the actual AWK script using *progfile* argument. If *progfile* is not ``None``, the *script* argument is ignored.
+        The AWK script can be supplied in two ways: either by directly passing
+        the contents of the script (should be a single string) as a *script*
+        argument, or by providing the path (absolute or relative to the file
+        pointed by *filename*) to some external file containing the actual AWK
+        script using *progfile* argument. If *progfile* is not ``None``, the
+        *script* argument is ignored.
 
-        Other keyword arguments (*\*\*kwargs*) can be used to pass additional variables to AWK (see ``-v`` flag in AWK manual)
+        Other keyword arguments (*\*\*kwargs*) can be used to pass additional
+        variables to AWK (see ``-v`` flag in AWK manual)
 
         Returned value is a list of lines (strings). See ``man awk`` for details.
         """
         cmd = ['awk']
-        for k,v in kwargs.items():
-            cmd += ['-v', '%s=%s'%(k,v)]
+        for k, v in kwargs.items():
+            cmd += ['-v', '%s=%s' % (k, v)]
         if progfile:
             if os.path.isfile(progfile):
                 cmd += ['-f', progfile]
@@ -105,7 +112,7 @@ class Package:
         self.prerun()
 
         job_settings = self.generic2specific(settings, mol)
-        #print(job_settings)
+
         result = self.run_job(job_settings, mol, **kwargs)
 
         self.postrun()
