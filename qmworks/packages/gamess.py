@@ -83,8 +83,6 @@ class GAMESS(Package):
 class Gamess_Result(Result):
     """
     Class providing access to CP2K result.
-
-    :param settings:
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  path_hdf5=None, project_name=None,
@@ -92,24 +90,6 @@ class Gamess_Result(Result):
         super().__init(settings, molecule, job_name, plams_dir,
                        work_dir=work_dir, path_hdf5=path_hdf5,
                        project_name=None, properties=properties)
-
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        self.settings = settings
-        self._molecule = molecule
-        self.hdf5_file = file_h5
-        properties = 'data/dictionaries/propertiesGAMESS.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        # self.archive = result_path
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dir': work_dir}
-        self.project_name = project_name
-        self.job_name = job_name
 
     def as_dict(self):
         return {
