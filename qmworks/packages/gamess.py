@@ -3,17 +3,13 @@
 __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import files
 from os.path import join
 
-import pkg_resources as pkg
-import plams
-# ==================> Internal modules <====================
-from qmworks.fileFunctions import json2Settings
 from qmworks.packages.packages import Package, Result
 from qmworks.quantumHDF5 import read_from_hdf5
 from qmworks.settings import Settings
 
+import plams
 # ======================================<>=====================================
 
 
@@ -112,7 +108,8 @@ class Gamess_Result(Result):
         :param plams_dir: Absolute path to plams output folder
         :param work_dir: Absolute path to the folder where the calculation
         was performed.
-        :param file_h5: Path to the HDF5 file that contains the numerical results
+        :param file_h5: Path to the HDF5 file that contains the numerical
+        results.
         """
         return Gamess_Result(settings, molecule, job_name, plams_dir, work_dir,
                              file_h5)
