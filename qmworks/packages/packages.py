@@ -27,8 +27,24 @@ __all__ = ['Package', 'run', 'registry', 'Result',
 
 
 class Result:
-    def __init__(self):
-        pass
+
+    def __init__(self, settings, molecule, job_name, project_name, plams_dir,
+                 work_dir, file_h5, properties=None):
+        """
+        :param settings: Job Settings.
+        :type settings: :class:`~qmworks.Settings`
+        :param mol: molecular Geometry
+        :type mol: plams Molecule
+        """
+        self.settings = settings
+        self._molecule = molecule
+        self.hdf5_file = file_h5
+        xs = pkg.resource_string("qmworks", properties)
+        self.prop_dict = json2Settings(xs)
+        self.archive = {"plams_dir": Path(plams_dir),
+                        'work_dir': work_dir}
+        self.project_name = project_name
+        self.job_name = job_name
 
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)
