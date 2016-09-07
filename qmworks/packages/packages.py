@@ -28,17 +28,29 @@ __all__ = ['Package', 'run', 'registry', 'Result',
 
 class Result:
 
-    def __init__(self, settings, molecule, job_name, project_name, plams_dir,
-                 work_dir, file_h5, properties=None):
+    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
+                 path_hdf5=None, project_name=None, properties=None):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
+        :param molecule: molecular Geometry
+        :type molecule: plams Molecule
+        :param job_name: Name of the computations
+        :type job_name: str
+        :param plams_dir: path to the ``Plams`` folder.
+        :type plams_dir: str
+        :param work_dir: scratch or another directory different from 
+        the `plams_dir`.
+        type work_dir: str
+        :param hdf5_file: path to the file containing the numerical results.
+        :type hdf5_file: str
+        :param properties: path to the `JSON` file containing the properties
+        addresses inside the `HDF5` file.
+        :type properties: str
         """
         self.settings = settings
         self._molecule = molecule
-        self.hdf5_file = file_h5
+        self.hdf5_file = path_hdf5
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": Path(plams_dir),

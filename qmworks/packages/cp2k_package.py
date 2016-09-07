@@ -3,34 +3,31 @@
 __all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import files
 from os.path import join
 
 import fnmatch
 import h5py
 import os
-import pkg_resources as pkg
 import plams
+
 # ==================> Internal modules <====================
 from qmworks.common import InputKey
-from qmworks.fileFunctions import json2Settings
 from qmworks.hdf5 import cp2k2hdf5
 from qmworks.packages.packages import Package, Result
 from qmworks.parsers import read_cp2k_number_of_orbitals
 from qmworks.settings import Settings
 
-# ====================================<>========================================
+# ====================================<>=======================================
 charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
                'Se': 6, 'Cd': 12, 'Pb': 4, 'Br': 7, 'Cs': 9}
-
-# ======================================<>======================================
+# ======================================<>====================================
 
 
 class CP2K(Package):
     """
     This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
-    It uses plams together with the templates to generate the stucture input and
-    also uses Plams to invoke the binary CP2K code.
+    It uses plams together with the templates to generate the stucture input
+    and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
     **cp2k** function should be called.
     """
@@ -64,7 +61,8 @@ class CP2K(Package):
         """
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings, molecule=mol)
+        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
+                            molecule=mol)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
@@ -77,7 +75,7 @@ class CP2K(Package):
                          nLUMOS, project_name=project_name)
 
         return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
-                           hdf5_file, project_name)
+                           path_hdf5=hdf5_file, project_name=project_name)
 
     def postrun(self):
         pass
@@ -183,29 +181,14 @@ class CP2K(Package):
 class CP2K_Result(Result):
     """
     Class providing access to CP2K result.
-
-    :param settings:
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir,
-                 file_h5, project_name):
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        self.settings = settings
-        self._molecule = molecule
-        self.hdf5_file = file_h5
-        properties = 'data/dictionaries/propertiesCP2K.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        # self.archive = result_path
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dir': work_dir}
-        self.project_name = project_name
-        self.job_name = job_name
-        
+    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
+                 path_hdf5=None, project_name=None,
+                 properties='data/dictionaries/propertiesCP2K.json'):
+        super().__init__(settings, molecule, job_name, plams_dir,
+                         work_dir=work_dir, path_hdf5=path_hdf5,
+                         project_name=project_name, properties=properties)
+
     def as_dict(self):
         return {
             "settings": self.settings,
@@ -227,7 +210,8 @@ class CP2K_Result(Result):
         :param plams_dir: Absolute path to plams output folder
         :param work_dir: Absolute path to the folder where the calculation
         was performed.
-        :param file_h5: Path to the HDF5 file that contains the numerical results
+        :param file_h5: Path to the HDF5 file that contains the numerical
+        results.
         """
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
                            file_h5)
@@ -247,9 +231,8 @@ class CP2K_Result(Result):
         relative_cwd = self.archive['work_dir'].split('/')[-1]
         hdf5_path_to_prop = join(self.project_name, relative_cwd)
         sections = self.prop_dict[prop]
-        # paths_to_prop = list(map(lambda x: join(self.archive['work_dir'], x),
-        #                          sections))
-        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x), sections))
+        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
+                                 sections))
 
         return paths_to_prop
 
@@ -271,12 +254,11 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
     :tpye work_dir: String
     :param output_file: Absolute path to plams output file.
     """
-    files = os.listdir(work_dir)
-
     def match_file(pattern):
         """ Cp2k append the suffix .Log to the output files """
         s = "*{}*Log".format(pattern)
-        xs = list(filter(lambda x: fnmatch.fnmatch(x, s), files))
+        xs = list(filter(lambda x: fnmatch.fnmatch(x, s),
+                         os.listdir(work_dir)))
         if xs:
             return xs[0]
         else:
@@ -309,7 +291,7 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
             root, file_pattern = os.path.split(path)
             real_name = match_file(file_pattern)
             return join(root, real_name)
-        
+
     settings_file_MO = ["specific", "cp2k", "force_eval", "dft",
                         "print", "mo", "filename"]
     settings_file_overlap = ["specific", "cp2k", "force_eval", "dft",
@@ -333,7 +315,7 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
         keys.append(k)
         # Remove this file after it has been processed
         files_to_remove.append(path_MO)
-        
+
     if path_overlap is not None:
         path_mtx_overlap = join(work_dir, "cp2k/overlap")
         keys.append(InputKey('overlap',

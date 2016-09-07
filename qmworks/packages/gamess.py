@@ -14,15 +14,15 @@ from qmworks.packages.packages import Package, Result
 from qmworks.quantumHDF5 import read_from_hdf5
 from qmworks.settings import Settings
 
-# ======================================<>======================================
+# ======================================<>=====================================
 
 
 class GAMESS(Package):
     """
     This class setup the requirement to run a Gamess-US Job
     <http://www.msg.ameslab.gov/gamess/>.
-    It uses plams together with the templates to generate the stucture input and
-    also uses Plams to invoke the ``rungms`` script.
+    It uses plams together with the templates to generate the stucture input
+    and also uses Plams to invoke the ``rungms`` script.
     This class is not intended to be called directly by the user, instead the
     **gamess** function should be called.
     """
@@ -86,8 +86,13 @@ class Gamess_Result(Result):
 
     :param settings:
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir,
-                 file_h5, project_name):
+    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
+                 path_hdf5=None, project_name=None,
+                 properties='data/dictionaries/propertiesGAMESS.json'):
+        super().__init(settings, molecule, job_name, plams_dir,
+                       work_dir=work_dir, path_hdf5=path_hdf5,
+                       project_name=None, properties=properties)
+
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
