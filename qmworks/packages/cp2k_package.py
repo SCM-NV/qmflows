@@ -189,13 +189,6 @@ class CP2K_Result(Result):
                          work_dir=work_dir, path_hdf5=path_hdf5,
                          project_name=project_name, properties=properties)
 
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.archive,
-            "job_name": self.job_name}
-
     @classmethod
     def from_dict(cls, settings, molecule, job_name, plams_dir=None,
                   work_dir=None, file_h5='quantum.hdf5'):
