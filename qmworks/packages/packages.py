@@ -69,7 +69,7 @@ class Result:
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)
         Shortcut for :meth:`~Results.awk_file` on the output file."""
-        output = self.name + ".out"
+        output = self.job_name + ".out"
         return self.awk_file(output, script, progfile, **kwargs)
 
     def awk_file(self, filename, script='', progfile=None, **kwargs):
