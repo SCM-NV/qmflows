@@ -85,20 +85,22 @@ class ADF(Package):
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
-    def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None):
+    def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
+                 project_name=None):
         properties = 'data/dictionaries/propertiesADF.json'
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties)
         self.result = plams.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
         """
         Methods to deserialize an `ADF_Result` object.
         """
         plams_dir = archive["plams_dir"]
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
-        return ADF_Result(settings, molecule, path_t21, job_name, plams_dir)
+        return ADF_Result(settings, molecule, path_t21, job_name, plams_dir,
+                          project_name)
 
     def get_property(self, prop, section=None):
         return self.result.read(section, prop)
@@ -181,7 +183,8 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, job_name, plams_dir):
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 project_name=None):
         properties = 'data/dictionaries/propertiesDFTB.json'
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties)
@@ -190,8 +193,8 @@ class DFTB_Result(Result):
         self.properties = self.extract_properties()
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive):
-        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"])
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"], project_name)
 
     def extract_properties(self):
         props = Settings()
