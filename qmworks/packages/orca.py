@@ -58,20 +58,17 @@ class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
     def __init__(self, settings, molecule, path, name):
-        self.settings = settings
-        self._molecule = molecule
-        self.path = path
         properties = 'data/dictionaries/propertiesORCA.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        self.name = name
+        super().__init__(settings, molecule, project_name=name,
+                         properties=properties)
+        self.path = path
 
     def as_dict(self):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
             "path": self.path,
-            "name": self.name}
+            "job_name": self.job_name}
 
     @classmethod
     def from_dict(cls, settings, molecule, path, name):

@@ -93,24 +93,6 @@ class Gamess_Result(Result):
                        work_dir=work_dir, path_hdf5=path_hdf5,
                        project_name=None, properties=properties)
 
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        self.settings = settings
-        self._molecule = molecule
-        self.hdf5_file = file_h5
-        properties = 'data/dictionaries/propertiesGAMESS.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        # self.archive = result_path
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dir': work_dir}
-        self.project_name = project_name
-        self.job_name = job_name
-
     def as_dict(self):
         return {
             "settings": self.settings,

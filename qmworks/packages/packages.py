@@ -28,8 +28,9 @@ __all__ = ['Package', 'run', 'registry', 'Result',
 
 class Result:
 
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
-                 path_hdf5=None, project_name=None, properties=None):
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 work_dir=None, path_hdf5=None, project_name=None,
+                 properties=None):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -39,7 +40,7 @@ class Result:
         :type job_name: str
         :param plams_dir: path to the ``Plams`` folder.
         :type plams_dir: str
-        :param work_dir: scratch or another directory different from 
+        :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
         :param hdf5_file: path to the file containing the numerical results.
