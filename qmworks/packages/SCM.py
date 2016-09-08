@@ -76,7 +76,8 @@ class ADF(Package):
             else:
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:
-                        settings.specific.adf.constraints['atom ' + str(a+1)] = ""
+                        name = 'atom ' + str(a + 1)
+                        settings.specific.adf.constraints[name] = ""
         else:
             raise RuntimeError('Keyword ' + key + ' doesn\'t exist')
 
@@ -85,14 +86,10 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, result, job_name):
-        self.settings = settings
-        self._molecule = molecule
-        self.result = result
         properties = 'data/dictionaries/propertiesADF.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
+        super().__init__(settings, molecule, job_name, properties=properties)
+        self.result = result
         self.archive = files.Path(result.path)
-        self.job_name = job_name
 
     def as_dict(self):
         """
@@ -176,7 +173,7 @@ class DFTB(Package):
         dftb_settings.input = settings.specific.dftb
         result = plams.DFTBJob(name=job_name, molecule=mol,
                                settings=dftb_settings).run()
-        #print('===>', result.path, result._kf)
+
         return DFTB_Result(dftb_settings, mol, result.job.path, result.job.name)
 
     def postrun(self):
@@ -189,16 +186,12 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, path, name):
-        self.settings = settings
-        self._molecule = molecule
-        self.path = path
-        self.name = name
-        kf_filename = self.path + '/' + name + '.rkf'
-        self.kf = plams.kftools.KFFile(kf_filename)
+    def __init__(self, settings, molecule, path, job_name):
         properties = 'data/dictionaries/propertiesDFTB.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
+        super().__init__(settings, molecule, job_name, properties=properties)
+        self.path = path
+        kf_filename = self.path + '/' + job_name + '.rkf'
+        self.kf = plams.kftools.KFFile(kf_filename)
         self.properties = self.extract_properties()
         self.archive = files.Path(self.kf)
 
@@ -207,7 +200,7 @@ class DFTB_Result(Result):
             "settings": self.settings,
             "molecule": self._molecule,
             "path": self.path,
-            "name": self.name}
+            "job_name": self.job_name}
 
     @classmethod
     def from_dict(cls, settings, molecule, path, name):
