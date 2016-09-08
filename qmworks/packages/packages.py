@@ -60,11 +60,15 @@ class Result:
         self.job_name = job_name
 
     def as_dict(self):
+        """
+        Method to serialize as a JSON dictionary the results given
+        by an ``Package`` computation.
+        """
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "archive": self.archive,
-            "job_name": self.job_name}
+            "job_name": self.job_name,
+            "archive": self.archive}
 
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)

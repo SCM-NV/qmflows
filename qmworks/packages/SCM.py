@@ -1,7 +1,6 @@
 
 # =======>  Standard and third party Python Libraries <======
 
-from noodles import files
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
@@ -92,17 +91,6 @@ class ADF_Result(Result):
                          properties=properties)
         self.result = plams.kftools.KFFile(path_t21)
 
-    def as_dict(self):
-        """
-        Method to serialize as a JSON dictionary the results given
-        by an ADF computation.
-        """
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "job_name": self.job_name,
-            "archive": self.archive}
-
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive):
         """
@@ -180,7 +168,8 @@ class DFTB(Package):
         result = plams.DFTBJob(name=job_name, molecule=mol,
                                settings=dftb_settings).run()
 
-        return DFTB_Result(dftb_settings, mol, result.job.path, result.job.name)
+        return DFTB_Result(dftb_settings, mol, result.job.name,
+                           plams_dir=result.job.path)
 
     def postrun(self):
         pass
@@ -192,25 +181,17 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, path, job_name):
+    def __init__(self, settings, molecule, job_name, plams_dir):
         properties = 'data/dictionaries/propertiesDFTB.json'
-        super().__init__(settings, molecule, job_name, properties=properties)
-        self.path = path
-        kf_filename = self.path + '/' + job_name + '.rkf'
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+                         properties=properties)
+        kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         self.kf = plams.kftools.KFFile(kf_filename)
         self.properties = self.extract_properties()
-        self.archive = files.Path(self.kf)
-
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "path": self.path,
-            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, path, name):
-        return DFTB_Result(settings, molecule, path, name)
+    def from_dict(cls, settings, molecule, job_name, archive):
+        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"])
 
     def extract_properties(self):
         props = Settings()
