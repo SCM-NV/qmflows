@@ -56,10 +56,10 @@ class ORCA_Result(Result):
 
     def __init__(self, settings, molecule, path, name):
         properties = 'data/dictionaries/propertiesORCA.json'
-        super().__init__(settings, molecule, project_name=name,
+        super().__init__(settings, molecule, name, project_name=name,
                          properties=properties)
         self.path = path
-
+        
     def as_dict(self):
         return {
             "settings": self.settings,

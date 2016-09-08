@@ -54,8 +54,8 @@ class Result:
         self.hdf5_file = path_hdf5
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
-        self.path = {"plams_dir": Path(plams_dir),
-                     'work_dir': work_dir}
+        self.archive = {"plams_dir": Path(plams_dir),
+                        'work_dir': work_dir}
         self.project_name = project_name
         self.job_name = job_name
 
