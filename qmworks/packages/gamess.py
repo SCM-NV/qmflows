@@ -81,8 +81,8 @@ class Gamess_Result(Result):
     """
     Class providing access to CP2K result.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir=None, work_dir=None,
-                 path_hdf5=None, project_name=None,
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 work_dir=None, path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesGAMESS.json'):
         super().__init(settings, molecule, job_name, plams_dir,
                        work_dir=work_dir, path_hdf5=path_hdf5,
@@ -104,8 +104,8 @@ class Gamess_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        plams_dir = lookup(archive["plams_dir"])
-        work_dir = lookup(archive["work_dir"])
+        plams_dir = lookup(archive, "plams_dir")
+        work_dir = lookup(archive, "work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
                              project_name=project_name)

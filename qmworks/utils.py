@@ -2,7 +2,7 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
-           'lookup'
+           'lookup',
            'repeatN', 'replicate', 'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================

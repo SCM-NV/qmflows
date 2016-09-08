@@ -271,8 +271,6 @@ def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
             s = s.get(x)
             if s is None:
                 break
-            else:
-                s
         return s
 
     def get_file_path(xs):
