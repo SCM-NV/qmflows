@@ -54,10 +54,17 @@ class Result:
         self.hdf5_file = path_hdf5
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
-        self.archive = {"plams_dir": Path(plams_dir),
-                        'work_dir': work_dir}
+        self.path = {"plams_dir": Path(plams_dir),
+                     'work_dir': work_dir}
         self.project_name = project_name
         self.job_name = job_name
+
+    def as_dict(self):
+        return {
+            "settings": self.settings,
+            "molecule": self._molecule,
+            "archive": self.archive,
+            "job_name": self.job_name}
 
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)

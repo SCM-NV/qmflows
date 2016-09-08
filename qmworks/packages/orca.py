@@ -1,12 +1,9 @@
 # =======>  Standard and third party Python Libraries <======
 from noodles import (Storable)
-import pkg_resources as pkg
-import plams
-
-# ========================> Internal Modules  <================================
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result
-from qmworks.fileFunctions import json2Settings
+
+import plams
 # ============================= Orca ==========================================
 
 
@@ -71,8 +68,8 @@ class ORCA_Result(Result):
             "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, path, name):
-        return ORCA_Result(settings, molecule, path, name)
+    def from_dict(cls, settings, molecule, archive, job_name):
+        return ORCA_Result(settings, molecule, archive, job_name)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
