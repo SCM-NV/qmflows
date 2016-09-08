@@ -88,10 +88,10 @@ class Gamess_Result(Result):
                        project_name=None, properties=properties)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, plams_dir=None,
-                  work_dir=None, file_h5='quantum.hdf5'):
+    def from_dict(cls, settings, molecule, job_name, archive, path_hdf5=None,
+                  project_name=None):
         """
-        Create a :class:`~Gamess_Result` instance using the data serialized in
+        Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
 
         :param cls:
@@ -99,13 +99,15 @@ class Gamess_Result(Result):
         :param molecule: molecular Geometry.
         :param job_name: Name of the job.
         :param plams_dir: Absolute path to plams output folder
-        :param work_dir: Absolute path to the folder where the calculation
-        was performed.
-        :param file_h5: Path to the HDF5 file that contains the numerical
+        :param archive: dictionary containing the paths to the input/output
+        folders.
+        :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
+        plams_dir = archive["plams_dir"]
+        work_dir = archive["work_dir"]
         return Gamess_Result(settings, molecule, job_name, plams_dir, work_dir,
-                             file_h5)
+                             path_hdf5, project_name)
 
     def get_property(self, prop, section=None):
         pass

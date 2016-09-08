@@ -39,7 +39,7 @@ class Result:
         :type job_name: str
         :param plams_dir: path to the ``Plams`` folder.
         :type plams_dir: str
-        :param work_dir: scratch or another directory different from 
+        :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
         :param hdf5_file: path to the file containing the numerical results.
@@ -53,8 +53,8 @@ class Result:
         self.hdf5_file = path_hdf5
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
-        self.archive = {"plams_dir": Path(plams_dir),
-                        'work_dir': work_dir}
+        self.path = {"plams_dir": Path(plams_dir),
+                     'work_dir': work_dir}
         self.project_name = project_name
         self.job_name = job_name
 
@@ -62,7 +62,7 @@ class Result:
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.archive,
+            "archive": self.archive,
             "job_name": self.job_name}
 
     def awk_output(self, script='', progfile=None, **kwargs):
