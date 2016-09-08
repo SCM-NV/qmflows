@@ -1,13 +1,12 @@
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import files
-import pkg_resources as pkg
-import plams
 
-# ==================> Internal Modules  <=====================
+from noodles import files
+from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
-from qmworks.fileFunctions import json2Settings
+
+import plams
 # ========================= ADF ============================
 
 
@@ -45,8 +44,10 @@ class ADF(Package):
         adf_settings.input = settings.specific.adf
         result = plams.ADFJob(name=job_name, molecule=mol,
                               settings=adf_settings).run()
+        path_t21 = result._kf.path
 
-        return ADF_Result(adf_settings, mol, result._kf, job_name)
+        return ADF_Result(adf_settings, mol, job_name, path_t21,
+                          plams_dir=result.job.path)
 
     def postrun(self):
         pass
@@ -85,11 +86,11 @@ class ADF(Package):
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
-    def __init__(self, settings, molecule, result, job_name):
+    def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None):
         properties = 'data/dictionaries/propertiesADF.json'
-        super().__init__(settings, molecule, job_name, properties=properties)
-        self.result = result
-        self.archive = files.Path(result.path)
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+                         properties=properties)
+        self.result = plams.kftools.KFFile(path_t21)
 
     def as_dict(self):
         """
@@ -99,12 +100,17 @@ class ADF_Result(Result):
         return {
             "settings": self.settings,
             "molecule": self._molecule,
-            "filename": self.result.path,
-            "job_name": self.job_name}
+            "job_name": self.job_name,
+            "archive": self.archive}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename, job_name):
-        return ADF_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
+    def from_dict(cls, settings, molecule, job_name, archive):
+        """
+        Methods to deserialize an `ADF_Result` object.
+        """
+        plams_dir = archive["plams_dir"]
+        path_t21 = join(plams_dir, '{}.t21'.format(job_name))
+        return ADF_Result(settings, molecule, path_t21, job_name, plams_dir)
 
     def get_property(self, prop, section=None):
         return self.result.read(section, prop)
