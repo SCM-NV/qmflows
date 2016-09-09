@@ -74,4 +74,3 @@ def try_to_remove(path):
         os.remove(path)
     except OSError:
         pass
-            

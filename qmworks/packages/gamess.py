@@ -4,10 +4,10 @@ __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
 from os.path import join
-
 from qmworks.packages.packages import Package, Result
 from qmworks.quantumHDF5 import read_from_hdf5
 from qmworks.settings import Settings
+from qmworks.utils import lookup
 
 import plams
 # ======================================<>=====================================
@@ -56,8 +56,9 @@ class GAMESS(Package):
         r = job.run(runner)
         r.wait()
 
-        return Gamess_Result(gamess_settings, mol, job_name, r.job.path,
-                             work_dir, hdf5_file, project_name)
+        return Gamess_Result(gamess_settings, mol, job_name,
+                             plams_dir=r.job.path, work_dir=work_dir,
+                             path_hdf5=hdf5_file, project_name=project_name)
 
     def postrun(self):
         pass
@@ -80,23 +81,15 @@ class Gamess_Result(Result):
     """
     Class providing access to CP2K result.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
-                 path_hdf5=None, project_name=None,
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 work_dir=None, path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesGAMESS.json'):
         super().__init(settings, molecule, job_name, plams_dir,
                        work_dir=work_dir, path_hdf5=path_hdf5,
                        project_name=None, properties=properties)
 
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.archive,
-            "job_name": self.job_name}
-
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, path_hdf5=None,
-                  project_name=None):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -111,10 +104,11 @@ class Gamess_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        plams_dir = archive["plams_dir"]
-        work_dir = archive["work_dir"]
-        return Gamess_Result(settings, molecule, job_name, plams_dir, work_dir,
-                             path_hdf5, project_name)
+        plams_dir = lookup(archive, "plams_dir")
+        work_dir = lookup(archive, "work_dir")
+        return Gamess_Result(settings, molecule, job_name,
+                             plams_dir=plams_dir, work_dir=work_dir,
+                             project_name=project_name)
 
     def get_property(self, prop, section=None):
         pass

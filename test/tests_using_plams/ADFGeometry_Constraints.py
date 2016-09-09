@@ -14,7 +14,6 @@ def test_ADFGeometry_Constraint():
     Test "freeze" and "selected_atoms" keywords for constrained geometry optimizations
     """
     an = plams.Molecule('test/test_files/an.xyz', 'xyz')
-    
     # optimize only H atoms
     s = Settings()
     s.freeze = [1, 2, 3]

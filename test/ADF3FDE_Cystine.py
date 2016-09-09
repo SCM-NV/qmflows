@@ -74,7 +74,7 @@ print("3-FDE:         ", fde_dipole)
 print
 
 sqrt_error = math.sqrt(diff_dens.integral(func=lambda x: x*x))
-abs_error = diff_dens.integral(func=lambda x: abs(x))
+abs_error = diff_dens.integral(func=abs)
 
 print(" fde Diff Dens Int        : ", diff_dens.integral())
 print(" fde Diff Dens Int (Sqr.) : ", sqrt_error)

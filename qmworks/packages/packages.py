@@ -55,7 +55,8 @@ class Result:
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": Path(plams_dir),
-                        'work_dir': work_dir}
+                        'work_dir': work_dir,
+                        "path_hdf5": path_hdf5}
         self.project_name = project_name
         self.job_name = job_name
 
@@ -68,7 +69,8 @@ class Result:
             "settings": self.settings,
             "molecule": self._molecule,
             "job_name": self.job_name,
-            "archive": self.archive}
+            "archive": self.archive,
+            "project_name": self.project_name}
 
     def awk_output(self, script='', progfile=None, **kwargs):
         """awk_output(script='', progfile=None, **kwargs)
