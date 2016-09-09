@@ -112,7 +112,7 @@ class Result:
             ret = ret[:-1]
         try:
             result = [float(i) for i in ret]
-        except:
+        except ValueError:
             result = ret
         if len(result) == 1:
             result = result[0]
