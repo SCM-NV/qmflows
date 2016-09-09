@@ -199,10 +199,10 @@ class DFTB_Result(Result):
     def extract_properties(self):
         props = Settings()
         for i in range(self.kf.read('Properties', 'nEntries')):
-            type = self.kf.read('Properties', 'Type(' + str(i + 1) + ')').strip()
+            typ = self.kf.read('Properties', 'Type(' + str(i + 1) + ')').strip()
             subtype = self.kf.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
             value = self.kf.read('Properties', 'Value(' + str(i + 1) + ')')
-            props[type][subtype] = value
+            props[typ][subtype] = value
         return props
 
     def __getattr__(self, prop):

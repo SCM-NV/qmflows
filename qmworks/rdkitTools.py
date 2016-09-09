@@ -11,9 +11,8 @@ This is a series of functions that apply RDKit functionality on PLAMS molecules
 """
 
 from rdkit import Chem, Geometry
-from rdkit.Chem import (AllChem, rdMolTransforms)
+from rdkit.Chem import AllChem
 from plams import (Molecule, Bond, Atom)
-from io import StringIO
 import sys
 
 
@@ -24,18 +23,20 @@ def rdkit2plams(rdkit_mol):
     plams_mol = Molecule()
     total_charge = 0
     Chem.Kekulize(rdkit_mol)
-    conf=rdkit_mol.GetConformer()
+    conf = rdkit_mol.GetConformer()
     for atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(atom.GetIdx())
         ch = atom.GetFormalCharge()
-        plams_mol.add_atom(Atom(atom.GetAtomicNum(), coords=(pos.x,pos.y,pos.z), charge=ch))
+        plams_mol.add_atom(Atom(atom.GetAtomicNum(),
+                                coords=(pos.x, pos.y, pos.z), charge=ch))
         total_charge += ch
     for bond in rdkit_mol.GetBonds():
         at1 = plams_mol.atoms[bond.GetBeginAtomIdx()]
         at2 = plams_mol.atoms[bond.GetEndAtomIdx()]
-        plams_mol.add_bond(Bond(at1,at2,bond.GetBondTypeAsDouble()))
+        plams_mol.add_bond(Bond(at1, at2, bond.GetBondTypeAsDouble()))
     plams_mol.charge = total_charge
     return plams_mol
+
 
 def plams2rdkit(plams_mol, sanitize=True):
     """
@@ -52,7 +53,7 @@ def plams2rdkit(plams_mol, sanitize=True):
     for bond in plams_mol.bonds:
         a1 = plams_mol.atoms.index(bond.atom1)
         a2 = plams_mol.atoms.index(bond.atom2)
-        e.AddBond(a1,a2,Chem.BondType(bond.order))
+        e.AddBond(a1, a2, Chem.BondType(bond.order))
     rdmol = e.GetMol()
     if sanitize:
         Chem.SanitizeMol(rdmol)
@@ -60,10 +61,11 @@ def plams2rdkit(plams_mol, sanitize=True):
     for a in range(len(plams_mol.atoms)):
         atom = plams_mol.atoms[a]
         p = Geometry.Point3D(atom._getx(), atom._gety(), atom._getz())
-        conf.SetAtomPosition(a,p)
-    rdmol.AddConformer(conf)    
+        conf.SetAtomPosition(a, p)
+    rdmol.AddConformer(conf)
     return rdmol
-       
+
+
 def smiles2plams(smiles):
     """
     Generates plams molecules from a smiles strings.
@@ -71,10 +73,11 @@ def smiles2plams(smiles):
     """
     smiles = str(smiles.split()[0])
     molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
-    AllChem.EmbedMolecule(molecule, randomSeed = 1)
+    AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
     return rdkit2plams(molecule)
 #    return rdkit2plams(Chem.AddHs(molecule,addCoords=True))
+
 
 def sequence2plams(sequence):
     """
@@ -85,7 +88,8 @@ def sequence2plams(sequence):
     AllChem.EmbedMolecule(molecule)
     AllChem.UFFOptimizeMolecule(molecule)
     print(Chem.MolToMolBlock(molecule))
-    return rdkit2plams(Chem.AddHs(molecule,addCoords=True))
+    return rdkit2plams(Chem.AddHs(molecule, addCoords=True))
+
 
 def modify_atom(mol, idx, element):
     """
@@ -99,20 +103,22 @@ def modify_atom(mol, idx, element):
         for neighbor in reversed(rdmol.GetAtomWithIdx(idx).GetNeighbors()):
             if neighbor.GetSymbol() == 'H':
                 e.RemoveAtom(neighbor.GetIdx())
-        e.ReplaceAtom(idx,Chem.Atom(element))
-        newmol=e.GetMol()
+        e.ReplaceAtom(idx, Chem.Atom(element))
+        newmol = e.GetMol()
         Chem.SanitizeMol(newmol)
-        newmol=Chem.AddHs(newmol,addCoords=True)
+        newmol = Chem.AddHs(newmol, addCoords=True)
         return rdkit2plams(newmol)
 
+    
 def apply_template(plams_mol, template):
     """
     Modifies bond orders in plams molecule according template smiles structure
     """
     rdmol = plams2rdkit(plams_mol, sanitize=False)
     template_mol = Chem.AddHs(Chem.MolFromSmiles(template))
-    newmol = Chem.AllChem.AssignBondOrdersFromTemplate(template_mol,rdmol)
+    newmol = Chem.AllChem.AssignBondOrdersFromTemplate(template_mol, rdmol)
     return rdkit2plams(newmol)
+
 
 def apply_smirks(plams_mol, reaction_smirks):
     """
@@ -138,31 +144,34 @@ def apply_smirks(plams_mol, reaction_smirks):
     product_list = [rdkit2plams(p) for p in products]
     return product_list
 
+
 def gen_coords(plams_mol):
     """ Calculate 3D positions for atoms without coordinates """
     rdmol = plams2rdkit(plams_mol)
     ref = plams2rdkit(plams_mol)
     conf = rdmol.GetConformer()
     coordDict = {}
-    freeze=[]
-    map=[]
+    freeze = []
+    maps = []
     # Put known coordinates in coordDict
     for i in range(rdmol.GetNumAtoms()):
         pos = conf.GetAtomPosition(i)
-        if (-0.0001 < pos.x < 0.0001) and (-0.0001 < pos.y < 0.0001) and (-0.0001 < pos.z < 0.0001):
-            continue # atom without coordinates
+        if (-0.0001 < pos.x < 0.0001) and (-0.0001 < pos.y < 0.0001) and \
+           (-0.0001 < pos.z < 0.0001):
+            continue  # atom without coordinates
         coordDict[i] = pos
         freeze.append(i)
-        map.append((i,i))
+        maps.append((i, i))
     # compute coordinates for new atoms, keeping known coordinates
-    rms=1
+    rms = 1
     rs = 1
-    # repeat embedding and alignment until the rms of mapped atoms is sufficiently small
+    # repeat embedding and alignment until the rms of mapsped atoms is sufficiently small
     while rms > 0.1:
-        print(AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs, useBasicKnowledge=True))
+        print(AllChem.EmbedMolecule(rdmol, coordMaps=coordDict, randomSeed=rs,
+                                    useBasicKnowledge=True))
         # align new molecule to original coordinates
-        rms = AllChem.AlignMol(rdmol,ref,atomMap=map)
-        rs+=1
+        rms = AllChem.AlignMol(rdmol, ref, atomMaps=maps)
+        rs += 1
 
     conf = rdmol.GetConformer()
     for a in range(len(plams_mol.atoms)):
@@ -173,8 +182,10 @@ def gen_coords(plams_mol):
         atom._setz(pos.z)
     return freeze
 
+
 def write_molblock(plams_mol, file=sys.stdout):
     file.write(Chem.MolToMolBlock(plams2rdkit(plams_mol)))
+
 
 def add_prot_Hs(rdmol):
     """
@@ -193,10 +204,13 @@ def add_prot_Hs(rdmol):
                 ResInfo = connected_atom.GetPDBResidueInfo()
                 atom.SetMonomerInfo(ResInfo)
             except:
-                print('Hydrogen annotation failed:',  connected_atom.GetIdx(), atom.GetIdx())
+                print('Hydrogen annotation failed:', connected_atom.GetIdx(),
+                      atom.GetIdx())
     return retmol
 
-def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None, bond_order=None):
+
+def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None,
+                 bond_order=None):
     molconf = rwmol.GetConformer()
     fragconf = frag.GetConformer()
     new_indices = []
@@ -210,8 +224,10 @@ def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None, bond_orde
         rwmol.AddBond(new_indices[ba], new_indices[ea], b.GetBondType())
     if bond_order:
         print(new_indices, frag_atom_idx, rwmol_atom_idx)
-        rwmol.AddBond(rwmol_atom_idx, new_indices[frag_atom_idx], Chem.BondType.values[bond_order])
+        rwmol.AddBond(rwmol_atom_idx, new_indices[frag_atom_idx],
+                      Chem.BondType.values[bond_order])
         rwmol.GetAtomWithIdx(new_indices[frag_atom_idx]).SetNumRadicalElectrons(0)
+
 
 def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
     molconf = mol.GetConformer()
@@ -228,7 +244,8 @@ def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
         ba = b.GetBeginAtomIdx()
         ea = b.GetEndAtomIdx()
         if ba in indices and ea in indices:
-            fragment.AddBond(indices.index(ba),indices.index(ea), b.GetBondType())
+            fragment.AddBond(indices.index(ba), indices.index(ea),
+                             b.GetBondType())
             continue
         if not incl_expl_Hs:
             continue
@@ -253,8 +270,9 @@ def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
     ret_frag.AddConformer(fragconf)
     return ret_frag
 
+
 def partition_protein(rdmol, cap=None):
-    caps=[]
+    caps = []
     em = Chem.RWMol(rdmol)
     # Split peptide bonds
     pept_bond = Chem.MolFromSmarts('[C;X4;H1,H2][CX3](=O)[NX3][C;X4;H1,H2][CX3](=O)')
