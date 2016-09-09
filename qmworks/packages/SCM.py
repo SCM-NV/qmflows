@@ -191,7 +191,7 @@ class DFTB_Result(Result):
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive):
-        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"])
+        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"].path)
 
     def extract_properties(self):
         props = Settings()
