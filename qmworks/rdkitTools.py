@@ -66,22 +66,29 @@ def plams2rdkit(plams_mol, sanitize=True):
     return rdmol
 
 
-def smiles2plams(smiles):
+def smiles2rdkit(smiles):
     """
-    Generates plams molecules from a smiles strings.
+    Generates rdkit molecule from a smiles strings.
     Includes explicit hydrogens and 3D coordinates
     """
     smiles = str(smiles.split()[0])
     molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
     AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
-    return rdkit2plams(molecule)
-#    return rdkit2plams(Chem.AddHs(molecule,addCoords=True))
+    return molecule
+
+
+def smiles2plams(smiles):
+    """
+    Generates plams molecule from a smiles strings.
+    Includes explicit hydrogens and 3D coordinates
+    """
+    return rdkit2plams(smiles2rdkit(smiles))
 
 
 def sequence2plams(sequence):
     """
-    Generates plams molecules from a peptide sequence.
+    Generates plams molecule from a peptide sequence.
     Includes explicit hydrogens and 3D coordinates
     """
     molecule = Chem.MolFromSequence(sequence)
