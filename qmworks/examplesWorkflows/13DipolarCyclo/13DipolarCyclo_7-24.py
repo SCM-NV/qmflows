@@ -76,7 +76,7 @@ def calc_productAndTS(name):
                      job_name=name + "_DFTBfreq")
 
     t = Settings()
-    t.specific.adf.geometry.inithess = DFTB_freq.archive.path
+    t.specific.adf.geometry.inithess = DFTB_freq.archive['plams_dir'].path
 
     # Run the TS optimization, using the default TS template
     TS = adf(templates.ts.overlay(settings).overlay(t), DFTB_freq.molecule,

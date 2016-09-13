@@ -67,9 +67,9 @@
             "WAVE FUNCTION": "SCF"
         },
         "gamess": {
-	    "basis": {"gbasis": "sto", "ngauss": 3},
-	    "contrl": {"scftyp": "rhf", "dfttyp": "pbe"}
-	},
+            "basis": {"gbasis": "sto", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe"}
+        },
         "orca": {
             "method": {
                 "method": "dft",
