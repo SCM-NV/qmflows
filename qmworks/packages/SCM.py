@@ -97,9 +97,9 @@ class ADF_Result(Result):
         """
         Methods to deserialize an `ADF_Result` object.
         """
-        plams_dir = archive["plams_dir"]
+        plams_dir = archive["plams_dir"].path
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
-        return ADF_Result(settings, molecule, path_t21, job_name, plams_dir,
+        return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
                           project_name)
 
     def get_property(self, prop, section=None):
