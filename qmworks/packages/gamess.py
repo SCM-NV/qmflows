@@ -123,10 +123,16 @@ class Gamess_Result(Result):
             Hessian_matrix = result.hessian
         """
         section_hdf5 = self.prop_dict[prop]
+
         path_to_node_in_hdf5 = join(self.project_name, section_hdf5)
         try:
             return read_from_hdf5(self.hdf5_file, path_to_node_in_hdf5)
         except KeyError:
-            self.read_property_from_archive
+            self.read_property_from_archive(prop, path_to_node_in_hdf5)
 
+    def read_property_from_archive(prop, path_to_node_in_hdf5):
+        """
+        Read `prop` from the output files and store in the HDF5.
+        """
+        
 gamess = GAMESS()

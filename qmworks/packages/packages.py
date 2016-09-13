@@ -104,12 +104,15 @@ class Result:
                 raise FileError('File %s not present' % progfile)
         else:
             cmd += [script]
-        ret = subprocess.check_output(cmd + [filename], cwd=self.archive['plams_dir'].path).decode('utf-8').split('\n')
+            
+        new_cmd = cmd + [filename]
+        plams_dir = self.archive['plams_dir'].path
+        ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
         if ret[-1] == '':
             ret = ret[:-1]
         try:
             result = [float(i) for i in ret]
-        except:
+        except ValueError:
             result = ret
         if len(result) == 1:
             result = result[0]

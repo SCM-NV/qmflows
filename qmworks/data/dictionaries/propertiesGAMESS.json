@@ -1,4 +1,5 @@
 {
+    "totalenergy": ["games/energy/totalenergy"],
     "orbitals" : ["gamess/mo/eigenvalues", "gamess/mo/coefficients"],
     "overlap": ["gamess/overlap"]
     "gradient": ["gamess/gradient"]
