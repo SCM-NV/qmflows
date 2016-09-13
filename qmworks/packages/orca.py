@@ -42,7 +42,7 @@ class ORCA(Package):
         result = plams.ORCAJob(molecule=mol, settings=orca_settings,
                                name=job_name).run()
 
-        return ORCA_Result(orca_settings, mol, result.job.path, result.job.name)
+        return ORCA_Result(orca_settings, mol, result.job.name, result.job.path)
 
     def postrun(self):
         pass
@@ -54,22 +54,15 @@ class ORCA(Package):
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, path, name):
+    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
         properties = 'data/dictionaries/propertiesORCA.json'
-        super().__init__(settings, molecule, name, project_name=name,
+        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir, project_name=project_name,
                          properties=properties)
-        self.path = path
-        
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "path": self.path,
-            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, archive, job_name):
-        return ORCA_Result(settings, molecule, archive, job_name)
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        plams_dir = archive["plams_dir"].path
+        return ORCA_Result(settings, molecule, job_name, plams_dir, project_name)
 
     def __getattr__(self, prop):
         """Returns a section of the results.

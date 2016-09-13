@@ -45,7 +45,7 @@ class ADF(Package):
                               settings=adf_settings).run()
         path_t21 = result._kf.path
 
-        return ADF_Result(adf_settings, mol, job_name, path_t21,
+        return ADF_Result(adf_settings, mol, result.job.name, path_t21,
                           plams_dir=result.job.path)
 
     def postrun(self):
@@ -88,7 +88,7 @@ class ADF_Result(Result):
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
                  project_name=None):
         properties = 'data/dictionaries/propertiesADF.json'
-        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir, project_name=project_name,
                          properties=properties)
         self.result = plams.kftools.KFFile(path_t21)
 
