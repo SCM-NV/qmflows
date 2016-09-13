@@ -1,5 +1,5 @@
 
-__all__ = ['apply_smirks', 'apply_template', 'gen_coords', 'modify_atom',
+__all__ = ['apply_reaction_smarts', 'apply_template', 'gen_coords', 'modify_atom',
            'plams2rdkit', 'rdkit2plams', 'sequence2plams', 'smiles2plams',
            'write_molblock']
 
@@ -127,35 +127,54 @@ def apply_template(plams_mol, template):
     return rdkit2plams(newmol)
 
 
-def apply_smirks(plams_mol, reaction_smirks):
+def apply_reaction_smarts(plams_mol, reaction_smarts):
     """
-    Applies reaction smirks and returns list of products
+    Applies reaction smirks and returns product
     """
     def react(reactant, reaction):
         """ Apply reaction to reactant and return products """
         ps = reaction.RunReactants([reactant])
+        # keep reactant if no reaction applied
+        if len(ps) == 0:
+            return [reactant]
         products = []
-        for product in ps:
-            frags = (Chem.GetMolFrags(product[0], asMols=True))
-            for p in frags:
-                q = Chem.AddHs(p)
-                Chem.SanitizeMol(q)
-                #gen_coords(q)
-                products.append(q)
+        for p in ps:
+            Chem.SanitizeMol(p[0])
+            q = Chem.AddHs(p[0])
+            Chem.SanitizeMol(q)
+            gen_coords(q)
+            products.append(q)
         return products
 
     rdmol = plams2rdkit(plams_mol)
-    query = Chem.MolFromSmarts(reaction_smirks.split('>>')[0])
-    reaction = AllChem.ReactionFromSmarts(reaction_smirks)
-    products = react(rdmol, reaction)
-    product_list = [rdkit2plams(p) for p in products]
-    return product_list
+    reaction = AllChem.ReactionFromSmarts(reaction_smarts)
+    # RDKit removes fragments that are disconnected from the reaction center
+    # In order to keep these, the molecule is first split in separate fragments
+    # and the results, including non-reacting parts, are re-combined afterwards
+    frags = (Chem.GetMolFrags(rdmol, asMols=True))
+    product = Chem.Mol()
+    for frag in frags:
+        for p in react(frag, reaction):
+            product = Chem.CombineMols(product, p)
+    return rdkit2plams(product)
 
 
-def gen_coords(plams_mol):
+def gen_coords_plamsmol(plamsmol):
     """ Calculate 3D positions for atoms without coordinates """
-    rdmol = plams2rdkit(plams_mol)
-    ref = plams2rdkit(plams_mol)
+    rdmol = plams2rdkit(plamsmol)
+    gen_coords(rdmol)
+    conf = rdmol.GetConformer()
+    for a in range(len(plamsmol.atoms)):
+        pos = conf.GetAtomPosition(a)
+        atom = plamsmol.atoms[a]
+        atom._setx(pos.x)
+        atom._sety(pos.y)
+        atom._setz(pos.z)
+    return
+
+
+def gen_coords(rdmol):
+    ref = rdmol
     conf = rdmol.GetConformer()
     coordDict = {}
     freeze = []
@@ -174,20 +193,12 @@ def gen_coords(plams_mol):
     rs = 1
     # repeat embedding and alignment until the rms of mapsped atoms is sufficiently small
     while rms > 0.1:
-        print(AllChem.EmbedMolecule(rdmol, coordMaps=coordDict, randomSeed=rs,
-                                    useBasicKnowledge=True))
+        AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs,
+                                    useBasicKnowledge=True)
         # align new molecule to original coordinates
-        rms = AllChem.AlignMol(rdmol, ref, atomMaps=maps)
+        rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
         rs += 1
 
-    conf = rdmol.GetConformer()
-    for a in range(len(plams_mol.atoms)):
-        pos = conf.GetAtomPosition(a)
-        atom = plams_mol.atoms[a]
-        atom._setx(pos.x)
-        atom._sety(pos.y)
-        atom._setz(pos.z)
-    return freeze
 
 
 def write_molblock(plams_mol, file=sys.stdout):

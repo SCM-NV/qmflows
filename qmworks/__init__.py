@@ -8,7 +8,7 @@ from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
 from .parsers import (manyXYZ, parse_string_xyz, readCp2KBasis, readCp2KCoeff,
                       readCp2KOverlap, readTurbomoleBasis, readTurbomoleMO,
                       readXYZ, read_cp2k_number_of_orbitals)
-from .rdkitTools import (apply_smirks, apply_template, gen_coords, modify_atom,
+from .rdkitTools import (apply_reaction_smarts, apply_template, gen_coords, modify_atom,
                          plams2rdkit, rdkit2plams, sequence2plams, smiles2plams,
                          write_molblock)
 from .templates import (freq, geometry, get_template, singlepoint, ts)
