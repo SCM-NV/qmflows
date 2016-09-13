@@ -43,4 +43,4 @@ def test_linear_ts():
 
     expected_energy = -3.219708290363864
 
-    assert abs(ts.energy - expected_energy) < 1.0e-6
+    assert abs(ts.energy - expected_energy) < 0.02
