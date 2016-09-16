@@ -17,7 +17,7 @@
         "orca": {
             "method": {
                 "method": "dft",
-                "functional": "lda",
+                "functional": "lda"},
             "basis": {
                 "basis": "sto_sz"},
             "main": "freq"}
