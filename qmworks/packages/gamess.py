@@ -5,7 +5,7 @@ __all__ = ['gamess']
 # =======>  Standard and third party Python Libraries <======
 from os.path import join
 from qmworks.packages.packages import Package, Result
-from qmworks.quantumHDF5 import read_from_hdf5
+#from qmworks.quantumHDF5 import read_from_hdf5
 from qmworks.settings import Settings
 from qmworks.utils import lookup
 
@@ -50,8 +50,8 @@ class GAMESS(Package):
         :type store_in_hdf5: Bool
         """
         gamess_settings = Settings()
-        gamess_settings.input = settings.specific.cp2k
-        job = plams.GamessJob(name=job_name, settings=gamess_settings)
+        gamess_settings.input = settings.specific.gamess
+        job = plams.GamessJob(molecule=mol, name=job_name, settings=gamess_settings)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
@@ -84,7 +84,7 @@ class Gamess_Result(Result):
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesGAMESS.json'):
-        super().__init(settings, molecule, job_name, plams_dir,
+        super().__init__(settings, molecule, job_name, plams_dir,
                        work_dir=work_dir, path_hdf5=path_hdf5,
                        project_name=None, properties=properties)
 
@@ -104,7 +104,7 @@ class Gamess_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        plams_dir = lookup(archive, "plams_dir")
+        plams_dir = lookup(archive, "plams_dir").path
         work_dir = lookup(archive, "work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
@@ -125,14 +125,15 @@ class Gamess_Result(Result):
         section_hdf5 = self.prop_dict[prop]
 
         path_to_node_in_hdf5 = join(self.project_name, section_hdf5)
-        try:
-            return read_from_hdf5(self.hdf5_file, path_to_node_in_hdf5)
-        except KeyError:
-            self.read_property_from_archive(prop, path_to_node_in_hdf5)
+        # try:
+        #     return read_from_hdf5(self.hdf5_file, path_to_node_in_hdf5)
+        # except KeyError:
+        return self.read_property_from_archive(prop, "path_to_node_in_hdf5")
 
-    def read_property_from_archive(prop, path_to_node_in_hdf5):
+    def read_property_from_archive(self, prop, path_to_node_in_hdf5):
         """
         Read `prop` from the output files and store in the HDF5.
         """
+        return self.awk_output(script=self.prop_dict[prop])
         
 gamess = GAMESS()
