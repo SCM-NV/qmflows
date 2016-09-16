@@ -7,7 +7,7 @@ def parser_gamess(path_to_dat, prop):
     """
     Read numerical data from the `*.dat` file.
     """
-    parser = {'totalenergy': parse_energy}
+    parser = {'energy': parse_energy}
 
     try:
         return parse_file(parser[prop], path_to_dat)
