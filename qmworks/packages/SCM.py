@@ -212,7 +212,7 @@ class DFTB_Result(Result):
 
         ..
 
-            dipole = result.properties.dipole
+            dipole = result.dipole
 
         """
         if prop in self.prop_dict:
@@ -223,9 +223,10 @@ class DFTB_Result(Result):
                 return self.kf.read(*prop_query.function)
             elif prop_query.parser == "kfproperties":
                 return self.properties[prop_query.function]
+            else:
+                raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for DFTB results.")
         else:
-            raise Exception("No such property: " + str(prop))
-        #return '3.23'
+            raise KeyError("Generic property '" + str(prop) + "' not defined")
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
