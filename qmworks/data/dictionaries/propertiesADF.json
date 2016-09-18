@@ -1,6 +1,6 @@
 {
-	"energy": ["Energy","Bond Energy"],
-	"dipole": ["Properties", "Dipole"],
-	"charges": ["Properties", "AtomCharge Mulliken"],
-	"frequencies": ["Freq", "Frequencies"]
+	"energy": {"parser": "kfreader", "function": ["Energy","Bond Energy"]},
+	"dipole": {"parser": "kfreader", "function": ["Properties", "Dipole"]},
+	"charges": {"parser": "kfreader", "function": ["Properties", "AtomCharge Mulliken"]},
+	"frequencies": {"parser": "kfreader", "function": ["Freq", "Frequencies"]}
 }

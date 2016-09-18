@@ -90,7 +90,7 @@ class ADF_Result(Result):
         properties = 'data/dictionaries/propertiesADF.json'
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir, project_name=project_name,
                          properties=properties)
-        self.result = plams.kftools.KFFile(path_t21)
+        self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -102,9 +102,6 @@ class ADF_Result(Result):
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
                           project_name)
 
-    def get_property(self, prop, section=None):
-        return self.result.read(section, prop)
-
     def __getattr__(self, prop):
         """Returns a section of the results.
 
@@ -112,11 +109,19 @@ class ADF_Result(Result):
 
         ..
 
-            dipole = result.properties.dipole
+            dipole = result.dipole
 
         """
-        section, property = self.prop_dict[prop]
-        return self.result.read(section, property)
+        if prop in self.prop_dict:
+            prop_query = self.prop_dict[prop]
+            if prop_query.parser == 'awk':
+                return self.awk_output(script=prop_query.function)
+            elif prop_query.parser == "kfreader":
+                return self.kf.read(*prop_query.function)
+            else:
+                raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for ADF results.")
+        else:
+            raise KeyError("Generic property '" + str(prop) + "' not defined")
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
@@ -124,7 +129,7 @@ class ADF_Result(Result):
         m = self._molecule.copy()
         natoms = len(m)
         # Find out correct location
-        coords = self.result.read('Geometry', 'xyz InputOrder')
+        coords = self.kf.read('Geometry', 'xyz InputOrder')
         coords = [coords[i:i + 3] for i in range(0, len(coords), 3)]
 
         if len(coords) > natoms:
