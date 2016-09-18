@@ -215,17 +215,16 @@ class DFTB_Result(Result):
             dipole = result.properties.dipole
 
         """
-        if 'properties' in dir(self) and prop in self.prop_dict:
+        if prop in self.prop_dict:
             prop_query = self.prop_dict[prop]
-            if isinstance(prop_query, str):
-                if prop_query[:4] == 'awk|':
-                    return self.awk_output(script=prop_query[4:])
-                return self.properties[prop_query]
-            else:
-                print(prop_query)
-                return self.kf.read(*prop_query)
+            if prop_query.parser == 'awk':
+                return self.awk_output(script=prop_query.function)
+            elif prop_query.parser == "kfreader":
+                return self.kf.read(*prop_query.function)
+            elif prop_query.parser == "kfproperties":
+                return self.properties[prop_query.function]
         else:
-            raise Exception("NNOETHUNTHN")
+            raise Exception("No such property: " + str(prop))
         #return '3.23'
 
     @property
