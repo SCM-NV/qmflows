@@ -1,5 +1,6 @@
 # Default imports
-from qmworks import Settings, templates, run, rdkitTools, draw_workflow
+from qmworks import Settings, templates, run, rdkitTools
+from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 # from plams import Molecule
 
@@ -84,7 +85,8 @@ def calc_productAndTS(name):
         job_name=name + "_DFTBfreq")
 
     t = Settings()
-    t.specific.adf.geometry.inithess = DFTB_freq.archive['plams_dir'].path
+    #t.specific.adf.geometry.inithess = DFTB_freq.kf.path
+    t.inithess = DFTB_freq.hessian
 
     # Run the TS optimization, using the default TS template
     TS = adf(

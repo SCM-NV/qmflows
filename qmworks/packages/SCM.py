@@ -5,6 +5,7 @@ from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
 
+import builtins
 import plams
 # ========================= ADF ============================
 
@@ -78,6 +79,11 @@ class ADF(Package):
                     if mol.atoms[a].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[name] = ""
+        elif key == "inithess":
+            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+            hess_file = open(hess_path, "w")
+            hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
+            settings.specific.adf.geometry.inithess = hess_path
         else:
             raise RuntimeError('Keyword ' + key + ' doesn\'t exist')
 

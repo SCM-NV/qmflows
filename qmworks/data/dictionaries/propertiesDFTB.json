@@ -2,5 +2,6 @@
 	"energy": {"parser": "kfproperties", "function": "Energy.DFTB Final Energy"},
 	"dipole": {"parser": "awk", "function": "/Dipole/ {print $2; print $3; print $4}"},
 	"charges": {"parser": "kfproperties", "function": "Atomic Charge.Net"},
-	"frequencies": {"parser": "kfreader", "function": ["Vibrations", "Frequencies[cm-1]"]}
+	"frequencies": {"parser": "kfreader", "function": ["Vibrations", "Frequencies[cm-1]"]},
+	"hessian": {"parser": "kfproperties", "function": "Hessian.Generic"}
 }
