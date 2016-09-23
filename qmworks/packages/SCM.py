@@ -1,13 +1,11 @@
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import files
-import pkg_resources as pkg
-import plams
 
-# ==================> Internal Modules  <=====================
+from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
-from qmworks.fileFunctions import json2Settings
+
+import plams
 # ========================= ADF ============================
 
 
@@ -45,8 +43,10 @@ class ADF(Package):
         adf_settings.input = settings.specific.adf
         result = plams.ADFJob(name=job_name, molecule=mol,
                               settings=adf_settings).run()
+        path_t21 = result._kf.path
 
-        return ADF_Result(adf_settings, mol, result._kf, job_name)
+        return ADF_Result(adf_settings, mol, result.job.name, path_t21,
+                          plams_dir=result.job.path)
 
     def postrun(self):
         pass
@@ -72,11 +72,12 @@ class ADF(Package):
             if isinstance(value[0], int):
                 for a in range(1, len(mol) + 1):
                     if a not in value:
-                         settings.specific.adf.constraints['atom ' + str(a)] = ""
+                        settings.specific.adf.constraints['atom ' + str(a)] = ""
             else:
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:
-                        settings.specific.adf.constraints['atom ' + str(a+1)] = ""
+                        name = 'atom ' + str(a + 1)
+                        settings.specific.adf.constraints[name] = ""
         else:
             raise RuntimeError('Keyword ' + key + ' doesn\'t exist')
 
@@ -84,30 +85,22 @@ class ADF(Package):
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
-    def __init__(self, settings, molecule, result, job_name):
-        self.settings = settings
-        self._molecule = molecule
-        self.result = result
+    def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
+                 project_name=None):
         properties = 'data/dictionaries/propertiesADF.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        self.archive = files.Path(result.path)
-        self.job_name = job_name
-
-    def as_dict(self):
-        """
-        Method to serialize as a JSON dictionary the results given
-        by an ADF computation.
-        """
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.result.path,
-            "job_name": self.job_name}
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir, project_name=project_name,
+                         properties=properties)
+        self.result = plams.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename, job_name):
-        return ADF_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        """
+        Methods to deserialize an `ADF_Result` object.
+        """
+        plams_dir = archive["plams_dir"].path
+        path_t21 = join(plams_dir, '{}.t21'.format(job_name))
+        return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
+                          project_name)
 
     def get_property(self, prop, section=None):
         return self.result.read(section, prop)
@@ -177,7 +170,8 @@ class DFTB(Package):
         result = plams.DFTBJob(name=job_name, molecule=mol,
                                settings=dftb_settings).run()
 
-        return DFTB_Result(dftb_settings, mol, result._kf, job_name)
+        return DFTB_Result(dftb_settings, mol, result.job.name,
+                           plams_dir=result.job.path)
 
     def postrun(self):
         pass
@@ -189,35 +183,26 @@ class DFTB(Package):
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, result, job_name):
-        self.settings = settings
-        self._molecule = molecule
-        self.result = result
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 project_name=None):
         properties = 'data/dictionaries/propertiesDFTB.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+                         properties=properties)
+        kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
+        self.kf = plams.kftools.KFFile(kf_filename)
         self.properties = self.extract_properties()
-        self.archive = files.Path(result.path)
-        self.job_name = job_name
-
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.result.path,
-            "job_name": self.job_name}
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename, job_name):
-        return DFTB_Result(settings, molecule, plams.kftools.KFFile(filename), job_name)
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"].path, project_name)
 
     def extract_properties(self):
         props = Settings()
-        for i in range(self.result.read('Properties', 'nEntries')):
-            type = self.result.read('Properties', 'Type(' + str(i + 1) + ')').strip()
-            subtype = self.result.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
-            value = self.result.read('Properties', 'Value(' + str(i + 1) + ')')
-            props[type][subtype] = value
+        for i in range(self.kf.read('Properties', 'nEntries')):
+            typ = self.kf.read('Properties', 'Type(' + str(i + 1) + ')').strip()
+            subtype = self.kf.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
+            value = self.kf.read('Properties', 'Value(' + str(i + 1) + ')')
+            props[typ][subtype] = value
         return props
 
     def __getattr__(self, prop):
@@ -230,12 +215,15 @@ class DFTB_Result(Result):
             dipole = result.properties.dipole
 
         """
-        if 'properties' in dir(self) and 'prop_dict' in dir(self):
-            if isinstance(self.prop_dict[prop], str):
-                return self.properties[self.prop_dict[prop]]
+        if 'properties' in dir(self) and prop in self.prop_dict:
+            prop_query = self.prop_dict[prop]
+            if isinstance(prop_query, str):
+                if prop_query[:4] == 'awk|':
+                    return self.awk_output(script=prop_query[4:])
+                return self.properties[prop_query]
             else:
-                print(self.prop_dict[prop])
-                return self.result.read(*self.prop_dict[prop])
+                print(prop_query)
+                return self.kf.read(*prop_query)
         else:
             raise Exception("NNOETHUNTHN")
         #return '3.23'
@@ -245,7 +233,7 @@ class DFTB_Result(Result):
         """WARNING: Cheap copy from PLAMS, do not keep this!!!"""
         m = self._molecule.copy()
         natoms = len(m)
-        coords = self.result.read('Molecule', 'Coords')
+        coords = self.kf.read('Molecule', 'Coords')
         coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
 
         if len(coords) > natoms:

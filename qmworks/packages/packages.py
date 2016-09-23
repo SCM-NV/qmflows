@@ -1,7 +1,11 @@
 
 # ========>  Standard and third party Python Libraries <======
 from os.path import join
+from rdkit import Chem
+import subprocess
+import base64
 
+import os
 import plams
 import pkg_resources as pkg
 
@@ -14,6 +18,7 @@ from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
 from qmworks.settings import Settings
+from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
 
 # ==============================================================
@@ -22,8 +27,96 @@ __all__ = ['Package', 'run', 'registry', 'Result',
 
 
 class Result:
-    def __init__(self):
-        pass
+
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 work_dir=None, path_hdf5=None, project_name=None,
+                 properties=None):
+        """
+        :param settings: Job Settings.
+        :type settings: :class:`~qmworks.Settings`
+        :param molecule: molecular Geometry
+        :type molecule: plams Molecule
+        :param job_name: Name of the computations
+        :type job_name: str
+        :param plams_dir: path to the ``Plams`` folder.
+        :type plams_dir: str
+        :param work_dir: scratch or another directory different from
+        the `plams_dir`.
+        type work_dir: str
+        :param hdf5_file: path to the file containing the numerical results.
+        :type hdf5_file: str
+        :param properties: path to the `JSON` file containing the properties
+        addresses inside the `HDF5` file.
+        :type properties: str
+        """
+        self.settings = settings
+        self._molecule = molecule
+        self.hdf5_file = path_hdf5
+        xs = pkg.resource_string("qmworks", properties)
+        self.prop_dict = json2Settings(xs)
+        self.archive = {"plams_dir": Path(plams_dir),
+                        'work_dir': work_dir,
+                        "path_hdf5": path_hdf5}
+        self.project_name = project_name
+        self.job_name = job_name
+
+    def as_dict(self):
+        """
+        Method to serialize as a JSON dictionary the results given
+        by an ``Package`` computation.
+        """
+        return {
+            "settings": self.settings,
+            "molecule": self._molecule,
+            "job_name": self.job_name,
+            "archive": self.archive,
+            "project_name": self.project_name}
+
+    def awk_output(self, script='', progfile=None, **kwargs):
+        """awk_output(script='', progfile=None, **kwargs)
+        Shortcut for :meth:`~Results.awk_file` on the output file."""
+        output = self.job_name + ".out"
+        return self.awk_file(output, script, progfile, **kwargs)
+
+    def awk_file(self, filename, script='', progfile=None, **kwargs):
+        """awk_file(filename, script='', progfile=None, **kwargs)
+        Execute an AWK script on a file given by *filename*.
+
+        The AWK script can be supplied in two ways: either by directly passing
+        the contents of the script (should be a single string) as a *script*
+        argument, or by providing the path (absolute or relative to the file
+        pointed by *filename*) to some external file containing the actual AWK
+        script using *progfile* argument. If *progfile* is not ``None``, the
+        *script* argument is ignored.
+
+        Other keyword arguments (*\*\*kwargs*) can be used to pass additional
+        variables to AWK (see ``-v`` flag in AWK manual)
+
+        Returned value is a list of lines (strings). See ``man awk`` for details.
+        """
+        cmd = ['awk']
+        for k, v in kwargs.items():
+            cmd += ['-v', '%s=%s' % (k, v)]
+        if progfile:
+            if os.path.isfile(progfile):
+                cmd += ['-f', progfile]
+            else:
+                raise FileError('File %s not present' % progfile)
+        else:
+            cmd += [script]
+            
+        new_cmd = cmd + [filename]
+        plams_dir = self.archive['plams_dir'].path
+        ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
+        if ret[-1] == '':
+            ret = ret[:-1]
+        try:
+            result = [float(i) for i in ret]
+        except ValueError:
+            result = ret
+        if len(result) == 1:
+            result = result[0]
+        return result
 
 
 @has_scheduled_methods
@@ -42,9 +135,9 @@ class Package:
         self.pkg_name = pkg_name
 
     @schedule_hint(
-        display="Running {self.pkg_name} ...",
+        display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
-    def __call__(self, settings, mol, **kwargs):
+    def __call__(self, settings, mol, job_name='', **kwargs):
         """
         This function performs a job with the package specified by
         self.pkg_name
@@ -55,9 +148,16 @@ class Package:
         :type mol: plams Molecule
         """
 
+        if isinstance(mol, Chem.Mol):
+            mol = rdkitTools.rdkit2plams(mol)
+
+        if job_name != '':
+            kwargs['job_name'] = job_name
+
         self.prerun()
 
         job_settings = self.generic2specific(settings, mol)
+
         result = self.run_job(job_settings, mol, **kwargs)
 
         self.postrun()
@@ -178,6 +278,21 @@ class SerMolecule(Serialiser):
         return plams.Molecule.from_dict(**data)
 
 
+class SerMol(Serialiser):
+    """
+    Based on the RDKit molecule this class encodes and decodes the
+    information related to the molecule using a string.
+    """
+    def __init__(self):
+        super(SerMol, self).__init__(Chem.Mol)
+
+    def encode(self, obj, make_rec):
+        return make_rec(base64.b64encode(obj.ToBinary()).decode('ascii'))
+
+    def decode(self, cls, data):
+        return Chem.Mol(base64.b64decode(data.encode('ascii')))
+
+
 class SerSettings(Serialiser):
     """
     Class to encode and decode the ~qmworks.Settings class using
@@ -207,5 +322,6 @@ def registry():
             Package: AsDict(Package),
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
+            Chem.Mol: SerMol(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})

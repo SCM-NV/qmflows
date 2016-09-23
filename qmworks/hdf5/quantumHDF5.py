@@ -1,24 +1,43 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['StoreasHDF5', 'adf2hdf5', 'save_ADF_Info', 'cp2k2hdf5', 'turbomole2hdf5']
+__all__ = ['StoreasHDF5', 'adf2hdf5', 'cp2k2hdf5', 'read_from_hdf5',
+           'save_ADF_Info', 'turbomole2hdf5']
 
 
 # ==========> Standard libraries and third-party <===============
-import numpy as np
 from collections import namedtuple
 from functools import partial
 from os.path import join
 
+import h5py
+import numpy as np
 # ==================> Internal modules <==========
 from plams import KFReader
 from qmworks.common import InfoMO
-from qmworks.parsers.cp2KParser import (readCp2KBasis, readCp2KCoeff, readCp2KOverlap)
-from qmworks.parsers.turbomoleParser import (readTurbomoleBasis, readTurbomoleMO)
+from qmworks.parsers.cp2KParser import (readCp2KBasis, readCp2KCoeff,
+                                        readCp2KOverlap)
+from qmworks.parsers.turbomoleParser import (readTurbomoleBasis,
+                                             readTurbomoleMO)
 from qmworks.utils import zipWith
 
-
 # ====================><==============================
+
+
+def read_from_hdf5(path_hdf5, path_to_properties):
+    try:
+        with h5py.File(path_hdf5, 'r') as f5:
+            if isinstance(path_to_properties, list):
+                return [f5[path].value for path in path_to_properties]
+            else:
+                return f5[path_to_properties].value
+    except KeyError:
+        msg = "There is not {} stored in the HDF5\n".format(path_to_properties)
+        raise KeyError(msg)
+    except FileNotFoundError:
+        msg = "there is not HDF5 file containing the numerical results"
+        raise RuntimeError(msg)
+
 
 class StoreasHDF5:
     """
@@ -90,8 +109,8 @@ class StoreasHDF5:
             self.funHDF5_attrs("basisFormat", str(fs), path, css)
 
     def saveMO(self, parserFun, pathMO, nOrbitals=None, nOrbFuns=None,
-               pathEs=None, pathCs=None, nOccupied=None, nHOMOS=100,
-               nLUMOS=100):
+               pathEs=None, pathCs=None, nOccupied=None, nHOMOS=None,
+               nLUMOS=None):
         """
         Save Molecular orbital eigenvalues and eigenvectors.
 
@@ -123,15 +142,23 @@ class StoreasHDF5:
         pathCs = pathCs if pathCs is not None else join(self.name, "mo",
                                                         "coefficients")
 
-        infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
+        # Save all the frontier orbitals.
+        # NOTE: IT ASSUMES THAT The USER HAVE SELECTED A RANGE OF MO
+        # TO PRINT.
+        if not (nHOMOS is None and nLUMOS is None):
+            infoMO = parserFun(pathMO, nHOMOS + nLUMOS, nOrbFuns)
 
-        # Drop Coefficients that below and above nHOMOS and nLUMOS, respectively.
-        if nOrbitals is not None and nOrbitals > nHOMOS + nLUMOS:
-            ess, css  = infoMO
-            eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
-            css = np.transpose(css)
-            coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
-            infoMO = InfoMO(eigenVals, np.transpose(coefficients))
+        elif nOrbitals is not None:
+            infoMO = parserFun(pathMO, nOrbitals, nOrbFuns)
+            if not (nHOMOS is None and nLUMOS is None) and \
+               nOrbitals > nHOMOS + nLUMOS:
+                # Drop Coefficients that below and above nHOMOS and nLUMOS,
+                # respectively.
+                ess, css  = infoMO
+                css = np.transpose(css)
+                eigenVals = ess[nOccupied - nHOMOS: nOccupied + nLUMOS]
+                coefficients = css[nOccupied - nHOMOS: nOccupied + nLUMOS]
+                infoMO = InfoMO(eigenVals, np.transpose(coefficients))
 
         zipWith(self.funHDF5)([pathEs, pathCs])([infoMO.eigenVals, infoMO.coeffs])
 

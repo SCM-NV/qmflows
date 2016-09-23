@@ -1,5 +1,6 @@
 {
-	"energy": "energy.dftb final energy",
-	"charges": "atomic charge.net",
+	"energy": "Energy.DFTB Final Energy",
+	"dipole": "awk|/Dipole/ {print $2; print $3; print $4}",
+	"charges": "Atomic Charge.Net",
 	"frequencies": ["Vibrations", "Frequencies[cm-1]"]
 }

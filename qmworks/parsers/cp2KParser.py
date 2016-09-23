@@ -18,8 +18,7 @@ import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
-from qmworks.utils import (chunksOf, concat, flatten, replicate, zipWith,
-                           zipWith3)
+from qmworks.utils import (chunksOf, concat, flatten, zipWith, zipWith3)
 
 # =========================<>=============================
 # Molecular Orbitals Parsing
@@ -156,7 +155,8 @@ def oddParserOverlap(n):
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
-parseAtomLabel = Word(srange("[A-Z]"), max=1) + Optional(Word(srange("[a-z]"), max=1))
+parseAtomLabel = (Word(srange("[A-Z]"), max=1) +
+                  Optional(Word(srange("[a-z]"), max=1)))
 
 parserBasisName = Word(alphanums + "-") + Suppress(restOfLine)
 
@@ -202,7 +202,7 @@ def read_cp2k_number_of_orbitals(file_name):
     except FileNotFoundError:
         msg2 = 'There is not a file: {}\n'.format(file_name)
         raise RuntimeError(msg2)
-    
+
 
 # Molecular Orbital Coefficients and EigenValues
 def move_restart_coeff(path):
@@ -241,7 +241,7 @@ def readCp2KOverlap(path, nOrbitals):
 def readCp2KBasis(path):
     """
     Read the Contracted Gauss function primitives format from a text file.
-    
+
     :param path: Path to the file containing the basis.
     :type path: String
     """
@@ -262,13 +262,6 @@ def readCp2KBasis(path):
 
 # ============================<>=======================================
 # Auxiliar functions
-
-def cp2KBasistoStandard(fs):
-    """
-    CP2K 2 0 3 7 3 3 2 1 -> Standard {777/777/77/7}
-    """
-    _lmin, _lmax, nc = fs[1], fs[2], fs[3]
-    return [replicate(l, nc) for l in fs[4:]]
 
 
 def concatSwapCoeff(xss, m, n):

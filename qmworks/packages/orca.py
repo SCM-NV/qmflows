@@ -1,12 +1,9 @@
 # =======>  Standard and third party Python Libraries <======
 from noodles import (Storable)
-import pkg_resources as pkg
-import plams
-
-# ========================> Internal Modules  <================================
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result
-from qmworks.fileFunctions import json2Settings
+
+import plams
 # ============================= Orca ==========================================
 
 
@@ -41,11 +38,11 @@ class ORCA(Package):
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
-        print(orca_settings)
+
         result = plams.ORCAJob(molecule=mol, settings=orca_settings,
                                name=job_name).run()
 
-        return ORCA_Result(orca_settings, mol, result, job_name)
+        return ORCA_Result(orca_settings, mol, result.job.name, result.job.path)
 
     def postrun(self):
         pass
@@ -57,25 +54,15 @@ class ORCA(Package):
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, result, job_name):
-        self.settings = settings
-        self._molecule = molecule
-        self.result = result
+    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
         properties = 'data/dictionaries/propertiesORCA.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        self.job_name = job_name
-
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.result.path,
-            "job_name": self.job_name}
+        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir, project_name=project_name,
+                         properties=properties)
 
     @classmethod
-    def from_dict(cls, settings, molecule, filename, job_name):
-        pass
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        plams_dir = archive["plams_dir"].path
+        return ORCA_Result(settings, molecule, job_name, plams_dir, project_name)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
@@ -84,17 +71,10 @@ class ORCA_Result(Result):
 
         ..
 
-            dipole = result.properties.dipole
+            dipole = result.dipole
 
         """
-        r = self.result.awk_output(script=self.prop_dict[prop])
-        try:
-            result = [float(i) for i in r]
-        except:
-            result = r
-        if len(result) == 1:
-            result = result[0]
-        return result
+        return self.awk_output(script=self.prop_dict[prop])
 
     @property
     def molecule(self):

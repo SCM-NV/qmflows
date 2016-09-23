@@ -2,7 +2,7 @@
     "specific": {
         "adf": {
             "basis": {"type": "SZ"},
-            "xc": {"lda": ""},
+            "xc": {"__block_replace": true, "lda": ""},
             "integration": {"accint": 4.0},
             "scf": {
         	"converge": 1e-6,
@@ -11,54 +11,54 @@
             "task": {"runtype": "SP"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
         "cp2k" : {
-          "FORCE_EVAL": {
-              "DFT": {
-                  "BASIS_SET_FILE_NAME": "",
-                  "MGRID": {
-                      "CUTOFF": 400,
-                      "NGRIDS": 4
+          "force_eval": {
+              "dft": {
+                  "basis_set_file_name": "",
+                  "mgrid": {
+                      "cutoff": 400,
+                      "ngrids": 4
                   },
-                  "POTENTIAL_FILE_NAME": "",
-                  "PRINT": {
-                      "MO": {
-                          "ADD_LAST"  : "NUMERIC",
-                          "EACH": {
-                              "QS_SCF": 0
+                  "potential_file_name": "",
+                  "print": {
+                      "mo": {
+                          "add_last"  : "numeric",
+                          "each": {
+                              "qs_scf": 0
                           },
-                          "EIGENVALUES" : "",
-                          "EIGENVECTORS": "",
-                          "FILENAME": "./mo.data",
-                          "NDIGITS": 36,
-                          "OCCUPATION_NUMBERS": ""
+                          "eigenvalues" : "",
+                          "eigenvectors": "",
+                          "filename": "./mo.data",
+                          "ndigits": 36,
+                          "occupation_numbers": ""
                       }
                   },
-                  "QS": {
-                      "METHOD": "GPW"
+                  "qs": {
+                      "method": "gpw"
                   },
-                  "SCF": {
-                      "ADDED_MOS": "",
-                      "EPS_SCF": 1e-06,
-                      "MAX_SCF": 200,
-                      "SCF_GUESS": "RESTART"
+                  "scf": {
+                      "added_mos": "",
+                      "eps_scf": 1e-06,
+                      "max_scf": 200,
+                      "scf_guess": "restart"
                   },
-                  "XC": {
-                      "XC_FUNCTIONAL": "PBE"
+                  "xc": {
+                      "xc_functional": "pbe"
                   }
               },
-              "SUBSYS": {
-                  "CELL": {
-                      "PERIODIC": "XYZ"
+              "subsys": {
+                  "cell": {
+                      "periodic": "xyz"
                   },
-                  "TOPOLOGY": {
-                      "COORDINATE": "XYZ",
-                      "COORD_FILE_NAME": ""
+                  "topology": {
+                      "coordinate": "xyz",
+                      "coord_file_name": ""
                   }
               }
           },
-          "GLOBAL": {
-              "PRINT_LEVEL": "LOW",
-              "PROJECT": "QMWORKS-CP2K",
-              "RUN_TYPE": "ENERGY_FORCE"
+          "global": {
+              "print_level": "low",
+              "project": "qmworks-cp2k",
+              "run_type": "energy_force"
           }
         },
         "dirac": {
@@ -66,7 +66,10 @@
             "HAMILTONIAN": "LEVY-LEBLOND",
             "WAVE FUNCTION": "SCF"
         },
-        "turbomole": {},
+        "gamess": {
+            "basis": {"gbasis": "sto", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe"}
+        },
         "orca": {
             "method": {
                 "method": "dft",

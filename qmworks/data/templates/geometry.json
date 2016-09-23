@@ -2,7 +2,7 @@
     "specific": {
         "adf": {
         	"basis": {"type": "SZ"},
-            "xc": {"lda": ""},
+            "xc": {"__block_replace": true, "lda": ""},
             "integration": {"accint": 6.0},
             "scf": {
                 "converge": 1e-6,
@@ -20,6 +20,9 @@
                 "functional": "lda",
                 "runtyp": "opt"},
             "basis": {
-                "basis": "sto_sz"} }
+                "basis": "sto_sz"}},
+        "gamess": {
+            "basis": {"gbasis": "n21", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe", "runtyp": "optimize"}}
     }
 }

@@ -9,7 +9,6 @@ from qmworks.packages import cp2k
 from qmworks.utils import (chunksOf, flatten)
 
 import fnmatch
-import getpass
 import h5py
 import os
 import plams
@@ -23,6 +22,21 @@ def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
     """
+    home = os.path.expanduser('~')  # HOME Path
+    scratch_path = join(home, '.test_qmworks')
+    if not os.path.exists(scratch_path):
+        os.makedirs(scratch_path)
+    try:
+        fun_ethylene(scratch_path)
+    finally:
+        # remove tmp data and clean global config
+        shutil.rmtree(scratch_path)
+
+
+def fun_ethylene(scratch_path):
+    """
+    Test Ethylene singlw
+    """
     project_name = 'ethylene'
 
     # create Settings for the Cp2K Jobs
@@ -30,22 +44,17 @@ def test_ethylene():
     s.basis = "DZVP-MOLOPT-SR-GTH"
     s.potential = "GTH-PBE"
     s.cell_parameters = [12.74] * 3
-    s.specific.cp2k.force_eval.dft.scf.added_mos = 50
-    s.specific.cp2k.force_eval.dft.scf.eps_scf = 1e-4
+    dft = s.specific.cp2k.force_eval.dft
+    dft.scf.added_mos = 20
+    dft.scf.eps_scf = 1e-4
 
-    # User variables
-    # home = os.path.expanduser('~')  # HOME Path
-    username = getpass.getuser()
-    # Work_dir
-    scratch = "/tmp"
-    scratch_path = join(scratch, username, project_name)
-    if not os.path.exists(scratch_path):
-        os.makedirs(scratch_path)
+    dft['print']['ao_matrices']['overlap'] = ''
+    dft['print']['ao_matrices']['filename'] = join(scratch_path, 'overlap.out')
 
-    # Cp2k configuration files
     # Copy the basis and potential to a tmp file
     shutil.copy('test/test_files/BASIS_MOLOPT', scratch_path)
     shutil.copy('test/test_files/GTH_POTENTIALS', scratch_path)
+    # Cp2k configuration files
     basiscp2k = join(scratch_path, 'BASIS_MOLOPT')
     potcp2k = join(scratch_path, 'GTH_POTENTIALS')
     cp2k_config = {"basis": basiscp2k, "potential": potcp2k}
@@ -79,12 +88,10 @@ def test_ethylene():
     with h5py.File(path_hdf5) as f5:
         assert(all(p in f5 for p in path_properties))
 
-    plams.finish()
-
 
 def prepare_job_cp2k(geometry, files, settings, work_dir,
                      project_name=None, hdf5_file=None, wfn_restart_job=None,
-                     store_in_hdf5=True, nHOMOS=25, nLUMOS=25,
+                     store_in_hdf5=True, nHOMOS=20, nLUMOS=20,
                      package_config=None):
     """
     Fills in the parameters for running a single job in CP2K.
@@ -117,7 +124,7 @@ def prepare_job_cp2k(geometry, files, settings, work_dir,
                                          work_dir, wfn_restart_job,
                                          store_in_hdf5, package_config)
     print("CP2K Settings: ", job_settings)
-    
+
     return cp2k(job_settings, plams.Molecule(files.get_xyz), work_dir=work_dir,
                 project_name=project_name, hdf5_file=hdf5_file,
                 input_file_name=files.get_inp,
@@ -193,4 +200,3 @@ def split_file_geometries(pathXYZ):
 
     numat = int(xss[0].split()[0])
     return list(map(flatten, chunksOf(xss, numat + 2)))
-

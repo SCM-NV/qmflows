@@ -1,36 +1,35 @@
 
 
-__all__ = ['cp2k', 'cp2k_farming', 'CP2K', 'CP2K_Farming', 'CP2K_Result']
+__all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
-from noodles import files
+from functools import partial
 from os.path import join
 
 import fnmatch
 import h5py
 import os
-import pkg_resources as pkg
 import plams
+
 # ==================> Internal modules <====================
 from qmworks.common import InputKey
-from qmworks.fileFunctions import json2Settings
 from qmworks.hdf5 import cp2k2hdf5
 from qmworks.packages.packages import Package, Result
 from qmworks.parsers import read_cp2k_number_of_orbitals
 from qmworks.settings import Settings
+from qmworks.utils import lookup
 
-# ====================================<>========================================
+# ====================================<>=======================================
 charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
                'Se': 6, 'Cd': 12, 'Pb': 4, 'Br': 7, 'Cs': 9}
-
-# ======================================<>======================================
+# ======================================<>====================================
 
 
 class CP2K(Package):
     """
     This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
-    It uses plams together with the templates to generate the stucture input and
-    also uses Plams to invoke the binary CP2K code.
+    It uses plams together with the templates to generate the stucture input
+    and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
     **cp2k** function should be called.
     """
@@ -44,7 +43,7 @@ class CP2K(Package):
     def run_job(self, settings, mol, work_dir=None, project_name=None,
                 hdf5_file="quantum.hdf5", input_file_name=None,
                 out_file_name=None, store_in_hdf5=True,
-                nHOMOS=100, nLUMOS=100, job_name='cp2k_job'):
+                nHOMOS=None, nLUMOS=None, job_name='cp2k_job'):
         """
         Call the Cp2K binary using plams interface.
 
@@ -64,7 +63,8 @@ class CP2K(Package):
         """
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings, molecule=mol)
+        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
+                            molecule=mol)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
@@ -73,106 +73,14 @@ class CP2K(Package):
         output_file = join(job.path, job._filename('out'))
 
         if store_in_hdf5:
-            self.dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
-                              nLUMOS, project_name=project_name)
+            dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
+                         nLUMOS, project_name=project_name)
 
         return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
-                           hdf5_file, project_name)
+                           path_hdf5=hdf5_file, project_name=project_name)
 
     def postrun(self):
         pass
-
-    def dump_to_hdf5(self, file_h5, settings, work_dir, output_file, nHOMOS,
-                     nLUMOS, project_name=None):
-        """
-        Store the result in HDF5 format.
-
-        :param file_h5: Path to the HDF5 file that contains the
-        numerical results.
-        :type file_h5: String
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param work_dir: Path to the folders where the calculation is carried out.
-        :tpye work_dir: String
-        :param output_file: Absolute path to plams output file.
-        """
-        files = os.listdir(work_dir)
-
-        def match_file(pattern):
-            """ Cp2k append the suffix .Log to the output files """
-            s = "*{}*Log".format(pattern)
-            xs = list(filter(lambda x: fnmatch.fnmatch(x, s), files))
-            if xs:
-                return xs[0]
-            else:
-                return None
-
-        def get_value_recursively(st, xs):
-            """
-            :param xs: List of keys
-            :type xs: String List
-            """
-            s = st.copy()
-            for x in xs:
-                s = s.get(x)
-                if s is None:
-                    break
-                else:
-                    s
-            return s
-
-        def get_file_path(xs):
-            """
-            Search for a result file requested in the settings.
-            CP2K renames thew files appending a number an a `Log` to the
-            end of the filename.
-            """
-
-            path = get_value_recursively(settings, xs)
-            if path is None:
-                return None
-            else:
-                root, file_pattern = os.path.split(path)
-                real_name = match_file(file_pattern)
-                return join(root, real_name)
-            
-        settings_file_MO = ["specific", "cp2k", "force_eval", "dft",
-                            "print", "mo", "filename"]
-        settings_file_overlap = ["specific", "cp2k", "force_eval", "dft",
-                                 "print", "ao_matrices", "filename"]
-
-        # Arguments to store the properties in HDF5
-        nOccupied, nOrbitals, nOrbFuns = read_cp2k_number_of_orbitals(output_file)
-        path_MO = get_file_path(settings_file_MO)
-        path_overlap = get_file_path(settings_file_overlap)
-
-        # Paths inside the HDF5 file
-        keys = []
-        files_to_remove = []
-        if path_MO is not None:
-            relative_cwd = work_dir.split('/')[-1]
-            pathEs = join(project_name, relative_cwd, "cp2k/mo/eigenvalues")
-            pathCs = join(project_name, relative_cwd, "cp2k/mo/coefficients")
-            k = InputKey('orbitals',
-                         [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
-                          nOccupied, nHOMOS, nLUMOS])
-            keys.append(k)
-            # Remove this file after it has been processed
-            files_to_remove.append(path_MO)
-            
-        if path_overlap is not None:
-            path_mtx_overlap = join(work_dir, "cp2k/overlap")
-            keys.append(InputKey('overlap',
-                                 [path_overlap, nOrbitals, path_mtx_overlap]))
-            files_to_remove.append(path_overlap)
-
-        # Calling the qmworks-HDF5 API
-        with h5py.File(file_h5, chunks=True) as f5:
-            cp2k2hdf5(f5, keys)
-
-        # Remove the text output files
-        for x in files_to_remove:
-            os.remove(x)
 
     def handle_special_keywords(self, settings, key, value, mol):
         """
@@ -218,12 +126,12 @@ class CP2K(Package):
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
-                s.specific.cp2k.force_eval.subsys.cell.PERIODIC = 'XYZ'
+                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
             else:
                 a, b, c = value  # Pattern match list
                 abc = ' [angstrom] {} {} {}'.format(a, b, c)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
-                s.specific.cp2k.force_eval.subsys.cell.PERIODIC = 'XYZ'
+                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
 
             return s
 
@@ -272,180 +180,19 @@ class CP2K(Package):
         return funs[key](settings, value, mol, key)
 
 
-class CP2K_Farming(CP2K):
-    """
-    Run CP2K Job in Groups according to:
-    <https://manual.cp2k.org/trunk/CP2K_INPUT/FARMING.html>
-    """
-    def run_job(self, settings, mol=None, hdf5_file="quantum.hdf5",
-                work_dirs=None, input_files=None, output_files=None,
-                coordinates_files=None, jobs_to_harvest=None, nGroups=None,
-                initial_guess=None):
-        """
-        Runs a CP2K Farming Job
-
-        :param settings: Farming Job Settings
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        :param hdf5_file: Path to the HDF5 file that contains the
-        numerical results.
-        :type hdf5_file: String
-        :param work_dirs: List of directories containing the information to
-        run a single job (e.g. coordinates).
-        :type work_dirs: String List
-        :param input_file_names: Names of the input files to be included in the
-        farming job.
-        :type input_file_names: String List
-        :param out_file_names: Output File Names for the different jobs
-        included in the farming.
-        :type out_file_names: String List
-        :param nGroups: Number of Jobs to run in parallel inside the Farming.
-        :type nGroups: Int
-        :returns: `~CP2K_Result`
-        """
-        # Execute initial_guess
-        if initial_guess is not None:
-                    initial_guess.orbitals
-        
-        # Create the input files for the Jobs to be run in Farming mode
-        mols = [plams.Molecule(xyz) for xyz in coordinates_files]
-        job_settings = [self.generic2specific(j, m)
-                        for j, m in zip(jobs_to_harvest, mols)]
-
-        # Use plams to generate the input of the jobs to farm
-        plams_settings = [Settings() for x in job_settings]
-        for cp2k_plams, s, input_file in zip(plams_settings, job_settings,
-                                             input_files):
-            cp2k_plams.input = s.specific.cp2k
-            job = plams.Cp2kJob(settings=cp2k_plams)
-
-            # Generate Input with Plams to use it during the farming
-            input = job.get_input()
-            with open(input_file, 'w') as f:
-                f.write(input)
-
-        # pass arguments in Plams input settings format
-        cp2k_settings = Settings()
-        cp2k_settings.input = settings.specific.cp2k
-        farm_job = plams.Cp2kJob(name='farming', settings=cp2k_settings)
-
-        # Create a Farming Job
-        runner = plams.JobRunner(parallel=True)
-        r = farm_job.run(runner)
-        r.wait()
-
-        # # Name of the folder were the output is stored
-        # folder_names = [f.split('/')[-1] for f in work_dirs]
-
-        # Dump the numerical results to HDF5
-        for s, outFile, folder in zip(job_settings, output_files, work_dirs):
-            self.dump_to_hdf5(hdf5_file, s, folder, outFile)
-
-        return CP2K_Farming_Result(cp2k_settings, mol, r.job.path, work_dirs,
-                                   hdf5_file)
-
-    def handle_special_keywords(self, settings, key, value, mol):
-        """
-        Create the settings input for complex cp2k keys
-
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param key: Special key declared in ``settings``.
-        :param value: Value store in ``settings``.
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        def expand_farming_jobs(s, values, mol, key):
-            """
-            The Input for a Farming CP2K job resemble the following structure,
-
-             &GLOBAL
-                PROJECT farming
-                PROGRAM FARMING
-                RUN_TYPE NONE
-             &END GLOBAL
-
-             &FARMING
-               GROUP_SIZE 1
-
-               &JOB
-                 DIRECTORY dir-1
-                 INPUT_FILE_NAME job1.inp
-                 JOB_ID 1
-               &END JOB
-
-               &JOB
-                 DEPENDENCIES 1
-                 DIRECTORY dir-2
-                 INPUT_FILE_NAME job2.inp
-                 JOB_ID 2
-               &END JOB
-
-               ...........................
-               ...........................
-
-               &JOB
-                 DEPENDENCIES 31
-                 DIRECTORY dir-32
-                 INPUT_FILE_NAME job32.inp
-                 JOB_ID 32
-               &END JOB
-
-             &END FARMING
-            """
-            job_ids, job_names, workDirs = [list(t) for t in zip(*values)]
-            s.specific.cp2k.farming.job.directories = workDirs
-            s.specific.cp2k.farming.job.input_file_names = job_names
-            s.specific.cp2k.farming.job.job_ids = job_ids
-
-            return s
-                    
-        funs = {'farming_jobs': expand_farming_jobs}
-
-        try:
-            return super(CP2K_Farming,
-                         self).handle_special_keywords(settings, key, value, mol)
-        except KeyError:
-            return funs[key](settings, value, mol, key)
-
-
 class CP2K_Result(Result):
     """
     Class providing access to CP2K result.
-  
-    :param settings:
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir,
-                 file_h5, project_name):
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        """
-        self.settings = settings
-        self._molecule = molecule
-        self.hdf5_file = file_h5
-        properties = 'data/dictionaries/propertiesCP2K.json'
-        xs = pkg.resource_string("qmworks", properties)
-        self.prop_dict = json2Settings(xs)
-        # self.archive = result_path
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dir': work_dir}
-        self.project_name = project_name
-        self.job_name = job_name
-        
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.archive,
-            "job_name": self.job_name}
+    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
+                 path_hdf5=None, project_name=None,
+                 properties='data/dictionaries/propertiesCP2K.json'):
+        super().__init__(settings, molecule, job_name, plams_dir,
+                         work_dir=work_dir, path_hdf5=path_hdf5,
+                         project_name=project_name, properties=properties)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, plams_dir=None,
-                  work_dir=None, file_h5='quantum.hdf5'):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -455,12 +202,16 @@ class CP2K_Result(Result):
         :param molecule: molecular Geometry.
         :param job_name: Name of the job.
         :param plams_dir: Absolute path to plams output folder
-        :param work_dir: Absolute path to the folder where the calculation
-        was performed.
-        :param file_h5: Path to the HDF5 file that contains the numerical results
+        :param archive: dictionary containing the paths to the input/output
+        folders.
+        :param path_hdf5: Path to the HDF5 file that contains the numerical
+        results.
         """
+        fun = partial(lookup, archive)
+        plams_dir, work_dir, path_hdf5 = list(map(fun, ["plams_dir", "work_dir",
+                                                        "path_hdf5"]))
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
-                           file_h5)
+                           path_hdf5, project_name)
 
     def get_property(self, prop, section=None):
         pass
@@ -477,51 +228,99 @@ class CP2K_Result(Result):
         relative_cwd = self.archive['work_dir'].split('/')[-1]
         hdf5_path_to_prop = join(self.project_name, relative_cwd)
         sections = self.prop_dict[prop]
-        # paths_to_prop = list(map(lambda x: join(self.archive['work_dir'], x),
-        #                          sections))
-        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x), sections))
-
-        return paths_to_prop
-
-
-class CP2K_Farming_Result(CP2K_Result):
-    """
-    """
-    def __init__(self, settings, mol, plams_dir, work_dirs, file_h5):
-        """
-        :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
-        :param mol: molecular Geometry.
-        :type mol: plams Molecule
-        :param plams_dir: Absolute path to plams output folder
-        :type plams_dir: String
-        :param work_dir: Absolute path to the folder where the calculation
-        was performed.
-        :type work_dirs: String
-        :param file_h5: Path to the HDF5 file that contains the numerical results.
-        :type file_h5: String
-        """
-        super(CP2K_Farming_Result, self).__init__(settings, mol, plams_dir,
-                                                  work_dirs, file_h5)
-        self.archive = {"plams_dir": files.Path(plams_dir),
-                        'work_dirs': work_dirs}
-        
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-        The property is extracted from a  result file, which is recursively
-        search for in the CP2K settings
-
-        Example:
-        ..
-            overlap_matrix = result.overlap
-        """
-        sections = self.prop_dict[prop]
-        work_dirs = self.archive['work_dirs']
-        paths_to_prop = list(map(lambda folder:
-                                 list(map(lambda x: join(folder, x), sections)), work_dirs))
+        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
+                                 sections))
 
         return paths_to_prop
 
 
 cp2k = CP2K()
-cp2k_farming = CP2K_Farming()
+
+
+def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
+                 nLUMOS, project_name=None):
+    """
+    Store the result in HDF5 format.
+
+    :param file_h5: Path to the HDF5 file that contains the
+    numerical results.
+    :type file_h5: String
+    :param settings: Job Settings.
+    :type settings: :class:`~qmworks.Settings`
+    :param work_dir: Path to the folders where the calculation is carried out.
+    :tpye work_dir: String
+    :param output_file: Absolute path to plams output file.
+    """
+    def match_file(pattern):
+        """ Cp2k append the suffix .Log to the output files """
+        s = "*{}*Log".format(pattern)
+        xs = list(filter(lambda x: fnmatch.fnmatch(x, s),
+                         os.listdir(work_dir)))
+        if xs:
+            return xs[0]
+        else:
+            return None
+
+    def get_value_recursively(st, xs):
+        """
+        :param xs: List of keys
+        :type xs: String List
+        """
+        s = st.copy()
+        for x in xs:
+            s = s.get(x)
+            if s is None:
+                break
+        return s
+
+    def get_file_path(xs):
+        """
+        Search for a result file requested in the settings.
+        CP2K renames thew files appending a number an a `Log` to the
+        end of the filename.
+        """
+        path = get_value_recursively(settings, xs)
+        if path is None or os.path.exists(path):
+            return path
+        else:  # The software renamed the filename given by the user
+            root, file_pattern = os.path.split(path)
+            real_name = match_file(file_pattern)
+            return join(root, real_name)
+
+    settings_file_MO = ["specific", "cp2k", "force_eval", "dft",
+                        "print", "mo", "filename"]
+    settings_file_overlap = ["specific", "cp2k", "force_eval", "dft",
+                             "print", "ao_matrices", "filename"]
+
+    # Arguments to store the properties in HDF5
+    nOccupied, nOrbitals, nOrbFuns = read_cp2k_number_of_orbitals(output_file)
+    path_MO = get_file_path(settings_file_MO)
+    path_overlap = get_file_path(settings_file_overlap)
+
+    # Paths inside the HDF5 file
+    keys = []
+    files_to_remove = []
+    if path_MO is not None:
+        relative_cwd = work_dir.split('/')[-1]
+        pathEs = join(project_name, relative_cwd, "cp2k/mo/eigenvalues")
+        pathCs = join(project_name, relative_cwd, "cp2k/mo/coefficients")
+        k = InputKey('orbitals',
+                     [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
+                      nOccupied, nHOMOS, nLUMOS])
+        keys.append(k)
+        # Remove this file after it has been processed
+        files_to_remove.append(path_MO)
+
+    if path_overlap is not None:
+        path_mtx_overlap = join(work_dir, "cp2k/overlap")
+        keys.append(InputKey('overlap',
+                             [path_overlap, nOrbitals, path_mtx_overlap]))
+        files_to_remove.append(path_overlap)
+
+    # Calling the qmworks-HDF5 API
+    with h5py.File(file_h5, chunks=True) as f5:
+        cp2k2hdf5(f5, keys)
+
+    # Remove the text output files
+    for x in files_to_remove:
+        os.remove(x)

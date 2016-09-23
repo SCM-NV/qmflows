@@ -2,12 +2,12 @@
     "specific": {
         "adf": {
             "basis": {"type": "SZ"},
-            "xc": {"lda": ""},
+            "xc": {"__block_replace": true, "lda": ""},
             "integration": {"accint": 6.0},
             "scf": {
                 "converge": 1e-6,
                 "iterations": 100},
-            "geometry": {"TransitionState":"mode=1"} },
+            "geometry": {"transitionstate":"mode=1"} },
         "dftb": {
             "task": {"runtype": "TS"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
