@@ -23,21 +23,20 @@ floatNumberDot = Regex(r'(\-)?(\d+)?(\.)(\d*)?([eE][\-\+]\d+)?')
 # Parse Utilities
 anyChar     = Regex('.')
 skipAnyChar = Suppress(anyChar)
-skipLine = Suppress(SkipTo('\n'))
+skipSupress = lambda z: Suppress(SkipTo(z))
+skipLine = skipSupress('\n')
 
 
 # Generic Functions
 
-
 def parse_file(p, file_name):
     """
-    Wrapper over parseFile method
+    Wrapper over the parseFile method
     """
     try:
-        r = p.parseFile(file_name)
-        return r[0]
+        return p.parseFile(file_name)
     except ParseException:
-        msg = "Error Trying to parse {}".format(p.name)
+        msg = "Error Trying to parse: {} in file: {}".format(p, file_name)
         print(msg)
         raise
 

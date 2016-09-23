@@ -1,10 +1,7 @@
 {
-    "totalenergy": ["games/energy/totalenergy"],
-    "orbitals" : ["gamess/mo/eigenvalues", "gamess/mo/coefficients"],
-    "overlap": ["gamess/overlap"],
-    "gradient": ["gamess/gradient"],
-    "hessian": ["gamess/hessian"],
+    "frequencies": {"module": "qmworks.parsers.gamess_parser", "function": "parse_frequencies"},
+    "hessian": {"module": "qmworks.parsers.gamess_parser", "function": "parse_hessian"},
+    "gradient": {"module": "qmworks.parsers.gamess_parser", "function": "parse_gradient"},
     "energy": "/TOTAL ENERGY/ {e = $4} END {print e}",
     "dipole": "/ELECTROSTATIC MOMENTS/ {getline; getline; getline; getline; getline; getline; dx = $1; dy = $2; dz = $3} END {print dx; print dy; print dz}",
-    "frequencies": "/MODE FREQ/ {getline; while($0 != \"\") {print $2; getline}}"
 }

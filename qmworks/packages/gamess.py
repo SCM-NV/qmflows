@@ -9,6 +9,9 @@ from qmworks.packages.packages import Package, Result
 from qmworks.settings import Settings
 from qmworks.utils import lookup
 
+import fnmatch
+import importlib
+import os
 import plams
 # ======================================<>=====================================
 
@@ -122,18 +125,16 @@ class Gamess_Result(Result):
         ..
             Hessian_matrix = result.hessian
         """
-        section_hdf5 = self.prop_dict[prop]
+        # Read the JSON dictionary than contains the parsers names
+        ds = prop_dict[prop]
+        module = ds['module'] 
+        function = ds['function']
+        m = importlib.import_module(module)
+    
+        real_job_name = fnmatch.filter(os.listdir(plams_dir), '*.inp')[0]
+        pat = '{}.dat'.format(real_job_name)
+        dat_file = fnmatch.filter(os.listdir(work_dir), pat)[0]
 
-        path_to_node_in_hdf5 = join(self.project_name, section_hdf5)
-        # try:
-        #     return read_from_hdf5(self.hdf5_file, path_to_node_in_hdf5)
-        # except KeyError:
-        return self.read_property_from_archive(prop, "path_to_node_in_hdf5")
-
-    def read_property_from_archive(self, prop, path_to_node_in_hdf5):
-        """
-        Read `prop` from the output files and store in the HDF5.
-        """
-        return self.awk_output(script=self.prop_dict[prop])
+        return getattr(m, function)(dat_file)
         
 gamess = GAMESS()
