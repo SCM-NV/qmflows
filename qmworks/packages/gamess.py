@@ -9,9 +9,7 @@ from qmworks.packages.packages import Package, Result
 from qmworks.settings import Settings
 from qmworks.utils import lookup
 
-import fnmatch
 import importlib
-import os
 import plams
 # ======================================<>=====================================
 
@@ -54,12 +52,13 @@ class GAMESS(Package):
         """
         gamess_settings = Settings()
         gamess_settings.input = settings.specific.gamess
-        job = plams.GamessJob(molecule=mol, name=job_name, settings=gamess_settings)
+        job = plams.GamessJob(molecule=mol, name=job_name,
+                              settings=gamess_settings)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
 
-        return Gamess_Result(gamess_settings, mol, job_name,
+        return Gamess_Result(gamess_settings, mol, r.job.name,
                              plams_dir=r.job.path, work_dir=work_dir,
                              path_hdf5=hdf5_file, project_name=project_name)
 
@@ -88,8 +87,8 @@ class Gamess_Result(Result):
                  work_dir=None, path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesGAMESS.json'):
         super().__init__(settings, molecule, job_name, plams_dir,
-                       work_dir=work_dir, path_hdf5=path_hdf5,
-                       project_name=None, properties=properties)
+                         work_dir=work_dir, path_hdf5=path_hdf5,
+                         project_name=None, properties=properties)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -126,15 +125,24 @@ class Gamess_Result(Result):
             Hessian_matrix = result.hessian
         """
         # Read the JSON dictionary than contains the parsers names
-        ds = prop_dict[prop]
-        module = ds['module'] 
+        ds = self.prop_dict[prop]
+        module = ds['module']
         function = ds['function']
+        file_name = ds['file']
         m = importlib.import_module(module)
-    
-        real_job_name = fnmatch.filter(os.listdir(plams_dir), '*.inp')[0]
-        pat = '{}.dat'.format(real_job_name)
-        dat_file = fnmatch.filter(os.listdir(work_dir), pat)[0]
 
-        return getattr(m, function)(dat_file)
-        
+        if file_name == 'dat_file':
+            file_out = join(self.work_dir, '{}.dat'.format(self.job_name))
+        else:
+            file_out = join(self.plams_dir, '{}.out'.format(self.job_name))
+
+        return getattr(m, function)(file_out)
+
+    @property
+    def molecule(self):
+        """
+        Read Molecule
+        """
+        return getattr(self, 'molecule')
+
 gamess = GAMESS()

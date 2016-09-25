@@ -1,7 +1,8 @@
 {
-    "frequencies": {"module": "qmworks.parsers.gamess_parser", "function": "parse_frequencies"},
-    "hessian": {"module": "qmworks.parsers.gamess_parser", "function": "parse_hessian"},
-    "gradient": {"module": "qmworks.parsers.gamess_parser", "function": "parse_gradient"},
+    "frequencies": {"module": "qmworks.parsers.gamess_parser", "function": "parse_frequencies", "file": "dat_file"},
+    "hessian": {"module": "qmworks.parsers.gamess_parser", "function": "parse_hessian", "file": "dat_file"},
+    "gradient": {"module": "qmworks.parsers.gamess_parser", "function": "parse_gradient", "file": "dat_file"},
+    "dipole": {"module": "qmworks.parsers.gamess_parser", "function": "parse_dipole", "file": "dat_file"},
+    "dipole": {"module": "qmworks.parsers.gamess_parser", "function": "parse_dipole", "file": "out_file"},
     "energy": "/TOTAL ENERGY/ {e = $4} END {print e}",
-    "dipole": "/ELECTROSTATIC MOMENTS/ {getline; getline; getline; getline; getline; getline; dx = $1; dy = $2; dz = $3} END {print dx; print dy; print dz}",
 }

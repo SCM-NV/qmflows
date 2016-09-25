@@ -1,8 +1,5 @@
 __author__ = "Felipe Zapata"
 
-__all__ = ["anyChar", "floatNumber", "floatNumberDot", "minusOrplus",
-           "parse_file", "parse_section", "skipAnyChar"]
-
 # ===============> Standard libraries and third-party <========================
 from pyparsing import (CaselessKeyword, Combine, Literal, nums, Optional,
                        ParseException, Regex, SkipTo, Suppress, Word)
@@ -24,7 +21,7 @@ floatNumberDot = Regex(r'(\-)?(\d+)?(\.)(\d*)?([eE][\-\+]\d+)?')
 anyChar     = Regex('.')
 skipAnyChar = Suppress(anyChar)
 skipSupress = lambda z: Suppress(SkipTo(z))
-skipLine = skipSupress('\n')
+skipLine = Suppress(skipSupress('\n'))
 
 
 # Generic Functions
