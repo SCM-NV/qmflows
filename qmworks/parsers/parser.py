@@ -1,8 +1,10 @@
 __author__ = "Felipe Zapata"
 
 # ===============> Standard libraries and third-party <========================
+from plams import (Atom, Molecule)
 from pyparsing import (CaselessKeyword, Combine, Literal, nums, Optional,
                        ParseException, Regex, SkipTo, Suppress, Word)
+import numpy as np
 
 # Literals
 point = Literal('.')
@@ -46,3 +48,31 @@ def parse_section(start, end):
     e = Literal('{}'.format(end))
 
     return Suppress(SkipTo(s)) + skipLine + SkipTo(e)
+
+
+def string_array_to_molecule(parser_fun, file_name):
+    """
+    Convert a Numpy string array like:
+
+    [['C', '-1.487460', '-0.028670', '-0.000060'],
+    ['O', '0.376340', '0.028670', '-0.000060'],
+    ['H', '-1.818910', '-1.067060', '-0.000060'],
+    ['H', '-1.866470', '0.473700', '0.889930'],
+    ['H', '-1.866470', '0.473700', '-0.890040'],
+    ['H', '0.756720', '-0.950010', '-0.000060']]
+
+    To a plams ``Molecule``.
+    """
+    string_array_to_float = np.vectorize(float)
+    mols = parse_file(parser_fun, file_name).asList()
+    last_mol = np.array(mols[-1])
+    elems = last_mol[:, 0]
+    coords = string_array_to_float(last_mol[:, 1:])
+    plams_mol = Molecule()
+    for e, c in zip(elems, coords):
+        plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
+
+    return plams_mol
+
+
+    

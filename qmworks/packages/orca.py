@@ -1,7 +1,9 @@
 # =======>  Standard and third party Python Libraries <======
 from noodles import (Storable)
+from os.path import join
 from qmworks.settings import Settings
-from qmworks.packages.packages import Package, Result
+from qmworks.packages.packages import (Package, Result)
+from qmworks.parser.orca_parser import parse_molecule
 
 import plams
 # ============================= Orca ==========================================
@@ -56,8 +58,8 @@ class ORCA_Result(Result):
 
     def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
         properties = 'data/dictionaries/propertiesORCA.json'
-        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir,
+                         project_name=project_name, properties=properties)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -78,6 +80,9 @@ class ORCA_Result(Result):
 
     @property
     def molecule(self):
-        pass
+        """ Retrieve the molecule from the output file"""
+        plams_dir = self.archive["plams_dir"].path
+        file_name = join(plams_dir, '{}.out'.format(self.job_name))
+        return parse_molecule(file_name)
 
 orca = ORCA()

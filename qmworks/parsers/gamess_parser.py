@@ -2,12 +2,10 @@
 __all__ = ['parse_dipole', 'parse_frequencies', 'parse_gradient',
            'parse_hessian', 'parse_molecule']
 
-from plams import (Atom, Molecule)
 from pyparsing import (alphanums, Group, Literal, OneOrMore, SkipTo, Suppress,
                        Word)
-from qmworks.utils import concat
 from .parser import (floatNumber, integer, parse_file, parse_section, skipLine,
-                     skipSupress)
+                     skipSupress, string_array_to_molecule)
 
 import numpy as np
 
@@ -40,17 +38,9 @@ def parse_molecule(file_name):
     parse_atoms = Group(Word(alphanums) + Suppress(floatNumber) +
                         floatNumber * 3)
     parse_mol = p1 + p2 + Group(OneOrMore(parse_atoms))
-    all_mols = OneOrMore(Group(parse_mol))
+    many_mols = OneOrMore(parse_mol)
 
-    mols = parse_file(all_mols, file_name).asList()
-    last_mol = np.array(concat(mols[-1]))
-    elems = last_mol[:, 0]
-    coords = string_array_to_float(last_mol[:, 1:])
-    plams_mol = Molecule()
-    for e, c in zip(elems, coords):
-        plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
-
-    return plams_mol
+    return string_array_to_molecule(many_mols, file_name)
 
 
 def parse_dipole(file_name):
