@@ -16,7 +16,7 @@ def test_opt_gamess():
     """
     Test Optimization in Gamess using methanol in water.
     """
-    methanol = Molecule('test/test_files/methanol.xyz')
+    methanol = Molecule('test/test_files/ion_methanol.xyz')
     methanol.properties['symmetry'] = 'Cs'
 
     s = Settings()
