@@ -3,7 +3,7 @@ from noodles import (Storable)
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, Result)
-from qmworks.parser.orca_parser import parse_molecule
+from qmworks.parsers.orca_parser import parse_molecule
 
 import plams
 # ============================= Orca ==========================================
