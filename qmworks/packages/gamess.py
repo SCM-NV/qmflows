@@ -5,7 +5,6 @@ __all__ = ['gamess']
 # =======>  Standard and third party Python Libraries <======
 from os.path import join
 from qmworks.packages.packages import Package, Result
-#from qmworks.quantumHDF5 import read_from_hdf5
 from qmworks.settings import Settings
 from qmworks.utils import lookup
 
@@ -131,18 +130,21 @@ class Gamess_Result(Result):
         file_name = ds['file']
         m = importlib.import_module(module)
 
+        work_dir = self.archive['work_dir']
+        plams_dir = self.archive['plams_dir'].path
+
         if file_name == 'dat_file':
-            file_out = join(self.work_dir, '{}.dat'.format(self.job_name))
+            file_out = join(work_dir, '{}.dat'.format(self.job_name))
         else:
-            file_out = join(self.plams_dir, '{}.out'.format(self.job_name))
+            file_out = join(plams_dir, '{}.out'.format(self.job_name))
 
         return getattr(m, function)(file_out)
 
-    @property
-    def molecule(self):
-        """
-        Read Molecule
-        """
-        return getattr(self, 'molecule')
-
+    # @property
+    # def molecule(self):
+    #     """
+    #     Read Molecule
+    #     """
+    #     pass
+          
 gamess = GAMESS()

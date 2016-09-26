@@ -3,6 +3,6 @@
     "hessian": {"module": "qmworks.parsers.gamess_parser", "function": "parse_hessian", "file": "dat_file"},
     "gradient": {"module": "qmworks.parsers.gamess_parser", "function": "parse_gradient", "file": "dat_file"},
     "dipole": {"module": "qmworks.parsers.gamess_parser", "function": "parse_dipole", "file": "dat_file"},
-    "dipole": {"module": "qmworks.parsers.gamess_parser", "function": "parse_dipole", "file": "out_file"},
-    "energy": "/TOTAL ENERGY/ {e = $4} END {print e}",
+    "molecule": {"module": "qmworks.parsers.gamess_parser", "function": "parse_molecule", "file": "out_file"},
+    "energy": "/TOTAL ENERGY/ {e = $4} END {print e}"
 }
