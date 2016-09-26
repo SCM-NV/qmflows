@@ -2,12 +2,14 @@
 from math import sqrt
 from nose.plugins.attrib import attr
 from plams import Molecule
-from qmworks import (Settings, templates)
+from qmworks import (concat, Settings, templates, zipWith)
 
 # User Defined imports
 from qmworks.packages.SCM import dftb
 from qmworks.packages.orca import orca
 from qmworks.packages import run
+
+import operator
 
 
 @attr('slow')
@@ -39,3 +41,27 @@ def test_opt_orca():
                                                  expected_dipole)))
 
     assert diff < 1e-8
+
+
+@attr('slow')
+def test_methanol_opt_orca():
+    """
+    Run a methanol optimization and retrieve the optimized geom.
+    """
+    methanol = Molecule('test/test_files/methanol.xyz')
+
+    s = Settings()
+    s.specific.main = "RKS B3LYP SVP Opt TightSCF SmallPrint"
+
+    opt = orca(s, methanol)
+
+    mol_opt = run(opt.molecule, methanol)
+
+    expected_coords = [-1.311116, -0.051535, -0.000062, 0.097548, 0.033890,
+                       -0.000077, -1.683393, -1.092152, -0.000066,
+                       -1.734877, 0.448868, 0.891460, -1.734894, 0.448881,
+                       -0.891567, 0.460481, -0.857621, -0.000038]
+
+    coords = concat([a.coords for a in mol_opt.atoms])
+
+    assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
