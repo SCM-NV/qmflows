@@ -15,3 +15,9 @@ def parse_molecule(file_name):
     parse_many_mol = OneOrMore(parse_mol)
 
     return string_array_to_molecule(parse_many_mol, file_name)
+
+
+def parse_hessian(file_name):
+    """ """
+    pass
+    

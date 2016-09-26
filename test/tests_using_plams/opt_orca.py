@@ -55,7 +55,7 @@ def test_methanol_opt_orca():
 
     opt = orca(s, methanol)
 
-    mol_opt = run(opt.molecule, methanol)
+    mol_opt = run(opt.molecule)
 
     expected_coords = [-1.311116, -0.051535, -0.000062, 0.097548, 0.033890,
                        -0.000077, -1.683393, -1.092152, -0.000066,
