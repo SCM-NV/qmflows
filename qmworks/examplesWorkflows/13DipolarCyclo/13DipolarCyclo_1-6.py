@@ -1,5 +1,6 @@
 # Default imports
-from qmworks import Settings, templates, run, rdkitTools, draw_workflow
+from qmworks import Settings, templates, run, rdkitTools
+from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 # from plams import Molecule
 
@@ -7,7 +8,7 @@ from noodles import gather
 from math import sqrt
 from qmworks.packages.SCM import dftb, adf
 # from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
-from qmworks.components import PES_scan, select_max
+from qmworks.components import Distance, PES, select_max
 
 import plams
 # ========== =============
@@ -16,7 +17,6 @@ plams.init()
 config.log.stdout = -1000  # noqa
 
 hartree2kcal = 627.5095
-startvalue = {'C': 2.1, 'N': 1.9, 'O': 1.8}
 
 # User define Settings
 settings = Settings()
@@ -48,43 +48,26 @@ def calc_productAndTS(name):
              mol, job_name=name + "_product_DFTB").molecule,
         job_name=name + "_product")
 
-    constraint1 = "dist 1 2"
-    constraint2 = "dist 4 5"
-
-    sv1 = startvalue[name[0]]
-    sv2 = startvalue[name[2]]
+    constraint1 = Distance(1, 0)
+    constraint2 = Distance(4, 3)
 
     # scan input
-    if name[0] == name[2]:
-        # symmetric molecule
-        scan = {'constraint': [constraint1, constraint2],
-                'surface': {'nsteps': 4, 'start': [sv1, sv2],
-                            'stepsize': [0.1, 0.1]}}
-    else:
-        scan = {'constraint': constraint1,
-                'surface': {'nsteps': 4, 'start': sv1, 'stepsize': 0.1},
-                'scan': {'constraint': constraint2,
-                         'surface': {'nsteps': 4,
-                                     'start': sv2,
-                                     'stepsize': 0.1}
-                         }
-                }
+    pes = PES(product.molecule, constraints=[constraint1, constraint2],
+              offset=[2.0, 2.0], get_current_values=False, nsteps=5, stepsize=[0.1, 0.1])
 
     # PES = gathered (promised) result objects for each point in the scan
-    PES = PES_scan(
-        [dftb, adf], settings, product.molecule, scan,
-        job_name=name + "_PES")
+    pesscan = pes.scan([dftb, adf], settings, job_name=name + "_PES")
 
     # get the object presenting the molecule with the maximum energy
     # calculated from the scan
-    apprTS = select_max(PES, 'energy')
+    apprTS = select_max(pesscan, 'energy')
 
     DFTB_freq = dftb(
         templates.freq.overlay(settings), apprTS.molecule,
         job_name=name + "_DFTBfreq")
 
     t = Settings()
-    t.specific.adf.geometry.inithess = DFTB_freq.archive['plams_dir'].path
+    t.specific.adf.geometry.inithess = DFTB_freq.kf.path
 
     # Run the TS optimization, using the default TS template
     TS = adf(
@@ -115,7 +98,7 @@ for name in reaction_names:
     job_list.append(gather(reactant, product, adf_freq))
 
 # Need also the energy of ethene
-ethene = rdkitTools.smiles2plams('C=C')
+ethene = rdkitTools.smiles2rdkit('C=C')
 E_ethene_job = adf(
     templates.geometry.overlay(settings),
     ethene, job_name="ethene").energy
