@@ -33,7 +33,7 @@ def test_opt_gamess():
                                          "3,1,2,3,4,  3,1,2,3,5,  3,1,2,3,6"
 
     inp = templates.geometry.overlay(s)
-    methanol_geometry = gamess(inp, methanol)
+    methanol_geometry = gamess(inp, methanol, work_dir='/tmp')
 
     mol_opt = run(methanol_geometry.molecule)
 

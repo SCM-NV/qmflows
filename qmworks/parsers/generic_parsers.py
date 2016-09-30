@@ -5,7 +5,7 @@ import os
 import subprocess
 
 
-def awk_file(filename, plams_dir, script='', progfile=None, **kwargs):
+def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
     """awk_file(filename, script='', progfile=None, **kwargs)
     Execute an AWK script on a file given by *filename*.
 

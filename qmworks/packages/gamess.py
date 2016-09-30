@@ -1,16 +1,13 @@
 
-
 __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
-from os.path import join
-from qmworks.packages.packages import Package, Result
+from functools import partial
+from qmworks.packages.packages import (find_file_pattern, Package, Result)
 from qmworks.settings import Settings
 from qmworks.utils import (concatMap, lookup)
 
-import fnmatch
 import importlib
-import os
 import plams
 # ======================================<>=====================================
 
@@ -125,16 +122,11 @@ class Gamess_Result(Result):
         ..
             Hessian_matrix = result.hessian
         """
-        def find_file_pattern(pat, folder):
-            if os.path.exists(folder):
-                return fnmatch.filter(os.listdir(plams_dir), file_pattern)
-            else:
-                return []
         # Read the JSON dictionary than contains the parsers names
         ds = self.prop_dict[prop]
         module_root = "qmworks.parsers"
         module_sufix = ds['parser']
-        module_name = join(module_root, module_sufix)
+        module_name = module_root + '.' + module_sufix
         function = ds['function']
         file_ext = ds['file_ext']
         m = importlib.import_module(module_name)
@@ -145,7 +137,8 @@ class Gamess_Result(Result):
         plams_dir = self.archive['plams_dir'].path
         # Search for the specified output file in the folders
         file_pattern = '{}.{}'.format(self.job_name, file_ext)
-        output_files = concatMap(file_pattern, [plams_dir, work_dir])
+        output_files = concatMap(partial(find_file_pattern, file_pattern),
+                                 [plams_dir, work_dir])
 
         if output_files:
             file_out = output_files[0]
@@ -158,9 +151,8 @@ class Gamess_Result(Result):
                 " output files"
             else:
                 suggestion = ''
-            msg = "There is not output file called: "
-            "{}.\n{}".format(file_pattern, suggestion)
-            FileNotFoundError(msg)
+            msg = "There is not output file called: {}.\n{}".format(file_pattern, suggestion)
+            raise FileNotFoundError(msg)
 
 
 gamess = GAMESS()
