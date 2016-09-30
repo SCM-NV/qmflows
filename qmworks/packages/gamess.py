@@ -125,7 +125,7 @@ class Gamess_Result(Result):
         """
         # Read the JSON dictionary than contains the parsers names
         ds = self.prop_dict[prop]
-        module = ds['module']
+        module = "qmworks.parsers.gamess_parser"
         function = ds['function']
         file_name = ds['file']
         m = importlib.import_module(module)
