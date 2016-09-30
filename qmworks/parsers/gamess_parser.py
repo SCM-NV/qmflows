@@ -1,8 +1,8 @@
 
-__all__ = ['parse_dipole', 'parse_frequencies', 'parse_gradient',
-           'parse_hessian', 'parse_molecule']
+__all__ = ['parse_dipole', 'parse_total_energy', 'parse_frequencies',
+           'parse_gradient', 'parse_hessian', 'parse_molecule']
 
-from pyparsing import (alphanums, Group, Literal, OneOrMore, SkipTo, Suppress,
+from pyparsing import (alphanums, Group, Literal, OneOrMore, Regex, Suppress,
                        Word)
 from .parser import (floatNumber, integer, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule)
@@ -48,7 +48,7 @@ def parse_dipole(file_name):
     Parse dipole moment from the *.dat file.
     """
     l = Literal('DIPOLE')
-    p = Suppress(SkipTo(l) + l) + OneOrMore(floatNumber)
+    p = skipSupress(l) + OneOrMore(floatNumber)
     rs = parse_file(p, file_name).asList()
     return string_array_to_float(rs)
 
@@ -89,8 +89,12 @@ def parse_frequencies(file_name):
     array_modes = arr[:, 1:]
     return frequencies, array_modes
 
-# def parse_energy():
-#     """
-#     parse Total energy.
-#     """
-#     Suppress(SkipTo(Regex(r'^E'))
+
+def parse_total_energy(file_name):
+    """
+    Parse Energy from the output file.
+    """
+    skip = Literal('TOTAL ENERGY') + Regex('=')
+    p = skipSupress(skip) + Suppress(skip) + floatNumber
+
+    return float(parse_file(p, file_name).asList()[0])
