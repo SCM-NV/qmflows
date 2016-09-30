@@ -51,7 +51,7 @@ def test_methanol_opt_orca():
     methanol = Molecule('test/test_files/methanol.xyz')
 
     s = Settings()
-    s.specific.main = "RKS B3LYP SVP Opt TightSCF SmallPrint"
+    s.specific.orca.main = "RKS B3LYP SVP Opt TightSCF SmallPrint"
 
     opt = orca(s, methanol)
 
