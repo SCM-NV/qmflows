@@ -4,6 +4,7 @@
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
+from qmworks.parsers.generic_parsers import awk_file
 
 import builtins
 import plams
@@ -94,8 +95,8 @@ class ADF_Result(Result):
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
                  project_name=None):
         properties = 'data/dictionaries/propertiesADF.json'
-        super().__init__(settings, molecule, job_name, plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+                         project_name=project_name, properties=properties)
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
@@ -114,18 +115,20 @@ class ADF_Result(Result):
         Example:
 
         ..
-
             dipole = result.dipole
-
         """
         if prop in self.prop_dict:
             prop_query = self.prop_dict[prop]
             if prop_query.parser == 'awk':
-                return self.awk_output(script=prop_query.function)
+                filename = self.job_name + ".out"
+                plams_dir = self.archive['plams_dir'].path
+                return awk_file(filename, plams_dir, script=prop_query.function)
+
             elif prop_query.parser == "kfreader":
                 return self.kf.read(*prop_query.function)
             else:
-                raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for ADF results.")
+                msg = "Property parser '" + prop_query.parser + "' not defined for ADF results."
+                raise RuntimeError(msg)
         else:
             raise KeyError("Generic property '" + str(prop) + "' not defined")
 
@@ -229,13 +232,19 @@ class DFTB_Result(Result):
         if prop in self.prop_dict:
             prop_query = self.prop_dict[prop]
             if prop_query.parser == 'awk':
-                return self.awk_output(script=prop_query.function)
+                filename = self.job_name + ".out"
+                plams_dir = self.archive['plams_dir'].path
+                return awk_file(filename, plams_dir, script=prop_query.function)
+
             elif prop_query.parser == "kfreader":
                 return self.kf.read(*prop_query.function)
+
             elif prop_query.parser == "kfproperties":
                 return self.properties[prop_query.function]
+
             else:
-                raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for DFTB results.")
+                msg = "Property parser '" + prop_query.parser + "' not defined for DFTB results."
+                raise RuntimeError(msg)
         else:
             raise KeyError("Generic property '" + str(prop) + "' not defined")
 

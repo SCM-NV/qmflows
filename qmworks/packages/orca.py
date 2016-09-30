@@ -4,6 +4,7 @@ from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, Result)
 from qmworks.parsers.orca_parser import parse_molecule
+from qmworks.parsers.generic_parsers import awk_file
 
 import plams
 # ============================= Orca ==========================================
@@ -72,11 +73,11 @@ class ORCA_Result(Result):
         Example:
 
         ..
-
             dipole = result.dipole
-
         """
-        return self.awk_output(script=self.prop_dict[prop])
+        filename = self.job_name + ".out"
+        plams_dir = self.archive['plams_dir'].path
+        return awk_file(filename, plams_dir, script=self.prop_dict[prop])
 
     @property
     def molecule(self):
