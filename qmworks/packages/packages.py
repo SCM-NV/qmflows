@@ -4,6 +4,8 @@ from os.path import join
 from rdkit import Chem
 import base64
 
+import fnmatch
+import os
 import plams
 import pkg_resources as pkg
 
@@ -70,7 +72,7 @@ class Result:
             "archive": self.archive,
             "project_name": self.project_name}
 
-
+    
 @has_scheduled_methods
 class Package:
     """
@@ -277,3 +279,10 @@ def registry():
             Chem.Mol: SerMol(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
+
+
+def find_file_pattern(pat, folder):
+    if folder is not None and os.path.exists(folder):
+        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), pat))
+    else:
+        return []
