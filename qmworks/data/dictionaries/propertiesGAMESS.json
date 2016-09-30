@@ -4,5 +4,5 @@
     "gradient":    {"function": "parse_gradient",    "file": "dat_file"},
     "dipole":      {"function": "parse_dipole",      "file": "dat_file"},
     "molecule":    {"function": "parse_molecule",    "file": "out_file"},
-    "energy": "/TOTAL ENERGY/ {e = $4} END {print e}"
+    "total_energy": {"function": "parse_total_energy", "file": "out_file"}
 }
