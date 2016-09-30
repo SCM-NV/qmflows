@@ -1,8 +1,8 @@
 {
-    "frequencies": {"function": "parse_frequencies", "file": "dat_file"},
-    "hessian":     {"function": "parse_hessian",     "file": "dat_file"},
-    "gradient":    {"function": "parse_gradient",    "file": "dat_file"},
-    "dipole":      {"function": "parse_dipole",      "file": "dat_file"},
-    "molecule":    {"function": "parse_molecule",    "file": "out_file"},
-    "total_energy": {"function": "parse_total_energy", "file": "out_file"}
+    "frequencies": {"parser": "gamess_parser", "function": "parse_frequencies", "file": "dat"},
+    "hessian":     {"parser": "gamess_parser", "function": "parse_hessian",     "file": "dat"},
+    "gradient":    {"parser": "gamess_parser", "function": "parse_gradient",    "file": "dat"},
+    "dipole":      {"parser": "gamess_parser", "function": "parse_dipole",      "file": "dat"},
+    "molecule":    {"parser": "gamess_parser", "function": "parse_molecule",    "file": "out"},
+    "total_energy": {"parser": "gamess_parser", "function": "parse_total_energy", "file": "out"}
 }
