@@ -1,5 +1,5 @@
 {
-    "energy": {"parser": "awk": "function": "/FINAL SINGLE POINT ENERGY/ {print $5}"},
+    "energy": {"parser": "awk", "function": "/FINAL SINGLE POINT ENERGY/ {print $5}"},
     "dipole": {"awk": "/Total Dipole Moment/ {print $5; print $6; print $7}"},
     "charges": {"awk": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"}
 }
