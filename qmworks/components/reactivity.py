@@ -4,6 +4,7 @@ __all__ = ['Distance', 'Angle', 'PES']
 from qmworks import templates, rdkitTools
 from qmworks.settings import Settings
 from noodles import gather, schedule
+from plams import Molecule
 from rdkit import Chem
 from rdkit.Chem import AllChem
 
@@ -17,6 +18,8 @@ class Distance:
         self.atom2 = atom2
 
     def get_current_value(self, mol):
+        if isinstance(mol, Molecule):
+            mol = rdkitTools.plams2rdkit(mol)
         conf = mol.GetConformer()
         return AllChem.GetBondLength(conf, self.atom1, self.atom2)
 
@@ -41,6 +44,8 @@ class Angle:
         self.atom3 = atom3
 
     def get_current_value(self, mol, rad=False):
+        if isinstance(mol, Molecule):
+            mol = rdkitTools.plams2rdkit(mol)
         conf = mol.GetConformer()
         if rad:
             return AllChem.GetAngleRad(conf, self.atom1, self.atom2, self.atom3)
