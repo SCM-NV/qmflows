@@ -75,6 +75,7 @@ def smiles2rdkit(smiles):
     """
     smiles = str(smiles.split()[0])
     molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    molecule.SetProp('smiles', smiles)
     AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
     return molecule
