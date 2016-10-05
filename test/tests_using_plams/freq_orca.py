@@ -13,7 +13,10 @@ def test_freq_ethylene():
     ethylene = Molecule('test/test_files/ethylene.xyz')
 
     s = Settings()
-    s.specific.orca.main = " B3LYP SVP NumFreq SmallPrint"
+    s.specific.orca.main = "freq"
+    s.specific.orca.basis.basis = 'sto_sz'
+    s.specific.orca.method.functional = 'lda'
+    s.specific.orca.method.method = 'dft'
 
     freq = orca(s, ethylene)
 
