@@ -5,6 +5,7 @@ from rdkit import Chem
 import base64
 
 import fnmatch
+import importlib
 import os
 import plams
 import pkg_resources as pkg
@@ -286,3 +287,13 @@ def find_file_pattern(pat, folder):
         return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), pat))
     else:
         return []
+
+
+def import_parser(ds, module_root="qmworks.parsers"):
+    """
+    Import parser for the corresponding property.
+    """
+    module_sufix = ds['parser']
+    module_name = module_root + '.' + module_sufix
+
+    return importlib.import_module(module_name)

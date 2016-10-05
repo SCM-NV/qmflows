@@ -2,7 +2,7 @@
 from noodles import (Storable)
 from os.path import join
 from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, Result)
+from qmworks.packages.packages import (import_parser, Package, Result)
 from qmworks.parsers.orca_parser import parse_molecule
 
 import plams
@@ -74,18 +74,15 @@ class ORCA_Result(Result):
         ..
             dipole = result.dipole
         """
-        pass
-        # ds = self.prop_dict[prop]
-        # module_root = "qmworks.parsers"
-        # module_sufix = ds['parser']
-        # module_name = join(module_root, module_sufix)
-        # function = ds['function']
-        # file_ext = ds['file_ext']
-        # m = importlib.import_module(module_name)
-        # file_out = self.job_name + ".out"
-        # plams_dir = self.archive['plams_dir'].path
-                
-        # return getattr(m, function)(file_out, plams_dir, script=self.prop_dict[prop])
+        ds = self.prop_dict[prop]
+        # File to parse
+        file_ext = ds['file_ext']
+        file_out = self.job_name + '.' + file_ext
+
+        # arguments of the parser function
+        kwargs = ds['kwargs']
+        kwargs['plams_dir'] = self.archive['plams_dir'].path
+        return getattr(import_parser(ds), ds['function'])(file_out, **kwargs)
 
     @property
     def molecule(self):
@@ -95,3 +92,4 @@ class ORCA_Result(Result):
         return parse_molecule(file_name)
 
 orca = ORCA()
+

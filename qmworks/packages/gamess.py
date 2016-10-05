@@ -3,11 +3,11 @@ __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
 from functools import partial
-from qmworks.packages.packages import (find_file_pattern, Package, Result)
+from qmworks.packages.packages import (find_file_pattern, import_parser,
+                                       Package, Result)
 from qmworks.settings import Settings
 from qmworks.utils import (concatMap, lookup)
 
-import importlib
 import plams
 # ======================================<>=====================================
 
@@ -124,12 +124,7 @@ class Gamess_Result(Result):
         """
         # Read the JSON dictionary than contains the parsers names
         ds = self.prop_dict[prop]
-        module_root = "qmworks.parsers"
-        module_sufix = ds['parser']
-        module_name = module_root + '.' + module_sufix
-        function = ds['function']
         file_ext = ds['file_ext']
-        m = importlib.import_module(module_name)
 
         # IF there is not work_dir returns None
         work_dir = lookup(self.archive, 'work_dir')
@@ -142,7 +137,7 @@ class Gamess_Result(Result):
 
         if output_files:
             file_out = output_files[0]
-            return getattr(m, function)(file_out)
+            return getattr(import_parser(ds), ds['function'])(file_out)
         else:
             if work_dir is None:
                 suggestion = "Maybe you need to provided to the gamess"
