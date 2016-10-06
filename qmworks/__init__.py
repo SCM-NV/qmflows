@@ -12,7 +12,7 @@ from .rdkitTools import (apply_reaction_smarts, apply_template, gen_coords, modi
                          plams2rdkit, rdkit2plams, sequence2plams, smiles2plams,
                          write_molblock)
 from .templates import (freq, geometry, get_template, singlepoint, ts)
-from .components import (PES_scan, select_max)
+from .components import *
 from .settings import Settings
 from .utils import (chunksOf, concat, concatMap, dict2Setting, flatten,
                     repeatN, replicate, settings2Dict, zipWith, zipWith3)
