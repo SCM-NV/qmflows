@@ -2,11 +2,9 @@
 __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
-from functools import partial
-from qmworks.packages.packages import (find_file_pattern, import_parser,
-                                       Package, Result)
+from qmworks.packages.packages import (Package, Result)
 from qmworks.settings import Settings
-from qmworks.utils import (concatMap, lookup)
+from qmworks.utils import lookup
 
 import plams
 # ======================================<>=====================================
@@ -110,9 +108,6 @@ class Gamess_Result(Result):
                              plams_dir=plams_dir, work_dir=work_dir,
                              project_name=project_name)
 
-    def get_property(self, prop, section=None):
-        pass
-
     def __getattr__(self, prop):
         """Returns a section of the results.
         The property is extracted from a  result file, which is recursively
@@ -122,32 +117,18 @@ class Gamess_Result(Result):
         ..
             Hessian_matrix = result.hessian
         """
-        # Read the JSON dictionary than contains the parsers names
-        ds = self.prop_dict[prop]
-        file_ext = ds['file_ext']
-
-        # IF there is not work_dir returns None
-        work_dir = lookup(self.archive, 'work_dir')
-        # Read path to plams output
-        plams_dir = self.archive['plams_dir'].path
-        # Search for the specified output file in the folders
-        file_pattern = '{}.{}'.format(self.job_name, file_ext)
-        output_files = concatMap(partial(find_file_pattern, file_pattern),
-                                 [plams_dir, work_dir])
-
-        if output_files:
-            file_out = output_files[0]
-            return getattr(import_parser(ds), ds['function'])(file_out)
-        else:
-            if work_dir is None:
-                suggestion = "Maybe you need to provided to the gamess"
-                " function the optional keyword 'work_dir' containing the path"
-                " to the SCR folder where GAMESS stores the *.dat and other"
-                " output files"
-            else:
-                suggestion = ''
-            msg = "There is not output file called: {}.\n{}".format(file_pattern, suggestion)
-            raise FileNotFoundError(msg)
+        try:
+            return self.get_property(prop)
+        except Exception:
+            pass
+        # except FileNotFoundError:
+        #     msg = """
+        #     Maybe you need to provided to the gamess
+        #     function the optional keyword 'work_dir' containing the path
+        #     to the SCR folder where GAMESS stores the *.dat and other
+        #     output files"""
+        #     print(msg)
+            # raise
 
 
 gamess = GAMESS()

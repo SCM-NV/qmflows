@@ -5,5 +5,7 @@
 	       "kwargs": {"script": "/Total Dipole Moment/ {print $5; print $6; print $7}"}},
     "charges": {"parser": "generic_parsers", "function": "awk_file", "file": "out",
 	       "kwargs": {"script": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"}}
-    "hess": {"parser": "orca_parser", "function": "parse_hessian", "file": "hess"}
+    "hess": {"parser": "orca_parser", "function": "parse_hessian", "file": "hess"},
+    "frequencies": {"parser": "orca_parser", "function": "parse_frequencies", "file": "hess"},
+    "normal_modes": {"parser": "orca_parser", "function": "parse_normal_modes", "file": "hess"},
 }
