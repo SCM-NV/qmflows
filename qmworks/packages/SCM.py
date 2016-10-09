@@ -122,11 +122,17 @@ class ADF_Result(Result):
         ..
             dipole = result.dipole
         """
+
         if prop in self.prop_dict:
-            section, property = self.prop_dict[prop]
-            return self.kf.read(section, property)
+            prop_query = self.prop_dict[prop]
+            if prop_query.parser == 'awk':
+                return self.awk_output(script=prop_query.function)
+            elif prop_query.parser == "kfreader":
+                return self.kf.read(*prop_query.function)
+            else:
+               raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for ADF results.")
         else:
-            raise Exception('Property "' + prop + '" not defined.')
+            raise KeyError("Generic property '" + str(prop) + "' not defined")
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):

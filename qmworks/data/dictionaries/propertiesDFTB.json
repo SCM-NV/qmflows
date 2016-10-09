@@ -1,7 +1,8 @@
 {
-	"energy": "Energy.DFTB Final Energy",
-	"dipole": "awk|/Dipole/ {print $2; print $3; print $4}",
-	"charges": "Atomic Charge.Net",
-	"frequencies": ["Vibrations", "Frequencies[cm-1]"],
-	"optcycles": ["History", "nEntries"]
+	"energy": {"parser": "kfproperties", "function": "Energy.DFTB Final Energy"},
+ 	"dipole": {"parser": "awk", "function": "/Dipole/ {print $2; print $3; print $4}"},
+ 	"charges": {"parser": "kfproperties", "function": "Atomic Charge.Net"},
+ 	"frequencies": {"parser": "kfreader", "function": ["Vibrations", "Frequencies[cm-1]"]},
+	"optcycles": {"parser": "kfreader", "function": ["History", "nEntries"]},
+ 	"hessian": {"parser": "kfproperties", "function": "Hessian.Generic"}
 }
