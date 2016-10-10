@@ -139,7 +139,7 @@ class DFTB(Package):
     Add some documentation to this class
     """
     def __init__(self):
-        super(DFTB, self).__init__("dftb")
+        super().__init__("dftb")
         self.generic_dict_file = 'generic2DFTB.json'
 
     def prerun(self):
