@@ -111,28 +111,8 @@ class ADF_Result(Result):
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
                           project_name)
 
-    def get_property(self, prop, section=None):
+    def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
-
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-            dipole = result.dipole
-        """
-
-        if prop in self.prop_dict:
-            prop_query = self.prop_dict[prop]
-            if prop_query.parser == 'awk':
-                return self.awk_output(script=prop_query.function)
-            elif prop_query.parser == "kfreader":
-                return self.kf.read(*prop_query.function)
-            else:
-               raise RuntimeError("Property parser '" + prop_query.parser + "' not defined for ADF results.")
-        else:
-            raise KeyError("Generic property '" + str(prop) + "' not defined")
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
@@ -141,7 +121,7 @@ class ADF_Result(Result):
         natoms = len(m)
         # Find out correct location
         coords = self.kf.read('Geometry', 'xyz InputOrder')
-        coords = [coords[i:i + 3] for i in range(0, len(coords), 3)]
+        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
 
         if len(coords) > natoms:
             coords = coords[(n - 1) * natoms: n * natoms]

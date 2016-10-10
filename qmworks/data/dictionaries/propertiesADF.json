@@ -1,7 +1,12 @@
 {
-	"energy": {"parser": "kfreader", "function": ["Energy","Bond Energy"]},
- 	"dipole": {"parser": "kfreader", "function": ["Properties", "Dipole"]},
- 	"charges": {"parser": "kfreader", "function": ["Properties", "AtomCharge Mulliken"]},
- 	"frequencies": {"parser": "kfreader", "function": ["Freq", "Frequencies"]},
-	"optcycles": {"parser": "kfreader", "function": ["History", "nr of geometries"]}
+    "energy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+	       "kwargs": {"section": "Energy", "prop": "Bond Energy"}},
+    "dipole": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+               "kwargs": {"section": "Properties", "prop": "Dipole"}},
+    "charges": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+	       "kwargs": {"section": "Properties", "prop": "AtomCharge Mulliken"}},
+    "frequencies": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+		    "kwargs": {"section": "Freq", "prop": "Frequencies"}},
+    "optcycles": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+		  "kwargs": {"section": "History", "prop": "nr of geometries"}}
 }

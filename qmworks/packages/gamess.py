@@ -118,17 +118,15 @@ class Gamess_Result(Result):
             Hessian_matrix = result.hessian
         """
         try:
-            return self.get_property(prop)
-        except Exception:
-            pass
-        # except FileNotFoundError:
-        #     msg = """
-        #     Maybe you need to provided to the gamess
-        #     function the optional keyword 'work_dir' containing the path
-        #     to the SCR folder where GAMESS stores the *.dat and other
-        #     output files"""
-        #     print(msg)
-            # raise
+            return super().__getattr__(prop)
+        except FileNotFoundError:
+            msg = """
+            Maybe you need to provided to the gamess
+            function the optional keyword 'work_dir' containing the path
+            to the SCR folder where GAMESS stores the *.dat and other
+            output files"""
+            print(msg)
+            raise
 
 
 gamess = GAMESS()
