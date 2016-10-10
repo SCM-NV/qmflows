@@ -10,6 +10,7 @@ from qmworks.packages.orca import orca
 from qmworks.packages import run
 
 import operator
+import plams
 
 
 @attr('slow')
@@ -35,10 +36,11 @@ def test_opt_orca():
 
     final_result = run(dipole, n_processes=1)
 
-    expected_dipole = [0.83203, 0.19521, -0.08393]
-
+    expected_dipole = [0.82409, 0.1933, -0.08316]
     diff = sqrt(sum((x - y) ** 2 for x, y in zip(final_result,
                                                  expected_dipole)))
+    print("Expected dipole computed with Orca 3.0.3 is:", expected_dipole)
+    print("Actual dipole is:", final_result)
 
     assert diff < 1e-8
 
@@ -65,3 +67,10 @@ def test_methanol_opt_orca():
     coords = concat([a.coords for a in mol_opt.atoms])
 
     assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
+
+
+if __name__ == "__main__":
+    plams.init()
+    test_methanol_opt_orca()
+    test_opt_orca()
+    plams.finish()
