@@ -1,10 +1,14 @@
 
 # ========>  Standard and third party Python Libraries <======
+from functools import partial
 from os.path import join
 from rdkit import Chem
-import subprocess
-import base64
+from typing import (Any, Callable, Dict, List)
 
+import base64
+import fnmatch
+import importlib
+import inspect
 import os
 import plams
 import pkg_resources as pkg
@@ -20,9 +24,10 @@ from noodles.serial.base import SerAutoStorable
 from qmworks.settings import Settings
 from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
+from qmworks.utils import (concatMap, lookup)
 
 # ==============================================================
-__all__ = ['Package', 'run', 'registry', 'Result',
+__all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
 
@@ -72,51 +77,51 @@ class Result:
             "archive": self.archive,
             "project_name": self.project_name}
 
-    def awk_output(self, script='', progfile=None, **kwargs):
-        """awk_output(script='', progfile=None, **kwargs)
-        Shortcut for :meth:`~Results.awk_file` on the output file."""
-        output = self.job_name + ".out"
-        return self.awk_file(output, script, progfile, **kwargs)
+    def __getattr__(self, prop):
+        """Returns a section of the results.
 
-    def awk_file(self, filename, script='', progfile=None, **kwargs):
-        """awk_file(filename, script='', progfile=None, **kwargs)
-        Execute an AWK script on a file given by *filename*.
+        Example:
 
-        The AWK script can be supplied in two ways: either by directly passing
-        the contents of the script (should be a single string) as a *script*
-        argument, or by providing the path (absolute or relative to the file
-        pointed by *filename*) to some external file containing the actual AWK
-        script using *progfile* argument. If *progfile* is not ``None``, the
-        *script* argument is ignored.
-
-        Other keyword arguments (*\*\*kwargs*) can be used to pass additional
-        variables to AWK (see ``-v`` flag in AWK manual)
-
-        Returned value is a list of lines (strings). See ``man awk`` for details.
+        ..
+            dipole = result.dipole
         """
-        cmd = ['awk']
-        for k, v in kwargs.items():
-            cmd += ['-v', '%s=%s' % (k, v)]
-        if progfile:
-            if os.path.isfile(progfile):
-                cmd += ['-f', progfile]
-            else:
-                raise FileError('File %s not present' % progfile)
+        if prop in self.prop_dict:
+            return self.get_property(prop)
         else:
-            cmd += [script]
-            
-        new_cmd = cmd + [filename]
+            raise KeyError("Generic property '" + str(prop) + "' not defined")
+
+    def get_property(self, prop):
+        """
+        Look for the optional arguments to parse a property, which are stored
+        in the properties dictionary.
+        """
+        # Read the JSON dictionary than contains the parsers names
+        ds = self.prop_dict[prop]
+
+        # extension of the output file containing the property value
+        file_ext = ds['file_ext']
+
+        # If there is not work_dir returns None
+        work_dir = lookup(self.archive, 'work_dir')
+
+        # Plams dir
         plams_dir = self.archive['plams_dir'].path
-        ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
-        if ret[-1] == '':
-            ret = ret[:-1]
-        try:
-            result = [float(i) for i in ret]
-        except ValueError:
-            result = ret
-        if len(result) == 1:
-            result = result[0]
-        return result
+
+        # Search for the specified output file in the folders
+        file_pattern = '{}.{}'.format(self.job_name, file_ext)
+
+        output_files = concatMap(partial(find_file_pattern, file_pattern),
+                                 [plams_dir, work_dir])
+        if output_files:
+            file_out = output_files[0]
+            fun = getattr(import_parser(ds), ds['function'])
+            # Read the keywords arguments from the properties dictionary
+            kwargs = lookup(ds, 'kwargs')
+            kwargs['plams_dir'] = plams_dir
+            return ignored_unused_kwargs(fun, [file_out], kwargs)
+        else:
+            msg = "There is not output file called: {}.\n".format(file_pattern)
+            raise FileNotFoundError(msg)
 
 
 @has_scheduled_methods
@@ -325,3 +330,38 @@ def registry():
             Chem.Mol: SerMol(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
+
+
+def import_parser(ds, module_root="qmworks.parsers"):
+    """
+    Import parser for the corresponding property.
+    """
+    module_sufix = ds['parser']
+    module_name = module_root + '.' + module_sufix
+
+    return importlib.import_module(module_name)
+
+
+def find_file_pattern(pat, folder):
+    if folder is not None and os.path.exists(folder):
+        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), pat))
+    else:
+        return []
+
+
+def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
+    """
+    Inspect the signature of function `fun` and filter the keyword arguments,
+    which are the ones that have a nonempty default value. Then extract
+    from the dict `kwargs` those key-value pairs ignoring the rest.
+    """
+    ps = inspect.signature(fun).parameters
+
+    # Look for the arguments with the nonempty defaults.
+    defaults = list(filter(lambda t: t[1].default != inspect._empty,
+                           ps.items()))
+    if not kwargs or not defaults:  # there are not keyword arguments in the function
+        return fun(*args)
+    else:  # extract from kwargs only the used keyword arguments
+        d = {k: kwargs[k] for k, _ in defaults}
+        return fun(*args, **d)

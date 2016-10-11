@@ -20,8 +20,12 @@
                 "functional": "lda"},
             "basis": {
                 "basis": "sto_sz"},
-            "main": "freq"}
-        }
+            "main": "freq"},
+        "gamess": {
+            "basis": {"gbasis": "n21", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe", "runtyp": "hessian", "nosym": 1},
+            "force": {"method": "seminum"}}
+    }
 }
 
 

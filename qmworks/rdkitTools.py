@@ -35,6 +35,8 @@ def rdkit2plams(rdkit_mol):
         at2 = plams_mol.atoms[bond.GetEndAtomIdx()]
         plams_mol.add_bond(Bond(at1, at2, bond.GetBondTypeAsDouble()))
     plams_mol.charge = total_charge
+    for propname in rdkit_mol.GetPropNames():
+        plams_mol.properties[propname] = rdkit_mol.GetProp(propname)
     return plams_mol
 
 
@@ -73,6 +75,7 @@ def smiles2rdkit(smiles):
     """
     smiles = str(smiles.split()[0])
     molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    molecule.SetProp('smiles', smiles)
     AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
     return molecule
