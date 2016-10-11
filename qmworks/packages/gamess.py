@@ -1,11 +1,8 @@
 
-
 __all__ = ['gamess']
 
 # =======>  Standard and third party Python Libraries <======
-from os.path import join
-from qmworks.packages.packages import Package, Result
-#from qmworks.quantumHDF5 import read_from_hdf5
+from qmworks.packages.packages import (Package, Result)
 from qmworks.settings import Settings
 from qmworks.utils import lookup
 
@@ -51,12 +48,13 @@ class GAMESS(Package):
         """
         gamess_settings = Settings()
         gamess_settings.input = settings.specific.gamess
-        job = plams.GamessJob(molecule=mol, name=job_name, settings=gamess_settings)
+        job = plams.GamessJob(molecule=mol, name=job_name,
+                              settings=gamess_settings)
         runner = plams.JobRunner(parallel=True)
         r = job.run(runner)
         r.wait()
 
-        return Gamess_Result(gamess_settings, mol, job_name,
+        return Gamess_Result(gamess_settings, mol, r.job.name,
                              plams_dir=r.job.path, work_dir=work_dir,
                              path_hdf5=hdf5_file, project_name=project_name)
 
@@ -85,8 +83,8 @@ class Gamess_Result(Result):
                  work_dir=None, path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesGAMESS.json'):
         super().__init__(settings, molecule, job_name, plams_dir,
-                       work_dir=work_dir, path_hdf5=path_hdf5,
-                       project_name=None, properties=properties)
+                         work_dir=work_dir, path_hdf5=path_hdf5,
+                         project_name=None, properties=properties)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -110,9 +108,6 @@ class Gamess_Result(Result):
                              plams_dir=plams_dir, work_dir=work_dir,
                              project_name=project_name)
 
-    def get_property(self, prop, section=None):
-        pass
-
     def __getattr__(self, prop):
         """Returns a section of the results.
         The property is extracted from a  result file, which is recursively
@@ -122,18 +117,16 @@ class Gamess_Result(Result):
         ..
             Hessian_matrix = result.hessian
         """
-        section_hdf5 = self.prop_dict[prop]
+        try:
+            return super().__getattr__(prop)
+        except FileNotFoundError:
+            msg = """
+            Maybe you need to provided to the gamess
+            function the optional keyword 'work_dir' containing the path
+            to the SCR folder where GAMESS stores the *.dat and other
+            output files"""
+            print(msg)
+            raise
 
-        path_to_node_in_hdf5 = join(self.project_name, section_hdf5)
-        # try:
-        #     return read_from_hdf5(self.hdf5_file, path_to_node_in_hdf5)
-        # except KeyError:
-        return self.read_property_from_archive(prop, "path_to_node_in_hdf5")
 
-    def read_property_from_archive(self, prop, path_to_node_in_hdf5):
-        """
-        Read `prop` from the output files and store in the HDF5.
-        """
-        return self.awk_output(script=self.prop_dict[prop])
-        
 gamess = GAMESS()
