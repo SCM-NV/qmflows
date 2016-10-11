@@ -23,11 +23,12 @@ install:
 
   # Package dependencies
   - pip install nose coverage
-  - pip install https://github.com/NLeSC/noodles/tarball/master#egg=noodles
-  - pip install -e git://github.com/SCM-NV/plams.git@master#egg=plams
+  # - pip install https://github.com/NLeSC/noodles/tarball/master#egg=noodles
+  - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams
+  #  - pip install -e git://github.com/SCM-NV/plams.git@master#egg=plams
 
   # Add Plams Defaults
-  -  echo 'export PLAMSDEFAULTS=$HOME/src/plams/utils/plams_defaults.py' >> $HOME/miniconda/envs/qmworks/bin/activate
+  #  -  echo 'export PLAMSDEFAULTS=$HOME/src/plams/utils/plams_defaults.py' >> $HOME/miniconda/envs/qmworks/bin/activate
   - source activate qmworks
 
   # Install qmworks package
