@@ -10,7 +10,7 @@
             },
         "dftb": {
             "task": {"runtype": "Frequencies"},
-            "dftb": {"resourcesdir": "QUASINANO2015"} },
+            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
         "turbomole": {},
         "dirac": {},
         "cp2k" : {},
