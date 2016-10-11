@@ -14,7 +14,7 @@ def kfreader(path_t21, section=None, prop=None):
 def extract_properties_rkf(path_rkf, key=None):
     """
     """
-    kf = plams.kftools.KFFile(path_rkf)
+    kf = plams.kftools.KFFile(path_rkf).read
     props = Settings()
 
     for i in range(kf('Properties', 'nEntries')):
