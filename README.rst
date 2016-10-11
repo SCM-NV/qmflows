@@ -35,7 +35,7 @@ automate the following tasks:
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
  3. Distribution in heterogeneous hardware platforms.
- 4. Advanced molecular manipulation capabilities with RDKIT_.
+ 4. Advanced molecular manipulation capabilities with (rdkit_).
  5. Numerical data storage and manipulation (HDF5_).
  6. Jobs failure detection and recovery.
 
@@ -116,4 +116,3 @@ Now you are ready to use *qmworks*.
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
-.. _RDKIT: http://www.rdkit.org/
