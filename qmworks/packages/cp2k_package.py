@@ -4,6 +4,7 @@ __all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
 from functools import partial
+from warnings import warn
 from os.path import join
 
 import fnmatch
@@ -177,7 +178,13 @@ class CP2K(Package):
         funs = {'basis': expand_basis_set, 'potential': expand_basis_set,
                 'cell_parameters': write_cell_parameters}
 
-        return funs[key](settings, value, mol, key)
+        # Function that handles the special keyword
+        f = lookup(funs, key)
+
+        if f is not None:
+            return f(settings, value, mol, key)
+        else:
+            warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 
 class CP2K_Result(Result):
