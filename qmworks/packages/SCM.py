@@ -4,7 +4,6 @@
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
-from qmworks.parsers.generic_parsers import awk_file
 
 import builtins
 import plams
@@ -186,57 +185,12 @@ class DFTB_Result(Result):
                          properties=properties)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         self.kf = plams.kftools.KFFile(kf_filename)
-        try:
-            self.properties = self.extract_properties()
-        except:
-            raise RuntimeError("No rkf file generated for job: " + job_name)
+
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
         return DFTB_Result(settings, molecule, job_name,
                            archive["plams_dir"].path, project_name)
-
-    def extract_properties(self):
-        props = Settings()
-        for i in range(self.kf.read('Properties', 'nEntries')):
-            typ = self.kf.read('Properties',
-                               'Type(' + str(i + 1) + ')').strip()
-            subtype = self.kf.read('Properties',
-                                   'Subtype(' + str(i + 1) + ')').strip()
-            value = self.kf.read('Properties', 'Value(' + str(i + 1) + ')')
-            props[typ][subtype] = value
-        return props
-
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-
-            dipole = result.dipole
-
-        """
-        if prop in self.prop_dict:
-            prop_query = self.prop_dict[prop]
-            if prop_query.parser == 'awk':
-                filename = self.job_name + ".out"
-                plams_dir = self.archive['plams_dir'].path
-                return awk_file(filename, plams_dir,
-                                script=prop_query.function)
-
-            elif prop_query.parser == "kfreader":
-                return self.kf.read(*prop_query.function)
-
-            elif prop_query.parser == "kfproperties":
-                return self.properties[prop_query.function]
-
-            else:
-                msg = "Property parser '" + prop_query.parser + \
-                      "' not defined for DFTB results."
-                raise RuntimeError(msg)
-        else:
-            raise KeyError("Generic property '" + str(prop) + "' not defined")
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
