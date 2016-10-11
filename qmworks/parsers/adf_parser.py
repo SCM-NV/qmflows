@@ -16,7 +16,7 @@ def extract_properties_rkf(path_rkf, key=None):
     """
     kf = plams.kftools.KFFile(path_rkf)
     props = Settings()
-    
+
     for i in range(kf('Properties', 'nEntries')):
         typ = kf('Properties', 'Type(' + str(i + 1) + ')').strip()
         subtype = kf('Properties', 'Subtype(' + str(i + 1) + ')').strip()

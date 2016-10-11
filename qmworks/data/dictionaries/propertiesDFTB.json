@@ -10,5 +10,5 @@
     "charges": {"parser": "adf_parser", "function": "extract_properties_rkf", "file_ext": "rkf",
 		"kwargs": {"key": "Atomic Charge.Net"}},
     "hessian": {"parser": "adf_parser", "function": "extract_properties_rkf", "file_ext": "rkf",
-		"kwargs": {"key": "Hessian.Generic"}},	       
+		"kwargs": {"key": "Hessian.Generic"}}
 }
