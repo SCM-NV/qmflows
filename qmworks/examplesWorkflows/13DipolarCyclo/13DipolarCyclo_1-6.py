@@ -53,7 +53,8 @@ def calc_productAndTS(name):
 
     # scan input
     pes = PES(product.molecule, constraints=[constraint1, constraint2],
-              offset=[2.0, 2.0], get_current_values=False, nsteps=5, stepsize=[0.1, 0.1])
+              offset=[2.0, 2.0], get_current_values=False, nsteps=5,
+              stepsize=[0.1, 0.1])
 
     # PES = gathered (promised) result objects for each point in the scan
     pesscan = pes.scan([dftb, adf], settings, job_name=name + "_PES")

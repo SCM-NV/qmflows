@@ -1,5 +1,11 @@
 {
-	"energy": "/FINAL SINGLE POINT ENERGY/ {print $5}",
-	"dipole": "/Total Dipole Moment/ {print $5; print $6; print $7}",
-	"charges": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"
+    "energy": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
+	       "kwargs": {"script": "/FINAL SINGLE POINT ENERGY/ {print $5}"}},
+    "dipole": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
+	       "kwargs": {"script": "/Total Dipole Moment/ {print $5; print $6; print $7}"}},
+    "charges": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
+		"kwargs": {"script": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"}},
+    "hess": {"parser": "orca_parser", "function": "parse_hessian", "file_ext": "hess"},
+    "frequencies": {"parser": "orca_parser", "function": "parse_frequencies", "file_ext": "hess"},
+    "normal_modes": {"parser": "orca_parser", "function": "parse_normal_modes", "file_ext": "hess"}
 }

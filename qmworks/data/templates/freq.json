@@ -10,7 +10,7 @@
             },
         "dftb": {
             "task": {"runtype": "Frequencies"},
-            "dftb": {"resourcesdir": "QUASINANO2015"} },
+            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
         "turbomole": {},
         "dirac": {},
         "cp2k" : {},
@@ -20,8 +20,12 @@
                 "functional": "lda"},
             "basis": {
                 "basis": "sto_sz"},
-            "main": "freq"}
-        }
+            "main": "freq"},
+        "gamess": {
+            "basis": {"gbasis": "n21", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe", "runtyp": "hessian", "nosym": 1},
+            "force": {"method": "seminum"}}
+    }
 }
 
 

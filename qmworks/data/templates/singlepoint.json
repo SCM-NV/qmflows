@@ -9,7 +9,7 @@
         	"iterations": 100} },
         "dftb": {
             "task": {"runtype": "SP"},
-            "dftb": {"resourcesdir": "QUASINANO2015"} },
+            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
         "cp2k" : {
           "force_eval": {
               "dft": {

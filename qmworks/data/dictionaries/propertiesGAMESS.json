@@ -1,9 +1,8 @@
 {
-//    "totalenergy": ["games/energy/totalenergy"],
-//    "orbitals" : ["gamess/mo/eigenvalues", "gamess/mo/coefficients"],
-//    "overlap": ["gamess/overlap"],
-//    "gradient": ["gamess/gradient"],
-//    "hessian": ["gamess/hessian"],
-    "energy": "/TOTAL ENERGY/ {e = $4} END {print e}",
-    "dipole": "/ELECTROSTATIC MOMENTS/ {getline; getline; getline; getline; getline; getline; dx = $1; dy = $2; dz = $3} END {print dx; print dy; print dz}"
+    "frequencies": {"parser": "gamess_parser", "function": "parse_frequencies", "file_ext": "dat"},
+    "hessian":     {"parser": "gamess_parser", "function": "parse_hessian",     "file_ext": "dat"},
+    "gradient":    {"parser": "gamess_parser", "function": "parse_gradient",    "file_ext": "dat"},
+    "dipole":      {"parser": "gamess_parser", "function": "parse_dipole",      "file_ext": "dat"},
+    "molecule":    {"parser": "gamess_parser", "function": "parse_molecule",    "file_ext": "out"},
+    "total_energy": {"parser": "gamess_parser", "function": "parse_total_energy", "file_ext": "out"}
 }

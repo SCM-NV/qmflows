@@ -30,7 +30,7 @@ def fragmentsjob(settings, mol, *frozen_frags):
             for a in m:
                 a.fragment = frag_id
             mol_tot += m
-        path = frag.result.result.path + ' type=FDE'
+        path = frag.result.kf.path + ' type=FDE'
         frag_settings.specific.adf.fragments[frag_id] = path
         frag_settings.specific.adf.fde.PW91k = ""
     mol_tot += mol

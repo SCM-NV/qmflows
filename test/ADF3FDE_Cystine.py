@@ -31,7 +31,7 @@ job_settings = pkg_templates.singlepoint.overlay(us)
 supermol_results = adf(job_settings, supermol)
 #supermol_dipole = supermol_results.dipole_vector
 
-supermol_dipole = supermol_results.get_property('Dipole', 'Properties')
+supermol_dipole = supermol_results.get_property_kf('Dipole', 'Properties')
 
 result = run_local.run(supermol_dipole)
 print(result)

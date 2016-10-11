@@ -5,6 +5,7 @@ from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
 
+import builtins
 import plams
 # ========================= ADF ============================
 
@@ -72,12 +73,18 @@ class ADF(Package):
             if isinstance(value[0], int):
                 for a in range(1, len(mol) + 1):
                     if a not in value:
-                        settings.specific.adf.constraints['atom ' + str(a)] = ""
+                        at = 'atom ' + str(a)
+                        settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[name] = ""
+        elif key == "inithess":
+            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+            hess_file = open(hess_path, "w")
+            hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
+            settings.specific.adf.geometry.inithess = hess_path
         else:
             raise RuntimeError('Keyword ' + key + ' doesn\'t exist')
 
@@ -88,7 +95,8 @@ class ADF_Result(Result):
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
                  project_name=None):
         properties = 'data/dictionaries/propertiesADF.json'
-        super().__init__(settings, molecule, job_name, plams_dir=plams_dir, project_name=project_name,
+        super().__init__(settings, molecule, job_name,
+                         plams_dir=plams_dir, project_name=project_name,
                          properties=properties)
         self.kf = plams.kftools.KFFile(path_t21)
 
@@ -102,24 +110,8 @@ class ADF_Result(Result):
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
                           project_name)
 
-    def get_property(self, prop, section=None):
+    def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
-
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-
-            dipole = result.properties.dipole
-
-        """
-        if prop in self.prop_dict:
-            section, property = self.prop_dict[prop]
-            return self.kf.read(section, property)
-        else:
-            raise Exception('Property "' + prop + '" not defined.')
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
@@ -128,7 +120,7 @@ class ADF_Result(Result):
         natoms = len(m)
         # Find out correct location
         coords = self.kf.read('Geometry', 'xyz InputOrder')
-        coords = [coords[i:i + 3] for i in range(0, len(coords), 3)]
+        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
 
         if len(coords) > natoms:
             coords = coords[(n - 1) * natoms: n * natoms]
@@ -146,7 +138,7 @@ class DFTB(Package):
     Add some documentation to this class
     """
     def __init__(self):
-        super(DFTB, self).__init__("dftb")
+        super().__init__("dftb")
         self.generic_dict_file = 'generic2DFTB.json'
 
     def prerun(self):
@@ -193,45 +185,12 @@ class DFTB_Result(Result):
                          properties=properties)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         self.kf = plams.kftools.KFFile(kf_filename)
-        try:
-            self.properties = self.extract_properties()
-        except:
-            raise RuntimeError("No rkf file generated for job: " + job_name)
+
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
-        return DFTB_Result(settings, molecule, job_name, archive["plams_dir"].path, project_name)
-
-    def extract_properties(self):
-        props = Settings()
-        for i in range(self.kf.read('Properties', 'nEntries')):
-            typ = self.kf.read('Properties', 'Type(' + str(i + 1) + ')').strip()
-            subtype = self.kf.read('Properties', 'Subtype(' + str(i + 1) + ')').strip()
-            value = self.kf.read('Properties', 'Value(' + str(i + 1) + ')')
-            props[typ][subtype] = value
-        return props
-
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-
-            dipole = result.properties.dipole
-
-        """
-        if 'properties' in dir(self) and prop in self.prop_dict:
-            prop_query = self.prop_dict[prop]
-            if isinstance(prop_query, str):
-                if prop_query[:4] == 'awk|':
-                    return self.awk_output(script=prop_query[4:])
-                return self.properties[prop_query]
-            else:
-                return self.kf.read(*prop_query)
-        else:
-            raise Exception("NNOETHUNTHN")
-        #return '3.23'
+        return DFTB_Result(settings, molecule, job_name,
+                           archive["plams_dir"].path, project_name)
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
