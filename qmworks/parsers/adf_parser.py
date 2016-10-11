@@ -1,5 +1,5 @@
 
-from qmworks import Settings
+from qmworks.settings import Settings
 import plams
 
 
