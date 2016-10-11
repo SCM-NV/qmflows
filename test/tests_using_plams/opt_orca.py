@@ -42,7 +42,7 @@ def test_opt_orca():
     print("Expected dipole computed with Orca 3.0.3 is:", expected_dipole)
     print("Actual dipole is:", final_result)
 
-    assert diff < 1e-8
+    assert diff < 1e-2
 
 
 @attr('slow')
