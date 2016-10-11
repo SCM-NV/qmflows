@@ -3,7 +3,8 @@
 .. image:: https://travis-ci.org/SCM-NV/qmworks.svg?branch=master
    :target: https://travis-ci.org/SCM-NV/qmworks 
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
-
+.. image:: https://img.shields.io/codacy/grade/e27821fb6289410b8f58338c7e0bc686.svg?maxAge=2592000
+   :target: https://www.codacy.com/app/tifonzafel/qmworks/dashboard	
 	   
 ================
 QMWorks
@@ -34,8 +35,9 @@ automate the following tasks:
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
  3. Distribution in heterogeneous hardware platforms.
- 4. Numerical data storage and manipulation (HDF5_).
- 5. Jobs failure detection and recovery.
+ 4. Advanced molecular manipulation capabilities with RDKIT_.
+ 5. Numerical data storage and manipulation (HDF5_).
+ 6. Jobs failure detection and recovery.
 
  
 Installation
@@ -86,28 +88,14 @@ Using the conda environment the following packages should be installed:
 .. _installation:
 Package installation
 --------------------
-
     
-- Create a new directory *escience* in your home folder.
-
-- Move to the *escience* folder.
-
 - Type in your terminal,
 
   ``source activate qmworks``  
 
 - Then
 
-  -``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams https://github.com/NLeSC/noodles/tarball/master#egg=noodles --upgrade``
-
-
-- Modify the anaconda activation file for Plams adding the following line ``export PLAMSDEFAULTS=$HOME/escience/plams/utils/plams_defaults.py`` to the file 
-  
-  ``$HOME/miniconda3/envs/qmworks/bin/activate`` or
-  ``$HOME/anaconda/envs/qmworks/bin/activate``
-  
-  You can find the path to your activation file running the command ``conda info --envs``.
-
+  ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade``
   
 Now you are ready to use *qmworks*. 
  
@@ -128,3 +116,4 @@ Now you are ready to use *qmworks*.
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
+.. _RDKIT: http://www.rdkit.org/
