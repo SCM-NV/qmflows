@@ -5,6 +5,7 @@ __all__ = ['gamess']
 from qmworks.packages.packages import (Package, Result)
 from qmworks.settings import Settings
 from qmworks.utils import lookup
+from warnings import warn
 
 import plams
 # ======================================<>=====================================
@@ -72,7 +73,7 @@ class GAMESS(Package):
         :param mol: molecular Geometry
         :type mol: plams Molecule
         """
-        pass
+        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 
 class Gamess_Result(Result):

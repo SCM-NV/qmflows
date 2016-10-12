@@ -4,6 +4,7 @@ from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, Result)
 from qmworks.parsers.orca_parser import parse_molecule
+from warnings import warn
 
 import plams
 # ============================= Orca ==========================================
@@ -50,7 +51,7 @@ class ORCA(Package):
         pass
 
     def handle_special_keywords(self, settings, key, value, mol):
-        pass
+        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 
 class ORCA_Result(Result):
