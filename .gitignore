@@ -66,4 +66,4 @@ target/
 .idea/
 
 #.jupyter
-.ipynb*
+jupyterNotebooks/.ipynb_checkpoints/*

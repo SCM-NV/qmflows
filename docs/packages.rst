@@ -10,7 +10,7 @@ The base class |Package| is the library core, it provides the general scaffold t
 * :class:`~qmworks.packages.SCM.ADF`
 * :class:`~qmworks.packages.SCM.DFTB`
 * :class:`~qmworks.packages.dirac.DIRAC`
-* :class:`~qmworks.packages.cp2k.CP2K`
+* :class:`~qmworks.packages.cp2k_package.CP2K`
 * :class:`~qmworks.packages.orca.ORCA`
 * :class:`~qmworks.packages.gamess.GAMESS`
 

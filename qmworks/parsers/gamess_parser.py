@@ -26,7 +26,7 @@ def parse_dollar_section(file_name, parser, start, trailing_lines=1):
 
 def parse_molecule(file_name):
     """
-    Parse the last available geometry from both the *.dat or *.log.
+    Parse the last available geometry from both the job_name.dat or job_name.log.
     """
     # Header in .out
     header1 = Literal("COORDINATES OF ALL ATOMS ARE (ANGS)")
@@ -45,7 +45,7 @@ def parse_molecule(file_name):
 
 def parse_dipole(file_name):
     """
-    Parse dipole moment from the *.dat file.
+    Parse dipole moment from the output.dat file.
     """
     l = Literal('DIPOLE')
     p = skipSupress(l) + OneOrMore(floatNumber)
@@ -55,7 +55,7 @@ def parse_dipole(file_name):
 
 def parse_gradient(file_name):
     """
-    Parse Gradient from the *.dat file.
+    Parse Gradient from the job_name.dat file.
     """
     p = Suppress(Word(alphanums) + floatNumber) + OneOrMore(floatNumber)
     return parse_dollar_section(file_name, p, '$GRAD')
@@ -63,7 +63,7 @@ def parse_gradient(file_name):
 
 def parse_hessian(file_name):
     """
-    Parse the hessian from the *.dat produced by gamess.
+    Parse the hessian from the job_name.dat produced by gamess.
     """
     p = Suppress(integer * 2) + OneOrMore(floatNumber)
     return parse_dollar_section(file_name, p, '$HESS')
