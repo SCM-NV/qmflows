@@ -81,7 +81,7 @@ settings.specific.dftb.dftb.scc
 
 job_list = []
 # Loop over all reactions
-for name, reactant1, reactant2, product in reactions:
+for name, reactant1, reactant2, product in reactions[:1]:
 
   # Prepare reactant1 job
     r1mol = rdkitTools.smiles2plams(reactant1)
@@ -124,7 +124,7 @@ for name, reactant1, reactant2, product in reactions:
 
     # Run the TS optimization, using the initial hession from DFTB
     t = Settings()
-    t.specific.adf.geometry.inithess = DFTBfreq.kf.path
+    t.inithess = DFTBfreq.hessian
     TS = adf(templates.ts.overlay(settings).overlay(t), DFTBfreq.molecule, job_name=name + "_TS")
 
     # Perform a freq calculation
