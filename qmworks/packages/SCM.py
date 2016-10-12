@@ -2,6 +2,7 @@
 # =======>  Standard and third party Python Libraries <======
 
 from os.path import join
+from warnings import warn
 from qmworks.settings import Settings
 from qmworks.packages.packages import Package, Result  # ChemResult
 
@@ -86,7 +87,7 @@ class ADF(Package):
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
             settings.specific.adf.geometry.inithess = hess_path
         else:
-            raise RuntimeError('Keyword ' + key + ' doesn\'t exist')
+            warn(UserWarning('Generic keyword "' + key + '" not implemented for package ADF.'))
 
 
 class ADF_Result(Result):
@@ -172,7 +173,7 @@ class DFTB(Package):
         pass
 
     def handle_special_keywords(self, settings, key, value, mol):
-        pass
+        warn(UserWarning('Generic keyword "' + key + '" not implemented for package DFTB.'))
 
 
 class DFTB_Result(Result):
