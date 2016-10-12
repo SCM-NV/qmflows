@@ -12,6 +12,7 @@ The base class |Package| is the library core, it provides the general scaffold t
 * :class:`~qmworks.packages.dirac.DIRAC`
 * :class:`~qmworks.packages.cp2k.CP2K`
 * :class:`~qmworks.packages.orca.ORCA`
+* :class:`~qmworks.packages.gamess.GAMESS`
 
 
 
@@ -45,7 +46,6 @@ SCM
 .. automethod::qmworks.packages.SCM.ADF.molecule
    :members:	      
 
-
 .. autoclass:: qmworks.packages.SCM.ADF_Result
    :members:	      
 
@@ -66,10 +66,10 @@ DIRAC
 CP2k
 ~~~~
 
-.. autoclass::  qmworks.cp2k_package.CP2K
+.. autoclass::  qmworks.packages.cp2k_package.CP2K
    :members:
 
-.. autoclass:: qmworks.cp2k_package.CP2K_Result
+.. autoclass:: qmworks.packages.cp2k_package.CP2K_Result
    :members:
 
 ORCA
