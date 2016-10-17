@@ -200,15 +200,30 @@ def call_xenon(job, **kwargs):
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    pass
-    # nproc = kwargs.get('n_processes')
-    # nproc = nproc if nproc is not None else 1
+    with XenonKeeper() as Xe:
+        certificate = Xe.credentials.newCertificateCredential(
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'jhidding', '', None)
 
-    # xenon_config = XenonConfig(jobs_scheme='local')
+        xenon_config = XenonConfig(
+            jobs_scheme='slurm',
+            location='cartesius.surfsara.nl',
+            credential=certificate,
+            jobs_properties={
+                'xenon.adaptors.slurm.ignore.version': 'true'
+            }
+        )
 
-    # job_config = RemoteJobConfig(registry=serial.base, time_out=1)
+        job_config = RemoteJobConfig(
+            registry=registry,
+            prefix='/home/jhidding/v2',
+            working_dir='/home/jhidding/qmtest',
+            time_out=5000
+        )
 
-    # return run_xenon(job, nproc, xenon_config, job_config)
+        with NCDisplay() as display:
+            result = run_xenon_prov(
+                C, Xe, "cache.json", 2,
+                xenon_config, job_config, display=display)
 
 
 class SerMolecule(Serialiser):

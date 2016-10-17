@@ -64,3 +64,7 @@ target/
 
 # pyCharm
 .idea/
+
+plams.*
+cache.json
+
