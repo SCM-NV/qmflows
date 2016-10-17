@@ -1,0 +1,39 @@
+! EXAM31.
+!     methanol in PCM water...RHF geometry optimization
+!  FINAL E= -115.0425099546, 10 iters, RMS Grad= 0.0019075
+!  FINAL E= -115.0425563049,  7 iters, RMS Grad= 0.0006106
+!  FINAL E= -115.0425615966,  6 iters, RMS Grad= 0.0001950
+!  FINAL E= -115.0425621873,  5 iters, RMS Grad= 0.0000403
+!  FINAL E= -115.0425622070,  4 iters, RMS Grad= 0.0000309
+!  FINAL E= -115.0425622162,  3 iters, RMS Grad= 0.0000033
+!  
+!     -------   RESULTS OF PCM CALCULATION   -------
+!  FREE ENERGY IN SOLVENT       =  -115.0425622162 A.U.
+!  INTERNAL ENERGY IN SOLVENT   =  -115.0346408486 A.U.
+!  DELTA INTERNAL ENERGY        =      .0000000000 A.U.
+!  ELECTROSTATIC INTERACTION    =     -.0079213676 A.U.
+!  PIEROTTI CAVITATION ENERGY   =      .0000000000 A.U.
+!  DISPERSION FREE ENERGY       =      .0000000000 A.U.
+!  REPULSION FREE ENERGY        =      .0000000000 A.U.
+!  TOTAL INTERACTION            =     -.0079213676 A.U.
+!  TOTAL FREE ENERGY IN SOLVENT =  -115.0425622162 A.U.
+!
+ $contrl scftyp=rhf runtyp=optimize nzvar=12 $end
+ $system timlim=2 mwords=2 $end
+ $pcm    solvnt=water $end
+ $basis  gbasis=n31 ngauss=6 ndfunc=1 $end
+ $guess  guess=huckel $end
+ $zmat   izmat(1)=1,1,2,  1,2,3,  1,3,4,  1,3,5,  1,3,6,
+            2,1,2,3,  2,2,3,4,  2,2,3,5,  2,2,3,6,
+            3,1,2,3,4,  3,1,2,3,5,  3,1,2,3,6 $end
+ $statpt opttol=1d-5 $end
+ $data
+Methanol in PCM water...starting at gas phase geom
+Cs
+
+H 1.0   -1.0616171503   0.8036449245   0.0000000000
+O 8.0   -0.6870131482  -0.0653470836   0.0000000000
+C 6.0    0.7093551399   0.0291827007   0.0000000000
+H 1.0    1.0836641283   0.5408321444   0.8835398105
+H 1.0    1.0975386849  -0.9797829903   0.0000000000
+ $end

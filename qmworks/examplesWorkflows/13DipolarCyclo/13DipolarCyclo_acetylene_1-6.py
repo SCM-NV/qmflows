@@ -74,7 +74,7 @@ def calc_productAndTS(name):
                      job_name=name + "_DFTBfreq")
 
     t = Settings()
-    t.specific.adf.geometry.inithess = DFTB_freq.archive.path
+    t.inithess = DFTB_freq.hessian
 
     # Run the TS optimization, using the default TS template
     TS = adf(templates.ts.overlay(settings).overlay(t), DFTB_freq.molecule,

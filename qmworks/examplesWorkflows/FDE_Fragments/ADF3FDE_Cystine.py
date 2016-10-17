@@ -13,6 +13,9 @@ from qmworks.packages.SCM import dftb, adf
 
 # from qmworks.components import adffragmentsjob
 
+# It turned out important to rename the terminal carboxyl oxygens
+# to which hydrogens were connected to "OXT" in order for RDKIT
+# to correctly interpret the connectivity of the cys_cys.pdb
 rdmol = Chem.MolFromPDBFile('cys_cys.pdb', removeHs=False)
 #supermol = rdopp.add_prot_Hs(rdmol)
 supermol = rdmol

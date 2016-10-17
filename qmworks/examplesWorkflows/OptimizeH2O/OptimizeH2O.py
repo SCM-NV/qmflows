@@ -2,16 +2,16 @@
 from qmworks import Settings, templates
 from qmworks.draw_workflow import draw_workflow
 from plams import Molecule
-import plams
+# import plams
 
 # User Defined imports
 from qmworks.packages.SCM import adf, dftb
 from qmworks.packages import run
 
 
-plams.init()  # This is a plams requirement we like to get rid of
+# plams.init()  # This is a plams requirement we like to get rid of
 # global config
-config.log.stdout = -1000
+# config.log.stdout = -1000
 
 h2o = Molecule('h2o.xyz', 'xyz')
 
@@ -31,6 +31,6 @@ dipole = h2o_singlepoint.dipole
 
 draw_workflow("wf.svg", dipole._workflow)
 
-final_result = run(dipole, n_processes=1)
+final_result = run(dipole, runner="xenon", n_processes=1)
 
 print(final_result)

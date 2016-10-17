@@ -20,6 +20,9 @@
                 "functional": "lda",
                 "runtyp": "opt"},
             "basis": {
-                "basis": "sto_sz"} }
+                "basis": "sto_sz"}},
+        "gamess": {
+            "basis": {"gbasis": "n21", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe", "runtyp": "optimize"}}
     }
 }

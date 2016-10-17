@@ -17,5 +17,3 @@ CGF = namedtuple("CGF", ("primitives", "orbType"))
 InfoMO = namedtuple("InfoMO", ("eigenVals", "coeffs"))
 InputKey = namedtuple("InpuKey", ("name", "args"))
 MO = namedtuple("MO", ("coordinates", "cgfs", "coefficients"))
-
-

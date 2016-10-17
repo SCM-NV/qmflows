@@ -1,70 +1,130 @@
 
 # ========>  Standard and third party Python Libraries <======
+from functools import partial
 from os.path import join
-import subprocess
-import base64
+from rdkit import Chem
+from typing import (Any, Callable, Dict, List)
 
+import base64
+import fnmatch
+import importlib
+import inspect
+import os
 import plams
 import pkg_resources as pkg
-from rdkit import Chem
 
 # ==================> Internal modules <====================
-from noodles import (schedule_hint, has_scheduled_methods, serial)
+from noodles import (schedule, schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerAutoStorable
 
+from noodles.run.xenon import (
+    XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
+
 from qmworks.settings import Settings
 from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
+from qmworks.utils import (concatMap, lookup)
 
 # ==============================================================
-__all__ = ['Package', 'run', 'registry', 'Result',
+__all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
 
 class Result:
-    def __init__(self):
-        pass
 
-    def awk_output(self, script='', progfile=None, **kwargs):
-        """awk_output(script='', progfile=None, **kwargs)
-        Shortcut for :meth:`~Results.awk_file` on the output file."""
-        output = self.name + ".out"
-        return self.awk_file(output, script, progfile, **kwargs)
-
-    def awk_file(self, filename, script='', progfile=None, **kwargs):
-        """awk_file(filename, script='', progfile=None, **kwargs)
-        Execute an AWK script on a file given by *filename*.
-
-        The AWK script can be supplied in two ways: either by directly passing the contents of the script (should be a single string) as a *script* argument, or by providing the path (absolute or relative to the file pointed by *filename*) to some external file containing the actual AWK script using *progfile* argument. If *progfile* is not ``None``, the *script* argument is ignored.
-
-        Other keyword arguments (*\*\*kwargs*) can be used to pass additional variables to AWK (see ``-v`` flag in AWK manual)
-
-        Returned value is a list of lines (strings). See ``man awk`` for details.
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
+                 work_dir=None, path_hdf5=None, project_name=None,
+                 properties=None):
         """
-        cmd = ['awk']
-        for k,v in kwargs.items():
-            cmd += ['-v', '%s=%s'%(k,v)]
-        if progfile:
-            if os.path.isfile(progfile):
-                cmd += ['-f', progfile]
-            else:
-                raise FileError('File %s not present' % progfile)
+        :param settings: Job Settings.
+        :type settings: :class:`~qmworks.Settings`
+        :param molecule: molecular Geometry
+        :type molecule: plams Molecule
+        :param job_name: Name of the computations
+        :type job_name: str
+        :param plams_dir: path to the ``Plams`` folder.
+        :type plams_dir: str
+        :param work_dir: scratch or another directory different from
+        the `plams_dir`.
+        type work_dir: str
+        :param hdf5_file: path to the file containing the numerical results.
+        :type hdf5_file: str
+        :param properties: path to the `JSON` file containing the properties
+        addresses inside the `HDF5` file.
+        :type properties: str
+        """
+        self.settings = settings
+        self._molecule = molecule
+        self.hdf5_file = path_hdf5
+        xs = pkg.resource_string("qmworks", properties)
+        self.prop_dict = json2Settings(xs)
+        self.archive = {"plams_dir": Path(plams_dir),
+                        'work_dir': work_dir,
+                        "path_hdf5": path_hdf5}
+        self.project_name = project_name
+        self.job_name = job_name
+
+    def as_dict(self):
+        """
+        Method to serialize as a JSON dictionary the results given
+        by an ``Package`` computation.
+        """
+        return {
+            "settings": self.settings,
+            "molecule": self._molecule,
+            "job_name": self.job_name,
+            "archive": self.archive,
+            "project_name": self.project_name}
+
+    def __getattr__(self, prop):
+        """Returns a section of the results.
+
+        Example:
+
+        ..
+            dipole = result.dipole
+        """
+        if prop in self.prop_dict:
+            return self.get_property(prop)
         else:
-            cmd += [script]
-        ret = subprocess.check_output(cmd + [filename], cwd=self.path).decode('utf-8').split('\n')
-        if ret[-1] == '':
-            ret = ret[:-1]
-        try:
-            result = [float(i) for i in ret]
-        except:
-            result = ret
-        if len(result) == 1:
-            result = result[0]
-        return result
+            raise KeyError("Generic property '" + str(prop) + "' not defined")
+
+    def get_property(self, prop):
+        """
+        Look for the optional arguments to parse a property, which are stored
+        in the properties dictionary.
+        """
+        # Read the JSON dictionary than contains the parsers names
+        ds = self.prop_dict[prop]
+
+        # extension of the output file containing the property value
+        file_ext = ds['file_ext']
+
+        # If there is not work_dir returns None
+        work_dir = lookup(self.archive, 'work_dir')
+
+        # Plams dir
+        plams_dir = self.archive['plams_dir'].path
+
+        # Search for the specified output file in the folders
+        file_pattern = '{}.{}'.format(self.job_name, file_ext)
+
+        output_files = concatMap(partial(find_file_pattern, file_pattern),
+                                 [plams_dir, work_dir])
+        if output_files:
+            file_out = output_files[0]
+            fun = getattr(import_parser(ds), ds['function'])
+            # Read the keywords arguments from the properties dictionary
+            kwargs = lookup(ds, 'kwargs')
+            kwargs['plams_dir'] = plams_dir
+            return ignored_unused_kwargs(fun, [file_out], kwargs)
+        else:
+            msg = "There is not output file called: {}.\n".format(file_pattern)
+            raise FileNotFoundError(msg)
 
 
 @has_scheduled_methods
@@ -105,7 +165,7 @@ class Package:
         self.prerun()
 
         job_settings = self.generic2specific(settings, mol)
-        #print(job_settings)
+
         result = self.run_job(job_settings, mol, **kwargs)
 
         self.postrun()
@@ -180,8 +240,10 @@ def run(job, runner=None, **kwargs):
 
     if runner is None:
         return call_default(job, **kwargs)
-    elif runner.lower() is 'xenon':
+    elif runner.lower() == 'xenon':
         return call_xenon(job, **kwargs)
+    else:
+        raise "Don't know runner: {}".format(runner)
 
 
 def call_default(job, n_processes=1):
@@ -195,14 +257,14 @@ def call_default(job, n_processes=1):
             display=display)
 
 
-def call_xenon(job, **kwargs):
+def call_xenon(job, n_processes=1, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
     with XenonKeeper() as Xe:
         certificate = Xe.credentials.newCertificateCredential(
-            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'jhidding', '', None)
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', '<username>', '', None)
 
         xenon_config = XenonConfig(
             jobs_scheme='slurm',
@@ -215,15 +277,18 @@ def call_xenon(job, **kwargs):
 
         job_config = RemoteJobConfig(
             registry=registry,
-            prefix='/home/jhidding/v2',
-            working_dir='/home/jhidding/qmtest',
+            working_dir='<path>',
+            init=plams.init,
+            finish=plams.finish,
             time_out=5000
         )
 
         with NCDisplay() as display:
             result = run_xenon_prov(
-                C, Xe, "cache.json", 2,
+                job, Xe, "cache.json", n_processes,
                 xenon_config, job_config, display=display)
+
+    return result
 
 
 class SerMolecule(Serialiser):
@@ -288,3 +353,40 @@ def registry():
             Chem.Mol: SerMol(),
             Result: SerAutoStorable(Result),
             Settings: SerSettings()})
+
+
+def import_parser(ds, module_root="qmworks.parsers"):
+    """
+    Import parser for the corresponding property.
+    """
+    module_sufix = ds['parser']
+    module_name = module_root + '.' + module_sufix
+
+    return importlib.import_module(module_name)
+
+
+def find_file_pattern(pat, folder):
+    if folder is not None and os.path.exists(folder):
+        return map(lambda x: join(folder, x),
+                   fnmatch.filter(os.listdir(folder), pat))
+    else:
+        return []
+
+
+def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
+    """
+    Inspect the signature of function `fun` and filter the keyword arguments,
+    which are the ones that have a nonempty default value. Then extract
+    from the dict `kwargs` those key-value pairs ignoring the rest.
+    """
+    ps = inspect.signature(fun).parameters
+
+    # Look for the arguments with the nonempty defaults.
+    defaults = list(filter(lambda t: t[1].default != inspect._empty,
+                           ps.items()))
+    if not kwargs or not defaults:
+        # there are no keyword arguments in the function
+        return fun(*args)
+    else:  # extract from kwargs only the used keyword arguments
+        d = {k: kwargs[k] for k, _ in defaults}
+        return fun(*args, **d)

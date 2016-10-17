@@ -31,7 +31,7 @@ job_settings = pkg_templates.singlepoint.overlay(us)
 supermol_results = adf(job_settings, supermol)
 #supermol_dipole = supermol_results.dipole_vector
 
-supermol_dipole = supermol_results.get_property('Dipole', 'Properties')
+supermol_dipole = supermol_results.get_property_kf('Dipole', 'Properties')
 
 result = run_local.run(supermol_dipole)
 print(result)
@@ -74,7 +74,7 @@ print("3-FDE:         ", fde_dipole)
 print
 
 sqrt_error = math.sqrt(diff_dens.integral(func=lambda x: x*x))
-abs_error = diff_dens.integral(func=lambda x: abs(x))
+abs_error = diff_dens.integral(func=abs)
 
 print(" fde Diff Dens Int        : ", diff_dens.integral())
 print(" fde Diff Dens Int (Sqr.) : ", sqrt_error)

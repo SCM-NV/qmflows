@@ -1,0 +1,8 @@
+{
+    "frequencies": {"parser": "gamess_parser", "function": "parse_frequencies", "file_ext": "dat"},
+    "hessian":     {"parser": "gamess_parser", "function": "parse_hessian",     "file_ext": "dat"},
+    "gradient":    {"parser": "gamess_parser", "function": "parse_gradient",    "file_ext": "dat"},
+    "dipole":      {"parser": "gamess_parser", "function": "parse_dipole",      "file_ext": "dat"},
+    "molecule":    {"parser": "gamess_parser", "function": "parse_molecule",    "file_ext": "out"},
+    "total_energy": {"parser": "gamess_parser", "function": "parse_total_energy", "file_ext": "out"}
+}

@@ -1,6 +1,5 @@
 # Default imports
 from qmworks import Settings, templates, run
-from noodles import gather
 from plams import Molecule
 
 # User Defined imports

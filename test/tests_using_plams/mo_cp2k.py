@@ -45,7 +45,7 @@ def fun_ethylene(scratch_path):
     s.potential = "GTH-PBE"
     s.cell_parameters = [12.74] * 3
     dft = s.specific.cp2k.force_eval.dft
-    dft.scf.added_mos = 50
+    dft.scf.added_mos = 20
     dft.scf.eps_scf = 1e-4
 
     dft['print']['ao_matrices']['overlap'] = ''
@@ -91,7 +91,7 @@ def fun_ethylene(scratch_path):
 
 def prepare_job_cp2k(geometry, files, settings, work_dir,
                      project_name=None, hdf5_file=None, wfn_restart_job=None,
-                     store_in_hdf5=True, nHOMOS=25, nLUMOS=25,
+                     store_in_hdf5=True, nHOMOS=20, nLUMOS=20,
                      package_config=None):
     """
     Fills in the parameters for running a single job in CP2K.
@@ -124,7 +124,7 @@ def prepare_job_cp2k(geometry, files, settings, work_dir,
                                          work_dir, wfn_restart_job,
                                          store_in_hdf5, package_config)
     print("CP2K Settings: ", job_settings)
-    
+
     return cp2k(job_settings, plams.Molecule(files.get_xyz), work_dir=work_dir,
                 project_name=project_name, hdf5_file=hdf5_file,
                 input_file_name=files.get_inp,
@@ -200,4 +200,3 @@ def split_file_geometries(pathXYZ):
 
     numat = int(xss[0].split()[0])
     return list(map(flatten, chunksOf(xss, numat + 2)))
-

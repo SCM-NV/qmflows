@@ -2,6 +2,7 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
+           'lookup',
            'repeatN', 'replicate', 'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
@@ -58,6 +59,16 @@ def zipWith3(f, xs, ys, zs):
 
 # ================> Dict Functions
 from qmworks.settings   import Settings
+
+
+def lookup(d, k):
+    """
+    Look `k` in `d` if it is not an element returns `None`.
+    """
+    try:
+        return d[k]
+    except KeyError:
+        return None
 
 
 def settings2Dict(s):

@@ -1,20 +1,17 @@
 
 from nose.plugins.attrib import attr
 from noodles import gather
-from qmworks import Settings, templates, run
+from qmworks import adf, run, Settings, templates
 import plams
-
-# User Defined imports
-from qmworks.packages.SCM import adf
 
 
 @attr('slow')
 def test_ADFGeometry_Constraint():
     """
-    Test "freeze" and "selected_atoms" keywords for constrained geometry optimizations
+    Test "freeze" and "selected_atoms" keywords for constrained geometry
+    optimizations.
     """
     an = plams.Molecule('test/test_files/an.xyz', 'xyz')
-    
     # optimize only H atoms
     s = Settings()
     s.freeze = [1, 2, 3]
@@ -30,3 +27,9 @@ def test_ADFGeometry_Constraint():
     r = run(gather(geom1, geom2), n_processes=1)
 
     assert str(r[0]) == str(r[1])
+
+
+if __name__ == "__main__":
+    plams.init()
+    test_ADFGeometry_Constraint
+    plams.finish()
