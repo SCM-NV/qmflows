@@ -24,7 +24,7 @@ from noodles.serial.base import SerAutoStorable
 from qmworks.settings import Settings
 from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
-from qmworks.utils import (concatMap, lookup)
+from qmworks.utils import concatMap
 
 # ==============================================================
 __all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
@@ -102,7 +102,7 @@ class Result:
         file_ext = ds['file_ext']
 
         # If there is not work_dir returns None
-        work_dir = lookup(self.archive, 'work_dir')
+        work_dir = self.archive.get('work_dir')
 
         # Plams dir
         plams_dir = self.archive['plams_dir'].path
@@ -116,7 +116,7 @@ class Result:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
             # Read the keywords arguments from the properties dictionary
-            kwargs = lookup(ds, 'kwargs')
+            kwargs = ds.get('kwargs')
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
@@ -344,7 +344,8 @@ def import_parser(ds, module_root="qmworks.parsers"):
 
 def find_file_pattern(pat, folder):
     if folder is not None and os.path.exists(folder):
-        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), pat))
+        return map(lambda x: join(folder, x),
+                   fnmatch.filter(os.listdir(folder), pat))
     else:
         return []
 
@@ -360,7 +361,8 @@ def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
     # Look for the arguments with the nonempty defaults.
     defaults = list(filter(lambda t: t[1].default != inspect._empty,
                            ps.items()))
-    if not kwargs or not defaults:  # there are not keyword arguments in the function
+    # there are not keyword arguments in the function
+    if not kwargs or not defaults:
         return fun(*args)
     else:  # extract from kwargs only the used keyword arguments
         d = {k: kwargs[k] for k, _ in defaults}
