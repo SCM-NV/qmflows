@@ -19,7 +19,7 @@ from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.base import SerAutoStorable
+from noodles.serial.base import SerStorable
 
 from noodles.run.xenon import (
     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
@@ -79,6 +79,14 @@ class Result:
             "job_name": self.job_name,
             "archive": self.archive,
             "project_name": self.project_name}
+
+    def from_dict(cls, settings, molecule, job_name, archive,
+                  project_name):
+        """
+        Methods to deserialize an `Result`` object.
+        """
+        raise NotImplementedError()
+
 
     def __getattr__(self, prop):
         """Returns a section of the results.
@@ -264,7 +272,7 @@ def call_xenon(job, n_processes=1, **kwargs):
     """
     with XenonKeeper() as Xe:
         certificate = Xe.credentials.newCertificateCredential(
-            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', '<username>', '', None)
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'fza900', '', None)
 
         xenon_config = XenonConfig(
             jobs_scheme='slurm',
@@ -277,7 +285,7 @@ def call_xenon(job, n_processes=1, **kwargs):
 
         job_config = RemoteJobConfig(
             registry=registry,
-            working_dir='<path>',
+            working_dir='/home/fza900/WorkBench_Python',
             init=plams.init,
             finish=plams.finish,
             time_out=5000
@@ -351,7 +359,7 @@ def registry():
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Chem.Mol: SerMol(),
-            Result: SerAutoStorable(Result),
+            Result: SerStorable(Result),
             Settings: SerSettings()})
 
 
