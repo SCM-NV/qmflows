@@ -23,6 +23,7 @@ from noodles.serial.base import SerStorable
 
 from noodles.run.xenon import (
     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
+from noodles.serial.numpy import arrays_to_hdf5
 
 from qmworks.settings import Settings
 from qmworks import rdkitTools
@@ -131,7 +132,7 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "There is not output file called: {}.\n".format(file_pattern)
+            msg = "There is no output file called: {}.\n".format(file_pattern)
             raise FileNotFoundError(msg)
 
 
@@ -353,7 +354,7 @@ def registry():
     and decode this Package object.
     """
     return Registry(
-        parent=serial.base(),
+        parent=serial.base() + arrays_to_hdf5(),
         types={
             Package: AsDict(Package),
             Path: SerPath(),
