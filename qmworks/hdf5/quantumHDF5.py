@@ -52,9 +52,9 @@ class StoreasHDF5:
         creates a data set using ``data`` and saves the data using ``pathProperty``
         in the HDF5 file.
 
-        :parameter pathProperty: path to store the property in HDF5.
+        :param pathProperty: path to store the property in HDF5.
         :type pathProperty: String
-        :parameter data: Numeric array containing the property.
+        :param data: Numeric array containing the property.
         :type data: Numpy array
         :returns: **None**
         """
@@ -65,13 +65,13 @@ class StoreasHDF5:
         """
         creates a data set using ``data`` and some attributes.
 
-        :parameter nameAttr: Name of the attribute assoaciated with the data.
+        :param nameAttr: Name of the attribute assoaciated with the data.
         :type nameAttr: String
-        :parameter attr: Actual atttribute.
+        :param attr: Actual atttribute.
         :type attr: String | Numpy array
-        :parameter pathProperty: path to store the property in HDF5.
+        :param pathProperty: path to store the property in HDF5.
         :type pathProperty: String
-        :parameter data: Numeric array containing the property.
+        :param data: Numeric array containing the property.
         :type data: Numpy array
         :returns: **None**
         """
@@ -84,10 +84,11 @@ class StoreasHDF5:
         """
         Store the basis set.
 
-        :parameter parserFun: Function to parse the file containing the
-        information about the primitive contracted Gauss functions.
-        :parameter pathBasis: Absolute path to the file containing the basis
-        sets information.
+        :param parserFun: Function to parse the file containing the
+                          information about the primitive contracted Gauss
+                          functions.
+        :param pathBasis: Absolute path to the file containing the basis
+                          sets information.
         :type pathBasis: String.
         :returns: **None**
         """
@@ -114,18 +115,18 @@ class StoreasHDF5:
         """
         Save Molecular orbital eigenvalues and eigenvectors.
 
-        :parameter parserFun: Function to parse the file containing the MOs.
-        :parameter pathMO: Absolute path to the MOs file.
+        :param parserFun: Function to parse the file containing the MOs.
+        :param pathMO: Absolute path to the MOs file.
         :type pathMO: String
-        :parameter nOrbitals: Number of orbitals
+        :param nOrbitals: Number of orbitals
         :type nOrbitals: Int
         :param nOrbFuns: Number of Atomic orbitals function that made up
-        each of the molecular orbitals.
+                         each of the molecular orbitals.
         :type nOrbFuns: Int
-        :parameter pathEs: Path to the MO eigenvalues in the HDF5 file
+        :param pathEs: Path to the MO eigenvalues in the HDF5 file
                            (default is: <softwareName>/mo/eigenvalues).
         :type pathEs: String
-        :parameter pathCs: Path to the MO coefficients in the HDF5 file
+        :param pathCs: Path to the MO coefficients in the HDF5 file
                            (default is: <softwareName>/mo/coefficients).
         :type pathCs: String
         :param nOccupied: Number of occupied molecular orbitals.
@@ -166,13 +167,13 @@ class StoreasHDF5:
         """
         Store the Overlap matrix.
 
-        :parameter parserFun: Function to parse the file containing the Overlap
+        :param parserFun: Function to parse the file containing the Overlap
                               matrix.
-        :parameter pathOverlap: Absolute path to the overlap matrix file.
+        :param pathOverlap: Absolute path to the overlap matrix file.
         :type pathOverlap: String
-        :parameter nOrbitals: Number of orbitals
+        :param nOrbitals: Number of orbitals
         :type nOrbitals: Int
-        :parameter path: Path to store the Overlap matrix in the HDF5 file.
+        :param path: Path to store the Overlap matrix in the HDF5 file.
         :type path: String
         :returns: **None**
         """

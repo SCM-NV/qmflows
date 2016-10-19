@@ -10,19 +10,6 @@ import plams
 # ============================= Orca ==========================================
 
 
-class _PropertyGetter(Storable):
-    def __init__(self, result, section):
-        super(_PropertyGetter, self).__init__()
-        self.result = result
-        self.section = section
-
-    def __getattr__(self, prop):
-        pass
-
-    def __getitem__(self, prop):
-        pass
-
-
 class ORCA(Package):
     """
     This class prepare the input to run a Orca job using both Plams and

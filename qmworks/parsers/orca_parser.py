@@ -31,7 +31,7 @@ def parse_molecule(file_name):
 
 def parse_molecule_traj(file_traj):
     """
-    Read Molecules from the *.traj file.
+    Read Molecules from the job_name.traj file.
     """
     mols = manyXYZ(file_traj)
     # Last geometry corresponds to the optimized structure
@@ -48,7 +48,7 @@ def parse_molecule_traj(file_traj):
 
 def parse_hessian(file_hess: str) -> Matrix:
     """
-    Read the hessian matrix in cartesian coordinates from the *.hess file.
+    Read the hessian matrix in cartesian coordinates from the job_name.hess file.
     :returns: Numpy array
     """
     start = '$hessian'
@@ -57,7 +57,7 @@ def parse_hessian(file_hess: str) -> Matrix:
 
 def parse_normal_modes(file_hess: str) -> Matrix:
     """
-    Returns the normal modes from the *.hess file
+    Returns the normal modes from the job_name.hess file
     """
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
@@ -65,7 +65,7 @@ def parse_normal_modes(file_hess: str) -> Matrix:
 
 def parse_frequencies(file_hess: str) -> Matrix:
     """
-    Parse the vibrational frequencies from the *.hess file.
+    Parse the vibrational frequencies from the job_name.hess file.
     """
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()

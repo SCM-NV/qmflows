@@ -8,9 +8,11 @@ For a more detail descrition of **QMworks** read the documentation
    templates
    promise
    packages
-   running
-   components
-   hdf5
-   parsers
+
+   ..
+      running
+      components
+      hdf5
+      parsers
 
    

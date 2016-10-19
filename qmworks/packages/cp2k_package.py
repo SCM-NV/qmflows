@@ -3,7 +3,6 @@
 __all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
-from functools import partial
 from warnings import warn
 from os.path import join
 
@@ -18,7 +17,6 @@ from qmworks.hdf5 import cp2k2hdf5
 from qmworks.packages.packages import Package, Result
 from qmworks.parsers import read_cp2k_number_of_orbitals
 from qmworks.settings import Settings
-from qmworks.utils import lookup
 
 # ====================================<>=======================================
 charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
@@ -179,7 +177,7 @@ class CP2K(Package):
                 'cell_parameters': write_cell_parameters}
 
         # Function that handles the special keyword
-        f = lookup(funs, key)
+        f = funs.get(key)
 
         if f is not None:
             return f(settings, value, mol, key)
@@ -214,8 +212,9 @@ class CP2K_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        fun = partial(lookup, archive)
-        plams_dir, work_dir, path_hdf5 = list(map(fun, ["plams_dir", "work_dir",
+        fun = lambda k: archive.get(k)
+        plams_dir, work_dir, path_hdf5 = list(map(fun, ["plams_dir",
+                                                        "work_dir",
                                                         "path_hdf5"]))
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
                            path_hdf5, project_name)

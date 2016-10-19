@@ -112,14 +112,16 @@ Suppose you have a water molecule and you want to calculate a first approximatio
 
 *QMWorks* uses the *Plams* package for both generating the input and calling the package that do the ``ab initio`` simulation.  *Plams* has an ``init`` function as shown in **(1)**, that initialize its enviroment and set all the variables to do the booking of creating unique folders, keeping track of the files, etc. that is required to do an ``ab initio`` simulation. Also, *QMWorks* use the *Plams* Molecule to store among other possible thing the molecular geometry coordinates. As shown at **(2)** the Molecule object is initialized with a path to the file containing the geometry and a string stating that file is of type ``xyz``. 
 
-In line **(3)** the *QMWorks* starts to show its power by declaring that a DFTB calculation is going to be carry out using as arguments the defaults for a ``geometry optimization`` available at `~qmworks.templates.geometry`. The :funct:`~qmworks.SCM.dftb` function takes as arguments the |Settings| and a *Molecule* object and it returns a :ref:`promise` object as result. You can regard this :ref:`promise` object like a suspended computation that is not yet evaluated. 
+In line **(3)** the *QMWorks* starts to show its power by declaring that a DFTB calculation is going to be carry out using as arguments the defaults
+for a ``geometry optimization`` available at `~qmworks.templates.geometry`. The `~qmworks.SCM.dftb` function takes as arguments the |Settings|
+and a *Molecule* object and it returns a :ref:`promise` object as result. You can regard this :ref:`promise` object like a suspended computation that
+is not yet evaluated. 
 
 In block **(4)** we set the input for a new computation using the *adf* but we use the previous computation using the syntax :: `h2o_geometry.molecule`
 
-As Previously discussed in the `tutorial templates`_ section
+As Previously discussed in the `tutorial templates`_
 
-
-.. technical:: 
+**Note**: 
   Under the hook the function *adf* is an instance of the class :class:`~qmworks.packages.SCM.ADF`
 
 

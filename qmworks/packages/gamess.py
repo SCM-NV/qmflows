@@ -4,7 +4,6 @@ __all__ = ['gamess']
 # =======>  Standard and third party Python Libraries <======
 from qmworks.packages.packages import (Package, Result)
 from qmworks.settings import Settings
-from qmworks.utils import lookup
 from warnings import warn
 
 import plams
@@ -103,8 +102,8 @@ class Gamess_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        plams_dir = lookup(archive, "plams_dir").path
-        work_dir = lookup(archive, "work_dir")
+        plams_dir = archive.get("plams_dir").path
+        work_dir = archive.get("work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
                              project_name=project_name)
