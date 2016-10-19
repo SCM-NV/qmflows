@@ -224,6 +224,21 @@ class Package:
     def __str__(self):
         return self.pkg_name
 
+    def handle_special_keywords(self, settings, key, value, mol):
+        """
+        This method should be implemented by the child class.
+        """
+        msg = "trying to call an abstract method"
+        raise  NotImplementedError(msg)
+
+    def run_job(self, settings, mol, job_name=None):
+        """
+        This method should be implemented by the child class.
+        """
+        msg = "The class representing a given quantum packages should \
+        implement this method"
+        raise  NotImplementedError(msg)
+
 
 def run(job, runner=None, **kwargs):
     """
