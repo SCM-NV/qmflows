@@ -88,7 +88,7 @@ class Result:
         if prop in self.prop_dict:
             return self.get_property(prop)
         else:
-            raise KeyError("Generic property '" + str(prop) + "' not defined")
+            raise AttributeError("Generic property '" + str(prop) + "' not defined")
 
     def get_property(self, prop):
         """
