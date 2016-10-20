@@ -87,7 +87,7 @@ def initialize(fun):
     """
     Decorator to avoid calling plams.init method constantly
     """
-    @wraps
+    @wraps(fun)
     def wrapper(*args, **kwargs):
         conf = builtins.config
         if not isinstance(conf, plams.Settings):
