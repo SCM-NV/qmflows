@@ -2,7 +2,7 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
-           'repeatN', 'replicate', 'settings2Dict', 'zipWith', 'zipWith3']
+           'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
 from functools import reduce
@@ -32,15 +32,6 @@ def flatten(xs):
     return reduce(lambda x, y: x + y, xs)
 
 
-def repeatN(n, a):
-    for x in range(n):
-        yield a
-
-
-def replicate(n, a):
-    return list(repeatN(n, a))
-
-
 @curry
 def zipWith(f, xs, ys):
     """zipWith generalises zip by zipping with the function given as the first argument"""
@@ -58,6 +49,7 @@ def zipWith3(f, xs, ys, zs):
 
 # ================> Dict Functions
 from qmworks.settings   import Settings
+
 
 def settings2Dict(s):
     """
