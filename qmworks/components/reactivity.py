@@ -5,7 +5,6 @@ from qmworks import templates, rdkitTools
 from qmworks.settings import Settings
 from noodles import gather, schedule
 from plams import Molecule
-from rdkit import Chem
 from rdkit.Chem import AllChem
 
 

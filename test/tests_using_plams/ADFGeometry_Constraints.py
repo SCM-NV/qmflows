@@ -31,5 +31,5 @@ def test_ADFGeometry_Constraint():
 
 if __name__ == "__main__":
     plams.init()
-    test_ADFGeometry_Constraint
+    test_ADFGeometry_Constraint()
     plams.finish()
