@@ -17,7 +17,7 @@ class ORCA(Package):
     and data required to retrieve the output.
     """
     def __init__(self):
-        super(ORCA, self).__init__("orca")
+        super().__init__("orca")
         self.generic_dict_file = 'generic2ORCA.json'
 
     def prerun(self):

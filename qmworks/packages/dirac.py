@@ -1,9 +1,11 @@
 
-__all__ = ['dirac','DIRAC', 'DIRAC_Result']
+__all__ = ['dirac', 'DIRAC', 'DIRAC_Result']
 
 
 # =======>  Standard and third party Python Libraries <======
+from functools import reduce
 from noodles import (Storable)
+from warnings import warn
 import plams
 
 # ==================> Internal modules <====================
@@ -17,29 +19,32 @@ class DIRAC(Package):
     """
     """
     def __init__(self):
-        super(DIRAC, self).__init__("dirac")
+        super().__init__("dirac")
         self.generic_dict_file = 'generic2DIRAC.json'
 
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, input_file_name=None, out_file_name=None):
+    @staticmethod
+    def run_job(settings, mol, input_file_name=None, out_file_name=None):
 
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
-        check_dirac_input(dirac_settings)
+        # check_dirac_input(dirac_settings)
         result = plams.DiracJob(settings=dirac_settings, molecule=mol).run()
 
-        return DIRAC_Result(dirac_settings, mol, result)
+        return DIRAC_Result(dirac_settings, mol, result.job.name,
+                            plams_dir=result.job.path)
 
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         """
         Create the settings input for complex Dirac keywords
         """
-        pass
+        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 # Instance
 dirac = DIRAC()
@@ -47,13 +52,12 @@ dirac = DIRAC()
 
 class DIRAC_Result(Storable):
     """
+    Class to access **DIRAC** Results.
     """
-    def __init__(self, settings, molecule, result):
-        super(DIRAC_Result, self).__init__(use_ref=True)
-        self.settings = settings
-        self._molecule = molecule
-        self.result = result
-        self.files.append(result.path)
+    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
+        properties = 'data/dictionaries/propertiesDIRAC.json'
+        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir,
+                         project_name=project_name, properties=properties)
 
     def as_dict(self):
         return {
@@ -61,11 +65,14 @@ class DIRAC_Result(Storable):
             "molecule": self._molecule,
             "filename": self.result.path}
 
+    @property
     def molecule(self):
-        pass 
+        pass
 
-    def __getattr__(self):
-        pass 
+    @classmethod
+    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+        plams_dir = archive["plams_dir"].path
+        return DIRAC_Result(settings, molecule, job_name, plams_dir, project_name)
 
 
 def check_dirac_input(s):
@@ -85,7 +92,7 @@ def check_dirac_input(s):
 
     method:
     Available options are: HF, DFT, MP2, CCSD, CCSDt, (FSCC, IHFSCC)
-    
+
      :param s.input.method: string identifying the selected method
      :type  s.input.method: str
 
@@ -115,7 +122,7 @@ def check_dirac_input(s):
    :domoltra:
       :param s.input.domoltra: Switch on transformation.
       :type  s.input.domoltra: bool
-  
+
    :moltra:
     set options for 4-index transformation.
     :param s.input.moltra: either ['all'] or a list giving minimum and maximum orbital energy
@@ -128,18 +135,17 @@ def check_dirac_input(s):
     :type  s.input.nucmod: String
 
     """
-    
-    for k in s.input.keys():
-        val = s.input[k]
-        key = k.upper()
-        if isinstance(val, list):
-            val = list([x.upper() for x in val])
-        elif isinstance(val, str):
-            val = val.upper()
-        s.input[key] = val
+    pass
+    # for k in s.input.keys():
+    #     val = s.input[k]
+    #     key = k.upper()
+    #     if isinstance(val, list):
+    #         val = list([x.upper() for x in val])
+    #     elif isinstance(val, str):
+    #         val = val.upper()
+    #     s.input[key] = val
 
-    return check_easy_input(s)
-    
+    # return check_easy_input(s)
 
 
 def check_easy_input(easySett):
@@ -149,8 +155,9 @@ def check_easy_input(easySett):
     :param easySett: Settings containing the user provided input
     :type  easySett: Settings
     """
-    
-    return reduce(lambda acc, f: f(acc), [check_hamiltonian, check_method, check_properties, check_transform, check_nucmod], easySett )
+    return reduce(lambda acc, f: f(acc),
+                  [check_hamiltonian, check_method, check_properties,
+                   check_transform, check_nucmod], easySett)
 
 
 def check_hamiltonian(s):
@@ -160,23 +167,26 @@ def check_hamiltonian(s):
     :type  s: Settings
 
     """
-    supported_hamiltonians = {'DC': 'Dirac-Coulomb',
-                      'DCG': 'Dirac-Coulomb-Gaunt (available for DFT, HF)',
-                      'SFDC': 'Spin-free Dirac-Coulomb',
-                      'MMF': 'DCG-based Molecular Mean Field',
-                      'X2C': 'eXact 2-Component',
-                      'ECP': 'Relativistic ECP',
-                      'LEVY': 'Levy-Leblond (NR limit of Dirac equation)',
-                      'NONR': 'Non-relativistic (true 1 component) Hamiltonian'}
+    supported_hamiltonians = {
+        'DC': 'Dirac-Coulomb',
+        'DCG': 'Dirac-Coulomb-Gaunt (available for DFT, HF)',
+        'SFDC': 'Spin-free Dirac-Coulomb',
+        'MMF': 'DCG-based Molecular Mean Field',
+        'X2C': 'eXact 2-Component',
+        'ECP': 'Relativistic ECP',
+        'LEVY': 'Levy-Leblond (NR limit of Dirac equation)',
+        'NONR': 'Non-relativistic (true 1 component) Hamiltonian'
+    }
 
     ham = s.input.HAMILTONIAN
     if ham not in supported_hamiltonians:
-        err = 'Dirac does not support Hamiltonian:{} \nSupported Hamiltonians:{}\n'.format(ham,supported_hamiltonians)
+        err = 'Dirac does not support Hamiltonian:{}\
+        \nSupported Hamiltonians:{}\n'.format(ham, supported_hamiltonians)
         raise RuntimeError(err)
 
     return s
 
-        
+
 def check_method(s):
     """
     Checks the user input list of properties stored ``in S.input.properties``.
@@ -184,29 +194,28 @@ def check_method(s):
     :type  s: Settings
     """
     met = s.input.METHOD
-    if any([met == x for x in ['HF','DFT']]):
-        s.input.EXPORTFDE_LEVEL='DHF'
+    if any([met == x for x in ['HF', 'DFT']]):
+        s.input.EXPORTFDE_LEVEL = 'DHF'
     elif any([met == x for x in ['MP2', 'CCSD', 'CCSDt', 'FSCC', 'IHFSCC']]):
-        s.input.EXPORTFDE_LEVEL='MP2'        
-        s.input.DOMOLTRA = True        
+        s.input.EXPORTFDE_LEVEL = 'MP2'
+        s.input.DOMOLTRA = True
 
     return s
+
 
 def check_transform(s):
     """
     Checks if the ``domoltra`` is active otherwise add some defaults.
     :param s: Settings containing the input tree
     :type  s: Settings
-    """    
-
+    """
     if s.input.DOMOLTRA:
-       moltra = s.input.get('MOLTRA')
-       if not moltra:
-           s.input.MOLTRA = [-5.0, 10.0, 0.1]
-           xs  = s.input.MOLTRA.strip('[]')            
-           msg = 'Default moltra parameters are:{}'.format(xs)
-           log.info(msg)
-
+        moltra = s.input.get('MOLTRA')
+        if not moltra:
+            s.input.MOLTRA = [-5.0, 10.0, 0.1]
+            xs  = s.input.MOLTRA.strip('[]')
+            msg = 'Default moltra parameters are:{}'.format(xs)
+            raise RuntimeError(msg)
     return s
 
 
@@ -219,19 +228,25 @@ def check_properties(s):
     :type  s: Settings
 
     """
-    predifined_properties = ['DIPOLE','QUADRUPOLE','EFG','NQCC','POLARIZABILITY','FIRST ORDER HYPERPOLARIZABILITY', 'VERDET', 'TWO-PHOTON', 'NMR', 'SHIELDING','MAGNET', 'SPIN-SPIN COUPLING', 'DSO', 'NSTDIAMAGNETIC', 'MOLGRD', 'PVC' ,'RHONUC','EFFDEN']
+    predifined_properties = ['DIPOLE', 'QUADRUPOLE', 'EFG', 'NQCC',
+                             'POLARIZABILITY', 'FIRST ORDER HYPERPOLARIZABILITY',
+                             'VERDET', 'TWO-PHOTON', 'NMR', 'SHIELDING',
+                             'MAGNET', 'SPIN-SPIN COUPLING', 'DSO',
+                             'NSTDIAMAGNETIC', 'MOLGRD', 'PVC', 'RHONUC',
+                             'EFFDEN']
 
-    properties = s.input.get('PROPERTIES')
     def iselem(x):
         if x not in predifined_properties:
             err = 'unkown property:{}\n'.format(x)
             raise RuntimeError(err)
 
-        for p in properties:
-            iselem(properties)
+    properties = s.input.get('PROPERTIES')
+    for p in properties:
+        iselem(properties)
 
     return s
-        
+
+
 def check_nucmod(s):
     """
     Checks the ``nuclear model`` input validity.
@@ -242,7 +257,7 @@ def check_nucmod(s):
     nucmod = s.input.NUCMOD
 
     if not nucmod:
-        if any( list( [nucmod == x for x in ['FINITE','POINT']] ) ):
+        if any(nucmod == x for x in ['FINITE', 'POINT']):
             err = 'Unkown nuclear mode:{}\n'.format(nucmod)
             raise RuntimeError(err)
 
@@ -263,27 +278,31 @@ def build_dirac_input(s):
     if s.input.GEOMOPT:
         inp.input.DIRAC["WAVE FUNCTION"]["OPTIMIZE"]
 
-    funs = [build_hamiltonian_opts, build_method_opts, build_basis_opts, build_transf_opts, build_integral_opts, build_properties_opts, build_exportlevel_opts]
+    funs = [build_hamiltonian_opts, build_method_opts, build_basis_opts,
+            build_transf_opts, build_integral_opts, build_properties_opts,
+            build_exportlevel_opts]
 
     for f in funs:
-        inp,s = f(*(inp,s))
-    
-    return inp    
+        inp, s = f(*(inp, s))
+
+    return inp
 
 
-def build_hamiltonian_opts(inp,s):
+def build_hamiltonian_opts(inp, s):
     """
-    Adds Hamiltonian to input structure together with some special keywords related to the Hamiltonians.
+    Adds Hamiltonian to input structure together with some special keywords
+    related to the Hamiltonians.
     :parameter inp: Real Dirac Input structure
     :type      inp: Settings
     :parameter   s: generic keywords
     :type        s: Settings
 
     """
-
-    _special_names = {'DCG' : ['DCG', 'GAUNT'] , 'MMF' : ['X2Cmmf', 'GAUNT']
-                      , 'SFDC' : ['SPINFREE' ], 'LEVY' : ['Levy-LEBLOND','LVCORR']
-                      , 'NONR' : ['NONREL','LVCORR']}
+    _special_names = {
+        'DCG': ['DCG', 'GAUNT'], 'MMF': ['X2Cmmf', 'GAUNT'],
+        'SFDC': ['SPINFREE'], 'LEVY': ['Levy-LEBLOND', 'LVCORR'],
+        'NONR': ['NONREL', 'LVCORR']
+    }
 
     ham   = s.input.HAMILTONIAN
     xs    = _special_names.get(ham)
@@ -292,14 +311,15 @@ def build_hamiltonian_opts(inp,s):
     if xs:
         for x in xs:
             inp.input.HAMILTONIAN[x]
-    elif met == 'DFT' :
-        inp.input.HAMILTONIAN.DFT = funct 
+    elif met == 'DFT':
+        inp.input.HAMILTONIAN.DFT = funct
     else:
         inp.input.HAMILTONIAN[ham]
-            
-    return inp,s
 
-def build_method_opts(inp,s):
+    return inp, s
+
+
+def build_method_opts(inp, s):
     """
     Adds the method keywords to the input settings.
     :parameter inp: Real Dirac Input structure
@@ -307,7 +327,7 @@ def build_method_opts(inp,s):
     :parameter   s: generic keywords
     :type        s: Settings
     """
-    cc_family = ['CCSD', 'CCSDt', 'FSCC', 'IHFSCC']    
+    cc_family = ['CCSD', 'CCSDt', 'FSCC', 'IHFSCC']
     met       = s.input.METHOD
 
     inp.input["WAVE FUNCTION"]["SCF"]
@@ -318,7 +338,8 @@ def build_method_opts(inp,s):
 
     return inp, s
 
-def build_basis_opts(inp,s):
+
+def build_basis_opts(inp, s):
     """
     Adds Basis set opts
     :parameter inp: Real Dirac Input structure
@@ -327,11 +348,12 @@ def build_basis_opts(inp,s):
     :type        s: Settings
     """
 
-    basis = s.input.BASIS    
+    basis = s.input.BASIS
     inp.input["MOLECULE"]["BASIS"]["DEFAULT"] = basis
     return inp, s
 
-def build_transf_opts(inp,s):
+
+def build_transf_opts(inp, s):
     """
     Options to Specify the active set of spinors in th integral transformation module.
     :parameter inp: Real Dirac Input structure
@@ -341,7 +363,6 @@ def build_transf_opts(inp,s):
 
     """
     moltra = s.input.MOLTRA
-    
     if s.input.DOMOLTRA:
         if moltra[0] == "all":
             inp.input.MOLTRA.ACTIVE = "all"
@@ -350,7 +371,8 @@ def build_transf_opts(inp,s):
 
     return inp, s
 
-def build_integral_opts(inp,s):
+
+def build_integral_opts(inp, s):
     """
     Nuclear model specification.
     :parameter inp: Real Dirac Input structure
@@ -365,9 +387,10 @@ def build_integral_opts(inp,s):
 
     return inp, s
 
-def build_properties_opts(inp,s):
+
+def build_properties_opts(inp, s):
     """
-    Adds Molecular property calculation to the input.    
+    Adds Molecular property calculation to the input.
     :parameter inp: Real Dirac Input structure
     :type      inp: Settings
     :parameter   s: generic keywords
@@ -376,13 +399,10 @@ def build_properties_opts(inp,s):
     ps = s.input.PROPERTIES
     for p in ps:
         inp.input.PROPERTIES[p]
-    return inp,s 
-        
-def build_exportlevel_opts(inp,s):
+    return inp, s
+
+
+def build_exportlevel_opts(inp, s):
     """
     """
-    return inp,s
-
-
-
-
+    return inp, s
