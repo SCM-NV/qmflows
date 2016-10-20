@@ -212,10 +212,9 @@ class CP2K_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        fun = lambda k: archive.get(k)
-        plams_dir, work_dir, path_hdf5 = list(map(fun, ["plams_dir",
-                                                        "work_dir",
-                                                        "path_hdf5"]))
+        plams_dir, work_dir, path_hdf5 = list(map(archive.get, ["plams_dir",
+                                                                "work_dir",
+                                                                "path_hdf5"]))
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
                            path_hdf5, project_name)
 

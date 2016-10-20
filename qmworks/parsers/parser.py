@@ -73,6 +73,3 @@ def string_array_to_molecule(parser_fun, file_name):
         plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
 
     return plams_mol
-
-
-    

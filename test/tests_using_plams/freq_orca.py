@@ -22,5 +22,5 @@ def test_freq_ethylene():
 
     mol = run(freq.molecule)
     print(mol)
-    
+
     assert False

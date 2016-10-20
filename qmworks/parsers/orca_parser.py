@@ -110,7 +110,7 @@ def read_block(lines):
       3  -0.133981  0.162928  -0.000000   0.133434  -0.164602   0.000000
 
     Read the matrix skiping the header and the first integer index
-    
+
     :returns: Numpy array
     """
     return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))
