@@ -1,8 +1,10 @@
 from nose.plugins.attrib import attr
-from qmworks import (dftb, run, templates)
 from plams import Molecule
+from qmworks import (dftb, run, templates)
+from qmworks.utils import initialize
 
 
+@initialize
 @attr('slow')
 def test_freq():
     """

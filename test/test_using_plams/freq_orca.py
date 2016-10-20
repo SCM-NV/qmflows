@@ -3,8 +3,10 @@ from nose.plugins.attrib import attr
 from plams import Molecule
 from qmworks.packages.orca import orca
 from qmworks.packages import (run, Settings)
+from qmworks.utils import initialize
 
 
+@initialize
 @attr('slow')
 def test_freq_ethylene():
     """
@@ -20,7 +22,5 @@ def test_freq_ethylene():
 
     freq = orca(s, ethylene)
 
-    mol = run(freq.molecule)
-    print(mol)
-
-    assert False
+    rs = run(freq.frequencies)
+    print(rs)

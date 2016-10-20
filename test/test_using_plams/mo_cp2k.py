@@ -6,7 +6,7 @@ from noodles import schedule  # Workflow Engine
 from os.path import join
 from qmworks import (run, Settings, templates)
 from qmworks.packages import cp2k
-from qmworks.utils import (chunksOf, flatten)
+from qmworks.utils import (chunksOf, flatten, initialize)
 
 import fnmatch
 import h5py
@@ -17,6 +17,7 @@ import shutil
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
+@initialize
 @attr('slow')
 def test_ethylene():
     """

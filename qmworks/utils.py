@@ -2,13 +2,15 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
-           'settings2Dict', 'zipWith', 'zipWith3']
+           'initialize', 'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
-from functools import reduce
+from functools import (reduce, wraps)
 from itertools import chain
 from pymonad   import curry
 
+import builtins
+import plams
 # ======================> List Functions <========================
 
 
@@ -77,3 +79,18 @@ def dict2Setting(d):
             r[k] = v
 
     return r
+
+# ====> Decorator
+
+
+def initialize(fun):
+    """
+    Decorator to avoid calling plams.init method constantly
+    """
+    @wraps
+    def wrapper(*args, **kwargs):
+        conf = builtins.config
+        if not isinstance(conf, plams.Settings):
+            plams.init()
+        return fun(*args, **kwargs)
+    return wrapper

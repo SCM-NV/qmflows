@@ -2,9 +2,11 @@
 from nose.plugins.attrib import attr
 from noodles import gather
 from qmworks import adf, run, Settings, templates
+from qmworks.utils import initialize
 import plams
 
 
+@initialize
 @attr('slow')
 def test_ADFGeometry_Constraint():
     """

@@ -6,8 +6,10 @@ from qmworks import (Settings, run)
 # User Defined imports
 from qmworks.components import (PES, select_max, Distance)
 from qmworks.packages.SCM import (dftb, adf)
+from qmworks.utils import initialize
 
 
+@initialize
 @attr('slow')
 def test_linear_ts():
     """
@@ -24,7 +26,6 @@ def test_linear_ts():
 
     constraint1 = Distance(0, 4)
     constraint2 = Distance(2, 3)
-
 
     # scan input
     pes = PES(cnc, constraints=[constraint1, constraint2],
