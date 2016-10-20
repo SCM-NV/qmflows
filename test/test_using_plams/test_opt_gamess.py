@@ -6,13 +6,11 @@ from qmworks import (concat, Settings, templates, zipWith)
 # User Defined imports
 from qmworks.packages.gamess import gamess
 from qmworks.packages import run
-from qmworks.utils import initialize
 
 import operator
 import plams
 
 
-@initialize
 @attr('slow')
 def test_opt_gamess():
     """

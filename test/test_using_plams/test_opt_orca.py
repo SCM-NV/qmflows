@@ -8,13 +8,12 @@ from qmworks import (concat, Settings, templates, zipWith)
 from qmworks.packages.SCM import dftb
 from qmworks.packages.orca import orca
 from qmworks.packages import run
-from qmworks.utils import initialize
 
 import operator
 import plams
 
 
-@initialize
+
 @attr('slow')
 def test_opt_orca():
     """
@@ -47,7 +46,6 @@ def test_opt_orca():
     assert diff < 1e-2
 
 
-@initialize
 @attr('slow')
 def test_methanol_opt_orca():
     """

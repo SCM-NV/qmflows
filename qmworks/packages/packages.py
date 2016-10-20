@@ -24,7 +24,7 @@ from noodles.serial.base import SerAutoStorable
 from qmworks.settings import Settings
 from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
-from qmworks.utils import concatMap
+from qmworks.utils import (concatMap, initialize)
 
 # ==============================================================
 __all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
@@ -242,6 +242,7 @@ class Package:
         raise  NotImplementedError(msg)
 
 
+@initialize
 def run(job, runner=None, **kwargs):
     """
     Pickup a runner and initialize it.

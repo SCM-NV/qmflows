@@ -1,9 +1,7 @@
 from nose.plugins.attrib import attr
 from qmworks import (templates, run, rdkitTools, dftb, adf)
-from qmworks.utils import initialize
 
 
-@initialize
 @attr('slow')
 def test_dftb_props():
     """
@@ -21,7 +19,6 @@ def test_dftb_props():
     assert abs(result.charges[0] + result.charges[1]) < 1e-6
 
 
-@initialize
 @attr('slow')
 def test_adf_props():
     """

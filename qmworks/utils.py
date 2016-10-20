@@ -93,5 +93,7 @@ def initialize(fun):
             builtins.config
         except AttributeError:
             plams.init()
-        return fun(*args, **kwargs)
+        result = fun(*args, **kwargs)
+        plams.finish()
+        return result
     return wrapper
