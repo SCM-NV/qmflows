@@ -1,4 +1,3 @@
-from os.path import join
 import importlib
 import plams
 
@@ -18,11 +17,11 @@ modules = {
 
 plams.init()
 
-root_folder = 'test/tests_using_plams'
+root_folder = 'test.tests_using_plams'
 
 # Load all the tests modules
 for module_name, fs in modules.items():
-    mod = join(root_folder, module_name)
+    mod = root_folder + '.' + module_name
     m = importlib.import_module(mod)
     # Execute each test function inside the module
     for fun in fs:
