@@ -24,7 +24,7 @@ class ORCA(Package):
         pass
 
     @staticmethod
-    def run_job(self, settings, mol, job_name="ORCAjob"):
+    def run_job(settings, mol, job_name="ORCAjob"):
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca

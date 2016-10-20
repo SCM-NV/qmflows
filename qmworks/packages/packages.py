@@ -233,7 +233,7 @@ class Package:
         raise  NotImplementedError(msg)
 
     @staticmethod
-    def run_job(settings, mol, job_name=None):
+    def run_job(settings, mol, job_name=None, **kwargs):
         """
         This method should be implemented by the child class.
         """

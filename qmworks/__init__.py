@@ -19,9 +19,9 @@ from .utils import (chunksOf, concat, concatMap, dict2Setting, flatten,
 
 
 __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
-           'InputKey', 'MO', 'Package', 'PES_scan', 'Result', 'SerMolecule',
+           'InputKey', 'MO', 'Package', 'Result', 'SerMolecule',
            'SerSettings', 'Settings', 'StoreasHDF5', 'adf', 'adf2hdf5',
-           'apply_reaction_smarts', 'apply_smirks',
+           'apply_reaction_smarts',
            'apply_template', 'chunksOf', 'concat', 'concatMap', 'cp2k',
            'cp2k2hdf5', 'dftb', 'dict2Setting', 'flatten',
            'freq', 'gen_coords', 'geometry',
