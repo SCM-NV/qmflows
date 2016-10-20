@@ -1,12 +1,31 @@
+from os.path import join
+import importlib
 import plams
+
+"""
+``modules`` is a dictionary contains as key the python modules names and
+a list of functions as values.
+"""
+modules = {
+    'freq_ethene_DFTB': ['test_freq'],
+    'ADFGeometry_Constraints': ['test_ADFGeometry_Constraint'],
+    'mo_cp2k': ['test_ethylene'],
+    'opt_orca': ['test_opt_orca', 'test_methanol_opt_orca'],
+    'linear_TS': ['test_linear_ts'],
+    'get_properties': ['test_dftb_props', 'test_adf_props'],
+    'opt_gamess': ['test_opt_gamess']
+}
 
 plams.init()
 
-exec(open('test/tests_using_plams/freq_ethene_DFTB.py').read())
-exec(open('test/tests_using_plams/ADFGeometry_Constraints.py').read())
-exec(open('test/tests_using_plams/mo_cp2k.py').read())
-exec(open('test/tests_using_plams/opt_orca.py').read())
-exec(open('test/tests_using_plams/linear_TS.py').read())
-exec(open('test/tests_using_plams/get_properties.py').read())
-exec(open('test/tests_using_plams/opt_gamess.py').read())
+root_folder = 'test/tests_using_plams'
+
+# Load all the tests modules
+for module_name, fs in modules.items():
+    mod = join(root_folder, module_name)
+    m = importlib.import_module(mod)
+    # Execute each test function inside the module
+    for fun in fs:
+        getattr(m, fun)()
+
 plams.finish()
