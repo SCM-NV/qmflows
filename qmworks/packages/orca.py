@@ -23,6 +23,7 @@ class ORCA(Package):
     def prerun(self):
         pass
 
+    @staticmethod
     def run_job(self, settings, mol, job_name="ORCAjob"):
 
         orca_settings = Settings()
@@ -36,7 +37,8 @@ class ORCA(Package):
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 

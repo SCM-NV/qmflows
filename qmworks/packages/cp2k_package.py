@@ -39,7 +39,8 @@ class CP2K(Package):
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, work_dir=None, project_name=None,
+    @staticmethod
+    def run_job(settings, mol, work_dir=None, project_name=None,
                 hdf5_file="quantum.hdf5", input_file_name=None,
                 out_file_name=None, store_in_hdf5=True,
                 nHOMOS=None, nLUMOS=None, job_name='cp2k_job'):
@@ -81,7 +82,8 @@ class CP2K(Package):
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         """
         Create the settings input for complex cp2k keys
 

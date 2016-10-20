@@ -224,14 +224,16 @@ class Package:
     def __str__(self):
         return self.pkg_name
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         """
         This method should be implemented by the child class.
         """
         msg = "trying to call an abstract method"
         raise  NotImplementedError(msg)
 
-    def run_job(self, settings, mol, job_name=None):
+    @staticmethod
+    def run_job(settings, mol, job_name=None):
         """
         This method should be implemented by the child class.
         """
