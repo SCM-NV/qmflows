@@ -89,8 +89,9 @@ def initialize(fun):
     """
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        conf = builtins.config
-        if not isinstance(conf, plams.Settings):
+        try:
+            builtins.config
+        except AttributeError:
             plams.init()
         return fun(*args, **kwargs)
     return wrapper
