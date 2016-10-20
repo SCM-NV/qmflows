@@ -1,5 +1,4 @@
 # =======>  Standard and third party Python Libraries <======
-from noodles import (Storable)
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, Result)

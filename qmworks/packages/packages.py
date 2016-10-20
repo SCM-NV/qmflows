@@ -116,7 +116,7 @@ class Result:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
             # Read the keywords arguments from the properties dictionary
-            kwargs = ds.get('kwargs')
+            kwargs = ds.get('kwargs') if ds.get('kwargs') is not None else {}
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
