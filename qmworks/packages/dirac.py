@@ -26,12 +26,13 @@ class DIRAC(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, input_file_name=None, out_file_name=None):
+    def run_job(settings, mol, job_name="dirac_job"):
 
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
         # check_dirac_input(dirac_settings)
-        result = plams.DiracJob(settings=dirac_settings, molecule=mol).run()
+        result = plams.DiracJob(name=job_name, settings=dirac_settings,
+                                molecule=mol).run()
 
         return DIRAC_Result(dirac_settings, mol, result.job.name,
                             plams_dir=result.job.path)
