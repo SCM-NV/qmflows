@@ -1,11 +1,11 @@
 # Default imports
-from qmworks import Settings, templates, run
+from qmworks import (Settings, run)
 from plams import Molecule
 
 # User Defined imports
 from math import sqrt
 from qmworks.packages.SCM import dftb, adf
-from qmworks.components import PES_scan, select_max
+from qmworks.components import (Distance, PES, select_max)
 
 # ========== =============
 
@@ -13,8 +13,6 @@ from qmworks.components import PES_scan, select_max
 def bond_distance(r1, r2):
     return sqrt(sum((x - y) ** 2 for x, y in zip(r1, r2)))
 # ========== =============
-
-econfig.log.stdout = -1000
 
 # Read the Molecule from file
 cnc = Molecule('C-N-C.mol', 'mol')
