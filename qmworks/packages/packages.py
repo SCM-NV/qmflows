@@ -19,7 +19,7 @@ from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.base import SerAutoStorable
+from noodles.serial.base import SerStorable
 
 from qmworks.settings import Settings
 from qmworks import rdkitTools
@@ -346,7 +346,7 @@ def registry():
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Chem.Mol: SerMol(),
-            Result: SerAutoStorable(Result),
+            Result: SerStorable(Result),
             Settings: SerSettings()})
 
 
