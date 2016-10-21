@@ -66,4 +66,8 @@ target/
 .idea/
 
 #.jupyter
-jupyterNotebooks/.ipynb_checkpoints/*
+.ipynb_checkpoints
+
+plams.*
+cache.json
+*.svg

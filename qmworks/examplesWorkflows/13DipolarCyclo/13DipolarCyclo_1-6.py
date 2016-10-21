@@ -10,11 +10,11 @@ from qmworks.packages.SCM import dftb, adf
 # from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
 from qmworks.components import Distance, PES, select_max
 
-import plams
+# import plams
 # ========== =============
 
-plams.init()
-config.log.stdout = -1000  # noqa
+# plams.init()
+# config.log.stdout = -1000  # noqa
 
 hartree2kcal = 627.5095
 
@@ -109,7 +109,7 @@ wf = gather(E_ethene_job, gather(*job_list))
 draw_workflow("wf.svg", wf._workflow)
 
 # Actual execution of the jobs
-E_ethene, results = run(wf, n_processes=2)
+E_ethene, results = run(wf, runner="xenon", n_processes=2)
 
 
 def bond_distance(r1, r2):

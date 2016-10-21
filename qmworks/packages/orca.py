@@ -6,7 +6,9 @@ from qmworks.packages.packages import (Package, Result)
 from qmworks.parsers.orca_parser import parse_molecule
 from warnings import warn
 
+import builtins
 import plams
+import numpy as np
 # ============================= Orca ==========================================
 
 
@@ -38,7 +40,31 @@ class ORCA(Package):
         pass
 
     def handle_special_keywords(self, settings, key, value, mol):
-        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
+        if key == "inithess":
+            hess = value
+            d = len(value)
+            if len(value.shape) == 1:
+                d = len(value)**0.5
+                if int(d) == d:
+                    d = int(d)
+                    hess = np.reshape(value, (d, d))
+            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+            hess_file = open(hess_path, "w")
+            hess_file.write('\n$orca_hessian_file\n\n$hessian\n' + str(d) + '\n')
+            for i in range(int((d-1) / 6) + 1):
+                hess_file.write("         " + " ".join(['{:10d}'.format(v + 6 * i) for v in range(min(6, d - 6*i))]) + '\n')
+                for j in range(len(hess[i])):
+                    hess_file.write('{:7d}'.format(j) + "     " + " ".join(['{:10.6f}'.format(hess[6*i+v][j]) for v in range(min(6, d - 6*i))]) + '\n')
+            hess_file.write('\n$atoms\n')
+            hess_file.write(str(len(mol)) + '\n')
+            for a in mol.atoms:
+                hess_file.write('{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(a.symbol, a._getmass(), *a.coords))
+            hess_file.write('\n\n$end\n')
+            hess_file.close()
+            settings.specific.orca.geom.InHess = "read"
+            settings.specific.orca.geom.InHessName = '"' + hess_path + '"'
+        else:
+            warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
 
 
 class ORCA_Result(Result):
@@ -54,21 +80,11 @@ class ORCA_Result(Result):
         plams_dir = archive["plams_dir"].path
         return ORCA_Result(settings, molecule, job_name, plams_dir, project_name)
 
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-            dipole = result.dipole
-        """
-        return self.get_property(prop)
-
     @property
     def molecule(self):
         """ Retrieve the molecule from the output file"""
         plams_dir = self.archive["plams_dir"].path
         file_name = join(plams_dir, '{}.out'.format(self.job_name))
-        return parse_molecule(file_name)
+        return parse_molecule(file_name, self._molecule)
 
 orca = ORCA()

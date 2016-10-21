@@ -14,12 +14,16 @@ import plams
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
-from noodles import (schedule_hint, has_scheduled_methods, serial)
+from noodles import (schedule, schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.base import SerAutoStorable
+from noodles.serial.base import SerStorable
+
+from noodles.run.xenon import (
+    XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
+from noodles.serial.numpy import arrays_to_hdf5
 
 from qmworks.settings import Settings
 from qmworks import rdkitTools
@@ -77,6 +81,14 @@ class Result:
             "archive": self.archive,
             "project_name": self.project_name}
 
+    def from_dict(cls, settings, molecule, job_name, archive,
+                  project_name):
+        """
+        Methods to deserialize an `Result`` object.
+        """
+        raise NotImplementedError()
+
+
     def __getattr__(self, prop):
         """Returns a section of the results.
 
@@ -120,7 +132,7 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "There is not output file called: {}.\n".format(file_pattern)
+            msg = "Property {} not found. No output file called: {}.\n".format(prop, file_pattern)
             raise FileNotFoundError(msg)
 
 
@@ -237,8 +249,10 @@ def run(job, runner=None, **kwargs):
 
     if runner is None:
         return call_default(job, **kwargs)
-    elif runner.lower() is 'xenon':
+    elif runner.lower() == 'xenon':
         return call_xenon(job, **kwargs)
+    else:
+        raise "Don't know runner: {}".format(runner)
 
 
 def call_default(job, n_processes=1):
@@ -252,20 +266,38 @@ def call_default(job, n_processes=1):
             display=display)
 
 
-def call_xenon(job, **kwargs):
+def call_xenon(job, n_processes=1, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    pass
-    # nproc = kwargs.get('n_processes')
-    # nproc = nproc if nproc is not None else 1
+    with XenonKeeper() as Xe:
+        certificate = Xe.credentials.newCertificateCredential(
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'fza900', '', None)
 
-    # xenon_config = XenonConfig(jobs_scheme='local')
+        xenon_config = XenonConfig(
+            jobs_scheme='slurm',
+            location='cartesius.surfsara.nl',
+            credential=certificate,
+            jobs_properties={
+                'xenon.adaptors.slurm.ignore.version': 'true'
+            }
+        )
 
-    # job_config = RemoteJobConfig(registry=serial.base, time_out=1)
+        job_config = RemoteJobConfig(
+            registry=registry,
+            working_dir='/home/fza900/WorkBench_Python',
+            init=plams.init,
+            finish=plams.finish,
+            time_out=5000
+        )
 
-    # return run_xenon(job, nproc, xenon_config, job_config)
+        with NCDisplay() as display:
+            result = run_xenon_prov(
+                job, Xe, "cache.json", n_processes,
+                xenon_config, job_config, display=display)
+
+    return result
 
 
 class SerMolecule(Serialiser):
@@ -322,13 +354,13 @@ def registry():
     and decode this Package object.
     """
     return Registry(
-        parent=serial.base(),
+        parent=serial.base() + arrays_to_hdf5(),
         types={
             Package: AsDict(Package),
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Chem.Mol: SerMol(),
-            Result: SerAutoStorable(Result),
+            Result: SerStorable(Result),
             Settings: SerSettings()})
 
 
