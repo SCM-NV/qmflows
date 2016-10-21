@@ -2,13 +2,15 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
-           'repeatN', 'replicate', 'settings2Dict', 'zipWith', 'zipWith3']
+           'initialize', 'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
-from functools import reduce
+from functools import (reduce, wraps)
 from itertools import chain
 from pymonad   import curry
 
+import builtins
+import plams
 # ======================> List Functions <========================
 
 
@@ -32,15 +34,6 @@ def flatten(xs):
     return reduce(lambda x, y: x + y, xs)
 
 
-def repeatN(n, a):
-    for x in range(n):
-        yield a
-
-
-def replicate(n, a):
-    return list(repeatN(n, a))
-
-
 @curry
 def zipWith(f, xs, ys):
     """zipWith generalises zip by zipping with the function given as the first argument"""
@@ -58,6 +51,7 @@ def zipWith3(f, xs, ys, zs):
 
 # ================> Dict Functions
 from qmworks.settings   import Settings
+
 
 def settings2Dict(s):
     """
@@ -85,3 +79,21 @@ def dict2Setting(d):
             r[k] = v
 
     return r
+
+# ====> Decorator
+
+
+def initialize(fun):
+    """
+    Decorator to avoid calling plams.init method constantly
+    """
+    @wraps(fun)
+    def wrapper(*args, **kwargs):
+        try:
+            builtins.config
+        except AttributeError:
+            plams.init()
+        result = fun(*args, **kwargs)
+        plams.finish()
+        return result
+    return wrapper

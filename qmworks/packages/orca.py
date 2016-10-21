@@ -1,5 +1,4 @@
 # =======>  Standard and third party Python Libraries <======
-from noodles import (Storable)
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, Result)
@@ -20,13 +19,14 @@ class ORCA(Package):
     and data required to retrieve the output.
     """
     def __init__(self):
-        super(ORCA, self).__init__("orca")
+        super().__init__("orca")
         self.generic_dict_file = 'generic2ORCA.json'
 
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, job_name="ORCAjob"):
+    @staticmethod
+    def run_job(settings, mol, job_name="ORCAjob"):
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
@@ -39,7 +39,8 @@ class ORCA(Package):
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         if key == "inithess":
             hess = value
             d = len(value)

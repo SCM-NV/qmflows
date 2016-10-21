@@ -25,7 +25,6 @@ def test_linear_ts():
     constraint1 = Distance(0, 4)
     constraint2 = Distance(2, 3)
 
-
     # scan input
     pes = PES(cnc, constraints=[constraint1, constraint2],
               offset=[2.3, 2.3], get_current_values=False, nsteps=2, stepsize=[0.1, 0.1])

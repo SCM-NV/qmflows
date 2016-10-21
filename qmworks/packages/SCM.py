@@ -25,7 +25,8 @@ class ADF(Package):
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, job_name='ADFjob'):
+    @staticmethod
+    def run_job(settings, mol, job_name='ADFjob'):
         """
         Execute ADF job.
 
@@ -53,7 +54,8 @@ class ADF(Package):
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         """
         some keywords provided by the user do not have a straightforward
         translation to *ADF* input and require some hooks that handles the
@@ -145,7 +147,8 @@ class DFTB(Package):
     def prerun(self):
         pass
 
-    def run_job(self, settings, mol, job_name='DFTBjob'):
+    @staticmethod
+    def run_job(settings, mol, job_name='DFTBjob'):
         """
         Execute an DFTB job with the *ADF* quantum package.
 
@@ -172,7 +175,8 @@ class DFTB(Package):
     def postrun(self):
         pass
 
-    def handle_special_keywords(self, settings, key, value, mol):
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
         warn(UserWarning('Generic keyword "' + key + '" not implemented for package DFTB.'))
 
 

@@ -31,7 +31,7 @@ def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
             raise FileNotFoundError('File %s not present' % progfile)
     else:
         cmd += [script]
-        
+
     new_cmd = cmd + [filename]
     ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
     if ret[-1] == '':

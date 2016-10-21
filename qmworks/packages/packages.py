@@ -20,7 +20,6 @@ from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerStorable
-
 from noodles.run.xenon import (
     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
 from noodles.serial.numpy import arrays_to_hdf5
@@ -28,7 +27,7 @@ from noodles.serial.numpy import arrays_to_hdf5
 from qmworks.settings import Settings
 from qmworks import rdkitTools
 from qmworks.fileFunctions import json2Settings
-from qmworks.utils import concatMap
+from qmworks.utils import (concatMap, initialize)
 
 # ==============================================================
 __all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
@@ -128,7 +127,7 @@ class Result:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
             # Read the keywords arguments from the properties dictionary
-            kwargs = ds.get('kwargs')
+            kwargs = ds.get('kwargs') if ds.get('kwargs') is not None else {}
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
@@ -236,7 +235,25 @@ class Package:
     def __str__(self):
         return self.pkg_name
 
+    @staticmethod
+    def handle_special_keywords(settings, key, value, mol):
+        """
+        This method should be implemented by the child class.
+        """
+        msg = "trying to call an abstract method"
+        raise  NotImplementedError(msg)
 
+    @staticmethod
+    def run_job(settings, mol, job_name=None, **kwargs):
+        """
+        This method should be implemented by the child class.
+        """
+        msg = "The class representing a given quantum packages should \
+        implement this method"
+        raise  NotImplementedError(msg)
+
+
+@initialize
 def run(job, runner=None, **kwargs):
     """
     Pickup a runner and initialize it.
