@@ -2,14 +2,11 @@
 from qmworks import Settings, templates
 from qmworks.draw_workflow import draw_workflow
 from plams import Molecule
-import plams
 
 # User Defined imports
 from qmworks.packages.SCM import adf, dftb
 from qmworks.packages import run
 
-
-plams.init()  # This is a plams requirement we like to get rid of
 # global config
 config.log.stdout = -1000
 

@@ -26,7 +26,8 @@ class Distance:
         s = Settings()
         if value is None:
             if mol is None:
-                raise RunTimeError('Distance constraint settings requires a value or molecule')
+                msg = 'Distance constraint settings requires a value or molecule'
+                raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
         s["dist " + str(self.atom1 + 1) + " " + str(self.atom2 + 1)] = value
@@ -55,18 +56,21 @@ class Angle:
         s = Settings()
         if value is None:
             if mol is None:
-                raise RunTimeError('Angle constraint settings requires a value or molecule')
+                msg = 'Angle constraint settings requires a value or molecule'
+                raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
-                s["angle " + str(self.atom1 + 1) + " " + str(self.atom2 + 1) + " " + str(self.atom3 + 1)] = value
+                s["angle " + str(self.atom1 + 1) + " " + str(self.atom2 + 1) +
+                  " " + str(self.atom3 + 1)] = value
         return s
+
 
 @schedule
 class PES:
     def __init__(self, molecule=None, constraints=None, offset=None, get_current_values=False,
                  nsteps=0, stepsize=0.0, nested_PES=None):
-        self.molecule=rdkitTools.plams2rdkit(molecule)
-        self.constraints=constraints
+        self.molecule = rdkitTools.plams2rdkit(molecule)
+        self.constraints = constraints
         if isinstance(constraints, list):
             self.start = []
             for i in range(len(constraints)):
@@ -83,9 +87,9 @@ class PES:
                 self.start = offset
             if get_current_values:
                 self.start += constraints.get_current_value(self.molecule)
-        self.nsteps=nsteps
-        self.stepsize=stepsize
-        self.nested_PES=nested_PES
+        self.nsteps = nsteps
+        self.stepsize = stepsize
+        self.nested_PES = nested_PES
 
     def scan(self, package, settings, job_name="PESscan"):
         """
@@ -138,12 +142,13 @@ class PES:
                              job_name=job_name)
         return result
 
-
     def get_constraint_settings(self, step):
         s = Settings()
         if isinstance(self.constraints, list):
             for c in range(len(self.constraints)):
-                s.constraint.update(self.constraints[c].get_settings(self.start[c] + self.stepsize[c] * step))
+                s.constraint.update(
+                    self.constraints[c].get_settings(self.start[c] +
+                                                     self.stepsize[c] * step))
         else:
             s.constraint = self.constraints.get_settings(self.start + self.stepsize * step)
         return s
