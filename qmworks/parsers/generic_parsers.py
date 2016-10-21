@@ -36,10 +36,16 @@ def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
     ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
     if ret[-1] == '':
         ret = ret[:-1]
-    try:
-        result = [float(i) for i in ret]
-    except ValueError:
-        result = ret
+    result = []
+    for i in ret:
+        try:
+            v = int(i)
+        except ValueError:
+            try:
+                v = float(i)
+            except ValueError:
+                v = i
+        result.append(v)
     if len(result) == 1:
         result = result[0]
     return result
