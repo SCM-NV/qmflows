@@ -27,7 +27,8 @@ setup(
         'topic :: scientific/engineering :: chemistry'
     ],
     install_requires=['cython', 'h5py', 'numpy', 'noodles', 'plams',
-                      'pymonad', 'pyparsing', 'six', 'tinydb', 'pyxenon'],
+                      'pymonad', 'pyparsing', 'six', 'tinydb', 'pyxenon',
+                      'filelock', 'msgpack-python'],
     extras_require={'test': ['nose', 'coverage']}
 
 )
