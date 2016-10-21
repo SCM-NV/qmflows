@@ -1,4 +1,4 @@
-
+from nose.plugins.attrib import attr
 from os.path import join
 from qmworks.common import InputKey
 from qmworks.hdf5.quantumHDF5 import turbomole2hdf5
@@ -9,6 +9,7 @@ import os
 path_hdf5 = 'test/test_files/test.hdf5'
 
 
+@attr('fast')
 def test_store_basisSet():
     """
     Check if the turbomole basis set are read
@@ -27,6 +28,7 @@ def test_store_basisSet():
             try_to_remove(path_hdf5)
 
 
+@attr('fast')
 def test_store_MO_h5():
     """
     test if the turbomole MO are stored in the HDF5 format.

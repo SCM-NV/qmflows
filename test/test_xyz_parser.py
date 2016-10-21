@@ -1,8 +1,9 @@
-
+from nose.plugins.attrib import attr
 from qmworks.parsers import (manyXYZ, parse_string_xyz)
 from qmworks.utils import (chunksOf, flatten)
 
 
+@attr('fast')
 def test_multiple_geometries():
     """
     Test the reading of multiples molecular geometries from a file.

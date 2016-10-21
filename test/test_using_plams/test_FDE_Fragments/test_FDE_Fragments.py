@@ -1,14 +1,9 @@
 # Default imports
-from qmworks import Settings, templates, run
-from noodles import gather, schedule, Storable
+
+from noodles import (gather, schedule, Storable)
 from plams import Molecule
-
-# User Defined imports
+from qmworks import (Settings, run, templates)
 from qmworks.packages.SCM import adf
-# from qmworks.components import adffragmentsjob
-
-import plams
-# ========== =============
 
 
 class Fragment(Storable):
@@ -25,7 +20,7 @@ def fragmentsjob(settings, mol, *frozen_frags):
     mol_tot = Molecule()
     frag_settings = Settings()
     for i, frag in enumerate(frozen_frags):
-        frag_id = 'frag' + str(i+1)
+        frag_id = 'frag' + str(i + 1)
         for m in frag.mol_list:
             for a in m:
                 a.fragment = frag_id
@@ -35,11 +30,8 @@ def fragmentsjob(settings, mol, *frozen_frags):
         frag_settings.specific.adf.fde.PW91k = ""
     mol_tot += mol
 
-    return adf(settings.overlay(frag_settings), mol_tot, job_name = "fde")
+    return adf(settings.overlay(frag_settings), mol_tot, job_name="fde")
 # ----------------------------------------------------------------
-
-
-plams.init()
 
 # Read the Molecule from file
 m_h2o_1 = Molecule('FDE-H2O-1.xyz')
@@ -66,5 +58,3 @@ frozen_frags = [Fragment(r_h2o_1, [m_h2o_1]),
 fde_res = run(fragmentsjob(settings, m_mol, *frozen_frags))
 
 print(fde_res.dipole)
-
-

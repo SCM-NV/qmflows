@@ -1,15 +1,12 @@
 # Default imports
-from qmworks import Settings, templates, run, rdkitTools
+from qmworks import (templates, run)
 from qmworks import rdkitTools as rdopp
 from qmworks.components import mfcc
-from noodles import gather, schedule, Storable
-import plams
+from noodles import gather
 from rdkit import Chem
 
-plams.init()
-
 # User Defined imports
-from qmworks.packages.SCM import dftb, adf
+from qmworks.packages.SCM import dftb
 
 # from qmworks.components import adffragmentsjob
 
@@ -23,11 +20,13 @@ supermol = rdopp.add_prot_Hs(rdmol)
 # settings.specific.adf.basis.core = 'Large'
 
 # supermolecule calculation
-# supermol_job =  adf(templates.singlepoint.overlay(settings), supermol, job_name = 'supermol_singlepoint')
-supermol_job =  dftb(templates.singlepoint, supermol, job_name = 'supermol_singlepoint')
+# supermol_job =  adf(templates.singlepoint.overlay(settings), supermol,
+#                     job_name='supermol_singlepoint')
+supermol_job = dftb(templates.singlepoint, supermol,
+                    job_name='supermol_singlepoint')
 # supermol_dipole = supermol_results.get_dipole_vector()
 
-#frags,caps = rdkitTools.partition_protein(supermol, cap=None)
+# frags,caps = rdkitTools.partition_protein(supermol, cap=None)
 frags, caps = rdopp.partition_protein(supermol, cap=None)
 # mfcc_job = mfcc(adf, frags, caps, settings)
 mfcc_job = mfcc(dftb, frags, caps)

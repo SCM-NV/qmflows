@@ -1,8 +1,9 @@
-
+from nose.plugins.attrib import attr
 from qmworks import rdkitTools
 from qmworks import packages
 
 
+@attr('fast')
 def test_SerMolecule():
     mol = rdkitTools.smiles2plams("c1ccccc1CC")
     registry = packages.registry()
