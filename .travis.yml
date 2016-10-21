@@ -22,6 +22,7 @@ install:
   # Package dependencies
   - pip install nose coverage
   - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams
+  - pip install https://github.com/NLeSC/noodles/tarball/devel#egg=noodles
   - source activate qmworks
 
   # Install qmworks package
