@@ -50,7 +50,7 @@ def parse_section(start, end):
     return Suppress(SkipTo(s)) + skipLine + SkipTo(e)
 
 
-def string_array_to_molecule(parser_fun, file_name):
+def string_array_to_molecule(parser_fun, file_name, mol=None):
     """
     Convert a Numpy string array like:
 
@@ -68,10 +68,17 @@ def string_array_to_molecule(parser_fun, file_name):
     last_mol = np.array(mols[-1])
     elems = last_mol[:, 0]
     coords = string_array_to_float(last_mol[:, 1:])
-    plams_mol = Molecule()
-    for e, c in zip(elems, coords):
-        plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
-
+    if mol:
+        if len(coords) == len(mol):
+            plams_mol = mol
+            for i in range(len(plams_mol)):
+                plams_mol.atoms[i].coords = tuple([float(c) for c in coords[i]])
+        else:
+            raise RuntimeError('Output molecule does not match input molecule')
+    else:
+        plams_mol = Molecule()
+        for e, c in zip(elems, coords):
+            plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
     return plams_mol
 
 

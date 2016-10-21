@@ -15,7 +15,7 @@ Matrix = np.ndarray
 vectorize_float = np.vectorize(float)
 
 
-def parse_molecule(file_name):
+def parse_molecule(file_name, mol=None):
     """
     Parse The Cartesian coordinates from the output file.
     """
@@ -26,7 +26,7 @@ def parse_molecule(file_name):
 
     parse_many_mol = OneOrMore(parse_mol)
 
-    return string_array_to_molecule(parse_many_mol, file_name)
+    return string_array_to_molecule(parse_many_mol, file_name, mol=mol)
 
 
 def parse_molecule_traj(file_traj):

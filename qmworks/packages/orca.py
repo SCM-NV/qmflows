@@ -92,21 +92,11 @@ class ORCA_Result(Result):
         plams_dir = archive["plams_dir"].path
         return ORCA_Result(settings, molecule, job_name, plams_dir, project_name)
 
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-
-        Example:
-
-        ..
-            dipole = result.dipole
-        """
-        return self.get_property(prop)
-
     @property
     def molecule(self):
         """ Retrieve the molecule from the output file"""
         plams_dir = self.archive["plams_dir"].path
         file_name = join(plams_dir, '{}.out'.format(self.job_name))
-        return parse_molecule(file_name)
+        return parse_molecule(file_name, self._molecule)
 
 orca = ORCA()
