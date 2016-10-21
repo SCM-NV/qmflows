@@ -14,7 +14,7 @@ import plams
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
-from noodles import (schedule, schedule_hint, has_scheduled_methods, serial)
+from noodles import (schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
