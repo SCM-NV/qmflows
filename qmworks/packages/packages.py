@@ -132,7 +132,7 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "There is no output file called: {}.\n".format(file_pattern)
+            msg = "Property {} not found. No output file called: {}.\n".format(prop, file_pattern)
             raise FileNotFoundError(msg)
 
 
