@@ -89,7 +89,8 @@ class ADF(Package):
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
             settings.specific.adf.geometry.inithess = hess_path
         else:
-            warn(UserWarning('Generic keyword "' + key + '" not implemented for package ADF.'))
+            msg = 'Generic keyword "' + key + '" not implemented for package ADF.'
+            warn(msg)
 
 
 class ADF_Result(Result):
@@ -177,7 +178,8 @@ class DFTB(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        warn(UserWarning('Generic keyword "' + key + '" not implemented for package DFTB.'))
+        msg = 'Generic keyword "' + key + '" not implemented for package DFTB.'
+        warn(msg)
 
 
 class DFTB_Result(Result):
@@ -190,7 +192,6 @@ class DFTB_Result(Result):
                          properties=properties)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         self.kf = plams.kftools.KFFile(kf_filename)
-
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):

@@ -65,7 +65,8 @@ class ORCA(Package):
             settings.specific.orca.geom.InHess = "read"
             settings.specific.orca.geom.InHessName = '"' + hess_path + '"'
         else:
-            warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
+            msg = 'Keyword ' + key + ' doesn\'t exist'
+            warn(msg)
 
 
 class ORCA_Result(Result):

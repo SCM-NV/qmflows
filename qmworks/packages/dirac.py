@@ -45,7 +45,7 @@ class DIRAC(Package):
         """
         Create the settings input for complex Dirac keywords
         """
-        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
+        warn('Keyword ' + key + ' doesn\'t exist')
 
 # Instance
 dirac = DIRAC()
