@@ -1,4 +1,6 @@
 {
 	"basis": "basis.basis",
-	"optimize": "method.runtyp.opt"
+	"optimize": "method.runtyp.opt",
+	"ts": "main.OptTS",
+	"functional": "method.functional"
 }
