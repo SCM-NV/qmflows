@@ -32,7 +32,7 @@ script:
   # Run the unitary tests excluding the expensive computations
   - nosetests --with-coverage --cover-erase --cover-package=qmworks -a '!slow' -v
 
-branches:
-  only:
-   - master
-   - develop
+# branches:
+#   only:
+#    - master
+#    - develop
