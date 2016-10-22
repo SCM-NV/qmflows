@@ -42,10 +42,10 @@ qmworks.fileFunctions module
     :undoc-members:
     :show-inheritance:
 
-qmworks.rdkitTools module
+qmworks.molkit module
 -------------------------
 
-.. automodule:: qmworks.rdkitTools
+.. automodule:: qmworks.molkit
     :members:
     :undoc-members:
     :show-inheritance:

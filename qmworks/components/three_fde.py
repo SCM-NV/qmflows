@@ -1,6 +1,6 @@
 __all__ = ['mfcc', 'MFCC_Result']
 
-from qmworks import templates, rdkitTools
+from qmworks import templates, molkit
 from qmworks.settings import Settings
 from qmworks.packages import Result, run
 from noodles import gather, schedule

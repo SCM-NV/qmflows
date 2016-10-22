@@ -25,7 +25,7 @@ from noodles.run.xenon import (
 from noodles.serial.numpy import arrays_to_hdf5
 
 from qmworks.settings import Settings
-from qmworks import rdkitTools
+from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
 from qmworks.utils import (concatMap, initialize)
 
@@ -165,7 +165,7 @@ class Package:
         """
 
         if isinstance(mol, Chem.Mol):
-            mol = rdkitTools.rdkit2plams(mol)
+            mol = molkit.from_rdmol(mol)
 
         if job_name != '':
             kwargs['job_name'] = job_name

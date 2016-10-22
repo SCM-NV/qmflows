@@ -1,11 +1,11 @@
 # Default imports
-from qmworks import Settings, templates, run, rdkitTools
+from qmworks import Settings, templates, run, molkit
 from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb, adf
-# from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
+from qmworks.packages.SCM import dftb#, adf
+from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
 from qmworks.components import Distance, PES, select_max
 
 import plams
@@ -84,7 +84,7 @@ job_list = []
 for name, reactant1, reactant2, product in reactions[:1]:
 
   # Prepare reactant1 job
-    r1mol = rdkitTools.smiles2plams(reactant1)
+    r1mol = molkit.from_smiles(reactant1)
     r1job = adf(
         templates.geometry.overlay(settings),
         dftb(templates.geometry.overlay(settings), r1mol,
@@ -92,7 +92,7 @@ for name, reactant1, reactant2, product in reactions[:1]:
         job_name=name + "_r1")
 
   # Prepare reactant2 job
-    r2mol = rdkitTools.smiles2plams(reactant2)
+    r2mol = molkit.from_smiles(reactant2)
     r2job = adf(
         templates.geometry.overlay(settings),
         dftb(templates.geometry.overlay(settings), r2mol,
@@ -100,7 +100,7 @@ for name, reactant1, reactant2, product in reactions[:1]:
         job_name=name + "_r2")
 
   # Prepare product job
-    pmol = rdkitTools.smiles2plams(product)
+    pmol = molkit.from_smiles(product)
     pmol.properties.name = name
     pjob = adf(
         templates.geometry.overlay(settings),

@@ -1,5 +1,5 @@
 # Default imports
-from qmworks import Settings, templates, rdkitTools
+from qmworks import Settings, templates, molkit
 from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
@@ -9,7 +9,7 @@ from qmworks.packages.orca import orca
 from qmworks.packages import run
 
 
-h2o = rdkitTools.smiles2plams('O')
+h2o = molkit.from_smiles('O')
 h2o.properties.symmetry = 'C1'
 
 h2o_freq = dftb(templates.freq, h2o, job_name="freq").hessian

@@ -1,6 +1,6 @@
 # Default imports
 from qmworks import (templates, run)
-from qmworks import rdkitTools as rdopp
+from qmworks import molkit
 from qmworks.components import mfcc
 from noodles import gather
 from rdkit import Chem
@@ -27,9 +27,8 @@ Chem.MolToPDBFile(supermol, "Cystine.pdb")
 # supermolecule calculation
 supermol_job = dftb(templates.singlepoint, supermol,
                     job_name='supermol_singlepoint')
-# supermol_dipole = supermol_results.get_dipole_vector()
 
-frags, caps = rdopp.partition_protein(supermol, cap=None)
+frags, caps = molkit.partition_protein(supermol, cap=None)
 mfcc_job = mfcc(dftb, frags, caps)
 
 supermol_result, mfcc_result = run(gather(supermol_job, mfcc_job))

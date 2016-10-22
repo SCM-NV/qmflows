@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks import (templates, run, rdkitTools, dftb, adf)
+from qmworks import (templates, run, molkit, dftb, adf)
 
 
 @attr('slow')
@@ -8,7 +8,7 @@ def test_dftb_props():
     Get properties from DFTB freq calc
     """
 
-    mol = rdkitTools.smiles2rdkit('F[H]')
+    mol = molkit.from_smiles('F[H]')
     result = run(dftb(templates.freq, mol, job_name='dftb_FH'))
     expected_energy = -4.76
     assert abs(result.energy - expected_energy) < 0.01
@@ -25,7 +25,7 @@ def test_adf_props():
     Get properties from ADF freq calc
     """
 
-    mol = rdkitTools.smiles2rdkit('F[H]')
+    mol = molkit.from_smiles('F[H]')
     result = run(adf(templates.freq, mol, job_name='adf_FH'))
     expected_energy = -0.30
     assert abs(result.energy - expected_energy) < 0.01

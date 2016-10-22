@@ -1,5 +1,5 @@
 # Default imports
-from qmworks import (Settings, templates, run, rdkitTools)
+from qmworks import (Settings, templates, run, molkit)
 from noodles import gather
 
 # User Defined imports
@@ -22,10 +22,10 @@ list_of_modifications = {"Me": "[#0:1]>>[CH3:1]",
 
 HH = plams.Molecule("H_Mes2PCBH2_TS3series1.xyz")
 HH.guess_bonds()
-newmol = rdkitTools.apply_template(HH, template)
+newmol = molkit.apply_template(HH, template)
 # Change the 2 hydrogens to dummy atoms
-temp = rdkitTools.modify_atom(newmol, 47, '*')
-temp = rdkitTools.modify_atom(temp, 48, '*')
+temp = molkit.modify_atom(newmol, 47, '*')
+temp = molkit.modify_atom(temp, 48, '*')
 # Put coordinates of dummy atoms to 0.0, this will force generating new
 # coordinates for the new atoms
 temp.atoms[47].move_to((0.0, 0.0, 0.0))
@@ -35,10 +35,9 @@ temp.atoms[48].move_to((0.0, 0.0, 0.0))
 job_list = []
 for mod, smirks in list_of_modifications.items():
     print(mod)
-    temp2 = rdkitTools.apply_smirks(temp, smirks)[0]
-    temp2 = rdkitTools.apply_smirks(temp2, smirks)[0]
-    freeze = rdkitTools.gen_coords(temp2)
-    # rdkitTools.write_molblock(temp2)
+    temp2 = molkit.apply_smirks(temp, smirks)[0]
+    temp2 = molkit.apply_smirks(temp2, smirks)[0]
+    freeze = molkit.gen_coords_rdmol(temp2)
     # generate job
     s = Settings()
     s.freeze = [a + 1 for a in freeze]

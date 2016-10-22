@@ -1,6 +1,6 @@
 
-__all__ = ['apply_reaction_smarts', 'apply_template', 'gen_coords', 'modify_atom',
-           'plams2rdkit', 'rdkit2plams', 'sequence2plams', 'smiles2plams',
+__all__ = ['apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
+           'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles',
            'write_molblock']
 
 """
@@ -16,7 +16,7 @@ from plams import (Molecule, Bond, Atom)
 import sys
 
 
-def rdkit2plams(rdkit_mol):
+def from_rdmol(rdkit_mol):
     """
     Translate an RDKit molecule into a PLAMS molecule type
     """
@@ -40,7 +40,7 @@ def rdkit2plams(rdkit_mol):
     return plams_mol
 
 
-def plams2rdkit(plams_mol, sanitize=True):
+def to_rdmol(plams_mol, sanitize=True):
     """
     Translate a PLAMS molecule into an RDKit molecule type
     """
@@ -68,9 +68,9 @@ def plams2rdkit(plams_mol, sanitize=True):
     return rdmol
 
 
-def smiles2rdkit(smiles):
+def from_smiles(smiles):
     """
-    Generates rdkit molecule from a smiles strings.
+    Generates plams molecule from a smiles strings.
     Includes explicit hydrogens and 3D coordinates
     """
     smiles = str(smiles.split()[0])
@@ -78,18 +78,10 @@ def smiles2rdkit(smiles):
     molecule.SetProp('smiles', smiles)
     AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
-    return molecule
+    return from_rdmol(molecule)
 
 
-def smiles2plams(smiles):
-    """
-    Generates plams molecule from a smiles strings.
-    Includes explicit hydrogens and 3D coordinates
-    """
-    return rdkit2plams(smiles2rdkit(smiles))
-
-
-def sequence2plams(sequence):
+def from_sequence(sequence):
     """
     Generates plams molecule from a peptide sequence.
     Includes explicit hydrogens and 3D coordinates
@@ -98,14 +90,14 @@ def sequence2plams(sequence):
     AllChem.EmbedMolecule(molecule)
     AllChem.UFFOptimizeMolecule(molecule)
     print(Chem.MolToMolBlock(molecule))
-    return rdkit2plams(Chem.AddHs(molecule, addCoords=True))
+    return from_rdmol(Chem.AddHs(molecule, addCoords=True))
 
 
 def modify_atom(mol, idx, element):
     """
     Change atom "idx" in molecule "mol" to "element"
     """
-    rdmol = plams2rdkit(mol)
+    rdmol = to_rdmol(mol)
     if rdmol.GetAtomWithIdx(idx).GetSymbol() == element:
         return mol
     else:
@@ -117,17 +109,17 @@ def modify_atom(mol, idx, element):
         newmol = e.GetMol()
         Chem.SanitizeMol(newmol)
         newmol = Chem.AddHs(newmol, addCoords=True)
-        return rdkit2plams(newmol)
+        return from_rdmol(newmol)
 
     
 def apply_template(plams_mol, template):
     """
     Modifies bond orders in plams molecule according template smiles structure
     """
-    rdmol = plams2rdkit(plams_mol, sanitize=False)
+    rdmol = to_rdmol(plams_mol, sanitize=False)
     template_mol = Chem.AddHs(Chem.MolFromSmiles(template))
     newmol = Chem.AllChem.AssignBondOrdersFromTemplate(template_mol, rdmol)
-    return rdkit2plams(newmol)
+    return from_rdmol(newmol)
 
 
 def apply_reaction_smarts(plams_mol, reaction_smarts):
@@ -145,11 +137,11 @@ def apply_reaction_smarts(plams_mol, reaction_smarts):
             Chem.SanitizeMol(p[0])
             q = Chem.AddHs(p[0])
             Chem.SanitizeMol(q)
-            gen_coords(q)
+            gen_coords_rdmol(q)
             products.append(q)
         return products
 
-    rdmol = plams2rdkit(plams_mol)
+    rdmol = to_rdmol(plams_mol)
     reaction = AllChem.ReactionFromSmarts(reaction_smarts)
     # RDKit removes fragments that are disconnected from the reaction center
     # In order to keep these, the molecule is first split in separate fragments
@@ -159,13 +151,13 @@ def apply_reaction_smarts(plams_mol, reaction_smarts):
     for frag in frags:
         for p in react(frag, reaction):
             product = Chem.CombineMols(product, p)
-    return rdkit2plams(product)
+    return from_rdmol(product)
 
 
-def gen_coords_plamsmol(plamsmol):
+def gen_coords(plamsmol):
     """ Calculate 3D positions for atoms without coordinates """
-    rdmol = plams2rdkit(plamsmol)
-    gen_coords(rdmol)
+    rdmol = to_rdmol(plamsmol)
+    freeze = gen_coords_rdmol(rdmol)
     conf = rdmol.GetConformer()
     for a in range(len(plamsmol.atoms)):
         pos = conf.GetAtomPosition(a)
@@ -173,10 +165,10 @@ def gen_coords_plamsmol(plamsmol):
         atom._setx(pos.x)
         atom._sety(pos.y)
         atom._setz(pos.z)
-    return
+    return freeze
 
 
-def gen_coords(rdmol):
+def gen_coords_rdmol(rdmol):
     ref = rdmol
     conf = rdmol.GetConformer()
     coordDict = {}
@@ -201,11 +193,11 @@ def gen_coords(rdmol):
         # align new molecule to original coordinates
         rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
         rs += 1
-
+    return freeze
 
 
 def write_molblock(plams_mol, file=sys.stdout):
-    file.write(Chem.MolToMolBlock(plams2rdkit(plams_mol)))
+    file.write(Chem.MolToMolBlock(to_rdmol(plams_mol)))
 
 
 def add_prot_Hs(rdmol):

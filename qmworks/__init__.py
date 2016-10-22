@@ -8,9 +8,9 @@ from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
 from .parsers import (manyXYZ, parse_string_xyz, readCp2KBasis, readCp2KCoeff,
                       readCp2KOverlap, readTurbomoleBasis, readTurbomoleMO,
                       readXYZ, read_cp2k_number_of_orbitals)
-from .rdkitTools import (apply_reaction_smarts, apply_template, gen_coords, modify_atom,
-                         plams2rdkit, rdkit2plams, sequence2plams, smiles2plams,
-                         write_molblock)
+from .molkit import (apply_reaction_smarts, apply_template, gen_coords_rdmol, modify_atom,
+                     to_rdmol, from_rdmol, from_sequence, from_smiles,
+                     write_molblock)
 from .templates import (freq, geometry, get_template, singlepoint, ts)
 from .components import *
 from .settings import Settings
@@ -24,12 +24,12 @@ __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
            'apply_reaction_smarts',
            'apply_template', 'chunksOf', 'concat', 'concatMap', 'cp2k',
            'cp2k2hdf5', 'dftb', 'dict2Setting', 'flatten',
-           'freq', 'gen_coords', 'geometry',
+           'freq', 'gen_coords_rdmol', 'geometry',
            'get_template', 'json2Settings', 'manyXYZ', 'modify_atom',
-           'orca', 'parse_string_xyz', 'plams2rdkit', 'rdkit2plams',
+           'orca', 'parse_string_xyz', 'to_rdmol', 'from_rdmol',
            'readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
            'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
            'read_cp2k_number_of_orbitals', 'registry',
            'run', 'save_ADF_Info', 'select_max',
-           'sequence2plams', 'settings2Dict', 'singlepoint', 'smiles2plams',
+           'from_sequence', 'settings2Dict', 'singlepoint', 'from_smiles',
            'ts', 'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']
