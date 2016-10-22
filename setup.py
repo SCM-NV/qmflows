@@ -13,7 +13,6 @@ setup(
     keywords='chemistry workflows simulation materials',
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
-              "qmworks.examplesWorkflows",
               "qmworks.hdf5",
               "qmworks.packages", "qmworks.parsers",
               "qmworks.templates"],
@@ -28,7 +27,9 @@ setup(
         'topic :: scientific/engineering :: chemistry'
     ],
     install_requires=['cython', 'h5py', 'numpy', 'noodles', 'plams',
-                      'pymonad', 'pyparsing', 'six', 'tinydb'],
+                      'pymonad', 'pyparsing', 'six', 'tinydb',
+                      'noodles[prov, xenon, numpy]',  'pyxenon',
+                      'filelock', 'msgpack-python'],
     extras_require={'test': ['nose', 'coverage']}
 
 )

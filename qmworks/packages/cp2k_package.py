@@ -184,7 +184,8 @@ class CP2K(Package):
         if f is not None:
             return f(settings, value, mol, key)
         else:
-            warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
+            msg = 'Keyword ' + key + ' doesn\'t exist'
+            warn(msg)
 
 
 class CP2K_Result(Result):

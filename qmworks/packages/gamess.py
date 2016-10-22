@@ -74,7 +74,7 @@ class GAMESS(Package):
         :param mol: molecular Geometry
         :type mol: plams Molecule
         """
-        warn(UserWarning('Keyword ' + key + ' doesn\'t exist'))
+        warn('Keyword ' + key + ' doesn\'t exist')
 
 
 class Gamess_Result(Result):

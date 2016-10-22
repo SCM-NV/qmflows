@@ -1,6 +1,6 @@
 # Default imports
 from qmworks import Settings, templates, molkit
-from qmworks.draw_workflow import draw_workflow
+# from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
@@ -25,6 +25,6 @@ dipole = h2o_opt.dipole
 
 
 wf = gather(energy, dipole)
-draw_workflow('wf.svg', wf._workflow)
+# draw_workflow('wf.svg', wf._workflow)
 
 print(run(wf))
