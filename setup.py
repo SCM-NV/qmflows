@@ -28,7 +28,8 @@ setup(
     ],
     install_requires=['cython', 'h5py', 'numpy', 'noodles', 'plams',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
-                      'noodles[prov, xenon, numpy]'],
+                      'noodles[prov, xenon, numpy]',  'pyxenon',
+                      'filelock', 'msgpack-python'],
     extras_require={'test': ['nose', 'coverage']}
 
 )
