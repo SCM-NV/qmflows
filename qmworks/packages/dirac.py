@@ -179,7 +179,7 @@ def check_hamiltonian(s):
         'NONR': 'Non-relativistic (true 1 component) Hamiltonian'
     }
 
-    ham = s.input.HAMILTONIAN
+    ham = s.specific.dirac.HAMILTONIAN
     if ham not in supported_hamiltonians:
         err = 'Dirac does not support Hamiltonian:{}\
         \nSupported Hamiltonians:{}\n'.format(ham, supported_hamiltonians)
@@ -190,16 +190,16 @@ def check_hamiltonian(s):
 
 def check_method(s):
     """
-    Checks the user input list of properties stored ``in S.input.properties``.
+    Checks the user input list of properties stored ``in S.specific.dirac.properties``.
     :param s: Settings containing the input tree
     :type  s: Settings
     """
-    met = s.input.METHOD
+    met = s.specific.dirac.METHOD
     if any([met == x for x in ['HF', 'DFT']]):
-        s.input.EXPORTFDE_LEVEL = 'DHF'
+        s.specific.dirac.EXPORTFDE_LEVEL = 'DHF'
     elif any([met == x for x in ['MP2', 'CCSD', 'CCSDt', 'FSCC', 'IHFSCC']]):
-        s.input.EXPORTFDE_LEVEL = 'MP2'
-        s.input.DOMOLTRA = True
+        s.specific.dirac.EXPORTFDE_LEVEL = 'MP2'
+        s.specific.dirac.DOMOLTRA = True
 
     return s
 
@@ -210,11 +210,11 @@ def check_transform(s):
     :param s: Settings containing the input tree
     :type  s: Settings
     """
-    if s.input.DOMOLTRA:
-        moltra = s.input.get('MOLTRA')
+    if s.specific.dirac.DOMOLTRA:
+        moltra = s.specific.dirac.get('MOLTRA')
         if not moltra:
-            s.input.MOLTRA = [-5.0, 10.0, 0.1]
-            xs  = s.input.MOLTRA.strip('[]')
+            s.specific.dirac.MOLTRA = [-5.0, 10.0, 0.1]
+            xs  = s.specific.dirac.MOLTRA.strip('[]')
             msg = 'Default moltra parameters are:{}'.format(xs)
             raise RuntimeError(msg)
     return s
@@ -222,7 +222,7 @@ def check_transform(s):
 
 def check_properties(s):
     """
-    Checks the user input list of properties stored ``in s.input.properties``.
+    Checks the user input list of properties stored ``in s.specific.dirac.properties``.
     Possible choices  are 'dipole', 'efg', 'nqcc'. See Dirac documentation of
         **PROPERTIES for more.
     :param s: Settings containing the input tree
@@ -241,7 +241,7 @@ def check_properties(s):
             err = 'unkown property:{}\n'.format(x)
             raise RuntimeError(err)
 
-    properties = s.input.get('PROPERTIES')
+    properties = s.specific.dirac.get('PROPERTIES')
     for p in properties:
         iselem(properties)
 
@@ -255,7 +255,7 @@ def check_nucmod(s):
      :type  s: Settings
 
     """
-    nucmod = s.input.NUCMOD
+    nucmod = s.specific.dirac.NUCMOD
 
     if not nucmod:
         if any(nucmod == x for x in ['FINITE', 'POINT']):
@@ -275,9 +275,9 @@ def build_dirac_input(s):
 
     """
     inp = Settings()
-    inp.input.DIRAC["WAVE FUNCTION"]
-    if s.input.GEOMOPT:
-        inp.input.DIRAC["WAVE FUNCTION"]["OPTIMIZE"]
+    inp.specific.dirac.DIRAC["WAVE FUNCTION"]
+    if s.specific.dirac.GEOMOPT:
+        inp.specific.dirac.DIRAC["WAVE FUNCTION"]["OPTIMIZE"]
 
     funs = [build_hamiltonian_opts, build_method_opts, build_basis_opts,
             build_transf_opts, build_integral_opts, build_properties_opts,
@@ -305,17 +305,17 @@ def build_hamiltonian_opts(inp, s):
         'NONR': ['NONREL', 'LVCORR']
     }
 
-    ham   = s.input.HAMILTONIAN
+    ham   = s.specific.dirac.HAMILTONIAN
     xs    = _special_names.get(ham)
-    met   = s.input.METHOD
-    funct = s.input.FUNCTIONAL
+    met   = s.specific.dirac.METHOD
+    funct = s.specific.dirac.FUNCTIONAL
     if xs:
         for x in xs:
-            inp.input.HAMILTONIAN[x]
+            inp.specific.dirac.HAMILTONIAN[x]
     elif met == 'DFT':
-        inp.input.HAMILTONIAN.DFT = funct
+        inp.specific.dirac.HAMILTONIAN.DFT = funct
     else:
-        inp.input.HAMILTONIAN[ham]
+        inp.specific.dirac.HAMILTONIAN[ham]
 
     return inp, s
 
@@ -329,7 +329,7 @@ def build_method_opts(inp, s):
     :type        s: Settings
     """
     cc_family = ['CCSD', 'CCSDt', 'FSCC', 'IHFSCC']
-    met       = s.input.METHOD
+    met       = s.specific.dirac.METHOD
 
     inp.input["WAVE FUNCTION"]["SCF"]
     if met in cc_family:
@@ -349,7 +349,7 @@ def build_basis_opts(inp, s):
     :type        s: Settings
     """
 
-    basis = s.input.BASIS
+    basis = s.specific.dirac.BASIS
     inp.input["MOLECULE"]["BASIS"]["DEFAULT"] = basis
     return inp, s
 
@@ -363,12 +363,12 @@ def build_transf_opts(inp, s):
     :type        s: Settings
 
     """
-    moltra = s.input.MOLTRA
-    if s.input.DOMOLTRA:
+    moltra = s.specific.dirac.MOLTRA
+    if s.specific.dirac.DOMOLTRA:
         if moltra[0] == "all":
-            inp.input.MOLTRA.ACTIVE = "all"
+            inp.specific.dirac.MOLTRA.ACTIVE = "all"
         else:
-            inp.input.MOLTRA.ACTIVE = moltra
+            inp.specific.dirac.MOLTRA.ACTIVE = moltra
 
     return inp, s
 
@@ -382,9 +382,9 @@ def build_integral_opts(inp, s):
     :type        s: Settings
 
     """
-    nucmod = s.input.NUCMOD
+    nucmod = s.specific.dirac.NUCMOD
     if nucmod == "POINT":
-        inp.input.INTEGRALS.NUCMOD = 1
+        inp.specific.dirac.INTEGRALS.NUCMOD = 1
 
     return inp, s
 
@@ -397,9 +397,9 @@ def build_properties_opts(inp, s):
     :parameter   s: generic keywords
     :type        s: Settings
     """
-    ps = s.input.PROPERTIES
+    ps = s.specific.dirac.PROPERTIES
     for p in ps:
-        inp.input.PROPERTIES[p]
+        inp.specific.dirac.PROPERTIES[p]
     return inp, s
 
 
