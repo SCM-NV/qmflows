@@ -13,23 +13,13 @@ from qmworks.packages.SCM import dftb
 rdmol = Chem.MolFromPDBFile('Dialanine.pdb')
 supermol = molkit.add_prot_Hs(rdmol)
 
-# settings = Settings ()
-# settings.functional = 'bp86'
-#
-# settings.basis = 'DZP'
-# settings.specific.adf.basis.core = 'Large'
-
-# supermolecule calculation
-# supermol_job =  adf(templates.singlepoint.overlay(settings), supermol,
-#                     job_name='supermol_singlepoint')
 supermol_job = dftb(templates.singlepoint, supermol,
                     job_name='supermol_singlepoint')
 
 frags, caps = molkit.partition_protein(supermol, cap=None)
-# mfcc_job = mfcc(adf, frags, caps, settings)
 mfcc_job = mfcc(dftb, frags, caps)
 
-supermol_result, mfcc_result = run(gather(supermol_job, mfcc_job))
+supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
 
-print(supermol_result.dipole)
-print(mfcc_result.dipole)
+print(supermol_dipole)
+print(mfcc_dipole)

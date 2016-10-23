@@ -12,10 +12,10 @@ from .molkit import (apply_reaction_smarts, apply_template, gen_coords_rdmol, mo
                      to_rdmol, from_rdmol, from_sequence, from_smiles,
                      write_molblock)
 from .templates import (freq, geometry, get_template, singlepoint, ts)
-from .components import *
 from .settings import Settings
 from .utils import (chunksOf, concat, concatMap, dict2Setting, flatten,
                     settings2Dict, zipWith, zipWith3)
+from .components import *
 
 
 __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',

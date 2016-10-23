@@ -1,8 +1,10 @@
-__all__ = ['mfcc', 'MFCC_Result']
+__all__ = ['mfcc', 'MFCC_Result', 'Fragment', 'adf_fragmentsjob']
 
-from qmworks import templates
+from qmworks import Settings, templates
 from qmworks.packages import Result
-from noodles import gather, schedule
+from qmworks.packages.SCM import adf
+from noodles import gather, schedule, Storable
+from plams import Molecule
 
 import numpy as np
 
@@ -35,3 +37,23 @@ def mfcc(package, frags, caps, settings=None):
     return MFCC_Result(gather(*frag_jobs), gather(*cap_jobs))
 
 
+class Fragment(Storable):
+    def __init__(self, result, mol_list):
+        self.result = result
+        self.mol_list = gather(*mol_list)
+
+@schedule
+def adf_fragmentsjob(settings, mol, *frozen_frags):
+    mol_tot = Molecule()
+    frag_settings = Settings()
+    for i, frag in enumerate(frozen_frags):
+        frag_id = 'frag' + str(i + 1)
+        for m in frag.mol_list:
+            for a in m:
+                a.fragment = frag_id
+            mol_tot += m
+        path = frag.result.kf.path + ' type=FDE'
+        frag_settings.specific.adf.fragments[frag_id] = path
+        frag_settings.specific.adf.fde.PW91k = ""
+    mol_tot += mol
+    return adf(settings.overlay(frag_settings), mol_tot, job_name="fde")
