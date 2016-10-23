@@ -131,14 +131,14 @@ def apply_reaction_smarts(plams_mol, reaction_smarts):
         ps = reaction.RunReactants([reactant])
         # keep reactant if no reaction applied
         if len(ps) == 0:
-            return [reactant]
+            return [(reactant, range(reactant.GetNumAtoms()))]
         products = []
         for p in ps:
             Chem.SanitizeMol(p[0])
             q = Chem.AddHs(p[0])
             Chem.SanitizeMol(q)
-            gen_coords_rdmol(q)
-            products.append(q)
+            u = gen_coords_rdmol(q) # These are the atoms that have not changed
+            products.append((q, u))
         return products
 
     rdmol = to_rdmol(plams_mol)
@@ -148,16 +148,18 @@ def apply_reaction_smarts(plams_mol, reaction_smarts):
     # and the results, including non-reacting parts, are re-combined afterwards
     frags = (Chem.GetMolFrags(rdmol, asMols=True))
     product = Chem.Mol()
+    unchanged = [] # List of atoms that have not changed
     for frag in frags:
-        for p in react(frag, reaction):
+        for p, u in react(frag, reaction):
+            unchanged += [product.GetNumAtoms() + i for i in u]
             product = Chem.CombineMols(product, p)
-    return from_rdmol(product)
+    return (from_rdmol(product), unchanged)
 
 
 def gen_coords(plamsmol):
     """ Calculate 3D positions for atoms without coordinates """
     rdmol = to_rdmol(plamsmol)
-    freeze = gen_coords_rdmol(rdmol)
+    unchanged = gen_coords_rdmol(rdmol)
     conf = rdmol.GetConformer()
     for a in range(len(plamsmol.atoms)):
         pos = conf.GetAtomPosition(a)
@@ -165,14 +167,14 @@ def gen_coords(plamsmol):
         atom._setx(pos.x)
         atom._sety(pos.y)
         atom._setz(pos.z)
-    return freeze
+    return unchanged
 
 
 def gen_coords_rdmol(rdmol):
-    ref = rdmol
+    ref = rdmol.__copy__()
     conf = rdmol.GetConformer()
     coordDict = {}
-    freeze = []
+    unchanged = []
     maps = []
     # Put known coordinates in coordDict
     for i in range(rdmol.GetNumAtoms()):
@@ -181,19 +183,22 @@ def gen_coords_rdmol(rdmol):
            (-0.0001 < pos.z < 0.0001):
             continue  # atom without coordinates
         coordDict[i] = pos
-        freeze.append(i)
+        unchanged.append(i)
         maps.append((i, i))
+    print('coordDict', coordDict)
+    print('maps', maps)
     # compute coordinates for new atoms, keeping known coordinates
     rms = 1
     rs = 1
-    # repeat embedding and alignment until the rms of mapsped atoms is sufficiently small
+    # repeat embedding and alignment until the rms of mapped atoms is sufficiently small
     while rms > 0.1:
         AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs,
                                     useBasicKnowledge=True)
         # align new molecule to original coordinates
         rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
+        print(rms)
         rs += 1
-    return freeze
+    return unchanged
 
 
 def write_molblock(plams_mol, file=sys.stdout):
