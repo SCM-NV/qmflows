@@ -1,7 +1,6 @@
 from nose.plugins.attrib import attr
 from pymonad import curry
-from qmworks.utils import (chunksOf, concat, concatMap, flatten, zipWith,
-                           zipWith3)
+from qmworks.utils import (chunksOf, concat, concatMap, zipWith, zipWith3)
 
 
 @attr('fast')
@@ -20,7 +19,7 @@ def test_concat():
     xss = [[1], [2]]
     assert concat(xss) == [1, 2]
 
-    
+
 @attr('fast')
 def test_concatMap():
     """
@@ -29,14 +28,6 @@ def test_concatMap():
     f = lambda x: [x * 2]
     xs = [1, 2]
     assert concatMap(f, xs) == list(concat(map(f, xs)))
-
-
-@attr('fast')
-def test_flatten():
-    """
-    Concatenation of arrays
-    """
-    assert flatten(["I\'m", " a", " sentence"]) == "I\'m a sentence"
 
 
 @attr('fast')

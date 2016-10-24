@@ -6,7 +6,7 @@ from noodles import schedule  # Workflow Engine
 from os.path import join
 from qmworks import (run, Settings, templates)
 from qmworks.packages import cp2k
-from qmworks.utils import (chunksOf, flatten)
+from qmworks.utils import (chunksOf)
 
 import fnmatch
 import h5py
@@ -199,4 +199,4 @@ def split_file_geometries(pathXYZ):
         xss = f.readlines()
 
     numat = int(xss[0].split()[0])
-    return list(map(flatten, chunksOf(xss, numat + 2)))
+    return list(map(''.join, chunksOf(xss, numat + 2)))

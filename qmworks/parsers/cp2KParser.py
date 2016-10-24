@@ -18,7 +18,7 @@ import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
-from qmworks.utils import (chunksOf, concat, flatten, zipWith, zipWith3)
+from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
 # Molecular Orbitals Parsing
@@ -246,7 +246,7 @@ def readCp2KBasis(path):
     :type path: String
     """
     bss = topParseBasis.parseFile(path)
-    atoms = [flatten(xs.atom[:]).lower() for xs in bss]
+    atoms = [''.join(xs.atom[:]).lower() for xs in bss]
     names = [' '.join(xs.basisName[:]).upper() for xs in bss]
     formats = [list(map(int, xs.format[:])) for xs in bss]
     # for example 2 0 3 7 3 3 2 1 there are sum(3 3 2 1) =9 Lists
