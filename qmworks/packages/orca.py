@@ -60,41 +60,41 @@ def translate_inithess(settings, key, value, mol):
     Generate an seperate file containing the initial Hessian matrix used as
     guess for the computation.
     """
-    def format_atom(at):
-        s, m, xs = at.symbol, at._getmass(), at.coords
-        return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(s, m, *xs)
+    def format_atom(atom):
+        symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
+        return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
-    def format_hessian(d, hess):
+    def format_hessian(dim, hess):
         """ Format numpy array to Orca matrix format """
-        acc = ''
-        for i in range((d - 1) // 6 + 1):
-            m = min(6, d - 6 * i)
-            just = 13 + m * 11  # Right justification
-            xs = ''.join('{:^11d}'.format(v + 6 * i) for v in range(m))
-            acc += xs.rjust(just)  + '\n'
-            for j in range(len(hess[i])):
-                ys = '{:7d}'.format(j).ljust(11)
-                ys += ''.join('{:11.7f}'.format(hess[v + 6 * i][j]) for v in range(m))
-                acc += ys + '\n'
-        return acc
+        ret = ''
+        for i in range((dim - 1) // 6 + 1):
+            n_columns = min(6, dim - 6 * i)
+            ret += '         '
+            ret += ' '.join('{:10d}'.format(v + 6 * i) for v in range(n_columns))
+            ret += '\n'
+            for j in range(dim):
+                ret += '{:7d}     '.format(j)
+                ret += ' '.join('{:10.6f}'.format(hess[v + 6 * i][j]) for v in range(n_columns))
+                ret += '\n'
+        return ret
 
     # Check Hessian dimension
-    d = len(value)
+    dim = len(value)
     if len(value.shape) == 1:
-        dim = int(d ** 0.5)
+        dim = int(dim ** 0.5)
         hess = np.reshape(value, (dim, dim))
     else:
         hess = value
 
     # Header
-    hess_str = '\n$orca_hessian_file\n\n$hessian\n' + str(d) + '\n'
+    hess_str = '\n$orca_hessian_file\n\n$hessian\n' + str(dim) + '\n'
     # Actual Hessian
-    hess_str += format_hessian(d, hess)
+    hess_str += format_hessian(dim, hess)
     # Atoms header
     hess_str += '\n$atoms\n'
     # Atoms coordinates
     hess_str += str(len(mol)) + '\n'
-    hess_str += ''.join(format_atom(at) for at in mol.atoms)
+    hess_str += ''.join(format_atom(atom) for atom in mol.atoms)
     # The end
     hess_str += '\n\n$end\n'
 
