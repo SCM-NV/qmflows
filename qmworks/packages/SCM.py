@@ -178,8 +178,29 @@ class DFTB(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        msg = 'Generic keyword "' + key + '" not implemented for package DFTB.'
-        warn(msg)
+        if key == "freeze":
+            settings.specific.dftb.geometry.optim = "cartesian"
+            settings.specific.dftb.geometry.converge = "Grad=0.1"
+            for a in value:
+                settings.specific.dftb.constraints['atom ' + str(a + 1)] = ""
+        elif key == "selected_atoms":
+            settings.specific.dftb.geometry.optim = "cartesian"
+            if not isinstance(value, list):
+                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            if isinstance(value[0], int):
+                for a in range(len(mol)):
+                    if a not in value:
+                        at = 'atom ' + str(a + 1)
+                        settings.specific.dftb.constraints[at] = ""
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol not in value:
+                        name = 'atom ' + str(a + 1)
+                        settings.specific.dftb.constraints[name] = ""
+        else:
+            msg = 'Generic keyword "' + key + '" not implemented for package DFTB.'
+            warn(msg)
 
 
 class DFTB_Result(Result):
