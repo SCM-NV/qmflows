@@ -1,5 +1,4 @@
 from nose.plugins.attrib import attr
-import os
 from test import exec_example
 
 @attr('slow')

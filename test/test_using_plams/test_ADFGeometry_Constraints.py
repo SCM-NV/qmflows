@@ -1,35 +1,11 @@
-
 from nose.plugins.attrib import attr
-from noodles import gather
-from qmworks import adf, run, Settings, templates
-import plams
+from test import exec_example
 
 
 @attr('slow')
-def test_ADFGeometry_Constraint():
+def test_partial_geometry_opt():
     """
-    Test "freeze" and "selected_atoms" keywords for constrained geometry
-    optimizations.
+    Test partial geometry optimization.
     """
-    an = plams.Molecule('test/test_files/an.xyz', 'xyz')
-    # optimize only H atoms
-    s = Settings()
-    s.freeze = [1, 2, 3]
-    result1 = adf(templates.geometry.overlay(s), an)
-    geom1 = result1.molecule
-
-    # optimize only H atoms
-    s = Settings()
-    s.selected_atoms = ['H']
-    result2 = adf(templates.geometry.overlay(s), an)
-    geom2 = result2.molecule
-
-    r = run(gather(geom1, geom2), n_processes=1)
-
-    assert str(r[0]) == str(r[1])
-
-
-if __name__ == "__main__":
-    plams.init()
-    test_ADFGeometry_Constraint()
-    plams.finish()
+    local_env = exec_example('examples/Constrained_and_TS_optimizations', 'partial_geometry_opt.py')
+    assert str(local_env['geom1']) == str(local_env['geom2'])
