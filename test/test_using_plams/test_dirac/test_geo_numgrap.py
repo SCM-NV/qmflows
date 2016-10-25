@@ -1,0 +1,48 @@
+
+from plams import Molecule
+from qmworks import (dirac, run, Settings)
+
+
+def main():
+
+    # read geometry
+    h2 = Molecule('h2.xyz')
+
+    # create a dirac job
+    job = create_job("h2_opt", h2)
+
+    rs = run(job.energy)
+
+    print(rs)
+
+
+
+def create_job():
+    """
+    Create a minimal optimization Job
+    """
+    s = Settings()
+
+    s.specific.dirac.dirac['WAVE FUNCTION']
+    s.specific.dirac.dirac.OPTIMIZE
+    s.specific.dirac.dirac.OPTIMIZE["_en"] = True
+    s.specific.dirac.dirac.OPTIMIZE.NUMGRA
+    s.specific.dirac.HAMILTONIAN["LEVY-LEBLOND"]
+    s.specific.dirac.HAMILTONIAN.DFT = "LDA"
+
+    s.specific.dirac.GRID.RADINT = "1.0D-9"
+    s.specific.dirac.GRID.ANGINT = 15
+    
+    s.specific.dirac.INTEGRALS.READIN["UNCONT"]
+
+    s.specific.dirac['WAVE FUNCTION']["scf"]
+
+    s.specific.dirac.molecule.basis.default = "cc-pVDZ"
+
+    s.specific.dirac.molecule.coordinates.units = "AU"
+
+
+    return  dirac(s, mol, job_name=name)
+
+if __name__ == "__main__":
+    main()

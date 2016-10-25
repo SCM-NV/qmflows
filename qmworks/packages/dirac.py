@@ -30,6 +30,7 @@ class DIRAC(Package):
 
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
+        dirac_settings.ignore_molecule
         # check_dirac_input(dirac_settings)
         result = plams.DiracJob(name=job_name, settings=dirac_settings,
                                 molecule=mol).run()
@@ -136,17 +137,16 @@ def check_dirac_input(s):
     :type  s.input.nucmod: String
 
     """
-    pass
-    # for k in s.input.keys():
-    #     val = s.input[k]
-    #     key = k.upper()
-    #     if isinstance(val, list):
-    #         val = list([x.upper() for x in val])
-    #     elif isinstance(val, str):
-    #         val = val.upper()
-    #     s.input[key] = val
+    for k in s.specific.dirac.keys():
+        val = s.specific.dirac[k]
+        key = k.upper()
+        if isinstance(val, list):
+            val = list([x.upper() for x in val])
+        elif isinstance(val, str):
+            val = val.upper()
+        s.specific.dirac[key] = val
 
-    # return check_easy_input(s)
+    return check_easy_input(s)
 
 
 def check_easy_input(easySett):

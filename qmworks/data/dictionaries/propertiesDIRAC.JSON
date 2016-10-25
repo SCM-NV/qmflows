@@ -1,3 +1,6 @@
 {
+    "energy": {"parser": "dirac_xml_parser", "function": "parse_xml", "file_ext": "xml",
+	       "kwargs" : {"section": "task/[@type='SCF optimization']/output/scf-iteration/"}
+	      }
     
 }
