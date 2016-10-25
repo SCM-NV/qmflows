@@ -20,7 +20,7 @@ class DIRAC(Package):
     """
     def __init__(self):
         super().__init__("dirac")
-        self.generic_dict_file = 'generic2DIRAC.json'
+        self.generic_dict_file = 'generic2Dirac.json'
 
     def prerun(self):
         pass

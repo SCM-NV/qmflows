@@ -6,7 +6,7 @@ from qmworks import (dirac, run, Settings)
 def main():
 
     # read geometry
-    h2 = Molecule('h2.xyz')
+    h2 = Molecule('test/test_files/h2.xyz')
 
     # create a dirac job
     job = create_job("h2_opt", h2)
@@ -17,7 +17,7 @@ def main():
 
 
 
-def create_job():
+def create_job(name, mol):
     """
     Create a minimal optimization Job
     """
