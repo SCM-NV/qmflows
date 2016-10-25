@@ -1,11 +1,11 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting', 'flatten',
+__all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting',
            'initialize', 'settings2Dict', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
-from functools import (reduce, wraps)
+from functools import  wraps
 from itertools import chain
 from pymonad   import curry
 
@@ -28,10 +28,6 @@ def concat(xss):
 def concatMap(f, xss):
     """Map a function over all the elements of a container and concatenate the resulting lists"""
     return concat(list(map(f, xss)))
-
-
-def flatten(xs):
-    return reduce(lambda x, y: x + y, xs)
 
 
 @curry

@@ -13,7 +13,7 @@ from .molkit import (apply_reaction_smarts, apply_template, gen_coords_rdmol, mo
                      write_molblock)
 from .templates import (freq, geometry, get_template, singlepoint, ts)
 from .settings import Settings
-from .utils import (chunksOf, concat, concatMap, dict2Setting, flatten,
+from .utils import (chunksOf, concat, concatMap, dict2Setting,
                     settings2Dict, zipWith, zipWith3)
 from .components import *
 
@@ -23,7 +23,7 @@ __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
            'SerSettings', 'Settings', 'StoreasHDF5', 'adf', 'adf2hdf5',
            'apply_reaction_smarts',
            'apply_template', 'chunksOf', 'concat', 'concatMap', 'cp2k',
-           'cp2k2hdf5', 'dftb', 'dict2Setting', 'flatten',
+           'cp2k2hdf5', 'dftb', 'dict2Setting',
            'freq', 'gen_coords_rdmol', 'geometry',
            'get_template', 'json2Settings', 'manyXYZ', 'modify_atom',
            'orca', 'parse_string_xyz', 'to_rdmol', 'from_rdmol',

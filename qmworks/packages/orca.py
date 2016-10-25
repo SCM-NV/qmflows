@@ -41,32 +41,72 @@ class ORCA(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        if key == "inithess":
-            hess = value
-            d = len(value)
-            if len(value.shape) == 1:
-                d = len(value)**0.5
-                if int(d) == d:
-                    d = int(d)
-                    hess = np.reshape(value, (d, d))
-            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
-            hess_file = open(hess_path, "w")
-            hess_file.write('\n$orca_hessian_file\n\n$hessian\n' + str(d) + '\n')
-            for i in range(int((d-1) / 6) + 1):
-                hess_file.write("         " + " ".join(['{:10d}'.format(v + 6 * i) for v in range(min(6, d - 6*i))]) + '\n')
-                for j in range(len(hess[i])):
-                    hess_file.write('{:7d}'.format(j) + "     " + " ".join(['{:10.6f}'.format(hess[6*i+v][j]) for v in range(min(6, d - 6*i))]) + '\n')
-            hess_file.write('\n$atoms\n')
-            hess_file.write(str(len(mol)) + '\n')
-            for a in mol.atoms:
-                hess_file.write('{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(a.symbol, a._getmass(), *a.coords))
-            hess_file.write('\n\n$end\n')
-            hess_file.close()
-            settings.specific.orca.geom.InHess = "read"
-            settings.specific.orca.geom.InHessName = '"' + hess_path + '"'
+        """
+        Translate generic keywords to their corresponding Orca keywords.
+        """
+        # Available translations
+        funs = {'inithess': translate_inithess}
+        f = funs.get(key)
+        # Apply translation
+        if f is not None:
+            return f(settings, key, value, mol)
         else:
             msg = 'Keyword ' + key + ' doesn\'t exist'
             warn(msg)
+
+
+def translate_inithess(settings, key, value, mol):
+    """
+    Generate an seperate file containing the initial Hessian matrix used as
+    guess for the computation.
+    """
+    def format_atom(at):
+        s, m, xs = at.symbol, at._getmass(), at.coords
+        return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(s, m, *xs)
+
+    def format_hessian(d, hess):
+        """ Format numpy array to Orca matrix format """
+        acc = ''
+        for i in range((d - 1) // 6 + 1):
+            m = min(6, d - 6 * i)
+            just = 13 + m * 11  # Right justification
+            xs = ''.join('{:^11d}'.format(v + 6 * i) for v in range(m))
+            acc += xs.rjust(just)  + '\n'
+            for j in range(len(hess[i])):
+                ys = '{:7d}'.format(j).ljust(11)
+                ys += ''.join('{:11.7f}'.format(hess[v + 6 * i][j]) for v in range(m))
+                acc += ys + '\n'
+        return acc
+
+    # Check Hessian dimension
+    d = len(value)
+    if len(value.shape) == 1:
+        dim = int(d ** 0.5)
+        hess = np.reshape(value, (dim, dim))
+    else:
+        hess = value
+
+    # Header
+    hess_str = '\n$orca_hessian_file\n\n$hessian\n' + str(d) + '\n'
+    # Actual Hessian
+    hess_str += format_hessian(d, hess)
+    # Atoms header
+    hess_str += '\n$atoms\n'
+    # Atoms coordinates
+    hess_str += str(len(mol)) + '\n'
+    hess_str += ''.join(format_atom(at) for at in mol.atoms)
+    # The end
+    hess_str += '\n\n$end\n'
+
+    # Store the hessian in the plams_dir
+    hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+    with open(hess_path, "w") as  hess_file:
+        hess_file.write(hess_str)
+
+    settings.specific.orca.geom.InHess = "read"
+    settings.specific.orca.geom.InHessName = '"' + hess_path + '"'
+
+    return settings
 
 
 class ORCA_Result(Result):
