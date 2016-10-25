@@ -1,22 +1,13 @@
 from nose.plugins.attrib import attr
 import os
+from test import exec_example
 
 @attr('slow')
 def test_ADF3FDE_Dialanine():
     """
     Test MFCC partitioning of dialanine
     """
-    local_env = {}
-    global_env = {}
-    os.chdir('examples/FDE_Fragments')
-    try:
-        exec(open('ADF3FDE_Dialanine.py').read(), global_env, local_env)
-        os.chdir('../..')
-    except:
-        # Make sure that if the tested code breaks the current dir is restored
-        # Otherwise the subsequent tests will break for the wrong reason
-        os.chdir('../..')
-        raise RuntimeError()
+    local_env = exec_example('examples/FDE_Fragments', 'ADF3FDE_Dialanine.py')
     for x,y in zip(local_env['supermol_dipole'], local_env['mfcc_dipole']):
         assert abs(x-y) < 0.01
 
