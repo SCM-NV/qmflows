@@ -16,5 +16,5 @@ def test_13dipolar_cyclo_ts():
     """
     local_env = exec_example('examples/Constrained_and_TS_optimizations', '13DipolarCyclo_TS.py')
     assert local_env['optcycles'] < 5
-    assert abs(local_env['d1'] - 2.19) < 0.01
-    assert abs(local_env['d2'] - 2.19) < 0.01
+    assert abs(local_env['d1'] - 2.294) < 0.01
+    assert abs(local_env['d2'] - 2.294) < 0.01
