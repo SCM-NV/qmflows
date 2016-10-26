@@ -57,10 +57,6 @@ class DIRAC_Result(Result):
                          plams_dir=plams_dir, project_name=project_name,
                          properties=properties)
 
-    @property
-    def molecule(self):
-        pass
-
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
         plams_dir = archive["plams_dir"].path
