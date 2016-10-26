@@ -5,12 +5,13 @@ from qmworks import (dirac, run, Settings)
 
 def main():
 
-    name = "BaF_req"
-    baf = create_molecule(name)
+    pass
+    # name = "BaF_req"
+    # baf = create_molecule(name)
 
-    job = create_job(name, baf)
+    # job = create_job(name, baf)
 
-    run(job)
+    # run(job)
 
 
 def create_job(name, mol, basis='dyall.cv2z'):
