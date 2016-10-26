@@ -4,12 +4,11 @@ __all__ = ['dirac', 'DIRAC', 'DIRAC_Result']
 
 # =======>  Standard and third party Python Libraries <======
 from functools import reduce
-from noodles import (Storable)
 from warnings import warn
 import plams
 
 # ==================> Internal modules <====================
-from qmworks.packages.packages import Package
+from qmworks.packages.packages import (Package, Result)
 from qmworks.settings import Settings
 
 # ==================> <======================
@@ -52,7 +51,7 @@ class DIRAC(Package):
 dirac = DIRAC()
 
 
-class DIRAC_Result(Storable):
+class DIRAC_Result(Result):
     """
     Class to access **DIRAC** Results.
     """
