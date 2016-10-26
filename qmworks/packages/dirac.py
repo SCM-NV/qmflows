@@ -61,12 +61,6 @@ class DIRAC_Result(Storable):
         super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir,
                          project_name=project_name, properties=properties)
 
-    def as_dict(self):
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "filename": self.result.path}
-
     @property
     def molecule(self):
         pass
