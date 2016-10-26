@@ -15,7 +15,7 @@ def get_text(xs, read=float):
     return rs
 
 
-def parse_xml(filename, section=None, select_value='last'):
+def parse_xml(filename, section=None, select_value=None):
     """
     Get a Property from the dirac xml output.
     :param filename: Name of the output file
