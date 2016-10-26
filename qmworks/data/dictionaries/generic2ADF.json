@@ -2,7 +2,6 @@
     "basis": "basis.type",
     "optimize": "geometry.optim",
     "ts": "geometry.transitionstate",
-    "constraint": "constraints",
     "charge": "charge",
     "functional": ["xc", {
         "hf": "hartreefock",

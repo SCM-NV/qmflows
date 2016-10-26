@@ -64,11 +64,12 @@ class ADF(Package):
         * ``freeze``
         * ``selected_atoms``
         """
-        if key == "freeze":
+        def freeze():
             settings.specific.adf.geometry.optim = "cartesian"
             for a in value:
                 settings.specific.adf.constraints['atom ' + str(a + 1)] = ""
-        elif key == "selected_atoms":
+
+        def selected_atoms():
             settings.specific.adf.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
@@ -83,11 +84,32 @@ class ADF(Package):
                     if mol.atoms[a].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[name] = ""
-        elif key == "inithess":
+
+        def inithess():
             hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
             hess_file = open(hess_path, "w")
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
             settings.specific.adf.geometry.inithess = hess_path
+
+        def constraint():
+            if isinstance(value, Settings):
+                for k, v in value.items():
+                    ks = k.split()
+                    # print('--->', ks, type(ks[2]), type(value), v)
+                    if ks[0] == 'dist' and len(ks) == 3:
+                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1)
+                        settings.specific.adf.constraints[name] = v
+                    elif ks[0] == 'angle' and len(ks == 4):
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
+                        settings.specific.adf.constraints[name] = v
+
+        # Available translations
+        functions = {'freeze': freeze,
+                     'selected_atoms': selected_atoms,
+                     'inithess': inithess,
+                     'constraint': constraint}
+        if key in functions:
+            functions[key]()
         else:
             msg = 'Generic keyword "' + key + '" not implemented for package ADF.'
             warn(msg)
@@ -178,12 +200,16 @@ class DFTB(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        if key == "freeze":
+        """
+        Translate generic keywords to their corresponding Orca keywords.
+        """
+        def freeze():
             settings.specific.dftb.geometry.optim = "cartesian"
             settings.specific.dftb.geometry.converge = "Grad=0.1"
             for a in value:
                 settings.specific.dftb.constraints['atom ' + str(a + 1)] = ""
-        elif key == "selected_atoms":
+
+        def selected_atoms():
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
@@ -198,6 +224,24 @@ class DFTB(Package):
                     if mol.atoms[a].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[name] = ""
+
+        def constraint():
+            if isinstance(value, Settings):
+                for k, v in value.items():
+                    ks = k.split()
+                    if ks[0] == 'dist' and len(ks) == 3:
+                        name = 'dist {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1)
+                        settings.specific.dftb.constraints[name] = v
+                    elif ks[0] == 'angle' and len(ks == 4):
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1, int(ks[2])+1)
+                        settings.specific.dftb.constraints[name] = v
+
+        # Available translations
+        functions = {'freeze': freeze,
+                     'selected_atoms': selected_atoms,
+                     'constraint': constraint}
+        if key in functions:
+            functions[key]()
         else:
             msg = 'Generic keyword "' + key + '" not implemented for package DFTB.'
             warn(msg)

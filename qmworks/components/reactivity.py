@@ -30,7 +30,7 @@ class Distance:
                 raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
-        s["dist " + str(self.atom1 + 1) + " " + str(self.atom2 + 1)] = value
+        s["dist {:d} {:d}".format(self.atom1, self.atom2)] = value
         return s
 
 
@@ -60,8 +60,7 @@ class Angle:
                 raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
-                s["angle " + str(self.atom1 + 1) + " " + str(self.atom2 + 1) +
-                  " " + str(self.atom3 + 1)] = value
+                s["angle {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3)] = value
         return s
 
 
