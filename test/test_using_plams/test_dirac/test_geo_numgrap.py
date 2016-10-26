@@ -1,4 +1,5 @@
 
+from noodles import gather
 from plams import Molecule
 from qmworks import (dirac, run, Settings)
 
@@ -11,10 +12,11 @@ def main():
     # create a dirac job
     job = create_job("h2_opt", h2)
 
-    rs = run(job.energy)
+    properties = [job.energy, job.molecule]
+    rs = run(gather(*properties))
 
-    print(rs)
-
+    print("Energy:", rs[0])
+    print("Molecule: ", rs[1])
 
 
 def create_job(name, mol):
