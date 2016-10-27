@@ -1,6 +1,6 @@
-# Default imports
+# Default imports 
+from nose.plugins.attrib import attr
 from qmworks import Settings, templates, molkit
-# from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
@@ -8,6 +8,8 @@ from qmworks.packages.SCM import dftb
 from qmworks.packages.orca import orca
 from qmworks.packages import run
 
+
+@attr('slow')
 def test_hessian_transfer():
     """
     Test DFTB -> Orca hessian transfer
