@@ -1,0 +1,12 @@
+{
+    "energy": {"parser": "dirac_xml_parser", "function": "parse_xml", "file_ext": "xml",
+	       "kwargs" : {"section": "task/[@type='SCF optimization']/output/scf-iteration/",
+			   "select_value": "last", "parse_text": ["builtins", "float"]}
+	      },
+    "molecule" : {"parser": "dirac_xml_parser", "function": "parse_xml", "file_ext": "xml",
+	       "kwargs" : {"section": "input/file[@type='dirac-xyz']",
+			   "select_value": "last", "parse_text": ["qmworks.parsers",
+								  "string_to_plams_Molecule"]}
+		 } 
+    
+}

@@ -89,6 +89,7 @@ def initialize(fun):
             builtins.config
         except AttributeError:
             plams.init()
+        builtins.config.log.stdout = 0
         result = fun(*args, **kwargs)
         plams.finish()
         return result

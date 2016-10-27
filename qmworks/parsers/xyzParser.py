@@ -1,8 +1,9 @@
 __author__ = "Felipe Zapata"
 
-__all__ = ['parse_string_xyz', 'readXYZ', 'manyXYZ']
+__all__ = ['parse_string_xyz', 'readXYZ', 'manyXYZ', "string_to_plams_Molecule"]
 
 # ===================> Standard libraries and third-party <====================
+from plams import (Atom, Molecule)
 from pyparsing   import (alphas, Group, LineEnd, OneOrMore, restOfLine,
                          Suppress, Word)
 
@@ -68,3 +69,19 @@ def createAtoms(xs):
     ls = [a.label.lower() for a in xs]
     rs = [list(map(float, a.xyz)) for a in xs]
     return zipWith(AtomXYZ)(ls)(rs)
+
+
+def tuplesXYZ_to_plams(xs):
+    """ Transform a list of namedTuples to a Plams molecule """
+    plams_mol = Molecule()
+    for at in xs:
+        symb = at.symbol
+        cs = at.xyz
+        plams_mol.add_atom(Atom(symbol=symb, coords=tuple(cs)))
+
+    return plams_mol
+
+
+def string_to_plams_Molecule(xs):
+    """Convert a molecule stored in a string to a plams Molecule"""
+    return  tuplesXYZ_to_plams(parse_string_xyz(xs))
