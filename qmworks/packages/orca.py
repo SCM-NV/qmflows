@@ -104,11 +104,14 @@ class ORCA(Package):
             if isinstance(value, Settings):
                 for k, v in value.items():
                     ks = k.split()
-                    # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
                         cons += '{{ B {:s} {:s} {:f} C }}'.format(*ks[1:], v)
-                    elif ks[0] == 'angle' and len(ks == 4):
+                    elif ks[0] == 'angle' and len(ks) == 4:
                         cons += '{{ A {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                    elif ks[0] == 'dihed' and len(ks) == 5:
+                        cons += '{{ D {:s} {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                    else:
+                        warn('Invalid constraint key: ' + k)
             settings.specific.orca.geom.Constraints._end = cons
 
         def freeze():

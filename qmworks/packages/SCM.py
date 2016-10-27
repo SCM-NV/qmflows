@@ -99,9 +99,15 @@ class ADF(Package):
                     if ks[0] == 'dist' and len(ks) == 3:
                         name = 'dist {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
-                    elif ks[0] == 'angle' and len(ks == 4):
+                    elif ks[0] == 'angle' and len(ks) == 4:
                         name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
+                    elif ks[0] == 'dihed' and len(ks) == 5:
+                        name = 'dihed {:d} {:d} {:d} {:d}'.\
+                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                        settings.specific.adf.constraints[name] = v
+                    else:
+                        warn('Invalid constraint key: ' + k)
 
         # Available translations
         functions = {'freeze': freeze,
@@ -232,9 +238,15 @@ class DFTB(Package):
                     if ks[0] == 'dist' and len(ks) == 3:
                         name = 'dist {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
-                    elif ks[0] == 'angle' and len(ks == 4):
+                    elif ks[0] == 'angle' and len(ks) == 4:
                         name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1, int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
+                    elif ks[0] == 'dihed' and len(ks) == 5:
+                        name = 'dihed {:d} {:d} {:d} {:d}'.\
+                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                        settings.specific.dftb.constraints[name] = v
+                    else:
+                        warn('Invalid constraint key: ' + k)
 
         # Available translations
         functions = {'freeze': freeze,
