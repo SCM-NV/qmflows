@@ -4,8 +4,10 @@ from plams import Molecule
 from qmworks import (dirac, run, Settings)
 
 
-def main():
-
+def test_numgrad():
+    """
+    Test Dirac numerical opt.
+    """
     # read geometry
     h2 = Molecule('test/test_files/h2.xyz')
 
