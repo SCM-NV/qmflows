@@ -89,7 +89,6 @@ def from_sequence(sequence):
     molecule = Chem.MolFromSequence(sequence)
     AllChem.EmbedMolecule(molecule)
     AllChem.UFFOptimizeMolecule(molecule)
-    print(Chem.MolToMolBlock(molecule))
     return from_rdmol(Chem.AddHs(molecule, addCoords=True))
 
 
@@ -185,8 +184,6 @@ def gen_coords_rdmol(rdmol):
         coordDict[i] = pos
         unchanged.append(i)
         maps.append((i, i))
-    print('coordDict', coordDict)
-    print('maps', maps)
     # compute coordinates for new atoms, keeping known coordinates
     rms = 1
     rs = 1
@@ -196,7 +193,6 @@ def gen_coords_rdmol(rdmol):
                                     useBasicKnowledge=True)
         # align new molecule to original coordinates
         rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
-        print(rms)
         rs += 1
     return unchanged
 
@@ -241,7 +237,6 @@ def add_fragment(rwmol, frag, rwmol_atom_idx=None, frag_atom_idx=None,
         ea = b.GetEndAtomIdx()
         rwmol.AddBond(new_indices[ba], new_indices[ea], b.GetBondType())
     if bond_order:
-        print(new_indices, frag_atom_idx, rwmol_atom_idx)
         rwmol.AddBond(rwmol_atom_idx, new_indices[frag_atom_idx],
                       Chem.BondType.values[bond_order])
         rwmol.GetAtomWithIdx(new_indices[frag_atom_idx]).SetNumRadicalElectrons(0)
