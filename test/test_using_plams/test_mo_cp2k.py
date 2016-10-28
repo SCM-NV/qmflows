@@ -35,7 +35,7 @@ def test_ethylene():
 
 def fun_ethylene(scratch_path):
     """
-    Test Ethylene singlw
+    Test Ethylene single
     """
     project_name = 'ethylene'
 
