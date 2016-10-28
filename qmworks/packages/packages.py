@@ -28,17 +28,29 @@ from qmworks.settings import Settings
 from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
 from qmworks.utils import (concatMap, initialize)
-
+from warnings import warn
 # ==============================================================
-__all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
+__all__ = ['import_parser', 'package_properties', 'Package',
+           'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
+
+package_properties = {
+    'adf': 'data/dictionaries/propertiesADF.json',
+    'dftb': 'data/dictionaries/propertiesDFTB.json',
+    'cp2k': 'data/dictionaries/propertiesCP2K.json',
+    'dirac': 'data/dictionaries/propertiesDIRAC.json',
+    'gamess': 'data/dictionaries/propertiesGAMESS.json',
+    'orca': 'data/dictionaries/propertiesORCA.json'
+}
 
 
 class Result:
-
+    """
+    Class containing the result associated with a quantum chemistry simulation.
+    """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, path_hdf5=None, project_name=None,
-                 properties=None):
+                 properties=None, status='done'):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -67,6 +79,7 @@ class Result:
                         "path_hdf5": path_hdf5}
         self.project_name = project_name
         self.job_name = job_name
+        self.status = status
 
     def as_dict(self):
         """
@@ -87,7 +100,6 @@ class Result:
         """
         raise NotImplementedError()
 
-
     def __getattr__(self, prop):
         """Returns a section of the results.
 
@@ -96,10 +108,23 @@ class Result:
         ..
             dipole = result.dipole
         """
-        if prop in self.prop_dict:
-            return self.get_property(prop)
+        if self.status == 'done':
+            if prop in self.prop_dict:
+                return self.get_property(prop)
+            else:
+                msg = "Generic property '" + str(prop) + "' not defined"
+                warn(msg)
+                return None
         else:
-            raise AttributeError("Generic property '" + str(prop) + "' not defined")
+            msg1 = """
+            It is not possible to retrieve property: '{}'
+            Because Job: '{}' has failed.
+            check the output\n""".format(prop, self.job_name)
+            msg2 = """
+            Are you sure that you have the package installed or you have loaded
+            the package in the cluster. `e.g. module load AwesomeQuantumPackage/3.1421`"""
+            warn(msg1 + msg2)
+            return None
 
     def get_property(self, prop):
         """
@@ -163,7 +188,9 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
-
+        print("Settings: ", settings)
+        print("Molecule: ", mol)
+        
         if isinstance(mol, Chem.Mol):
             mol = molkit.from_rdmol(mol)
 
@@ -174,7 +201,25 @@ class Package:
 
         job_settings = self.generic2specific(settings, mol)
 
-        result = self.run_job(job_settings, mol, **kwargs)
+        properties = package_properties[self.pkg_name]
+        # There are not data from previous nodes in the dependecy trees
+        # because of a failure upstream or the user provided None as argument
+        if all(x is not None for x in [settings, mol]):
+            #  Check if plams finishes normally
+            try:
+                result = self.run_job(job_settings, mol, **kwargs)
+            # Otherwise pass an empty Result instance
+            except plams.PlamsError:
+                result = Result(None, None, job_name=job_name,
+                                properties=properties, status='failed')
+            # except Exception as e:
+            #     print("Exception e: ", type(e), e.args)
+        else:
+            result = Result(None, None, job_name=job_name,
+                            properties=properties, status='failed')
+
+        # Label this calculation as failed if there are not dependecies coming
+        # from upstream
 
         self.postrun()
 

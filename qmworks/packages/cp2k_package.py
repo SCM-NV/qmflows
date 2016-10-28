@@ -65,19 +65,20 @@ class CP2K(Package):
         cp2k_settings.input = settings.specific.cp2k
         job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
                             molecule=mol)
-        runner = plams.JobRunner(parallel=True)
-        r = job.run(runner)
-        r.wait()
+        r = job.run()
 
         work_dir = work_dir if work_dir is not None else job.path
         output_file = join(job.path, job._filename('out'))
 
-        if store_in_hdf5:
+        if store_in_hdf5 and job.status not in ['failed', 'crashed']:
             dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
                          nLUMOS, project_name=project_name)
 
-        return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
-                           path_hdf5=hdf5_file, project_name=project_name)
+        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
+                             path_hdf5=hdf5_file, project_name=project_name,
+                             status=job.status)
+
+        return result
 
     def postrun(self):
         pass
@@ -194,10 +195,12 @@ class CP2K_Result(Result):
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  path_hdf5=None, project_name=None,
-                 properties='data/dictionaries/propertiesCP2K.json'):
+                 properties='data/dictionaries/propertiesCP2K.json',
+                 status='done'):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, path_hdf5=path_hdf5,
-                         project_name=project_name, properties=properties)
+                         project_name=project_name, properties=properties,
+                         status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -233,14 +236,15 @@ class CP2K_Result(Result):
         ..
             overlap_matrix = result.overlap
         """
-        relative_cwd = self.archive['work_dir'].split('/')[-1]
-        hdf5_path_to_prop = join(self.project_name, relative_cwd)
-        sections = self.prop_dict[prop]
-        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
-                                 sections))
-
-        return paths_to_prop
-
+        if self.status == 'done':
+            relative_cwd = self.archive['work_dir'].split('/')[-1]
+            hdf5_path_to_prop = join(self.project_name, relative_cwd)
+            sections = self.prop_dict[prop]
+            paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
+                                     sections))
+            return paths_to_prop
+        else:
+            return None
 
 cp2k = CP2K()
 

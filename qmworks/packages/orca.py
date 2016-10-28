@@ -31,10 +31,11 @@ class ORCA(Package):
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
 
-        result = plams.ORCAJob(molecule=mol, settings=orca_settings,
-                               name=job_name).run()
+        job = plams.ORCAJob(molecule=mol, settings=orca_settings, name=job_name)
+        result = job.run()
 
-        return ORCA_Result(orca_settings, mol, result.job.name, result.job.path)
+        return ORCA_Result(orca_settings, mol, result.job.name,
+                           plams_dir=result.job.path, satatus=job.status)
 
     def postrun(self):
         pass
@@ -147,15 +148,15 @@ class ORCA(Package):
             warn(msg)
 
 
-
-
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
+    def __init__(self, settings, molecule, job_name, plams_dir,
+                 project_name=None, status='done'):
         properties = 'data/dictionaries/propertiesORCA.json'
         super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir,
-                         project_name=project_name, properties=properties)
+                         project_name=project_name, properties=properties,
+                         status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):

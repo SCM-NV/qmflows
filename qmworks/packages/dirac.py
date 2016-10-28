@@ -27,11 +27,12 @@ class DIRAC(Package):
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
         dirac_settings.ignore_molecule
-        result = plams.DiracJob(name=job_name, settings=dirac_settings,
-                                molecule=mol).run()
+        job = plams.DiracJob(name=job_name, settings=dirac_settings,
+                             molecule=mol)
+        result = job.run()
 
         return DIRAC_Result(dirac_settings, mol, result.job.name,
-                            plams_dir=result.job.path)
+                            plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -51,11 +52,12 @@ class DIRAC_Result(Result):
     """
     Class to access **DIRAC** Results.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
+    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None,
+                 status='done'):
         properties = 'data/dictionaries/propertiesDIRAC.json'
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+                         properties=properties, status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):

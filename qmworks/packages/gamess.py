@@ -51,13 +51,14 @@ class GAMESS(Package):
         gamess_settings.input = settings.specific.gamess
         job = plams.GamessJob(molecule=mol, name=job_name,
                               settings=gamess_settings)
-        runner = plams.JobRunner(parallel=True)
-        r = job.run(runner)
-        r.wait()
+        r = job.run()
 
-        return Gamess_Result(gamess_settings, mol, r.job.name,
-                             plams_dir=r.job.path, work_dir=work_dir,
-                             path_hdf5=hdf5_file, project_name=project_name)
+        result = Gamess_Result(gamess_settings, mol, r.job.name,
+                               plams_dir=r.job.path, work_dir=work_dir,
+                               path_hdf5=hdf5_file, project_name=project_name,
+                               status=job.status)
+
+        return result
 
     def postrun(self):
         pass
@@ -83,10 +84,12 @@ class Gamess_Result(Result):
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, path_hdf5=None, project_name=None,
-                 properties='data/dictionaries/propertiesGAMESS.json'):
+                 properties='data/dictionaries/propertiesGAMESS.json',
+                 status='done'):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, path_hdf5=path_hdf5,
-                         project_name=None, properties=properties)
+                         project_name=None, properties=properties,
+                         status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
@@ -119,16 +122,16 @@ class Gamess_Result(Result):
         ..
             Hessian_matrix = result.hessian
         """
-        try:
-            return super().__getattr__(prop)
-        except FileNotFoundError:
+        result = super().__getattr__(prop)
+        if result is None:
             msg = """
             Maybe you need to provided to the gamess
             function the optional keyword 'work_dir' containing the path
             to the SCR folder where GAMESS stores the *.dat and other
             output files"""
-            print(msg)
-            raise
+            warn(msg)
+
+        return result
 
 
 gamess = GAMESS()

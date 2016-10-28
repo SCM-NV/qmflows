@@ -44,12 +44,15 @@ class ADF(Package):
         """
         adf_settings = Settings()
         adf_settings.input = settings.specific.adf
-        result = plams.ADFJob(name=job_name, molecule=mol,
-                              settings=adf_settings).run()
+        job = plams.ADFJob(name=job_name, molecule=mol,
+                           settings=adf_settings)
+        result = job.run()
         path_t21 = result._kf.path
 
-        return ADF_Result(adf_settings, mol, result.job.name, path_t21,
-                          plams_dir=result.job.path)
+        adf_result = ADF_Result(adf_settings, mol, result.job.name, path_t21,
+                                plams_dir=result.job.path, status=job.status)
+
+        return adf_result
 
     def postrun(self):
         pass
@@ -119,11 +122,11 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 project_name=None):
+                 project_name=None, status='done'):
         properties = 'data/dictionaries/propertiesADF.json'
         super().__init__(settings, molecule, job_name,
                          plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+                         properties=properties, status=status)
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
@@ -189,11 +192,13 @@ class DFTB(Package):
         """
         dftb_settings = Settings()
         dftb_settings.input = settings.specific.dftb
-        result = plams.DFTBJob(name=job_name, molecule=mol,
-                               settings=dftb_settings).run()
+        job = plams.DFTBJob(name=job_name, molecule=mol,
+                            settings=dftb_settings)
 
-        return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path)
+        result = job.run()
+
+        return  DFTB_Result(dftb_settings, mol, result.job.name,
+                            plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -251,10 +256,10 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 project_name=None):
+                 project_name=None, status='done'):
         properties = 'data/dictionaries/propertiesDFTB.json'
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties)
+                         properties=properties, status=status)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         self.kf = plams.kftools.KFFile(kf_filename)
 
