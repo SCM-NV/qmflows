@@ -128,7 +128,7 @@ class Result:
         ..
             dipole = result.dipole
         """
-        if self.status == 'done':
+        if self.status == 'successful':
             if prop in self.prop_dict:
                 return self.get_property(prop)
             else:

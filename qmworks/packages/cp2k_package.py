@@ -1,5 +1,4 @@
 
-
 __all__ = ['cp2k']
 
 # =======>  Standard and third party Python Libraries <======
@@ -196,7 +195,7 @@ class CP2K_Result(Result):
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  path_hdf5=None, project_name=None,
                  properties='data/dictionaries/propertiesCP2K.json',
-                 status='done'):
+                 status='successful'):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, path_hdf5=path_hdf5,
                          project_name=project_name, properties=properties,
