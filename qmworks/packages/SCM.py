@@ -4,7 +4,7 @@
 from os.path import join
 from warnings import warn
 from qmworks.settings import Settings
-from qmworks.packages.packages import Package, Result  # ChemResult
+from qmworks.packages.packages import (check_status, Package, Result)
 
 import builtins
 import plams
@@ -142,6 +142,7 @@ class ADF_Result(Result):
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
 
+    @check_status
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
         """WARNING: Cheap copy from PLAMS, do not keep this!!!"""
@@ -268,6 +269,7 @@ class DFTB_Result(Result):
         return DFTB_Result(settings, molecule, job_name,
                            archive["plams_dir"].path, project_name)
 
+    @check_status
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
         """WARNING: Cheap copy from PLAMS, do not keep this!!!"""

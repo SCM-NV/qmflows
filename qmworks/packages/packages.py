@@ -1,6 +1,6 @@
 
 # ========>  Standard and third party Python Libraries <======
-from functools import partial
+from functools import (partial, wraps)
 from os.path import join
 from rdkit import Chem
 from typing import (Any, Callable, Dict, List)
@@ -30,8 +30,8 @@ from qmworks.fileFunctions import json2Settings
 from qmworks.utils import (concatMap, initialize)
 from warnings import warn
 # ==============================================================
-__all__ = ['import_parser', 'package_properties', 'Package',
-           'run', 'registry', 'Result',
+__all__ = ['check_status' 'import_parser', 'package_properties',
+           'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
 package_properties = {
@@ -42,6 +42,26 @@ package_properties = {
     'gamess': 'data/dictionaries/propertiesGAMESS.json',
     'orca': 'data/dictionaries/propertiesORCA.json'
 }
+
+
+def check_status(fun):
+    """
+    Check the status of a package computation and returns ``None`` if
+    the compputations failed.
+
+    This decorator is loosely equivalent to the bind operator (>>=) for
+    the monad Maybe in Haskell:
+
+      ..
+         Just 3 >>= lambda.x -> f(x)  == Just (f 3)
+         Nothing >>= lambda.x -> f(x)  == Nothing
+    """
+    @wraps(fun)
+    def maybe(self, *args, **kwargs):
+        if self.status not in ['crashed', 'failed']:
+            return fun(self, *args, **kwargs)
+        else:
+            return None
 
 
 class Result:
@@ -188,9 +208,6 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
-        print("Settings: ", settings)
-        print("Molecule: ", mol)
-        
         if isinstance(mol, Chem.Mol):
             mol = molkit.from_rdmol(mol)
 

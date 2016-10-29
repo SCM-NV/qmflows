@@ -31,11 +31,12 @@ class ORCA(Package):
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
 
-        job = plams.ORCAJob(molecule=mol, settings=orca_settings, name=job_name)
+        job = plams.ORCAJob(molecule=mol, settings=orca_settings,
+                            name=job_name)
         result = job.run()
 
         return ORCA_Result(orca_settings, mol, result.job.name,
-                           plams_dir=result.job.path, satatus=job.status)
+                           plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -151,23 +152,26 @@ class ORCA(Package):
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, job_name, plams_dir,
+    def __init__(self, settings, molecule, job_name, plams_dir=None,
                  project_name=None, status='done'):
         properties = 'data/dictionaries/propertiesORCA.json'
-        super().__init__(settings, molecule, job_name=job_name, plams_dir=plams_dir,
-                         project_name=project_name, properties=properties,
-                         status=status)
+        super().__init__(settings, molecule, job_name=job_name,
+                         plams_dir=plams_dir, project_name=project_name,
+                         properties=properties, status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):
         plams_dir = archive["plams_dir"].path
-        return ORCA_Result(settings, molecule, job_name, plams_dir, project_name)
+        return ORCA_Result(settings, molecule, job_name, plams_dir,
+                           project_name)
 
     @property
     def molecule(self):
         """ Retrieve the molecule from the output file"""
-        plams_dir = self.archive["plams_dir"].path
-        file_name = join(plams_dir, '{}.out'.format(self.job_name))
-        return parse_molecule(file_name, self._molecule)
-
+        if self.status not in ['crashed', 'failed']:
+            plams_dir = self.archive["plams_dir"].path
+            file_name = join(plams_dir, '{}.out'.format(self.job_name))
+            return parse_molecule(file_name, self._molecule)
+        else:
+            return None
 orca = ORCA()
