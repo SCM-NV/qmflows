@@ -128,23 +128,24 @@ class Result:
         ..
             dipole = result.dipole
         """
-        if self.status == 'successful':
-            if prop in self.prop_dict:
-                return self.get_property(prop)
-            else:
-                msg = "Generic property '" + str(prop) + "' not defined"
-                warn(msg)
-                return None
-        else:
-            msg1 = """
-            It is not possible to retrieve property: '{}'
-            Because Job: '{}' has failed.
-            check the output\n""".format(prop, self.job_name)
-            msg2 = """
-            Are you sure that you have the package installed or you have loaded
-            the package in the cluster. `e.g. module load AwesomeQuantumPackage/3.1421`"""
-            warn(msg1 + msg2)
+        is_private = prop.startswith('__') and prop.endswith('__')
+        # if self.status == 'successful':
+        if self.status == 'successful' and prop in self.prop_dict:
+            return self.get_property(prop)
+        elif not is_private:
+            msg = "Generic property '" + str(prop) + "' not defined"
+            warn(msg)
             return None
+        # else:
+        #     msg1 = """
+        #     It is not possible to retrieve property: '{}'
+        #     Because Job: '{}' has failed.
+        #     check the output\n""".format(prop, self.job_name)
+        #     msg2 = """
+        #     Are you sure that you have the package installed or you have loaded
+        #     the package in the cluster. `e.g. module load AwesomeQuantumPackage/3.1421`"""
+        #     warn(msg1 + msg2)
+        #     return None
 
     def get_property(self, prop):
         """

@@ -235,15 +235,13 @@ class CP2K_Result(Result):
         ..
             overlap_matrix = result.overlap
         """
-        if self.status == 'done':
-            relative_cwd = self.archive['work_dir'].split('/')[-1]
-            hdf5_path_to_prop = join(self.project_name, relative_cwd)
-            sections = self.prop_dict[prop]
-            paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
-                                     sections))
-            return paths_to_prop
-        else:
-            return None
+
+        relative_cwd = self.archive['work_dir'].split('/')[-1]
+        hdf5_path_to_prop = join(self.project_name, relative_cwd)
+        sections = self.prop_dict[prop]
+        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
+                                 sections))
+        return paths_to_prop
 
 cp2k = CP2K()
 
