@@ -7,10 +7,23 @@ from qmworks.packages import orca
 from qmworks.components import Distance
 
 import plams
+import io
 # ========== =============
 
 # 5 membered ring from which ozone will dissociate
-guessTS = plams.Molecule('ac18_ts.xyz')
+xyz_file = io.StringIO('''7
+
+  C   -1.46639100895973     -0.66859400443971     -0.31255505682806
+  O    0.00282072410259      0.01474573531737      1.30606888074830
+  O    1.04388936077663     -0.01936067299255      0.53927051691306
+  O    0.93874565776916      0.76907359603763     -0.48055185294869
+  C   -0.93375384866586     -0.24065248892727     -1.32868508338709
+  H   -2.06330249766107     -1.10524960979939      0.46177231972758
+  H   -0.61425226052981      0.06238167064304     -2.30462642727095
+''')
+
+guessTS = plams.Molecule()
+guessTS.readxyz(xyz_file, 1)
 
 # Some dftb specific settings
 dftb_set = Settings()

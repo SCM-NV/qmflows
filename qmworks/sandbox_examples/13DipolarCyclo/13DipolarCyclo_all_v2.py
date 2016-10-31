@@ -12,9 +12,6 @@ from qmworks.components import Distance, select_max
 import plams
 # ========== =============
 
-plams.init()
-config.log.stdout = -1000  # noqa
-
 hartree2kcal = 627.5095
 
 # List of reactions, defined by name, reactants and products (as smiles strings)
@@ -76,7 +73,9 @@ bond2 = Distance(3, 4)
 # User define Settings
 settings = Settings()
 settings.functional = "b3lyp"
-settings.basis = "DZ"
+settings.specific.orca.basis.basis = "_6_31G"
+settings.specific.orca.basis.pol = "_d"
+settings.specific.orca.basis.diff = "_p"
 settings.specific.dftb.dftb.scc
 
 
@@ -88,19 +87,22 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
     r1_mol =  molkit.from_smiles(r1_smiles)
     r1_dftb = dftb(templates.geometry.overlay(settings), r1_mol, job_name=name + "_r1_DFTB")
     r1 =      adf(templates.geometry.overlay(settings), r1_dftb.molecule, job_name=name + "_r1")
+    r1_freq = adf(templates.freq.overlay(settings), r1.molecule, job_name=name + "_r1_freq")
 
   # Prepare reactant2 job
     r2_mol =  molkit.from_smiles(r2_smiles)
     r2_dftb = dftb(templates.geometry.overlay(settings), r2_mol, job_name=name + "_r2_DFTB")
     r2 =      adf(templates.geometry.overlay(settings), r2_dftb.molecule, job_name=name + "_r2")
+    r2_freq = adf(templates.freq.overlay(settings), r2.molecule, job_name=name + "_r2_freq")
 
-  # Prepare product job
+# Prepare product job
     p_mol =  molkit.from_smiles(p_smiles)
     p_mol.properties.name = name
     p_dftb = dftb(templates.geometry.overlay(settings), p_mol, job_name=name + "_p_DFTB")
     p =      adf(templates.geometry.overlay(settings), p_dftb.molecule, job_name=name + "_p")
+    p_freq = adf(templates.freq.overlay(settings), p.molecule, job_name=name + "_p_freq")
 
-  # Prepare scan
+# Prepare scan
     pes_jobs = []
     for d in range(6):
         consset = Settings()
@@ -129,7 +131,7 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
     TSfreq = adf(templates.freq.overlay(settings), TS.molecule, job_name=name + "_freq")
 
   # Add the jobs to the job list
-    job_list.append(gather(r1, r2, p, TSfreq, TS.optcycles))
+    job_list.append(gather(r1_freq, r2_freq, p_freq, TS, TSfreq))
 
 # Finalize and draw workflow
 wf = gather(*job_list)
@@ -140,21 +142,21 @@ results = run(wf, n_processes=1)
 
 # Extract table from results
 table = {}
-for r1_result, r2_result, p_result, ts_result, optcycles in results:
+for r1_result, r2_result, p_result, ts_opt, ts_result in results:
     # Retrieve the molecular coordinates
-    mol = ts_result.molecule
+    mol = ts_opt.molecule
     d1 = bond1.get_current_value(mol)
     d2 = bond2.get_current_value(mol)
 
-    Eact = (ts_result.energy - r1_result.energy - r2_result.energy) * hartree2kcal
-    Ereact = (p_result.energy - r1_result.energy - r2_result.energy) * hartree2kcal
+    Eact = (ts_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
+    Ereact = (p_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
     name = p_result.molecule.properties.name
     smiles = p_result.molecule.properties.smiles
-    nnegfreq = sum([f < 0 for f in ts_result.frequencies])
-    table[name] = [smiles, Eact, Ereact, d1, d2, nnegfreq, optcycles]
+    nimfreq = sum([f < 0 for f in ts_result.frequencies])
+    table[name] = [smiles, Eact, Ereact, d1, d2, nimfreq, ts_opt.optcycles, ts_opt.runtime]
 
 # Print table
-print("Reaction Productsmiles    Eact  Ereact   Bond1   Bond2 NNegFreq OptCycles")
+print("Reaction Productsmiles    Eact  Ereact   Bond1   Bond2 NNegFreq TSoptCycles TSoptTime")
 for name in sorted(table):
-    print("{0:8s} {1:13s} {2:7.1f} {3:7.1f} {4:7.2f} {5:7.2f} {6:8d} {7:8d}".format(
+    print("{0:8s} {1:13s} {2:7.1f} {3:7.1f} {4:7.2f} {5:7.2f} {6:8d} {7:10d} {8:10.2f}".format(
         name, *table[name]))
