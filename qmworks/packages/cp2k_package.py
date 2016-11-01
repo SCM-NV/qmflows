@@ -1,6 +1,3 @@
-
-__all__ = ['cp2k']
-
 # =======>  Standard and third party Python Libraries <======
 from warnings import warn
 from os.path import join
@@ -13,7 +10,7 @@ import plams
 # ==================> Internal modules <====================
 from qmworks.common import InputKey
 from qmworks.hdf5 import cp2k2hdf5
-from qmworks.packages.packages import Package, Result
+from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.parsers import read_cp2k_number_of_orbitals
 from qmworks.settings import Settings
 
@@ -21,6 +18,7 @@ from qmworks.settings import Settings
 charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
                'Se': 6, 'Cd': 12, 'Pb': 4, 'Br': 7, 'Cs': 9, 'Si': 4}
 # ======================================<>====================================
+__all__ = ['cp2k']
 
 
 class CP2K(Package):
@@ -73,8 +71,9 @@ class CP2K(Package):
             dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
                          nLUMOS, project_name=project_name)
 
-        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path, work_dir,
-                             path_hdf5=hdf5_file, project_name=project_name,
+        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path,
+                             work_dir, path_hdf5=hdf5_file,
+                             project_name=project_name,
                              status=job.status)
 
         return result
@@ -194,7 +193,7 @@ class CP2K_Result(Result):
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  path_hdf5=None, project_name=None,
-                 properties='data/dictionaries/propertiesCP2K.json',
+                 properties=package_properties['cp2k'],
                  status='successful'):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, path_hdf5=path_hdf5,

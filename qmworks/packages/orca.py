@@ -1,7 +1,7 @@
 # =======>  Standard and third party Python Libraries <======
 from os.path import join
 from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, Result)
+from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.parsers.orca_parser import parse_molecule
 from warnings import warn
 
@@ -93,7 +93,7 @@ class ORCA(Package):
 
             # Store the hessian in the plams_dir
             hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
-            with open(hess_path, "w") as  hess_file:
+            with open(hess_path, "w") as hess_file:
                 hess_file.write(hess_str)
 
             settings.specific.orca.geom.InHess = "read"
@@ -157,7 +157,7 @@ class ORCA_Result(Result):
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  project_name=None, status='done'):
-        properties = 'data/dictionaries/propertiesORCA.json'
+        properties = package_properties['orca']
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, project_name=project_name,
                          properties=properties, status=status)
@@ -177,4 +177,5 @@ class ORCA_Result(Result):
             return parse_molecule(file_name, self._molecule)
         else:
             return None
+
 orca = ORCA()

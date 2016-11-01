@@ -4,7 +4,7 @@
 from os.path import join
 from warnings import warn
 from qmworks.settings import Settings
-from qmworks.packages.packages import (check_status, Package, Result)
+from qmworks.packages.packages import (Package, package_properties, Result)
 
 import builtins
 import plams
@@ -100,14 +100,18 @@ class ADF(Package):
                     ks = k.split()
                     # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
+                                                       int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1,
+                                                             int(ks[2]) + 1,
+                                                             int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]) + 1, int(ks[2]) + 1,
+                                   int(ks[3]) + 1, int(ks[4]) + 1)
                         settings.specific.adf.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -129,10 +133,12 @@ class ADF_Result(Result):
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
                  project_name=None, status='done'):
-        properties = 'data/dictionaries/propertiesADF.json'
+        # Load available property parser from Json file.
+        properties = package_properties['adf']
         super().__init__(settings, molecule, job_name,
                          plams_dir=plams_dir, project_name=project_name,
                          properties=properties, status=status)
+        # Create a KF reader instance
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
@@ -203,8 +209,8 @@ class DFTB(Package):
 
         result = job.run()
 
-        return  DFTB_Result(dftb_settings, mol, result.job.name,
-                            plams_dir=result.job.path, status=job.status)
+        return DFTB_Result(dftb_settings, mol, result.job.name,
+                           plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -241,14 +247,18 @@ class DFTB(Package):
                 for k, v in value.items():
                     ks = k.split()
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1])+1,
+                                                       int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1, int(ks[2])+1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1,
+                                                             int(ks[2])+1,
+                                                             int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]) + 1, int(ks[2]) + 1,
+                                   int(ks[3]) + 1, int(ks[4]) + 1)
                         settings.specific.dftb.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -269,10 +279,12 @@ class DFTB_Result(Result):
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  project_name=None, status='done'):
-        properties = 'data/dictionaries/propertiesDFTB.json'
+        # Read available propiety parsers from a JSON file
+        properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties, status=status)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
+        # create a kf reader instance
         self.kf = plams.kftools.KFFile(kf_filename)
 
     @classmethod

@@ -1,13 +1,11 @@
-
-__all__ = ['gamess']
-
 # =======>  Standard and third party Python Libraries <======
-from qmworks.packages.packages import (Package, Result)
+from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
 from warnings import warn
 
 import plams
 # ======================================<>=====================================
+__all__ = ['gamess']
 
 
 class GAMESS(Package):
@@ -84,7 +82,7 @@ class Gamess_Result(Result):
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, path_hdf5=None, project_name=None,
-                 properties='data/dictionaries/propertiesGAMESS.json',
+                 properties=package_properties['gamess'],
                  status='done'):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, path_hdf5=path_hdf5,

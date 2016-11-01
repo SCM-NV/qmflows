@@ -10,22 +10,23 @@ def isNone(x):
     return True if x is None else False
 
 
-# def test_fail_scm():
-#     """ Test that both ADF and DFTB returns ``None`` if a computation fails"""
-#     # 5 membered ring from which ozone will dissociate
-#     mol = Molecule("test/test_files/ethylene.xyz")
+def test_fail_scm():
+    """ Test that both ADF and DFTB returns ``None`` if a computation fails"""
+    # 5 membered ring from which ozone will dissociate
+    mol = Molecule("test/test_files/ethylene.xyz")
 
-#     # Some dftb specific settings
-#     dftb_set = Settings()
-#     dftb_set.specific.dftb.dftb.scc
+    # Some dftb specific settings
+    dftb_set = Settings()
+    dftb_set.specific.dftb.dftb.scc
 
-#     # Calculate the DFTB hessian
-#     opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
-#                     job_name="failed_DFTB")
-#     fail_adf = adf(templates.singlepoint, opt_dftb.molecule, job_name="fail_adf")
-#     result = run(fail_adf.molecule)
+    # Calculate the DFTB hessian
+    opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
+                    job_name="failed_DFTB")
+    fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
+    result = run(fail_adf.molecule)
 
-#     assert isNone(result)
+    print(result)
+    assert isNone(result)
 
 
 # def test_fail_cp2k():

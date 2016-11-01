@@ -1,6 +1,6 @@
 
 # ========>  Standard and third party Python Libraries <======
-from functools import (partial, wraps)
+from functools import partial
 from os.path import join
 from rdkit import Chem
 from typing import (Any, Callable, Dict, List)
@@ -30,7 +30,7 @@ from qmworks.fileFunctions import json2Settings
 from qmworks.utils import (concatMap, initialize)
 from warnings import warn
 # ==============================================================
-__all__ = ['check_status' 'import_parser', 'package_properties',
+__all__ = ['import_parser', 'package_properties',
            'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
@@ -42,26 +42,6 @@ package_properties = {
     'gamess': 'data/dictionaries/propertiesGAMESS.json',
     'orca': 'data/dictionaries/propertiesORCA.json'
 }
-
-
-def check_status(fun):
-    """
-    Check the status of a package computation and returns ``None`` if
-    the compputations failed.
-
-    This decorator is loosely equivalent to the bind operator (>>=) for
-    the monad Maybe in Haskell:
-
-      ..
-         Just 3 >>= lambda.x -> f(x)  == Just (f 3)
-         Nothing >>= lambda.x -> f(x)  == Nothing
-    """
-    @wraps(fun)
-    def maybe(self, *args, **kwargs):
-        if self.status not in ['crashed', 'failed']:
-            return fun(self, *args, **kwargs)
-        else:
-            return None
 
 
 class Result:
@@ -132,20 +112,20 @@ class Result:
         # if self.status == 'successful':
         if self.status == 'successful' and prop in self.prop_dict:
             return self.get_property(prop)
-        elif not is_private:
+        elif (self.status == 'successful' and not is_private and
+              prop not in self.prop_dict):
             msg = "Generic property '" + str(prop) + "' not defined"
             warn(msg)
             return None
-        # else:
-        #     msg1 = """
-        #     It is not possible to retrieve property: '{}'
-        #     Because Job: '{}' has failed.
-        #     check the output\n""".format(prop, self.job_name)
-        #     msg2 = """
-        #     Are you sure that you have the package installed or you have loaded
-        #     the package in the cluster. `e.g. module load AwesomeQuantumPackage/3.1421`"""
-        #     warn(msg1 + msg2)
-        #     return None
+        elif self.status != 'successful' and not is_private:
+            warn("""
+            It is not possible to retrieve property: '{}'
+            Because Job: '{}' has failed. Check the output.\n
+            Are you sure that you have the package installed or
+             you have loaded the package in the cluster. For example:
+            `module load AwesomeQuantumPackage/3.1421`
+            """.format(prop, self.job_name))
+            return None
 
     def get_property(self, prop):
         """
@@ -177,7 +157,8 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "Property {} not found. No output file called: {}.\n".format(prop, file_pattern)
+            msg = "Property {} not found. No output file \
+            called: {}.\n".format(prop, file_pattern)
             raise FileNotFoundError(msg)
 
 
@@ -209,22 +190,25 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
-        if isinstance(mol, Chem.Mol):
-            mol = molkit.from_rdmol(mol)
-
-        if job_name != '':
-            kwargs['job_name'] = job_name
-
-        self.prerun()
-
-        job_settings = self.generic2specific(settings, mol)
-
         properties = package_properties[self.pkg_name]
+
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
         if all(x is not None for x in [settings, mol]):
             #  Check if plams finishes normally
             try:
+                # If molecule is an RDKIT molecule translate it to plams
+                if isinstance(mol, Chem.Mol):
+                    mol = molkit.from_rdmol(mol)
+                    
+                if job_name != '':
+                    kwargs['job_name'] = job_name
+
+                # Settings transformations
+                job_settings = self.generic2specific(settings, mol)
+
+                # Run the job
+                self.prerun()
                 result = self.run_job(job_settings, mol, **kwargs)
             # Otherwise pass an empty Result instance
             except plams.PlamsError:

@@ -4,7 +4,7 @@ from warnings import warn
 import plams
 
 # ==================> Internal modules <====================
-from qmworks.packages.packages import (Package, Result)
+from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
 
 # ==================> <======================
@@ -52,9 +52,9 @@ class DIRAC_Result(Result):
     """
     Class to access **DIRAC** Results.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None,
-                 status='done'):
-        properties = 'data/dictionaries/propertiesDIRAC.json'
+    def __init__(self, settings, molecule, job_name, plams_dir,
+                 project_name=None, status='done'):
+        properties = package_properties['dirac']
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, project_name=project_name,
                          properties=properties, status=status)
