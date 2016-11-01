@@ -8,10 +8,7 @@ from qmworks import (concat, Settings, templates, zipWith)
 from qmworks.packages.SCM import dftb
 from qmworks.packages.orca import orca
 from qmworks.packages import run
-
 import operator
-import plams
-
 
 
 @attr('slow')
@@ -71,7 +68,5 @@ def test_methanol_opt_orca():
 
 
 if __name__ == "__main__":
-    plams.init()
     test_methanol_opt_orca()
     test_opt_orca()
-    plams.finish()

@@ -8,7 +8,6 @@ from qmworks.packages.gamess import gamess
 from qmworks.packages import run
 
 import operator
-import plams
 
 
 @attr('slow')
@@ -48,6 +47,4 @@ def test_opt_gamess():
     assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
 
 if __name__ == "__main__":
-    plams.init()
     test_opt_gamess()
-    plams.finish()

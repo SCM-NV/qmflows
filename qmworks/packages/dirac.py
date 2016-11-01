@@ -4,7 +4,7 @@ from warnings import warn
 import plams
 
 # ==================> Internal modules <====================
-from qmworks.packages.packages import (Package, Result)
+from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
 
 # ==================> <======================
@@ -27,11 +27,12 @@ class DIRAC(Package):
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
         dirac_settings.ignore_molecule
-        result = plams.DiracJob(name=job_name, settings=dirac_settings,
-                                molecule=mol).run()
+        job = plams.DiracJob(name=job_name, settings=dirac_settings,
+                             molecule=mol)
+        result = job.run()
 
         return DIRAC_Result(dirac_settings, mol, result.job.name,
-                            plams_dir=result.job.path)
+                            plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -51,11 +52,12 @@ class DIRAC_Result(Result):
     """
     Class to access **DIRAC** Results.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir, project_name=None):
-        properties = 'data/dictionaries/propertiesDIRAC.json'
+    def __init__(self, settings, molecule, job_name, plams_dir,
+                 project_name=None, status='done'):
+        properties = package_properties['dirac']
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+                         properties=properties, status=status)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, project_name):

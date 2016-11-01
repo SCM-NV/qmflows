@@ -25,8 +25,8 @@ def test_frequencies_gamess():
     """
     Read if the frequencies are read from the *.dat file
     """
-    freqs, modes = parse_frequencies(file_name)
+    freqs_modes = parse_frequencies(file_name)
     expected_freqs = [1.24863666e+03, 2.31217000, 1.46703000, 6.99020000e-01,
                       1.00000000e-03, 2.51780000e-01, 2.34140000e+00, 2.10562417e+03,
                       3.07137245e+03]
-    assert abs(np.sum(freqs - expected_freqs)) < 1e-7
+    assert abs(np.sum(freqs_modes[0] - expected_freqs)) < 1e-7

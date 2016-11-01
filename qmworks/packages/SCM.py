@@ -4,7 +4,7 @@
 from os.path import join
 from warnings import warn
 from qmworks.settings import Settings
-from qmworks.packages.packages import Package, Result  # ChemResult
+from qmworks.packages.packages import (Package, package_properties, Result)
 
 import builtins
 import plams
@@ -44,12 +44,15 @@ class ADF(Package):
         """
         adf_settings = Settings()
         adf_settings.input = settings.specific.adf
-        result = plams.ADFJob(name=job_name, molecule=mol,
-                              settings=adf_settings).run()
+        job = plams.ADFJob(name=job_name, molecule=mol,
+                           settings=adf_settings)
+        result = job.run()
         path_t21 = result._kf.path
 
-        return ADF_Result(adf_settings, mol, result.job.name, path_t21,
-                          plams_dir=result.job.path)
+        adf_result = ADF_Result(adf_settings, mol, result.job.name, path_t21,
+                                plams_dir=result.job.path, status=job.status)
+
+        return adf_result
 
     def postrun(self):
         pass
@@ -97,14 +100,18 @@ class ADF(Package):
                     ks = k.split()
                     # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
+                                                       int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1,
+                                                             int(ks[2]) + 1,
+                                                             int(ks[2]) + 1)
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]) + 1, int(ks[2]) + 1,
+                                   int(ks[3]) + 1, int(ks[4]) + 1)
                         settings.specific.adf.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -125,11 +132,13 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 project_name=None):
-        properties = 'data/dictionaries/propertiesADF.json'
+                 project_name=None, status='done'):
+        # Load available property parser from Json file.
+        properties = package_properties['adf']
         super().__init__(settings, molecule, job_name,
                          plams_dir=plams_dir, project_name=project_name,
-                         properties=properties)
+                         properties=properties, status=status)
+        # Create a KF reader instance
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
@@ -195,11 +204,13 @@ class DFTB(Package):
         """
         dftb_settings = Settings()
         dftb_settings.input = settings.specific.dftb
-        result = plams.DFTBJob(name=job_name, molecule=mol,
-                               settings=dftb_settings).run()
+        job = plams.DFTBJob(name=job_name, molecule=mol,
+                            settings=dftb_settings)
+
+        result = job.run()
 
         return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path)
+                           plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -236,14 +247,18 @@ class DFTB(Package):
                 for k, v in value.items():
                     ks = k.split()
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1])+1,
+                                                       int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1, int(ks[2])+1, int(ks[2])+1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1,
+                                                             int(ks[2])+1,
+                                                             int(ks[2])+1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1, int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]) + 1, int(ks[2]) + 1,
+                                   int(ks[3]) + 1, int(ks[4]) + 1)
                         settings.specific.dftb.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -263,11 +278,13 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 project_name=None):
-        properties = 'data/dictionaries/propertiesDFTB.json'
+                 project_name=None, status='done'):
+        # Read available propiety parsers from a JSON file
+        properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties)
+                         properties=properties, status=status)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
+        # create a kf reader instance
         self.kf = plams.kftools.KFFile(kf_filename)
 
     @classmethod
