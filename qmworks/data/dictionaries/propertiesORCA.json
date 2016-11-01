@@ -13,7 +13,7 @@
 	       "kwargs": {"script": "/Sum of individual times/ {runtime = $6} END {print runtime}"}},
     "charges": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
 		"kwargs": {"script": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"}},
-    "hess": {"parser": "orca_parser", "function": "parse_hessian", "file_ext": "hess"},
+    "hessian": {"parser": "orca_parser", "function": "parse_hessian", "file_ext": "hess"},
     "frequencies": {"parser": "orca_parser", "function": "parse_frequencies", "file_ext": "hess"},
     "normal_modes": {"parser": "orca_parser", "function": "parse_normal_modes", "file_ext": "hess"}
 }
