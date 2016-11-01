@@ -19,3 +19,13 @@ def test_13dipolar_cyclo_ts():
     assert local_env['optcycles'] < 5
     assert abs(local_env['d1'] - 2.294) < 0.01
     assert abs(local_env['d2'] - 2.294) < 0.01
+
+def test_generic_constraints():
+    """
+    Test generic distance constraints on all packages
+    """
+    local_env = {}
+    exec(open('examples/Constrained_and_TS_optimizations/generic_constraints.py').read(), {}, local_env)
+    assert local_env['table'] == {'adf': {'1.1': -0.276479, '1.0': -0.284003, '1.2': -0.258743},
+                                  'dftb': {'1.1': -4.747407, '1.0': -4.760192, '1.2': -4.732274},
+                                  'orca': {'1.1': -99.430973, '1.0': -99.438656, '1.2': -99.415615}}
