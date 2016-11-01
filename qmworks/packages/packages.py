@@ -28,17 +28,29 @@ from qmworks.settings import Settings
 from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
 from qmworks.utils import (concatMap, initialize)
-
+from warnings import warn
 # ==============================================================
-__all__ = ['import_parser', 'Package', 'run', 'registry', 'Result',
+__all__ = ['import_parser', 'package_properties',
+           'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
+
+package_properties = {
+    'adf': 'data/dictionaries/propertiesADF.json',
+    'dftb': 'data/dictionaries/propertiesDFTB.json',
+    'cp2k': 'data/dictionaries/propertiesCP2K.json',
+    'dirac': 'data/dictionaries/propertiesDIRAC.json',
+    'gamess': 'data/dictionaries/propertiesGAMESS.json',
+    'orca': 'data/dictionaries/propertiesORCA.json'
+}
 
 
 class Result:
-
+    """
+    Class containing the result associated with a quantum chemistry simulation.
+    """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, path_hdf5=None, project_name=None,
-                 properties=None):
+                 properties=None, status='done'):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -67,6 +79,7 @@ class Result:
                         "path_hdf5": path_hdf5}
         self.project_name = project_name
         self.job_name = job_name
+        self.status = status
 
     def as_dict(self):
         """
@@ -87,7 +100,6 @@ class Result:
         """
         raise NotImplementedError()
 
-
     def __getattr__(self, prop):
         """Returns a section of the results.
 
@@ -96,10 +108,24 @@ class Result:
         ..
             dipole = result.dipole
         """
-        if prop in self.prop_dict:
+        is_private = prop.startswith('__') and prop.endswith('__')
+        # if self.status == 'successful':
+        if self.status == 'successful' and prop in self.prop_dict:
             return self.get_property(prop)
-        else:
-            raise AttributeError("Generic property '" + str(prop) + "' not defined")
+        elif (self.status == 'successful' and not is_private and
+              prop not in self.prop_dict):
+            msg = "Generic property '" + str(prop) + "' not defined"
+            warn(msg)
+            return None
+        elif self.status != 'successful' and not is_private:
+            warn("""
+            It is not possible to retrieve property: '{}'
+            Because Job: '{}' has failed. Check the output.\n
+            Are you sure that you have the package installed or
+             you have loaded the package in the cluster. For example:
+            `module load AwesomeQuantumPackage/3.1421`
+            """.format(prop, self.job_name))
+            return None
 
     def get_property(self, prop):
         """
@@ -131,7 +157,8 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "Property {} not found. No output file called: {}.\n".format(prop, file_pattern)
+            msg = "Property {} not found. No output file \
+            called: {}.\n".format(prop, file_pattern)
             raise FileNotFoundError(msg)
 
 
@@ -163,18 +190,38 @@ class Package:
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
         """
+        properties = package_properties[self.pkg_name]
 
-        if isinstance(mol, Chem.Mol):
-            mol = molkit.from_rdmol(mol)
+        # There are not data from previous nodes in the dependecy trees
+        # because of a failure upstream or the user provided None as argument
+        if all(x is not None for x in [settings, mol]):
+            #  Check if plams finishes normally
+            try:
+                # If molecule is an RDKIT molecule translate it to plams
+                if isinstance(mol, Chem.Mol):
+                    mol = molkit.from_rdmol(mol)
+                    
+                if job_name != '':
+                    kwargs['job_name'] = job_name
 
-        if job_name != '':
-            kwargs['job_name'] = job_name
+                # Settings transformations
+                job_settings = self.generic2specific(settings, mol)
 
-        self.prerun()
+                # Run the job
+                self.prerun()
+                result = self.run_job(job_settings, mol, **kwargs)
+            # Otherwise pass an empty Result instance
+            except plams.PlamsError:
+                result = Result(None, None, job_name=job_name,
+                                properties=properties, status='failed')
+            # except Exception as e:
+            #     print("Exception e: ", type(e), e.args)
+        else:
+            result = Result(None, None, job_name=job_name,
+                            properties=properties, status='failed')
 
-        job_settings = self.generic2specific(settings, mol)
-
-        result = self.run_job(job_settings, mol, **kwargs)
+        # Label this calculation as failed if there are not dependecies coming
+        # from upstream
 
         self.postrun()
 
