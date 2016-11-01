@@ -91,7 +91,8 @@ class Result:
             "molecule": self._molecule,
             "job_name": self.job_name,
             "archive": self.archive,
-            "project_name": self.project_name}
+            "project_name": self.project_name,
+            "status": self.status}
 
     def from_dict(cls, settings, molecule, job_name, archive,
                   project_name):

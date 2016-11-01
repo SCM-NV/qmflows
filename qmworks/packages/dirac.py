@@ -60,7 +60,7 @@ class DIRAC_Result(Result):
                          properties=properties, status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
         plams_dir = archive["plams_dir"].path
         return DIRAC_Result(settings, molecule, job_name, plams_dir,
-                            project_name)
+                            project_name, status)

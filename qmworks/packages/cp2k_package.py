@@ -201,7 +201,7 @@ class CP2K_Result(Result):
                          status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -220,7 +220,7 @@ class CP2K_Result(Result):
                                                                 "work_dir",
                                                                 "path_hdf5"]))
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
-                           path_hdf5, project_name)
+                           path_hdf5, project_name, status)
 
     def get_property(self, prop, section=None):
         pass

@@ -142,14 +142,14 @@ class ADF_Result(Result):
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
         """
         Methods to deserialize an `ADF_Result` object.
         """
         plams_dir = archive["plams_dir"].path
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
-                          project_name)
+                          project_name, status)
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
@@ -288,9 +288,9 @@ class DFTB_Result(Result):
         self.kf = plams.kftools.KFFile(kf_filename)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
         return DFTB_Result(settings, molecule, job_name,
-                           archive["plams_dir"].path, project_name)
+                           archive["plams_dir"].path, project_name, status)
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):

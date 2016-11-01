@@ -90,7 +90,7 @@ class Gamess_Result(Result):
                          status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name):
+    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -109,7 +109,7 @@ class Gamess_Result(Result):
         work_dir = archive.get("work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
-                             project_name=project_name)
+                             project_name=project_name, status=status)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
