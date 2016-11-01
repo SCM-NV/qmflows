@@ -8,7 +8,6 @@ from qmworks.packages.gamess import gamess
 from qmworks.packages import run
 
 import operator
-import plams
 
 
 @attr('slow')

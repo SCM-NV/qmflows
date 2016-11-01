@@ -3,7 +3,7 @@ from plams import Molecule
 from qmworks import (Settings, templates, run)
 
 # User Defined imports
-from qmworks.packages import (adf, cp2k, dirac, dftb, gamess, orca)
+from qmworks.packages import (adf, dirac, dftb, gamess, orca)
 
 
 def isNone(x):
