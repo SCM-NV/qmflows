@@ -34,15 +34,20 @@ This library consists of a set of modules written in Python 3.5 to
 automate the following tasks:
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
- 3. Distribution in heterogeneous hardware platforms.
- 4. Advanced molecular manipulation capabilities with (rdkit_).
- 5. Numerical data storage and manipulation (HDF5_).
- 6. Jobs failure detection and recovery.
+ 3. Advanced molecular manipulation capabilities with (rdkit_).
+ 4. Numerical data storage and manipulation (HDF5_).
+ 5. Jobs failure detection and recovery.
+ 6. Distribution in heterogeneous hardware platforms.    
 
+Tutorial and Examples
+---------------------
+A tutorial written as a jupyter-notebook_ is available from: tutorial-qmworks_. You can
+also access direclty more advanced examples_.
+    
  
 Installation
 ============
-First check that you have available in your system **Python 3.5**. Otherwise, you can download it from here_.
+First check that you have available in your system **Python >= 3.5**. Otherwise, you can download it from here_.
 Because **QMWorks** depends on a set of libraries that are not pat of the python ecosystem, you need first
 to install these dependecies_  using a virtual-environment_. Finally, you can proceed to the package installation_
 
@@ -52,7 +57,7 @@ to install these dependecies_  using a virtual-environment_. Finally, you can pr
 Installation using a virtual environment (recommended)
 ======================================================
 
-- Download miniconda for python 3.5: miniconda_ (also you can install the complete anaconda_ version).
+- Download miniconda for python >= 3.5: miniconda_ (also you can install the complete anaconda_ version).
 
 - Install according to: installConda_. 
 
@@ -103,6 +108,7 @@ Now you are ready to use *qmworks*.
  
 .. _remote_setup:
 
+
 Remote/Xenon setup
 ------------------
 
@@ -152,8 +158,11 @@ script gives an idea of what you need:
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _anaconda: https://www.continuum.io/downloads
 .. _installConda: http://conda.pydata.org/docs/install/quick.html
-.. _Noodles: https://gitlab.pyadf.org/e-science/workflow-engine
+.. _Noodles: http://nlesc.github.io/noodles/
 .. _HDF5: http://www.h5py.org/ 
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
+.. _jupyter-notebook: http://jupyter.org/
+.. _tutorial-qmworks: https://github.com/SCM-NV/qmworks/tree/master/jupyterNotebooks
+.. _examples: https://github.com/SCM-NV/qmworks/tree/develop/examples
