@@ -95,7 +95,7 @@ class Result:
             "status": self.status}
 
     def from_dict(cls, settings, molecule, job_name, archive,
-                  project_name):
+                  project_name, status):
         """
         Methods to deserialize an `Result`` object.
         """

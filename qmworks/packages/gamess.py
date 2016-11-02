@@ -25,9 +25,7 @@ class GAMESS(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, work_dir=None, project_name=None,
-                hdf5_file="quantum.hdf5", store_in_hdf5=True,
-                job_name='gamess_job'):
+    def run_job(settings, mol, job_name='gamess_job', work_dir=None):
         """
         Call the Cp2K binary using plams interface.
 
@@ -53,7 +51,6 @@ class GAMESS(Package):
 
         result = Gamess_Result(gamess_settings, mol, r.job.name,
                                plams_dir=r.job.path, work_dir=work_dir,
-                               path_hdf5=hdf5_file, project_name=project_name,
                                status=job.status)
 
         return result
@@ -81,12 +78,11 @@ class Gamess_Result(Result):
     Class providing access to CP2K result.
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, path_hdf5=None, project_name=None,
-                 properties=package_properties['gamess'],
-                 status='done'):
+                 work_dir=None, status='done',
+                 properties=package_properties['gamess']):
         super().__init__(settings, molecule, job_name, plams_dir,
-                         work_dir=work_dir, path_hdf5=path_hdf5,
-                         project_name=None, properties=properties,
+                         work_dir=work_dir, project_name=None,
+                         properties=properties,
                          status=status)
 
     @classmethod
