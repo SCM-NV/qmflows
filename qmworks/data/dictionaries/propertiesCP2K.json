@@ -1,4 +1,4 @@
+
 {
-    "orbitals" : ["cp2k/mo/eigenvalues", "cp2k/mo/coefficients"],
-    "overlap": ["cp2k/overlap"]
+    "orbitals": {"parser": "cp2KParser", "function": "read_cp2k_coeff", "file_ext": "Log"}
 }

@@ -1,7 +1,7 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
+__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
            'read_cp2k_number_of_orbitals']
 
 # ==================> Standard libraries and third-party <=====================
@@ -11,6 +11,7 @@ from pyparsing import (alphanums, alphas, CaselessLiteral, Empty, FollowedBy,
                        Group, Literal, nums, NotAny, oneOf, OneOrMore,
                        Optional, restOfLine, srange, Suppress, Word)
 
+import fnmatch
 import numpy as np
 import os
 import re
@@ -39,6 +40,20 @@ from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 
 floatArray = np.vectorize(float)
+
+
+def read_cp2k_coefficients(path_mos, plams_dir=None):
+    """
+    Read the number of ``Orbitals`` and ``Orbital`` functions from the
+    cp2k output and then read the molecular orbitals.
+
+    :returns: NamedTuple containing the Eigenvalues and the Coefficients
+    """
+    path_mos = fnmatch.filter(os.listdir(plams_dir), 'out')[0]
+    orbital_info = read_cp2k_number_of_orbitals(path_mos)
+    nOrbitals, nOrbFuns = orbital_info[1], orbital_info[2]
+
+    return readCp2KCoeff(path_mos, nOrbitals, nOrbFuns)
 
 
 def readCp2KCoeff(path, nOrbitals, nOrbFuns):
@@ -296,4 +311,3 @@ def headTail(xs):
     head = next(it)
     tail = list(it)
     return (head, tail)
-

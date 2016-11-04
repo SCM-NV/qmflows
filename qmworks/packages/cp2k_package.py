@@ -37,10 +37,8 @@ class CP2K(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, work_dir=None, project_name=None,
-                hdf5_file="quantum.hdf5", input_file_name=None,
-                out_file_name=None, store_in_hdf5=True,
-                nHOMOS=None, nLUMOS=None, job_name='cp2k_job'):
+    def run_job(settings, mol, job_name='cp2k_job',
+                work_dir=None, **kwargs):
         """
         Call the Cp2K binary using plams interface.
 
@@ -58,6 +56,9 @@ class CP2K(Package):
         :param store_in_hdf5: wether to store the output arrays in HDF5 format.
         :type store_in_hdf5: Bool
         """
+        # Yet another work directory
+
+        # Input modifications
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
         job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
@@ -65,16 +66,9 @@ class CP2K(Package):
         r = job.run()
 
         work_dir = work_dir if work_dir is not None else job.path
-        output_file = join(job.path, job._filename('out'))
-
-        if store_in_hdf5 and job.status not in ['failed', 'crashed']:
-            dump_to_hdf5(hdf5_file, settings, work_dir, output_file, nHOMOS,
-                         nLUMOS, project_name=project_name)
 
         result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path,
-                             work_dir, path_hdf5=hdf5_file,
-                             project_name=project_name,
-                             status=job.status)
+                             work_dir, status=job.status)
 
         return result
 
@@ -192,16 +186,14 @@ class CP2K_Result(Result):
     Class providing access to CP2K result.
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
-                 path_hdf5=None, project_name=None,
                  properties=package_properties['cp2k'],
                  status='successful'):
         super().__init__(settings, molecule, job_name, plams_dir,
-                         work_dir=work_dir, path_hdf5=path_hdf5,
-                         project_name=project_name, properties=properties,
+                         work_dir=work_dir, properties=properties,
                          status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -216,31 +208,9 @@ class CP2K_Result(Result):
         :param path_hdf5: Path to the HDF5 file that contains the numerical
         results.
         """
-        plams_dir, work_dir, path_hdf5 = list(map(archive.get, ["plams_dir",
-                                                                "work_dir",
-                                                                "path_hdf5"]))
+        plams_dir, work_dir = list(map(archive.get, ["plams_dir", "work_dir"]))
         return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
-                           path_hdf5, project_name, status)
-
-    def get_property(self, prop, section=None):
-        pass
-
-    def __getattr__(self, prop):
-        """Returns a section of the results.
-        The property is extracted from a  result file, which is recursively
-        search for in the CP2K settings
-
-        Example:
-        ..
-            overlap_matrix = result.overlap
-        """
-
-        relative_cwd = self.archive['work_dir'].split('/')[-1]
-        hdf5_path_to_prop = join(self.project_name, relative_cwd)
-        sections = self.prop_dict[prop]
-        paths_to_prop = list(map(lambda x: join(hdf5_path_to_prop, x),
-                                 sections))
-        return paths_to_prop
+                           status)
 
 cp2k = CP2K()
 

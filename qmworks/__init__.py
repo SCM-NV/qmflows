@@ -5,7 +5,7 @@ from .hdf5 import (StoreasHDF5, adf2hdf5, save_ADF_Info, cp2k2hdf5,
                    turbomole2hdf5)
 from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
                        dftb, dirac, orca, registry, run)
-from .parsers import (manyXYZ, parse_string_xyz, readCp2KBasis, readCp2KCoeff,
+from .parsers import (manyXYZ, parse_string_xyz, read_cp2k_coefficients,
                       readCp2KOverlap, readTurbomoleBasis, readTurbomoleMO,
                       readXYZ, read_cp2k_number_of_orbitals)
 from .molkit import (apply_reaction_smarts, apply_template, gen_coords_rdmol, modify_atom,
@@ -27,7 +27,7 @@ __all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
            'freq', 'gen_coords_rdmol', 'geometry',
            'get_template', 'json2Settings', 'manyXYZ', 'modify_atom',
            'orca', 'parse_string_xyz', 'to_rdmol', 'from_rdmol',
-           'readCp2KBasis', 'readCp2KCoeff', 'readCp2KOverlap',
+           'readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
            'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
            'read_cp2k_number_of_orbitals', 'registry',
            'run', 'save_ADF_Info', 'select_max',
