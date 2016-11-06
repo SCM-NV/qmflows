@@ -5,8 +5,10 @@ from nose.plugins.attrib import attr
 from os.path import join
 from plams import Molecule
 from qmworks import (run, Settings, templates)
+from qmworks.hdf5 import dump_to_hdf5
 from qmworks.packages import cp2k
 
+import h5py
 import os
 import shutil
 # ===================================<>========================================
@@ -37,7 +39,21 @@ def fun_ethylene(scratch_path):
     job_settings = prepare_cp2k_settings(geometry, scratch_path)
 
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
-    energies, coefficients = cp2k_result.orbitals
+
+    # Path to the HDF5 file
+    hdf5_file = 'quantum.hdf5'
+
+    # Path to the molecular orbitals energies and  coefficients
+    path_es = 'ethylene/cp2k_job/cp2k/mo/eigenvalues'
+    path_css = 'ethylene/cp2k_job/cp2k/mo/coefficients'
+
+    with h5py.File(hdf5_file) as f5:
+        dump_to_hdf5(cp2k_result.orbitals, 'cp2k', f5,
+                     project_name='ethylene',
+                     job_name=cp2k_result.job_name,
+                     property_to_dump='orbitals')
+        energies = f5[path_es].value
+        coefficients = f5[path_css].value
 
     print("Energy array shape: ", energies.shape)
     print("Coefficients array shape: ", coefficients.shape)
