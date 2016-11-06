@@ -42,16 +42,20 @@ from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 floatArray = np.vectorize(float)
 
 
-def read_cp2k_coefficients(path_mos, plams_dir=None):
+def read_cp2k_coefficients(path_mos, plams_dir=None, nOrbitals=None):
     """
     Read the number of ``Orbitals`` and ``Orbital`` functions from the
     cp2k output and then read the molecular orbitals.
 
     :returns: NamedTuple containing the Eigenvalues and the Coefficients
     """
-    path_mos = fnmatch.filter(os.listdir(plams_dir), 'out')[0]
-    orbital_info = read_cp2k_number_of_orbitals(path_mos)
-    nOrbitals, nOrbFuns = orbital_info[1], orbital_info[2]
+    file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
+    path_out = os.path.join(plams_dir, file_out)
+    orbital_info = read_cp2k_number_of_orbitals(path_out)
+    nOrbFuns = orbital_info[2]
+
+    if nOrbitals is None:
+        nOrbitals = orbital_info[1]  # print Occupied + added_mos
 
     return readCp2KCoeff(path_mos, nOrbitals, nOrbFuns)
 

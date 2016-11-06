@@ -39,10 +39,12 @@ def fun_ethylene(scratch_path):
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
     energies, coefficients = cp2k_result.orbitals
 
-    assert  (energies.shape == (46,)) and (coefficients.shape == (40, 46))
+    print("Energy array shape: ", energies.shape)
+    print("Coefficients array shape: ", coefficients.shape)
+    assert (energies.shape == (40,)) and (coefficients.shape == (46, 40))
 
 
-def prepare_cp2k_settings(geometry, files, work_dir, wfn_restart_job):
+def prepare_cp2k_settings(geometry, work_dir):
     """
     Fills in the parameters for running a single job in CP2K.
 
@@ -72,9 +74,9 @@ def prepare_cp2k_settings(geometry, files, work_dir, wfn_restart_job):
     cp2k_args.cell_parameters = [12.74] * 3
     dft = cp2k_args.specific.cp2k.force_eval.dft
     dft.scf.added_mos = 20
-    dft.scf.eps_scf = 1e-4
-    dft.print.mo.mo_index_range = "1 40"
-    dft.scf.diagonalization.jacobi_threshold = 1e-6
+    dft.scf.eps_scf = 1e-3
+    dft["print"]["mo"]["mo_index_range"] = "7 46"
+    dft.scf.diagonalization.jacobi_threshold = 1e-5
 
     # Copy the basis and potential to a tmp file
     shutil.copy('test/test_files/BASIS_MOLOPT', work_dir)
