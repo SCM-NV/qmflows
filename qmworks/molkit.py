@@ -110,7 +110,7 @@ def modify_atom(mol, idx, element):
         newmol = Chem.AddHs(newmol, addCoords=True)
         return from_rdmol(newmol)
 
-    
+
 def apply_template(plams_mol, template):
     """
     Modifies bond orders in plams molecule according template smiles structure

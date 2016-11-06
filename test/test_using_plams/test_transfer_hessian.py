@@ -1,4 +1,3 @@
-# Default imports 
 from nose.plugins.attrib import attr
 from qmworks import Settings, templates, molkit
 from noodles import gather

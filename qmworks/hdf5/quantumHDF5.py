@@ -10,8 +10,7 @@ import h5py
 import numpy as np
 # ==================> Internal modules <==========
 from qmworks.parsers.cp2KParser import readCp2KBasis
-from qmworks.parsers.turbomoleParser import (readTurbomoleBasis,
-                                             readTurbomoleMO)
+from qmworks.parsers.turbomoleParser import readTurbomoleBasis
 
 # ====================><==============================
 
