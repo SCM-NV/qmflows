@@ -53,14 +53,13 @@ class DIRAC_Result(Result):
     Class to access **DIRAC** Results.
     """
     def __init__(self, settings, molecule, job_name, plams_dir,
-                 project_name=None, status='done'):
+                 status='done'):
         properties = package_properties['dirac']
         super().__init__(settings, molecule, job_name=job_name,
-                         plams_dir=plams_dir, project_name=project_name,
-                         properties=properties, status=status)
+                         plams_dir=plams_dir, properties=properties, status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         plams_dir = archive["plams_dir"].path
         return DIRAC_Result(settings, molecule, job_name, plams_dir,
-                            project_name, status)
+                            status)

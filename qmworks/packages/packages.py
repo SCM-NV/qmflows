@@ -49,8 +49,7 @@ class Result:
     Class containing the result associated with a quantum chemistry simulation.
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, path_hdf5=None, project_name=None,
-                 properties=None, status='done'):
+                 work_dir=None, properties=None, status='done'):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -63,21 +62,16 @@ class Result:
         :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
-        :param hdf5_file: path to the file containing the numerical results.
-        :type hdf5_file: str
-        :param properties: path to the `JSON` file containing the properties
-        addresses inside the `HDF5` file.
+        :param properties: path to the `JSON` file containing the data to
+                           load the parser on the fly.
         :type properties: str
         """
         self.settings = settings
         self._molecule = molecule
-        self.hdf5_file = path_hdf5
         xs = pkg.resource_string("qmworks", properties)
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": Path(plams_dir),
-                        'work_dir': work_dir,
-                        "path_hdf5": path_hdf5}
-        self.project_name = project_name
+                        'work_dir': work_dir}
         self.job_name = job_name
         self.status = status
 
@@ -91,11 +85,10 @@ class Result:
             "molecule": self._molecule,
             "job_name": self.job_name,
             "archive": self.archive,
-            "project_name": self.project_name,
             "status": self.status}
 
     def from_dict(cls, settings, molecule, job_name, archive,
-                  project_name, status):
+                  status):
         """
         Methods to deserialize an `Result`` object.
         """
@@ -146,7 +139,9 @@ class Result:
         plams_dir = self.archive['plams_dir'].path
 
         # Search for the specified output file in the folders
-        file_pattern = '{}.{}'.format(self.job_name, file_ext)
+        file_pattern = ds.get('file_pattern')
+        if file_pattern is None:
+            file_pattern = '{}.{}'.format(self.job_name, file_ext)
 
         output_files = concatMap(partial(find_file_pattern, file_pattern),
                                  [plams_dir, work_dir])
@@ -201,7 +196,7 @@ class Package:
                 # If molecule is an RDKIT molecule translate it to plams
                 if isinstance(mol, Chem.Mol):
                     mol = molkit.from_rdmol(mol)
-                    
+
                 if job_name != '':
                     kwargs['job_name'] = job_name
 

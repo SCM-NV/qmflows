@@ -132,24 +132,23 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 project_name=None, status='done'):
+                 status='done'):
         # Load available property parser from Json file.
         properties = package_properties['adf']
-        super().__init__(settings, molecule, job_name,
-                         plams_dir=plams_dir, project_name=project_name,
+        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties, status=status)
         # Create a KF reader instance
         self.kf = plams.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         """
         Methods to deserialize an `ADF_Result` object.
         """
         plams_dir = archive["plams_dir"].path
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
-                          project_name, status)
+                          status)
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
@@ -278,7 +277,7 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 project_name=None, status='done'):
+                 status='done'):
         # Read available propiety parsers from a JSON file
         properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
@@ -288,9 +287,9 @@ class DFTB_Result(Result):
         self.kf = plams.kftools.KFFile(kf_filename)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         return DFTB_Result(settings, molecule, job_name,
-                           archive["plams_dir"].path, project_name, status)
+                           archive["plams_dir"].path, status)
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):

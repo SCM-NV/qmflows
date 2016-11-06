@@ -156,17 +156,16 @@ class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 project_name=None, status='done'):
+                 status='done'):
         properties = package_properties['orca']
         super().__init__(settings, molecule, job_name=job_name,
-                         plams_dir=plams_dir, project_name=project_name,
-                         properties=properties, status=status)
+                         plams_dir=plams_dir, properties=properties,
+                         status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         plams_dir = archive["plams_dir"].path
-        return ORCA_Result(settings, molecule, job_name, plams_dir,
-                           project_name, status)
+        return ORCA_Result(settings, molecule, job_name, plams_dir, status)
 
     @property
     def molecule(self):

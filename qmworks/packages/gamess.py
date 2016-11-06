@@ -33,15 +33,11 @@ class GAMESS(Package):
         :type settings: :class:`~qmworks.Settings`
         :param mol: molecular Geometry
         :type mol: plams Molecule
-        :param hdf5_file: Path to the HDF5 file that contains the
-        numerical results.
-        :type hdf5_file: String
         :param input_file_name: Optional name for the input.
         :type input_file_name: String
         :param out_file_name: Optional name for the output.
         :type out_file_name: String
-        :param store_in_hdf5: wether to store the output arrays in HDF5 format.
-        :type store_in_hdf5: Bool
+        :return: Package.Result
         """
         gamess_settings = Settings()
         gamess_settings.input = settings.specific.gamess
@@ -81,12 +77,11 @@ class Gamess_Result(Result):
                  work_dir=None, status='done',
                  properties=package_properties['gamess']):
         super().__init__(settings, molecule, job_name, plams_dir,
-                         work_dir=work_dir, project_name=None,
-                         properties=properties,
+                         work_dir=work_dir, properties=properties,
                          status=status)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, project_name, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -98,14 +93,12 @@ class Gamess_Result(Result):
         :param plams_dir: Absolute path to plams output folder
         :param archive: dictionary containing the paths to the input/output
         folders.
-        :param path_hdf5: Path to the HDF5 file that contains the numerical
-        results.
         """
         plams_dir = archive.get("plams_dir").path
         work_dir = archive.get("work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
-                             project_name=project_name, status=status)
+                             status=status)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
