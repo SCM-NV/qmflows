@@ -150,7 +150,6 @@ def turbomoleOpts(file_h5, key):
     storeTurbo = StoreasHDF5(file_h5, "turbomole")
     args = key.args
     name = key.name
-    d = {"basis": partial(storeTurbo.saveBasis, readTurbomoleBasis),
-         "orbitals": partial(storeTurbo.saveMO, readTurbomoleMO)}
+    d = {"basis": partial(storeTurbo.saveBasis, readTurbomoleBasis)}
 
     return d[name](*args)
