@@ -1,17 +1,9 @@
 # =======>  Standard and third party Python Libraries <======
 from warnings import warn
-from os.path import join
-
-import fnmatch
-import h5py
-import os
 import plams
 
 # ==================> Internal modules <====================
-from qmworks.common import InputKey
-from qmworks.hdf5 import cp2k2hdf5
 from qmworks.packages.packages import (Package, package_properties, Result)
-from qmworks.parsers import read_cp2k_number_of_orbitals
 from qmworks.settings import Settings
 
 # ====================================<>=======================================
@@ -213,92 +205,3 @@ class CP2K_Result(Result):
                            status)
 
 cp2k = CP2K()
-
-
-def dump_to_hdf5(file_h5, settings, work_dir, output_file, nHOMOS,
-                 nLUMOS, project_name=None):
-    """
-    Store the result in HDF5 format.
-
-    :param file_h5: Path to the HDF5 file that contains the
-    numerical results.
-    :type file_h5: String
-    :param settings: Job Settings.
-    :type settings: :class:`~qmworks.Settings`
-    :param work_dir: Path to the folders where the calculation is carried out.
-    :tpye work_dir: String
-    :param output_file: Absolute path to plams output file.
-    """
-    def match_file(pattern):
-        """ Cp2k append the suffix .Log to the output files """
-        s = "*{}*Log".format(pattern)
-        xs = list(filter(lambda x: fnmatch.fnmatch(x, s),
-                         os.listdir(work_dir)))
-        if xs:
-            return xs[0]
-        else:
-            return None
-
-    def get_value_recursively(st, xs):
-        """
-        :param xs: List of keys
-        :type xs: String List
-        """
-        s = st.copy()
-        for x in xs:
-            s = s.get(x)
-            if s is None:
-                break
-        return s
-
-    def get_file_path(xs):
-        """
-        Search for a result file requested in the settings.
-        CP2K renames thew files appending a number an a `Log` to the
-        end of the filename.
-        """
-        path = get_value_recursively(settings, xs)
-        if path is None or os.path.exists(path):
-            return path
-        else:  # The software renamed the filename given by the user
-            root, file_pattern = os.path.split(path)
-            real_name = match_file(file_pattern)
-            return join(root, real_name)
-
-    settings_file_MO = ["specific", "cp2k", "force_eval", "dft",
-                        "print", "mo", "filename"]
-    settings_file_overlap = ["specific", "cp2k", "force_eval", "dft",
-                             "print", "ao_matrices", "filename"]
-
-    # Arguments to store the properties in HDF5
-    nOccupied, nOrbitals, nOrbFuns = read_cp2k_number_of_orbitals(output_file)
-    path_MO = get_file_path(settings_file_MO)
-    path_overlap = get_file_path(settings_file_overlap)
-
-    # Paths inside the HDF5 file
-    keys = []
-    files_to_remove = []
-    if path_MO is not None:
-        relative_cwd = work_dir.split('/')[-1]
-        pathEs = join(project_name, relative_cwd, "cp2k/mo/eigenvalues")
-        pathCs = join(project_name, relative_cwd, "cp2k/mo/coefficients")
-        k = InputKey('orbitals',
-                     [path_MO, nOrbitals, nOrbFuns, pathEs, pathCs,
-                      nOccupied, nHOMOS, nLUMOS])
-        keys.append(k)
-        # Remove this file after it has been processed
-        files_to_remove.append(path_MO)
-
-    if path_overlap is not None:
-        path_mtx_overlap = join(work_dir, "cp2k/overlap")
-        keys.append(InputKey('overlap',
-                             [path_overlap, nOrbitals, path_mtx_overlap]))
-        files_to_remove.append(path_overlap)
-
-    # Calling the qmworks-HDF5 API
-    with h5py.File(file_h5, chunks=True) as f5:
-        cp2k2hdf5(f5, keys)
-
-    # Remove the text output files
-    for x in files_to_remove:
-        os.remove(x)
