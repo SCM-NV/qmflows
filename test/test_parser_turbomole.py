@@ -1,5 +1,4 @@
 from nose.plugins.attrib import attr
-from os.path import join
 from qmworks.common import InputKey
 from qmworks.hdf5.quantumHDF5 import turbomole2hdf5
 

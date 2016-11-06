@@ -284,16 +284,16 @@ class Package:
         This method should be implemented by the child class.
         """
         msg = "trying to call an abstract method"
-        raise  NotImplementedError(msg)
+        raise NotImplementedError(msg)
 
     @staticmethod
-    def run_job(settings, mol, job_name=None, **kwargs):
+    def run_job(settings, mol, job_name=None, work_dir=None, **kwargs):
         """
         This method should be implemented by the child class.
         """
         msg = "The class representing a given quantum packages should \
         implement this method"
-        raise  NotImplementedError(msg)
+        raise NotImplementedError(msg)
 
 
 @initialize
