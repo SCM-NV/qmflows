@@ -102,16 +102,17 @@ class Result:
         ..
             dipole = result.dipole
         """
+        crash_status = ['failed', 'crashed']
         is_private = prop.startswith('__') and prop.endswith('__')
         # if self.status == 'successful':
-        if self.status == 'successful' and prop in self.prop_dict:
+        if self.status not in crash_status and prop in self.prop_dict:
             return self.get_property(prop)
-        elif (self.status == 'successful' and not is_private and
+        elif (self.status not in crash_status and not is_private and
               prop not in self.prop_dict):
             msg = "Generic property '" + str(prop) + "' not defined"
             warn(msg)
             return None
-        elif self.status != 'successful' and not is_private:
+        elif (self.status in crash_status) and not is_private:
             warn("""
             It is not possible to retrieve property: '{}'
             Because Job: '{}' has failed. Check the output.\n
