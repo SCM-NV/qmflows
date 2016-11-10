@@ -207,9 +207,11 @@ class DFTB(Package):
                             settings=dftb_settings)
 
         result = job.run()
+        if job.status in ['failed', 'crashed']:
+            builtins.config.jm.remove_job(job)
 
         return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path, status=job.status)
+                           plams_dir=result.job.path)
 
     def postrun(self):
         pass
