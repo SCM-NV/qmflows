@@ -2,7 +2,7 @@
 __author__ = "Felipe Zapata"
 
 __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting',
-           'initialize', 'settings2Dict', 'zipWith', 'zipWith3']
+           'initialize', 'settings2Dict', 'Maybe', 'zipWith', 'zipWith3']
 
 # ======================> Python Standard  and third-party <===================
 from functools import  wraps
@@ -75,6 +75,31 @@ def dict2Setting(d):
             r[k] = v
 
     return r
+
+
+class Maybe:
+    """
+    Wrapper to allow formatted printing of variables that may contain either a value or None
+    Example: print("{:10.2f}".format(Maybe(None))
+    """
+    def __init__(self, value):
+        self.value = value
+
+    def __bool__(self):
+        return self.value is not None
+
+    def __format__(self, spec):
+        if self.value is None:
+            return "None"
+        else:
+            if spec:
+                return ("{:" + spec + "}").format(self.value)
+            else:
+                return "{}".format(self.value)
+
+    def __str__(self):
+        return str(self.value)
+
 
 # ====> Decorator
 
