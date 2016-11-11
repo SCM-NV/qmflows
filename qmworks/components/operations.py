@@ -14,18 +14,18 @@ def select_max(results, prop='energy'):
     :return:
     """
     max_res = sel_max(results, prop)
-    print("Appr TS energy " + str(max_res.job_name) + ": " + str(max_res.energy))
+    print("Selected " + str(max_res.job_name) + ": " + str(max_res.__getattr__(prop)))
     return max_res
 
 
 def sel_max(results, prop):
-    line = ""
+    line = "From " + prop + " values: "
     for i in range(len(results)):
         if isinstance(results[i], list):
             n = sel_max(results[i], prop)
             results[i] = n
         else:
-            line += "{:12.6f}".format(results[i].energy, end="")
+            line += "{:12.6f}".format(results[i].__getattr__(prop), end="")
     print(line)
     selected_result = max(results, key=lambda item: item.__getattr__(prop))
     return selected_result
@@ -41,18 +41,18 @@ def select_min(results, prop='energy'):
     :return:
     """
     min_res = sel_min(results, prop)
-    print("Appr TS energy: " + str(min_res.energy))
+    print("Selected " + str(max_res.job_name) + ": "+ str(min_res.__getattr__(prop)))
     return min_res
 
 
 def sel_min(results, prop):
-    line = ""
+    line = "From " + prop + " values: "
     for i in range(len(results)):
         if isinstance(results[i], list):
             n = sel_min(results[i], prop)
             results[i] = n
         else:
-            line += "{:12.6f}".format(results[i].energy, end="")
+            line += "{:12.6f}".format(results[i].__getattr__(prop), end="")
     print(line)
     selected_result = min(results, key=lambda item: item.__getattr__(prop))
     return selected_result
