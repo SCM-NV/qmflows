@@ -121,37 +121,49 @@ def apply_template(plams_mol, template):
     return from_rdmol(newmol)
 
 
-def apply_reaction_smarts(plams_mol, reaction_smarts):
+def apply_reaction_smarts(mol, reaction_smarts, complete=False):
     """
     Applies reaction smirks and returns product
     """
     def react(reactant, reaction):
         """ Apply reaction to reactant and return products """
         ps = reaction.RunReactants([reactant])
-        # keep reactant if no reaction applied
+        # if reaction doesn't apply, return the reactant
         if len(ps) == 0:
             return [(reactant, range(reactant.GetNumAtoms()))]
+        while complete: # when complete is True
+            # apply reaction until no further changes
+            reactant = ps[0][0]
+            ps = reaction.RunReactants([reactant])
+            print('len:',len(ps))
+            if len(ps) == 0:
+                ps = [[reactant]]
+                break
+        # add hydrogens and generate coordinates for new atoms
         products = []
-        for p in ps:
-            Chem.SanitizeMol(p[0])
-            q = Chem.AddHs(p[0])
+        for p in ps[0]:
+            Chem.SanitizeMol(p)
+            q = Chem.AddHs(p)
             Chem.SanitizeMol(q)
             u = gen_coords_rdmol(q) # These are the atoms that have not changed
             products.append((q, u))
         return products
 
-    rdmol = to_rdmol(plams_mol)
+    if isinstance(mol, Molecule):
+        mol = to_rdmol(mol)
     reaction = AllChem.ReactionFromSmarts(reaction_smarts)
     # RDKit removes fragments that are disconnected from the reaction center
     # In order to keep these, the molecule is first split in separate fragments
     # and the results, including non-reacting parts, are re-combined afterwards
-    frags = (Chem.GetMolFrags(rdmol, asMols=True))
+    frags = (Chem.GetMolFrags(mol, asMols=True))
     product = Chem.Mol()
     unchanged = [] # List of atoms that have not changed
     for frag in frags:
         for p, u in react(frag, reaction):
             unchanged += [product.GetNumAtoms() + i for i in u]
             product = Chem.CombineMols(product, p)
+    # The molecule is returned together with a list of atom indices of the atoms that are identical to those
+    # in the reactants. This list can be used in subsequent partial optimization of the molecule
     return (from_rdmol(product), unchanged)
 
 
