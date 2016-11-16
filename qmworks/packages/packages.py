@@ -12,6 +12,7 @@ import inspect
 import os
 import plams
 import pkg_resources as pkg
+import builtins
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
@@ -297,8 +298,7 @@ class Package:
         raise NotImplementedError(msg)
 
 
-@initialize
-def run(job, runner=None, **kwargs):
+def run(job, runner=None, path=None, folder=None, **kwargs):
     """
     Pickup a runner and initialize it.
 
@@ -308,12 +308,30 @@ def run(job, runner=None, **kwargs):
     :type runner: String
     """
 
+    initialize = False
+    try:
+        builtins.config
+        if path or folder:
+            msg = "Plams is already initialized.\n"
+            if path:
+                msg += "Ignoring specified path: {:s}\n".format(path)
+            if folder:
+                msg += "Ignoring specified folder: {:s}\n".format(folder)
+            warn(msg)
+    except:
+        plams.init(path=path, folder=folder)
+        initialize = True
+    builtins.config.log.stdout = 0
+    builtins.config.jobmanager.jobfolder_exists = 'rename'
     if runner is None:
-        return call_default(job, **kwargs)
+        ret = call_default(job, **kwargs)
     elif runner.lower() == 'xenon':
-        return call_xenon(job, **kwargs)
+        ret = call_xenon(job, **kwargs)
     else:
         raise "Don't know runner: {}".format(runner)
+    if initialize:
+        plams.finish()
+    return ret
 
 
 def call_default(job, n_processes=1):
