@@ -1,10 +1,11 @@
-
-from qmworks import rdkitTools
+from nose.plugins.attrib import attr
+from qmworks import molkit
 from qmworks import packages
 
 
+@attr('fast')
 def test_SerMolecule():
-    mol = rdkitTools.smiles2plams("c1ccccc1CC")
+    mol = molkit.from_smiles("c1ccccc1CC")
     registry = packages.registry()
     encoded_molecule = registry.deep_encode(mol)
     decoded_molecule = registry.deep_decode(encoded_molecule)

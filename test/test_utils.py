@@ -1,8 +1,9 @@
+from nose.plugins.attrib import attr
 from pymonad import curry
-from qmworks.utils import (chunksOf, concat, concatMap, flatten, zipWith,
-                           zipWith3)
+from qmworks.utils import (chunksOf, concat, concatMap, zipWith, zipWith3)
 
 
+@attr('fast')
 def test_chunksOf():
     """
     chunksOf([0, 1, 2, 3], 1) == [[0], [1], [2], [3]]
@@ -10,6 +11,7 @@ def test_chunksOf():
     assert list(chunksOf([0, 1, 2, 3], 1)) == [[0], [1], [2], [3]]
 
 
+@attr('fast')
 def test_concat():
     """
     Test list concatenation
@@ -18,6 +20,7 @@ def test_concat():
     assert concat(xss) == [1, 2]
 
 
+@attr('fast')
 def test_concatMap():
     """
     concatMap f == concat (map f)
@@ -27,13 +30,7 @@ def test_concatMap():
     assert concatMap(f, xs) == list(concat(map(f, xs)))
 
 
-def test_flatten():
-    """
-    Concatenation of arrays
-    """
-    assert flatten(["I\'m", " a", " sentence"]) == "I\'m a sentence"
-
-
+@attr('fast')
 def test_zipwith():
     """
     zipWith f xs ys ==  map (f) (zip  xs ys)
@@ -48,6 +45,7 @@ def test_zipwith():
     assert zipWith(f)(xs)(ys) == [f(x, y) for (x, y) in zip(xs, ys)]
 
 
+@attr('fast')
 def test_zipwith3():
     """
     zipWith f xs ys zs ==  map (f) (zip  xs ys zs)

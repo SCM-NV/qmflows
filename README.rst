@@ -34,15 +34,20 @@ This library consists of a set of modules written in Python 3.5 to
 automate the following tasks:
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
- 3. Distribution in heterogeneous hardware platforms.
- 4. Advanced molecular manipulation capabilities with (rdkit_).
- 5. Numerical data storage and manipulation (HDF5_).
- 6. Jobs failure detection and recovery.
+ 3. Advanced molecular manipulation capabilities with (rdkit_).
+ 4. Numerical data storage and manipulation (HDF5_).
+ 5. Jobs failure detection and recovery.
+ 6. Distribution in heterogeneous hardware platforms.    
 
+Tutorial and Examples
+---------------------
+A tutorial written as a jupyter-notebook_ is available from: tutorial-qmworks_. You can
+also access direclty more advanced examples_.
+    
  
 Installation
 ============
-First check that you have available in your system **Python 3.5**. Otherwise, you can download it from here_.
+First check that you have available in your system **Python >= 3.5**. Otherwise, you can download it from here_.
 Because **QMWorks** depends on a set of libraries that are not pat of the python ecosystem, you need first
 to install these dependecies_  using a virtual-environment_. Finally, you can proceed to the package installation_
 
@@ -52,7 +57,7 @@ to install these dependecies_  using a virtual-environment_. Finally, you can pr
 Installation using a virtual environment (recommended)
 ======================================================
 
-- Download miniconda for python 3.5: miniconda_ (also you can install the complete anaconda_ version).
+- Download miniconda for python >= 3.5: miniconda_ (also you can install the complete anaconda_ version).
 
 - Install according to: installConda_. 
 
@@ -70,6 +75,7 @@ To exit the virtual environment type  ``source deactivate``.
     
     
 .. _dependecies:
+
 Dependencies installation
 -------------------------
 
@@ -86,6 +92,7 @@ Using the conda environment the following packages should be installed:
     
 
 .. _installation:
+
 Package installation
 --------------------
     
@@ -99,6 +106,46 @@ Package installation
   
 Now you are ready to use *qmworks*. 
  
+.. _remote_setup:
+
+
+Remote/Xenon setup
+------------------
+
+QMWorks supports running jobs over a variety of cluster computing schedulers
+like Slurm and Torque. You program and run your workflows from your laptop, but
+the jobs are run at the remote site. For this to work you need to setup QMWorks
+both locally and remotely. In addition you need to add a Bash script that loads
+the VirtualEnv and starts the Noodles remote worker. This remote worker acts as
+a pilot job, reading job descriptions from input and returning the results. If
+you defined the remote VirtualEnv with the name `qmworks`, the following Bash
+script gives an idea of what you need:
+
+.. code-block:: bash
+
+    #!/bin/bash
+    # comment/uncomment lines that you need
+
+    # If you need ADF, and it is available in a module
+    module load adf/2016.102
+    # or if you installed it yourself
+    # ADFHOME=${HOME}/.local/opt/adf
+    # source ${ADFHOME}/bin/adfrc.sh
+
+    # Point PLAMS to its place
+    export PLAMSDEFAULTS="${HOME}/.local/src/plams/utils/plams_defaults.py"
+
+    # Go to the directory that contains this script
+    cd "$(dirname "${BASH_SOURCE[0]}")"
+
+    # Activate the VirtualEnv
+    source activate qmworks
+
+    # Start the remote worker
+    python -m noodles.worker ${@:2}
+
+    # Bye!
+    source deactivate
 
 **Notes:**
 
@@ -111,8 +158,11 @@ Now you are ready to use *qmworks*.
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _anaconda: https://www.continuum.io/downloads
 .. _installConda: http://conda.pydata.org/docs/install/quick.html
-.. _Noodles: https://gitlab.pyadf.org/e-science/workflow-engine
+.. _Noodles: http://nlesc.github.io/noodles/
 .. _HDF5: http://www.h5py.org/ 
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
+.. _jupyter-notebook: http://jupyter.org/
+.. _tutorial-qmworks: https://github.com/SCM-NV/qmworks/tree/master/jupyterNotebooks
+.. _examples: https://github.com/SCM-NV/qmworks/tree/develop/examples

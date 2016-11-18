@@ -1,5 +1,4 @@
-
-from os.path import join
+from nose.plugins.attrib import attr
 from qmworks.common import InputKey
 from qmworks.hdf5.quantumHDF5 import turbomole2hdf5
 
@@ -9,6 +8,7 @@ import os
 path_hdf5 = 'test/test_files/test.hdf5'
 
 
+@attr('fast')
 def test_store_basisSet():
     """
     Check if the turbomole basis set are read
@@ -25,45 +25,6 @@ def test_store_basisSet():
                 assert False
         finally:
             try_to_remove(path_hdf5)
-
-
-def test_store_MO_h5():
-    """
-    test if the turbomole MO are stored in the HDF5 format.
-    """
-    path = join('/turbomole', 'test', 'ethylene')
-    path_es = join(path, 'eigenvalues')
-    path_css = join(path, 'coefficients')
-    number_of_orbs = 36
-    number_of_orb_funs = 38
-
-    with h5py.File(path_hdf5) as f5:
-        path_es, path_css = dump_MOs_coeff(f5, path_es, path_css,
-                                           number_of_orbs, number_of_orb_funs)
-        try:
-            if not f5[path_es] and f5[path_css]:
-                assert False
-        finally:
-            try_to_remove(path_hdf5)
-
-
-def dump_MOs_coeff(handle_hdf5, path_es, path_css, number_of_orbs,
-                   number_of_orb_funs):
-    """
-    MO coefficients are stored in row-major order, they must be transposed
-    to get the standard MO matrix.
-    :param files: Files to calculate the MO coefficients
-    :type  files: Namedtuple (fileXYZ,fileInput,fileOutput)
-    :param job: Output File
-    :type  job: String
-    """
-    path_MO = 'test/test_files/aomix_ethylene.in'
-    key = InputKey('orbitals', [path_MO, number_of_orbs, number_of_orb_funs,
-                                path_es, path_css])
-
-    turbomole2hdf5(handle_hdf5, [key])
-
-    return path_es, path_css
 
 
 def try_to_remove(path):

@@ -12,7 +12,9 @@ class Settings(plams.Settings, Storable):
     This is a subclass of the :class:`plams.Settings`.
     The difference with respect to plams' Settings are:
     - settings['a.b'] is equivalent to settings['a']['b'] = settings.a.b
-    - in update(): settings.__block_replace = True results in removal of all existing key value pairs.
+    - in update(): settings.__block_replace = True results in removal of all
+    existing key value pairs.
+
       __block_replace can be either in the updated settings or in the updating settings object.
     """
 
@@ -78,7 +80,8 @@ class Settings(plams.Settings, Storable):
     def update(self, other):
         """
         Like PLAMS update, but:
-        __block_replace = True results in removing all existing key value pairs in the current node of the settings tree
+        __block_replace = True results in removing all existing key value pairs
+        in the current node of the settings tree
 
         For example:
 

@@ -1,8 +1,9 @@
-
+from nose.plugins.attrib import attr
 from qmworks.templates import (freq, geometry, singlepoint, ts)
 from qmworks.utils import (dict2Setting, settings2Dict)
 
 
+@attr('fast')
 def test_templates():
     """
     Test that the JSON files are read properly.

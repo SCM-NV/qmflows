@@ -22,6 +22,7 @@ install:
   # Package dependencies
   - pip install nose coverage
   - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams
+  - pip install https://github.com/NLeSC/noodles/tarball/master#egg=noodles
   - source activate qmworks
 
   # Install qmworks package
@@ -29,7 +30,7 @@ install:
   
 script:
   # Run the unitary tests excluding the expensive computations
-  - nosetests --with-coverage --cover-erase --cover-package=qmworks -a '!slow' -v
+  - nosetests --with-coverage --cover-erase --cover-package=qmworks -a 'fast' --exclude='test_using_plams' -v
 
 branches:
   only:

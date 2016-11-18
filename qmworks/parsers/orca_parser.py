@@ -15,7 +15,7 @@ Matrix = np.ndarray
 vectorize_float = np.vectorize(float)
 
 
-def parse_molecule(file_name):
+def parse_molecule(file_name, mol=None):
     """
     Parse The Cartesian coordinates from the output file.
     """
@@ -26,12 +26,12 @@ def parse_molecule(file_name):
 
     parse_many_mol = OneOrMore(parse_mol)
 
-    return string_array_to_molecule(parse_many_mol, file_name)
+    return string_array_to_molecule(parse_many_mol, file_name, mol=mol)
 
 
 def parse_molecule_traj(file_traj):
     """
-    Read Molecules from the *.traj file.
+    Read Molecules from the job_name.traj file.
     """
     mols = manyXYZ(file_traj)
     # Last geometry corresponds to the optimized structure
@@ -48,7 +48,7 @@ def parse_molecule_traj(file_traj):
 
 def parse_hessian(file_hess: str) -> Matrix:
     """
-    Read the hessian matrix in cartesian coordinates from the *.hess file.
+    Read the hessian matrix in cartesian coordinates from the job_name.hess file.
     :returns: Numpy array
     """
     start = '$hessian'
@@ -57,7 +57,7 @@ def parse_hessian(file_hess: str) -> Matrix:
 
 def parse_normal_modes(file_hess: str) -> Matrix:
     """
-    Returns the normal modes from the *.hess file
+    Returns the normal modes from the job_name.hess file
     """
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
@@ -65,7 +65,7 @@ def parse_normal_modes(file_hess: str) -> Matrix:
 
 def parse_frequencies(file_hess: str) -> Matrix:
     """
-    Parse the vibrational frequencies from the *.hess file.
+    Parse the vibrational frequencies from the job_name.hess file.
     """
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
@@ -110,7 +110,7 @@ def read_block(lines):
       3  -0.133981  0.162928  -0.000000   0.133434  -0.164602   0.000000
 
     Read the matrix skiping the header and the first integer index
-    
+
     :returns: Numpy array
     """
     return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))

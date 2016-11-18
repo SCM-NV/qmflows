@@ -1,12 +1,18 @@
 {
     "energy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
 	       "kwargs": {"section": "Energy", "prop": "Bond Energy"}},
-    "dipole": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
+    "enthalpy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21",
+	       "kwargs": {"section": "Thermodynamics", "prop": "Enthalpy"}},
+    "free_energy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21",
+	       "kwargs": {"section": "Thermodynamics", "prop": "Gibbs free Energy"}},
+    "dipole": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21",
                "kwargs": {"section": "Properties", "prop": "Dipole"}},
     "charges": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
 	       "kwargs": {"section": "Properties", "prop": "AtomCharge Mulliken"}},
     "frequencies": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
 		    "kwargs": {"section": "Freq", "prop": "Frequencies"}},
     "optcycles": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
-		  "kwargs": {"section": "History", "prop": "nr of geometries"}}
+		  "kwargs": {"section": "History", "prop": "nr of geometries"}},
+    "runtime": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
+	       "kwargs": {"script": "/Total Used/ {runtime = $9} END {print runtime}"}}
 }

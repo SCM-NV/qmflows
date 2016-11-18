@@ -1,0 +1,13 @@
+digraph G {
+
+       node [color=darkgreen]
+       edge [arrowhead=vee, color=blue]
+	
+	s -> b;
+	b -> z;
+	s -> c;
+	c -> f;
+	c -> g;
+	g -> 0;
+
+}

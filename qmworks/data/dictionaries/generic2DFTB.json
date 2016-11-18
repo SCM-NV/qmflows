@@ -1,6 +1,5 @@
 {
     "optimize": ["task.runtype","GO"],
-    "ts": ["task.runtype","TS"],
-    "constraint" :"constraints"
+    "ts": ["task.runtype","TS"]
 }
 

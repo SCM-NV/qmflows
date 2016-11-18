@@ -64,3 +64,11 @@ target/
 
 # pyCharm
 .idea/
+
+#.jupyter
+.ipynb_checkpoints
+
+plams.*
+cache.json
+*.svg
+
