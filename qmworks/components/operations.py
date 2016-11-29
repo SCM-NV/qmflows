@@ -1,7 +1,13 @@
 
-__all__ = ['select_max', 'select_min']
+__all__ = ['find_first_job', 'select_max', 'select_min']
 
-from noodles import schedule_hint
+from noodles import schedule_hint, find_first
+
+
+@schedule_hint()
+def find_first_job(pred, packagelist, settings, molecule, job_name):
+    joblist = [package(settings, molecule, job_name=package.pkg_name+"_"+job_name) for package in packagelist]
+    return find_first(pred, joblist)
 
 
 @schedule_hint()
