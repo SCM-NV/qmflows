@@ -76,7 +76,9 @@ settings.functional = "b3lyp"
 settings.specific.orca.basis.basis = "_6_31G"
 settings.specific.orca.basis.pol = "_d"
 settings.specific.orca.basis.diff = "_p"
-settings.specific.dftb.dftb.scc
+settings.specific.dftb.dftb.scc.ndiis = 4
+settings.specific.dftb.dftb.scc.Mixing = 0.1
+settings.specific.dftb.dftb.scc.iterations = 300
 
 
 job_list = []
