@@ -8,6 +8,7 @@ For a more detail descrition of **QMworks** read the documentation
    templates
    promise
    packages
+   molkit
 
    ..
       running
