@@ -28,7 +28,7 @@ from noodles.serial.numpy import arrays_to_hdf5
 from qmworks.settings import Settings
 from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
-from qmworks.utils import (concatMap, initialize)
+from qmworks.utils import concatMap
 from warnings import warn
 # ==============================================================
 __all__ = ['import_parser', 'package_properties',
@@ -345,27 +345,30 @@ def call_default(job, n_processes=1):
             display=display)
 
 
-def call_xenon(job, n_processes=1, **kwargs):
+def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
+               host_name=None, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    with XenonKeeper() as Xe:
+    dict_properties = {
+        'slurm': {'xenon.adaptors.slurm.ignore.version': 'true'},
+        'pbs': {'xenon.adaptors.pbs.ignore.version': 'true'}
+    }
+    with XenonKeeper(log_level='DEBUG') as Xe:
         certificate = Xe.credentials.newCertificateCredential(
-            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'fza900', '', None)
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
 
         xenon_config = XenonConfig(
-            jobs_scheme='slurm',
-            location='cartesius.surfsara.nl',
+            jobs_scheme=queue_name,
+            location=host_name,
             credential=certificate,
-            jobs_properties={
-                'xenon.adaptors.slurm.ignore.version': 'true'
-            }
+            jobs_properties=dict_properties[queue_name]
         )
+        print(xenon_config.__dict__)
 
         job_config = RemoteJobConfig(
             registry=registry,
-            working_dir='/home/fza900/WorkBench_Python',
             init=plams.init,
             finish=plams.finish,
             time_out=5000
