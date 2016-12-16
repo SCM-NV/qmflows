@@ -346,7 +346,7 @@ def call_default(job, n_processes=1):
 
 
 def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
-               host_name=None, **kwargs):
+               host_name=None, workdir=None, timeout=60000, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
@@ -367,11 +367,15 @@ def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
         )
         print(xenon_config.__dict__)
 
+        if workdir is None:
+            workdir = '/home/' + user_name
+
         job_config = RemoteJobConfig(
             registry=registry,
             init=plams.init,
             finish=plams.finish,
-            time_out=5000
+            time_out=timeout,
+            working_dir=workdir
         )
 
         with NCDisplay() as display:
