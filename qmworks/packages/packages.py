@@ -345,7 +345,7 @@ def call_default(job, n_processes=1):
             display=display)
 
 
-def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
+def call_xenon(job, n_processes=1, user_name=None, adapter='slurm', queue_name=None,
                host_name=None, workdir=None, timeout=60000, **kwargs):
     """
     See :
@@ -360,10 +360,10 @@ def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
             'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
 
         xenon_config = XenonConfig(
-            jobs_scheme=queue_name,
+            jobs_scheme=adapter,
             location=host_name,
             credential=certificate,
-            jobs_properties=dict_properties[queue_name]
+            jobs_properties=dict_properties[adapter]
         )
         print(xenon_config.__dict__)
 
@@ -374,6 +374,7 @@ def call_xenon(job, n_processes=1, user_name=None, queue_name='slurm',
             registry=registry,
             init=plams.init,
             finish=plams.finish,
+            queue=queue_name,
             time_out=timeout,
             working_dir=workdir
         )
