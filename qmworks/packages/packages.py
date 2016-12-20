@@ -311,13 +311,12 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     initialize = False
     try:
         builtins.config
-        if path or folder:
-            msg = "Plams is already initialized.\n"
-            if path:
-                msg += "Ignoring specified path: {:s}\n".format(path)
-            if folder:
-                msg += "Ignoring specified folder: {:s}\n".format(folder)
+        if path and os.path.abspath(path) != builtins.config.jm.path or \
+                folder and folder != builtins.config.jm.folder:
+            msg = "Reinitializing Plams with new path and/or folder name.\n"
             warn(msg)
+            plams.finish()
+            plams.init(path=path, folder=folder)
     except:
         plams.init(path=path, folder=folder)
         initialize = True
