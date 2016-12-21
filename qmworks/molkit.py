@@ -95,6 +95,24 @@ def from_smiles(smiles):
     :rtype: plams.Molecule
     """
     smiles = str(smiles.split()[0])
+    molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    molecule.SetProp('smiles', smiles)
+    AllChem.EmbedMolecule(molecule, randomSeed=1)
+    AllChem.UFFOptimizeMolecule(molecule)
+    return from_rdmol(molecule)
+
+
+def from_smarts(smarts):
+    """
+    Generates plams molecule from a smarts strings.
+    This allows for example to define hydrogens explicitly.
+    However it is less suitable for aromatic molecules (use from_smiles in that case).
+
+    :parameter str smarts: A smarts string
+    :return: A molecule with hydrogens and 3D coordinates
+    :rtype: plams.Molecule
+    """
+    smiles = str(smarts.split()[0])
     mol = Chem.MolFromSmarts(smiles)
     Chem.SanitizeMol(mol)
     molecule = Chem.AddHs(mol)
