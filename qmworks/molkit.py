@@ -95,7 +95,9 @@ def from_smiles(smiles):
     :rtype: plams.Molecule
     """
     smiles = str(smiles.split()[0])
-    molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    mol = Chem.MolFromSmarts(smiles)
+    Chem.SanitizeMol(mol)
+    molecule = Chem.AddHs(mol)
     molecule.SetProp('smiles', smiles)
     AllChem.EmbedMolecule(molecule, randomSeed=1)
     AllChem.UFFOptimizeMolecule(molecule)
