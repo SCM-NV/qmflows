@@ -1,5 +1,5 @@
 
-__all__ = ['Distance', 'Angle', 'PES']
+__all__ = ['Distance', 'Angle', 'Dihedral', 'PES']
 
 from qmworks import templates, molkit
 from qmworks.settings import Settings
@@ -60,7 +60,38 @@ class Angle:
                 raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
-                s["angle {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3)] = value
+        s["angle {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3)] = value
+        return s
+
+
+class Dihedral:
+    """
+    Class defining an atomic dihedral angle
+    """
+    def __init__(self, atom1, atom2, atom3, atom4):
+        self.atom1 = atom1
+        self.atom2 = atom2
+        self.atom3 = atom3
+        self.atom4 = atom4
+
+    def get_current_value(self, mol, rad=False):
+        if isinstance(mol, Molecule):
+            mol = molkit.plams2rdkit(mol)
+        conf = mol.GetConformer()
+        if rad:
+            return AllChem.GetDihedralRad(conf, self.atom1, self.atom2, self.atom3)
+        else:
+            return AllChem.GetDihedralDeg(conf, self.atom1, self.atom2, self.atom3)
+
+    def get_settings(self, value=None, mol=None):
+        s = Settings()
+        if value is None:
+            if mol is None:
+                msg = 'Dihedral constraint settings requires a value or molecule'
+                raise RuntimeError(msg)
+            else:
+                value = self.get_current_value(mol)
+        s["dihed {:d} {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3, self.atom4)] = value
         return s
 
 
