@@ -45,7 +45,7 @@ class Angle:
 
     def get_current_value(self, mol, rad=False):
         if isinstance(mol, Molecule):
-            mol = molkit.plams2rdkit(mol)
+            mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
         if rad:
             return AllChem.GetAngleRad(conf, self.atom1, self.atom2, self.atom3)
@@ -76,12 +76,12 @@ class Dihedral:
 
     def get_current_value(self, mol, rad=False):
         if isinstance(mol, Molecule):
-            mol = molkit.plams2rdkit(mol)
+            mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
         if rad:
-            return AllChem.GetDihedralRad(conf, self.atom1, self.atom2, self.atom3)
+            return AllChem.GetDihedralRad(conf, self.atom1, self.atom2, self.atom3, self.atom4)
         else:
-            return AllChem.GetDihedralDeg(conf, self.atom1, self.atom2, self.atom3)
+            return AllChem.GetDihedralDeg(conf, self.atom1, self.atom2, self.atom3, self.atom4)
 
     def get_settings(self, value=None, mol=None):
         s = Settings()
