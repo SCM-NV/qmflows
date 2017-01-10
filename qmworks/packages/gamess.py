@@ -41,8 +41,8 @@ class GAMESS(Package):
         """
         gamess_settings = Settings()
         gamess_settings.input = settings.specific.gamess
-        job = plams.GamessJob(molecule=mol, name=job_name,
-                              settings=gamess_settings)
+        job = plams.interfaces.gamess.GamessJob(molecule=mol, name=job_name,
+                                                settings=gamess_settings)
         r = job.run()
 
         result = Gamess_Result(gamess_settings, mol, r.job.name,

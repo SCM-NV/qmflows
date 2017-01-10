@@ -53,8 +53,9 @@ class CP2K(Package):
         # Input modifications
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
-                            molecule=mol)
+        job = plams.interfaces.cp2k.Cp2kJob(name=job_name,
+                                            settings=cp2k_settings,
+                                            molecule=mol)
         r = job.run()
 
         work_dir = work_dir if work_dir is not None else job.path
