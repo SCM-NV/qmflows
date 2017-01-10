@@ -1,5 +1,4 @@
 
 {
-    "orbitals": {"parser": "cp2KParser", "function": "read_cp2k_coefficients", "file_pattern": "*MOLog",
-		"kwargs": {"nOrbitals": 40} }
+    "orbitals": {"parser": "cp2KParser", "function": "read_cp2k_coefficients", "file_pattern": "*MOLog"}
 }

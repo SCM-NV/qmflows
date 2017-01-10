@@ -5,6 +5,7 @@ __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
            'read_cp2k_number_of_orbitals']
 
 # ==================> Standard libraries and third-party <=====================
+from collections import namedtuple
 from itertools import islice
 from pymonad import curry
 from pyparsing import (alphanums, alphas, CaselessLiteral, Empty, FollowedBy,
@@ -22,9 +23,12 @@ from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
 from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
+MO_metadata = namedtuple("MO_metadata", ("added_mos", "nOccupied",
+                                         "nOrbitals", "nOrbFuns"))
+
+# =========================<>=============================
 # Molecular Orbitals Parsing
 # MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
-# AFTER SCF STEP -1
 
 # 1                      2
 #                          -0.9857682741370732    -0.9831467097855797
@@ -42,7 +46,7 @@ from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 floatArray = np.vectorize(float)
 
 
-def read_cp2k_coefficients(path_mos, plams_dir=None, nOrbitals=None):
+def read_cp2k_coefficients(path_mos, plams_dir=None):
     """
     Read the number of ``Orbitals`` and ``Orbital`` functions from the
     cp2k output and then read the molecular orbitals.
@@ -51,13 +55,15 @@ def read_cp2k_coefficients(path_mos, plams_dir=None, nOrbitals=None):
     """
     file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
     path_out = os.path.join(plams_dir, file_out)
-    orbital_info = read_cp2k_number_of_orbitals(path_out)
-    nOrbFuns = orbital_info[2]
+    mo_metadata = read_cp2k_number_of_orbitals(path_out)
+    nOrbFuns = mo_metadata.nOrbFuns
 
-    if nOrbitals is None:
-        nOrbitals = orbital_info[1]  # print Occupied + added_mos
+    # added_mos parameter contains the LUMOs printed,
+    # then read the same number of HOMOs and LUMOs as specified by the
+    # added_mos parameter
+    printed_orbitals = mo_metadata.added_mos * 2
 
-    return readCp2KCoeff(path_mos, nOrbitals, nOrbFuns)
+    return readCp2KCoeff(path_mos, printed_orbitals, nOrbFuns)
 
 
 def readCp2KCoeff(path, nOrbitals, nOrbFuns):
@@ -206,6 +212,8 @@ def read_cp2k_number_of_orbitals(file_name):
     try:
         with open(file_name, 'r') as f:
             for line in f:
+                if re.search("added MOs", line):
+                    added_mos = line.split()[2]
                 if re.search("Number of occupied orbitals", line):
                     nOccupied = line.split()[-1]
                 if re.search("Number of molecular orbitals", line):
@@ -213,7 +221,8 @@ def read_cp2k_number_of_orbitals(file_name):
                 if re.search("Number of orbital functions", line):
                     nOrbFuns = line.split()[-1]
                     break
-            return int(nOccupied), int(nOrbitals), int(nOrbFuns)
+            return MO_metadata(*[int(x) for x in
+                                 [added_mos, nOccupied, nOrbitals, nOrbFuns]])
     except NameError:
         msg1 = 'There is a problem with the output file: \
         {}\n'.format(file_name)
