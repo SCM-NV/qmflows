@@ -23,7 +23,7 @@ from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
 from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
-MO_metadata = namedtuple("MO_metadada", ("added_mos", "nOccupied", "nOrbitals", "nOrbFuns"))
+MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 # =========================<>=============================
 # Molecular Orbitals Parsing
 # MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
@@ -53,12 +53,22 @@ def read_cp2k_coefficients(path_mos, plams_dir=None):
     :returns: NamedTuple containing the Eigenvalues and the Coefficients
     """
     file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
-    path_out = os.path.join(plams_dir, file_out)
+    file_in = fnmatch.filter(os.listdir(plams_dir), '*in')[0]
+    path_in, path_out = [os.path.join(plams_dir, x)
+                         for x in [file_in, file_out]]
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
+    added_mos, range_mos = read_mos_data_input(path_in)
 
-    # Read the added_mos int parameter and with it read HOMOs and LUMOs
-    printed_orbitals = orbitals_info.added_mos * 2
-    
+    # Read the range of printed MOs from the input
+    if range_mos is not None:
+        printed_orbitals = range_mos[1] - range_mos[0] + 1
+    # Otherwise read the added_mos parameter
+    elif added_mos is not None:
+        printed_orbitals = orbitals_info.added_mos * 2
+    # Otherwise read the occupied orbitals
+    else:
+        printed_orbitals = orbitals_info.nOccupied
+
     return readCp2KCoeff(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
 
 
@@ -200,29 +210,44 @@ topParseBasis = OneOrMore(Suppress(comment)) + \
 # ===============================<>====================================
 # Parsing From File
 
+def read_mos_data_input(path_input):
+    """
+    Try to read the added_mos parameter and the range of printed MOs
+    """
+    pass
+    properties = ["ADDED_MOS", "MO_INDEX_RANGE"]
+    l1, l2 = [try_search_pattern(x, path_input) for x in properties]
+    added_mos = l1.split()[-1] if l1 is not None else None
+    range_mos = list(map(int, l2.split()[1:])) if l1 is not None else None
 
+    return added_mos, range_mos
+
+    
 def read_cp2k_number_of_orbitals(file_name):
     """
     Look for the line ' Number of molecular orbitals:'
     """
+    properties = ["Number of occupied orbitals", "Number of molecular orbitals",
+                  "Number of orbital functions"]
+
+    fun_split = lambda l: l.split()[-1]
+
+    xs = [fun_split(try_search_pattern(x, file_name)) for x in properties]
+
+    return MO_metadata(*[int(x) for x in xs])
+
+
+def try_search_pattern(pat, file_name):
+    """
+    Search for an specific pattern in  a file
+    """
     try:
         with open(file_name, 'r') as f:
             for line in f:
-                if re.search("added MOs", line):
-                    added_mos = line.split()[2]
-                if re.search("Number of occupied orbitals", line):
-                    nOccupied = line.split()[-1]
-                if re.search("Number of molecular orbitals", line):
-                    nOrbitals = line.split()[-1]
-                if re.search("Number of orbital functions", line):
-                    nOrbFuns = line.split()[-1]
-                    break
-            return MO_metadata(int(added_mos), int(nOccupied), int(nOrbitals),
-                               int(nOrbFuns))
+                if re.search(pat, line):
+                    return line
     except NameError:
-        msg1 = 'There is a problem with the output file: \
-        {}\n'.format(file_name)
-        raise RuntimeError(msg1)
+        return None
     except FileNotFoundError:
         msg2 = 'There is not a file: {}\n'.format(file_name)
         raise RuntimeError(msg2)
