@@ -9,10 +9,10 @@ The base class |Package| is the library core, it provides the general scaffold t
 
 * :class:`~qmworks.packages.SCM.ADF`
 * :class:`~qmworks.packages.SCM.DFTB`
-* :class:`~qmworks.packages.dirac.DIRAC`
 * :class:`~qmworks.packages.cp2k_package.CP2K`
-* :class:`~qmworks.packages.orca.ORCA`
+* :class:`~qmworks.packages.dirac.DIRAC`
 * :class:`~qmworks.packages.gamess.GAMESS`
+* :class:`~qmworks.packages.orca.ORCA`
 
 
 
@@ -55,14 +55,6 @@ SCM
 .. autoclass:: qmworks.packages.SCM.DFTB_Result
    :members:	      
 
-DIRAC
-~~~~~
-.. autoclass:: qmworks.packages.dirac.DIRAC
-   :members:	      
-
-.. autoclass:: qmworks.packages.dirac.DIRAC_Result
-   :members:	      
-     
 CP2k
 ~~~~
 
@@ -72,6 +64,25 @@ CP2k
 .. autoclass:: qmworks.packages.cp2k_package.CP2K_Result
    :members:
 
+
+DIRAC
+~~~~~
+.. autoclass:: qmworks.packages.dirac.DIRAC
+   :members:	      
+
+.. autoclass:: qmworks.packages.dirac.DIRAC_Result
+   :members:	      
+     
+
+GAMESS-US
+~~~~~~~~~
+.. autoclass:: qmworks.packages.gamess.GAMESS
+   :members:	      
+
+.. autoclass:: qmworks.packages.gamess.Gamess_Result
+   :members:	      
+
+      
 ORCA
 ~~~~
 
@@ -79,7 +90,4 @@ ORCA
    :members:
 
 
-
-
-
-.. _plams: 
+.. _plams: https://www.scm.com/doc/Scripting/PLAMS/PLAMS.html

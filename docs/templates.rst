@@ -1,5 +1,5 @@
-Input Generation
-----------------
+Templates
+---------
 The input generations consist of two parts: chosing a template (see templates_)
 for the kind of calculation to perform and adding some settings to that template. Notice
 that the user can either pick a specific package template or provides only generic
@@ -7,8 +7,8 @@ keywords.
 
 .. _templates:
 
-Templates
-~~~~~~~~~
+JSON format
+~~~~~~~~~~~
 .. currentmodule:: qmworks.templates.templates
 
 The Java script object notation **JSON** is a widely used data format. This format is used together with the :mod:`json` module to implement the mechanism to load/unload the templates using the function :func:`~qmworks.templates.templates.get_template`.
