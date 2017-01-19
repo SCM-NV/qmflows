@@ -7,7 +7,7 @@ For a more detail descrition of **QMworks** read the documentation
    settings
    templates
    packages
-   running
+   promise
    parsers
    hdf5
-   promise
+
