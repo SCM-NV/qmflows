@@ -6,14 +6,8 @@ For a more detail descrition of **QMworks** read the documentation
 .. toctree::
    settings
    templates
-   promise
    packages
-   molkit
+   promise
+   parsers
+   hdf5
 
-   ..
-      running
-      components
-      hdf5
-      parsers
-
-   
