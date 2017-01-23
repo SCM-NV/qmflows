@@ -17,11 +17,12 @@ import sys
 import random
 
 
-def from_rdmol(rdkit_mol):
+def from_rdmol(rdkit_mol, confid=-1):
     """
     Translate an RDKit molecule into a PLAMS molecule type.
 
     :parameter rdkit_mol: RDKit molecule
+    :parameter int confid: conformer identifier from which to take coordinates
     :type rdkit_mol: rdkit.Chem.Mol
     :return: a PLAMS molecule
     :rtype: plams.Molecule
@@ -33,7 +34,7 @@ def from_rdmol(rdkit_mol):
     plams_mol = Molecule()
     total_charge = 0
     Chem.Kekulize(rdkit_mol)
-    conf = rdkit_mol.GetConformer()
+    conf = rdkit_mol.GetConformer(id=confid)
     for atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(atom.GetIdx())
         ch = atom.GetFormalCharge()
@@ -86,40 +87,55 @@ def to_rdmol(plams_mol, sanitize=True):
     return rdmol
 
 
-def from_smiles(smiles):
+def from_smiles(smiles, nconfs=1, name=None):
     """
     Generates plams molecule from a smiles strings.
 
     :parameter str smiles: A smiles string
-    :return: A molecule with hydrogens and 3D coordinates
-    :rtype: plams.Molecule
+    :parameter int nconfs: Number of conformers to be generated
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
     """
     smiles = str(smiles.split()[0])
     molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
     molecule.SetProp('smiles', smiles)
-    AllChem.EmbedMolecule(molecule, randomSeed=1)
-    AllChem.UFFOptimizeMolecule(molecule)
-    return from_rdmol(molecule)
+    if name:
+        molecule.SetProp('name', name)
+    if nconfs==1:
+        AllChem.EmbedMolecule(molecule, randomSeed=1)
+        AllChem.UFFOptimizeMolecule(molecule)
+        return from_rdmol(molecule)
+    else:
+        cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
+        for cid in cids:
+            AllChem.UFFOptimizeMolecule(molecule, confId=cid)
+        return [from_rdmol(molecule, cid) for cid in cids]
 
-
-def from_smarts(smarts):
+def from_smarts(smarts, nconfs=1):
     """
     Generates plams molecule from a smarts strings.
     This allows for example to define hydrogens explicitly.
     However it is less suitable for aromatic molecules (use from_smiles in that case).
 
     :parameter str smarts: A smarts string
-    :return: A molecule with hydrogens and 3D coordinates
-    :rtype: plams.Molecule
+    :parameter int nconfs: Number of conformers to be generated
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
     """
     smiles = str(smarts.split()[0])
     mol = Chem.MolFromSmarts(smiles)
     Chem.SanitizeMol(mol)
     molecule = Chem.AddHs(mol)
     molecule.SetProp('smiles', smiles)
-    AllChem.EmbedMolecule(molecule, randomSeed=1)
-    AllChem.UFFOptimizeMolecule(molecule)
-    return from_rdmol(molecule)
+    if nconfs==1:
+        AllChem.EmbedMolecule(molecule, randomSeed=1)
+        AllChem.UFFOptimizeMolecule(molecule)
+        return from_rdmol(molecule)
+    else:
+        cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
+        for cid in cids:
+            AllChem.UFFOptimizeMolecule(molecule, confId=cid)
+        return [from_rdmol(molecule, cid) for cid in cids]
 
 
 def from_sequence(sequence):

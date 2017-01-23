@@ -7,7 +7,7 @@ from noodles import gather
 from qmworks.packages.SCM import dftb, adf
 from qmworks.packages.orca import orca as adf
 # from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
-from qmworks.components import Distance, select_max
+from qmworks.components import Distance, select_max, select_min
 
 import plams
 # ========== =============
@@ -98,9 +98,9 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
     r2_freq = adf(templates.freq.overlay(settings), r2.molecule, job_name=name + "_r2_freq")
 
 # Prepare product job
-    p_mol =  molkit.from_smiles(p_smiles)
-    p_mol.properties.name = name
-    p_dftb = dftb(templates.geometry.overlay(settings), p_mol, job_name=name + "_p_DFTB")
+    ps_mol =  molkit.from_smiles(p_smiles, nconfs=10, name=name)
+    ps_dftb = [dftb(templates.geometry.overlay(settings), p_mol, job_name=name + "_ps_DFTB") for p_mol in ps_mol]
+    p_dftb = select_min(gather(*ps_dftb), 'energy')
     p =      adf(templates.geometry.overlay(settings), p_dftb.molecule, job_name=name + "_p")
     p_freq = adf(templates.freq.overlay(settings), p.molecule, job_name=name + "_p_freq")
 
@@ -112,7 +112,7 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
         consset.constraint.update(bond2.get_settings(2.0 + d * 0.1))
 
         pes_name = name + "_pes_" + str(d)
-        pes_dftb = dftb(templates.geometry.overlay(settings).overlay(consset), p_dftb.molecule, job_name=pes_name + "_DFTB")
+        pes_dftb = dftb(templates.geometry.overlay(settings).overlay(consset), p.molecule, job_name=pes_name + "_DFTB")
         pes =      adf(templates.singlepoint.overlay(settings), pes_dftb.molecule, job_name=pes_name)
         pes_jobs.append(pes)
 

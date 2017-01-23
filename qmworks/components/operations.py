@@ -5,8 +5,8 @@ from noodles import schedule_hint, find_first
 
 
 @schedule_hint()
-def find_first_job(pred, packagelist, settings, molecule, job_name):
-    joblist = [package(settings, molecule, job_name=package.pkg_name+"_"+job_name) for package in packagelist]
+def find_first_job(pred, packagelist, settings, molecule, job_name, **kwargs):
+    joblist = [package(settings, molecule, job_name=package.pkg_name+"_"+job_name, **kwargs) for package in packagelist]
     return find_first(pred, joblist)
 
 
@@ -47,7 +47,7 @@ def select_min(results, prop='energy'):
     :return:
     """
     min_res = sel_min(results, prop)
-    print("Selected " + str(max_res.job_name) + ": "+ str(min_res.__getattr__(prop)))
+    print("Selected " + str(min_res.job_name) + ": "+ str(min_res.__getattr__(prop)))
     return min_res
 
 
