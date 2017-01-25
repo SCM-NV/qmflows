@@ -103,15 +103,15 @@ def from_smiles(smiles, nconfs=1, name=None):
         molecule.SetProp('name', name)
     if nconfs==1:
         AllChem.EmbedMolecule(molecule, randomSeed=1)
-        AllChem.UFFOptimizeMolecule(molecule)
+        AllChem.MMFFOptimizeMolecule(molecule)
         return from_rdmol(molecule)
     else:
         cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
         for cid in cids:
-            AllChem.UFFOptimizeMolecule(molecule, confId=cid)
+            AllChem.MMFFOptimizeMolecule(molecule, confId=cid)
         return [from_rdmol(molecule, cid) for cid in cids]
 
-def from_smarts(smarts, nconfs=1):
+def from_smarts(smarts, nconfs=1, name=None):
     """
     Generates plams molecule from a smarts strings.
     This allows for example to define hydrogens explicitly.
@@ -127,16 +127,17 @@ def from_smarts(smarts, nconfs=1):
     Chem.SanitizeMol(mol)
     molecule = Chem.AddHs(mol)
     molecule.SetProp('smiles', smiles)
+    if name:
+        molecule.SetProp('name', name)
     if nconfs==1:
         AllChem.EmbedMolecule(molecule, randomSeed=1)
-        AllChem.UFFOptimizeMolecule(molecule)
+        AllChem.MMFFOptimizeMolecule(molecule)
         return from_rdmol(molecule)
     else:
         cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
         for cid in cids:
-            AllChem.UFFOptimizeMolecule(molecule, confId=cid)
+            AllChem.MMFFOptimizeMolecule(molecule, confId=cid)
         return [from_rdmol(molecule, cid) for cid in cids]
-
 
 def from_sequence(sequence):
     """
@@ -148,7 +149,7 @@ def from_sequence(sequence):
     """
     molecule = Chem.MolFromSequence(sequence)
     AllChem.EmbedMolecule(molecule)
-    AllChem.UFFOptimizeMolecule(molecule)
+    AllChem.MMFFOptimizeMolecule(molecule)
     return from_rdmol(Chem.AddHs(molecule, addCoords=True))
 
 
