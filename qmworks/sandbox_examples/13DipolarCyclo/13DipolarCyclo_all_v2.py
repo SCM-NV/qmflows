@@ -92,8 +92,9 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
     r1_freq = adf(templates.freq.overlay(settings), r1.molecule, job_name=name + "_r1_freq")
 
   # Prepare reactant2 job
-    r2_mol =  molkit.from_smiles(r2_smiles)
-    r2_dftb = dftb(templates.geometry.overlay(settings), r2_mol, job_name=name + "_r2_DFTB")
+    r2s_mol =  molkit.from_smiles(r2_smiles, nconfs=10)
+    r2s_dftb = [dftb(templates.geometry.overlay(settings), r2_mol, job_name=name + "_r2_DFTB") for r2_mol in r2s_mol]
+    r2_dftb = select_min(gather(*r2s_dftb), 'energy')
     r2 =      adf(templates.geometry.overlay(settings), r2_dftb.molecule, job_name=name + "_r2")
     r2_freq = adf(templates.freq.overlay(settings), r2.molecule, job_name=name + "_r2_freq")
 
