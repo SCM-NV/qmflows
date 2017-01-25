@@ -27,8 +27,9 @@ class DIRAC(Package):
         dirac_settings = Settings()
         dirac_settings.input = settings.specific.dirac
         dirac_settings.ignore_molecule
-        job = plams.DiracJob(name=job_name, settings=dirac_settings,
-                             molecule=mol)
+        job = plams.interfaces.dirac.DiracJob(name=job_name,
+                                              settings=dirac_settings,
+                                              molecule=mol)
         result = job.run()
 
         return DIRAC_Result(dirac_settings, mol, result.job.name,

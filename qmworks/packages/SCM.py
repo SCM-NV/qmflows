@@ -44,8 +44,8 @@ class ADF(Package):
         """
         adf_settings = Settings()
         adf_settings.input = settings.specific.adf
-        job = plams.ADFJob(name=job_name, molecule=mol,
-                           settings=adf_settings)
+        job = plams.interfaces.adfsuite.ADFJob(name=job_name, molecule=mol,
+                                               settings=adf_settings)
         result = job.run()
         path_t21 = result._kf.path
 
@@ -138,7 +138,7 @@ class ADF_Result(Result):
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties, status=status)
         # Create a KF reader instance
-        self.kf = plams.kftools.KFFile(path_t21)
+        self.kf = plams.tools.kftools.KFFile(path_t21)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status):
@@ -203,8 +203,8 @@ class DFTB(Package):
         """
         dftb_settings = Settings()
         dftb_settings.input = settings.specific.dftb
-        job = plams.DFTBJob(name=job_name, molecule=mol,
-                            settings=dftb_settings)
+        job = plams.interfaces.adfsuite.DFTBJob(name=job_name, molecule=mol,
+                                                settings=dftb_settings)
 
         result = job.run()
         if job.status in ['failed', 'crashed']:
@@ -286,7 +286,7 @@ class DFTB_Result(Result):
                          properties=properties, status=status)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         # create a kf reader instance
-        self.kf = plams.kftools.KFFile(kf_filename)
+        self.kf = plams.tools.kftools.KFFile(kf_filename)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status):
