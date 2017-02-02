@@ -1,6 +1,10 @@
 {
     "energy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21", 
 	       "kwargs": {"section": "Energy", "prop": "Bond Energy"}},
+    "homo" : {"parser": "generic_parsers",  "function": "extract_line_value", "file_ext": "out",
+	      "kwargs" : {"pattern": "HOMO", "pos": 4}},
+    "lumo" : {"parser": "generic_parsers",  "function": "extract_line_value", "file_ext": "out",
+	      "kwargs" : {"pattern": "LUMO", "pos": 4}},
     "enthalpy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21",
 	       "kwargs": {"section": "Thermodynamics", "prop": "Enthalpy"}},
     "free_energy": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "t21",

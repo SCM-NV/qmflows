@@ -1,5 +1,8 @@
 
-__all__ = ['awk_file']
+__all__ = ['awk_file', 'extract_line_value']
+
+from pyparsing import  (OneOrMore, SkipTo, Suppress)
+from qmworks.parsers.parser import parse_file
 
 import os
 import subprocess
@@ -49,3 +52,18 @@ def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
     if len(result) == 1:
         result = result[0]
     return result
+
+
+def extract_line_value(file_name, pattern=None, pos=0):
+    """
+    Get a field record from a file.
+    Search for lines containing `pattern` and return the last line
+    containing that value.
+
+    :returns: value at position `pos` in the last found line, containing pattern.
+    """
+    parse_Line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
+    properties = parse_file(parse_Line, file_name).asList()
+    last_line = properties[-1].split()
+
+    return float(last_line[pos])
