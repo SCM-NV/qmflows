@@ -53,8 +53,9 @@ class CP2K(Package):
         # Input modifications
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings,
-                            molecule=mol)
+        job = plams.interfaces.cp2k.Cp2kJob(name=job_name,
+                                            settings=cp2k_settings,
+                                            molecule=mol)
         r = job.run()
 
         work_dir = work_dir if work_dir is not None else job.path
@@ -80,6 +81,21 @@ class CP2K(Package):
         :type mol: plams Molecule
         """
 
+        def write_cell_angles(s, value, mol, key):
+            """
+            The angles of the cell is a 3-dimensional list ::
+
+            &SUBSYS
+              &CELL
+                ABC [angstrom] 5.958 7.596 15.610
+                ALPHA_BETA_GAMMA 81.250 86.560 89.800 
+              &END CELL
+            """
+            angles = '{} {} {}'.format(*value) 
+            s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
+
+            return s
+            
         def write_cell_parameters(s, value, mol, key):
             """
             The cell parameter can be a list of lists containing the
@@ -106,18 +122,18 @@ class CP2K(Package):
                 abc = [value] * 3
                 abc_cell = ' [angstrom] {} {} {}'.format(*abc)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc_cell
+            elif isinstance(value, list):
+                abc = ' [angstrom] {} {} {}'.format(*value)
+                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             elif isinstance(value[0], list):
                 a, b, c = value  #
                 fun = lambda xs: '{} {} {}'.format(*xs)
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
-                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
             else:
-                a, b, c = value  # Pattern match list
-                abc = ' [angstrom] {} {} {}'.format(a, b, c)
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
-                s.specific.cp2k.force_eval.subsys.cell.periodic = 'xyz'
+                msg = "cell parameter:{}\nformat not recognized"
+                RuntimeError(msg)
 
             return s
 
@@ -161,7 +177,8 @@ class CP2K(Package):
             return s
 
         funs = {'basis': expand_basis_set, 'potential': expand_basis_set,
-                'cell_parameters': write_cell_parameters}
+                'cell_parameters': write_cell_parameters,
+                'cell_angles': write_cell_angles}
 
         # Function that handles the special keyword
         f = funs.get(key)

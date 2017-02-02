@@ -31,8 +31,9 @@ class ORCA(Package):
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
 
-        job = plams.ORCAJob(molecule=mol, settings=orca_settings,
-                            name=job_name)
+        job = plams.interfaces.orca.ORCAJob(molecule=mol,
+                                            settings=orca_settings,
+                                            name=job_name)
         result = job.run()
 
         return ORCA_Result(orca_settings, mol, result.job.name,
