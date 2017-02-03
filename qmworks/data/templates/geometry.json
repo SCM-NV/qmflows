@@ -11,9 +11,48 @@
         "dftb": {
             "task": {"runtype": "GO"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
-        "turbomole": {},
         "dirac": {},
-        "cp2k": {},
+        "cp2k" : {
+	    "motion": {
+		"geo_opt" : {"type": "minimization", "optimizer": "bfgs", "max_iter": 500}
+	    }, 
+          "force_eval": {
+              "dft": {
+                  "basis_set_file_name": "",
+                  "mgrid": {
+                      "cutoff": 400,
+                      "ngrids": 4
+                  },
+                  "potential_file_name": "",
+                  "qs": {
+                      "method": "gpw"
+                  },
+                  "scf": {
+                      "eps_scf": 1e-06,
+                      "max_scf": 200,
+                      "scf_guess": "restart"
+                  },
+                  "xc": {
+                      "xc_functional": "pbe"
+                  }
+              },
+              "subsys": {
+                  "cell": {
+                      "periodic": "xyz"
+                  },
+                  "topology": {
+                      "coordinate": "xyz",
+                      "coord_file_name": ""
+                  }
+              }
+          },
+          "global": {
+              "print_level": "low",
+              "project": "qmworks-cp2k",
+              "run_type": "energy_force"
+          }
+        },
+        
         "orca": {
             "method": {
                 "method": "dft",

@@ -1,5 +1,5 @@
-Dependecy resolution
-~~~~~~~~~~~~~~~~~~~~
+Running a workflow
+~~~~~~~~~~~~~~~~~~
 A workflow in **QMWorks** consist of a set of computations and the dependencies between them,
 explicitly declared by the user in the python script. This dependecies and the relation between
 them form an graph (specifically an acyclic direct graph) that represent these relations.
