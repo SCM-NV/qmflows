@@ -10,7 +10,7 @@ def is_successful(result):
     return result.status not in ["failed", "crashed"]
 
 # Generate water molecule
-water = molkit.from_smiles('[OH2]')
+water = molkit.from_smiles('[OH2]', forcefield='mmff')
 
 # Pre-optimize the water molecule
 opt_water = dftb(templates.geometry, water, job_name="dftb_geometry")

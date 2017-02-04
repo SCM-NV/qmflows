@@ -87,38 +87,36 @@ def to_rdmol(plams_mol, sanitize=True):
     return rdmol
 
 
-def from_smiles(smiles, nconfs=1, name=None):
+def from_smiles(smiles, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
-    Generates plams molecule from a smiles strings.
+    Generates plams molecule(s) from a smiles strings.
 
     :parameter str smiles: A smiles string
     :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
     :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
     :rtype: plams.Molecule or list of plams Molecules
     """
     smiles = str(smiles.split()[0])
-    molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
-    molecule.SetProp('smiles', smiles)
-    if name:
-        molecule.SetProp('name', name)
-    if nconfs==1:
-        AllChem.EmbedMolecule(molecule, randomSeed=1)
-        AllChem.MMFFOptimizeMolecule(molecule)
-        return from_rdmol(molecule)
-    else:
-        cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
-        for cid in cids:
-            AllChem.MMFFOptimizeMolecule(molecule, confId=cid)
-        return [from_rdmol(molecule, cid) for cid in cids]
+    rdkit_mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    rdkit_mol.SetProp('smiles', smiles)
+    return get_conformations(rdkit_mol, nconfs, name, forcefield, rms)
 
-def from_smarts(smarts, nconfs=1, name=None):
+def from_smarts(smarts, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
-    Generates plams molecule from a smarts strings.
+    Generates plams molecule(s) from a smarts strings.
     This allows for example to define hydrogens explicitly.
     However it is less suitable for aromatic molecules (use from_smiles in that case).
 
     :parameter str smarts: A smarts string
     :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
     :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
     :rtype: plams.Molecule or list of plams Molecules
     """
@@ -127,31 +125,72 @@ def from_smarts(smarts, nconfs=1, name=None):
     Chem.SanitizeMol(mol)
     molecule = Chem.AddHs(mol)
     molecule.SetProp('smiles', smiles)
-    if name:
-        molecule.SetProp('name', name)
-    if nconfs==1:
-        AllChem.EmbedMolecule(molecule, randomSeed=1)
-        AllChem.MMFFOptimizeMolecule(molecule)
-        return from_rdmol(molecule)
-    else:
-        cids = AllChem.EmbedMultipleConfs(molecule, numConfs=nconfs, randomSeed=1)
-        for cid in cids:
-            AllChem.MMFFOptimizeMolecule(molecule, confId=cid)
-        return [from_rdmol(molecule, cid) for cid in cids]
+    return get_conformations(molecule, nconfs, name, forcefield, rms)
 
-def from_sequence(sequence):
+def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
+    """
+    Generates 3D conformation(s) for and rdkit_mol
+
+    :parameter rdkit_mol: RDKit molecule
+    :type rdkit_mol: rdkit.Chem.Mol
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
+    """
+    def MMFFenergy(cid):
+        ff = AllChem.MMFFGetMoleculeForceField(rdkit_mol, AllChem.MMFFGetMoleculeProperties(rdkit_mol), confId=cid)
+        return ff.CalcEnergy()
+    def UFFenergy(cid):
+        ff = AllChem.UFFGetMoleculeForceField(rdkit_mol, confId=cid)
+        return ff.CalcEnergy()
+
+    if name:
+        rdkit_mol.SetProp('name', name)
+    cids = list(AllChem.EmbedMultipleConfs(rdkit_mol, nconfs, pruneRmsThresh=rms, randomSeed=1))
+    if forcefield:
+        optimize_molecule, energy = {
+            'uff': [AllChem.UFFOptimizeMolecule, UFFenergy],
+            'mmff': [AllChem.MMFFOptimizeMolecule, MMFFenergy],
+            }[forcefield]
+        for cid in cids:
+            optimize_molecule(rdkit_mol, confId=cid)
+        cids.sort(key=energy)
+        if rms > 0:
+            keep=[cids[0]]
+            for cid in cids[1:]:
+                for id in keep:
+                    r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, id)
+                    if r < rms:
+                        break
+                else:
+                    keep.append(cid)
+        cids = keep
+    if nconfs == 1:
+        return from_rdmol(rdkit_mol)
+    else:
+        return [from_rdmol(rdkit_mol, cid) for cid in cids]
+
+def from_sequence(sequence, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
     Generates plams molecule from a peptide sequence.
     Includes explicit hydrogens and 3D coordinates.
 
     :parameter str sequence: A peptide sequence, e.g. 'HAG'
-    :return: A peptide molecule with explicit hydrogens and 3D coordinates
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A peptide molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
     """
-    molecule = Chem.MolFromSequence(sequence)
-    AllChem.EmbedMolecule(molecule)
-    AllChem.MMFFOptimizeMolecule(molecule)
-    return from_rdmol(Chem.AddHs(molecule, addCoords=True))
-
+    rdkit_mol = Chem.AddHs(Chem.MolFromSequence(sequence))
+    rdkit_mol.SetProp('sequence', sequence)
+    return get_conformations(rdkit_mol, nconfs, name, forcefield, rms)
 
 def modify_atom(mol, idx, element):
     """
@@ -251,7 +290,7 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
 
 
 def gen_coords(plamsmol):
-    """ Calculate 3D positions for atoms without coordinates """
+    """ Calculate 3D positions only for atoms without coordinates """
     rdmol = to_rdmol(plamsmol)
     unchanged = gen_coords_rdmol(rdmol)
     conf = rdmol.GetConformer()
