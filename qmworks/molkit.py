@@ -5,7 +5,7 @@ __all__ = ['add_prot_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords
 
 """
 @author: Lars Ridder
-@description: RDKit tools
+@description: A set of functions to manipulate molecules based on RDKit
 
 This is a series of functions that apply RDKit functionality on PLAMS molecules
 """
@@ -15,6 +15,7 @@ from rdkit.Chem import AllChem
 from plams import (Molecule, Bond, Atom)
 import sys
 import random
+from warnings import warn
 
 
 def from_rdmol(rdkit_mol, confid=-1):
@@ -143,10 +144,22 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
     """
     def MMFFenergy(cid):
         ff = AllChem.MMFFGetMoleculeForceField(rdkit_mol, AllChem.MMFFGetMoleculeProperties(rdkit_mol), confId=cid)
-        return ff.CalcEnergy()
+        try:
+            energy = ff.CalcEnergy()
+        except:
+            warn("MMFF energy calculation failed for molecule: " + Chem.MolToSmiles(rdkit_mol) + \
+                 "\nNo geometry optimization was performed.")
+            energy = 1e9
+        return energy
     def UFFenergy(cid):
         ff = AllChem.UFFGetMoleculeForceField(rdkit_mol, confId=cid)
-        return ff.CalcEnergy()
+        try:
+            energy = ff.CalcEnergy()
+        except:
+            warn("MMFF energy calculation failed for molecule: " + Chem.MolToSmiles(rdkit_mol) + \
+                 "\nNo geometry optimization was performed.")
+            energy = 1e9
+        return energy
 
     if name:
         rdkit_mol.SetProp('name', name)
@@ -159,6 +172,7 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
         for cid in cids:
             optimize_molecule(rdkit_mol, confId=cid)
         cids.sort(key=energy)
+        print(cids)
         if rms > 0:
             keep=[cids[0]]
             for cid in cids[1:]:
