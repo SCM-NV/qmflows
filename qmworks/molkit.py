@@ -192,6 +192,20 @@ def from_sequence(sequence, nconfs=1, name=None, forcefield=None, rms=0.1):
     rdkit_mol.SetProp('sequence', sequence)
     return get_conformations(rdkit_mol, nconfs, name, forcefield, rms)
 
+def calc_rmsd(mol1, mol2):
+    """
+    Superimpose two molecules and calculate the root-mean-squared deviations of the atomic positions.
+    The molecules should be identical, but the ordering of the atoms may differ.
+
+    :param mol1: Molecule 1
+    :param mol2: Molecule 2
+    :return: The rmsd after superposition
+    :rtype: float
+    """
+    rdkit_mol1 = to_rdmol(mol1)
+    rdkit_mol2 = to_rdmol(mol2)
+    return AllChem.GetBestRMS(rdkit_mol1, rdkit_mol2)
+
 def modify_atom(mol, idx, element):
     """
     Change atom "idx" in molecule "mol" to "element" and add or remove hydrogens accordingly
