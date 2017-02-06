@@ -48,10 +48,6 @@
               "subsys": {
                   "cell": {
                       "periodic": "xyz"
-                  },
-                  "topology": {
-                      "coordinate": "xyz",
-                      "coord_file_name": ""
                   }
               }
           },

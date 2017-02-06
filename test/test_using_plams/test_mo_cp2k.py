@@ -104,5 +104,4 @@ def prepare_cp2k_settings(geometry, work_dir):
     force.dft['print']['mo']['filename'] = file_MO
     cp2k_args.specific.cp2k['global']['project'] = 'ethylene'
 
-
     return templates.singlepoint.overlay(cp2k_args)
