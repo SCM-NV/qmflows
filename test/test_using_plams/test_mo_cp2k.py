@@ -80,7 +80,6 @@ def prepare_cp2k_settings(geometry, work_dir):
    :returns: ~qmworks.Settings
     """
     # Input/Output Files
-    file_xyz = join(work_dir, 'coordinates.xyz')
     file_MO = join(work_dir, 'mo_coeffs.out')
 
     # create Settings for the Cp2K Jobs
@@ -103,10 +102,7 @@ def prepare_cp2k_settings(geometry, work_dir):
     force.dft.basis_set_file_name = join(work_dir, 'BASIS_MOLOPT')
     force.dft.potential_file_name = join(work_dir, 'GTH_POTENTIALS')
     force.dft['print']['mo']['filename'] = file_MO
-    force.subsys.topology.coord_file_name = file_xyz
     cp2k_args.specific.cp2k['global']['project'] = 'ethylene'
 
-    # Write Molecular gemoetry
-    geometry.write(file_xyz)
 
     return templates.singlepoint.overlay(cp2k_args)
