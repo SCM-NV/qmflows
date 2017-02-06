@@ -7,9 +7,12 @@ from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
 
 # ====================================<>=======================================
-charge_dict = {'H': 1, 'C': 4, 'N': 5, 'O': 6, 'S': 6, 'Cl': 7,
-               'Se': 6, 'Cd': 12, 'Pb': 4, 'Br': 7, 'Cs': 9, 'Si': 4,
-               'I': 7}
+charge_dict = {'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 3, 'C': 4, 'N': 5, 'O': 6, 'F': 7, 'Ne': 8, 'Na': 9, 'Mg': 10, 'Al': 3,
+               'Si': 4, 'P': 5, 'S': 6, 'Cl': 7, 'Ar': 8, 'K': 9, 'Ca': 10, 'Sc' : 11, 'Ti': 12, 'V': 13, 'Cr': 14, 'Mn': 15,
+               'Fe': 16, 'Co': 17, 'Ni': 18, 'Cu': 11, 'Zn': 12, 'Ga': 13, 'Ge': 4, 'As': 5, 'Se': 6, 'Br': 7, 'Kr': 8, 'Rb: 9,
+               'Sr': 10, 'Y': 11, 'Zr': 12, 'Nb': 13, 'Mo': 14, 'Tc': 15, 'Ru': 16, 'Rh': 17, 'Pd': 18, 'Ag': 11, 'Cd': 12,
+               'In': 13, 'Sn': 4, 'Sb': 5, 'Te': 6, 'I': 7, 'Xe': 8, 'Cs': 9, 'Ba': 10, 'Hf': 12, 'Ta': 13, 'W': 14, 'Re': 15,
+               'Os': 16, 'Ir': 17, 'Pt': 18, 'Au': 11, 'Hg': 12, 'Tl': 13, 'Pb': 4, 'Bi': 5, 'Po': 6, 'At': 7, 'Rn': 8}
 # ======================================<>====================================
 __all__ = ['cp2k']
 
@@ -89,14 +92,14 @@ class CP2K(Package):
             &SUBSYS
               &CELL
                 ABC [angstrom] 5.958 7.596 15.610
-                ALPHA_BETA_GAMMA 81.250 86.560 89.800 
+                ALPHA_BETA_GAMMA 81.250 86.560 89.800
               &END CELL
             """
-            angles = '{} {} {}'.format(*value) 
+            angles = '{} {} {}'.format(*value)
             s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
 
             return s
-            
+
         def write_cell_parameters(s, value, mol, key):
             """
             The cell parameter can be a list of lists containing the
