@@ -59,7 +59,7 @@ class CP2K(Package):
         cp2k_settings.input = settings.specific.cp2k
 
         # Add molecular coordinates
-        m = format_coord_xyz(mol) + '{:>8}'.format('END')
+        m = format_coord_xyz(mol) + '{:>8}'.format('&END')
         cp2k_settings.input.force_eval.subsys['&COORD'] = m
 
         # Create a Plams job
