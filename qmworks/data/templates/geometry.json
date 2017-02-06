@@ -49,7 +49,7 @@
           "global": {
               "print_level": "low",
               "project": "qmworks-cp2k",
-              "run_type": "energy_force"
+              "run_type": "geometry_optimization"
           }
         },
         
