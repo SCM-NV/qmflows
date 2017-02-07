@@ -30,7 +30,13 @@
                   "scf": {
                       "eps_scf": 1e-06,
                       "max_scf": 200,
-                      "scf_guess": "restart"
+                      "scf_guess": "atomic",
+		      "OT": {
+			  "minimizer" : "DIIS",
+			  "N_DIIS" : 7,
+			  "preconditioner": "full_single_inverse"
+			  
+		      }
                   },
                   "xc": {
                       "xc_functional": "pbe"
