@@ -1,6 +1,6 @@
 
 __all__ = ['add_prot_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
-           'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles', 'partition_protein',
+           'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles', 'from_smarts', 'partition_protein',
            'write_molblock']
 
 """
@@ -57,7 +57,7 @@ def to_rdmol(plams_mol, sanitize=True):
     Translate a PLAMS molecule into an RDKit molecule type.
 
     :parameter plams_mol: PLAMS molecule
-    :type PLAMS_mol: plams.Molecule
+    :type plams_mol: plams.Molecule
     :return: an RDKit molecule
     :rtype: rdkit.Chem.Mol
 
@@ -172,7 +172,6 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
         for cid in cids:
             optimize_molecule(rdkit_mol, confId=cid)
         cids.sort(key=energy)
-        print(cids)
         if rms > 0:
             keep=[cids[0]]
             for cid in cids[1:]:
@@ -225,6 +224,7 @@ def modify_atom(mol, idx, element):
     Change atom "idx" in molecule "mol" to "element" and add or remove hydrogens accordingly
 
     :parameter mol: molecule to be modified
+    :type mol: plams.Molecule or rdkit.Chem.Mol
     :parameter int idx: index of the atom to be modified
     :parameter str element:
     :return: Molecule with new element and possibly added or removed hydrogens
@@ -270,8 +270,8 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
     :parameter str reactions_smarts: Reactions smarts to be applied to molecule
     :parameter complete: Apply reaction until no further changes occur or given fraction of reaction centers have been modified
     :type complete: bool or float (value between 0 and 1)
-    :return: product molecule
-    :rtype: plams.Molecule
+    :return: (product molecule, list of unchanged atoms)
+    :rtype: (plams.Molecule, list of int)
     """
     def react(reactant, reaction):
         """ Apply reaction to reactant and return products """
@@ -369,6 +369,7 @@ def add_prot_Hs(rdmol):
     Makes sure that the hydrogens get the correct PDBResidue info.
 
     :param rdmol: An RDKit molecule containing a protein
+    :type rdmol: rdkit.Chem.Mol
     :return: An RDKit molecule with explicit hydrogens added
     :rtype: rdkit.Chem.Mol
     """

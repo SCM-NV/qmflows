@@ -7,6 +7,7 @@ For a more detail descrition of **QMworks** read the documentation
    settings
    templates
    packages
+   molkit
    promise
    parsers
    hdf5
