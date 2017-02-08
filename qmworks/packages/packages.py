@@ -143,7 +143,7 @@ class Result:
         # Search for the specified output file in the folders
         file_pattern = ds.get('file_pattern')
         if file_pattern is None:
-            file_pattern = '{}.{}'.format(self.job_name, file_ext)
+            file_pattern = '{}*.{}'.format(self.job_name, file_ext)
 
         output_files = concatMap(partial(find_file_pattern, file_pattern),
                                  [plams_dir, work_dir])
@@ -155,8 +155,11 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "Property {} not found. No output file \
-            called: {}.\n".format(prop, file_pattern)
+            msg = """
+            Property {} not found. No output file called: {}. Folder used:
+            plams_dir = {}\n
+            work_dir {}\n
+            """.format(prop, file_pattern, plams_dir, work_dir)
             raise FileNotFoundError(msg)
 
 
