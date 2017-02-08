@@ -35,7 +35,6 @@
 			  "minimizer" : "DIIS",
 			  "N_DIIS" : 7,
 			  "preconditioner": "full_single_inverse"
-			  
 		      }
                   },
                   "xc": {

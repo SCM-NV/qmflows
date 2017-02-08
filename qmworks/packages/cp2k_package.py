@@ -228,8 +228,10 @@ class CP2K_Result(Result):
         results.
         """
         plams_dir, work_dir = list(map(archive.get, ["plams_dir", "work_dir"]))
-        return CP2K_Result(settings, molecule, job_name, plams_dir, work_dir,
-                           status)
+        return CP2K_Result(settings, molecule, job_name, plams_dir,
+                           work_dir=work_dir,
+                           properties=package_properties['cp2k'],
+                           status=status)
 
 
 def format_coord_xyz(mol):
