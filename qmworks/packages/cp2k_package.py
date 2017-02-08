@@ -228,7 +228,7 @@ class CP2K_Result(Result):
         results.
         """
         plams_dir, work_dir = list(map(archive.get, ["plams_dir", "work_dir"]))
-        return CP2K_Result(settings, molecule, job_name, plams_dir,
+        return CP2K_Result(settings, molecule, job_name, plams_dir.path,
                            work_dir=work_dir,
                            properties=package_properties['cp2k'],
                            status=status)
