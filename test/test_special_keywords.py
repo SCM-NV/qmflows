@@ -1,4 +1,4 @@
-from qmworks import Settings, gamess, adf, dftb, molkit
+from qmworks import Settings, gamess, adf, dftb, orca, molkit
 
 def test_freeze_with_gamess():
     mol = molkit.from_smiles('CO')
@@ -50,7 +50,7 @@ def test_freeze_with_dftb():
     mol = molkit.from_smiles('CO')
     s = Settings()
     s.freeze = ["C", "O"]
-    expected_settings = Settings({'freeze': ["C", "O"], 'specific':
+    expected_settings = Settings({'freeze': ['C', 'O'], 'specific':
                                     {'dftb': {'constraints': {'atom 1': '', 'atom 2': ''}, 'geometry': {'optim': 'cartesian'}}}})
     assert str(dftb.generic2specific(s, mol)) == str(expected_settings)
     s.freeze = [0, 1]
@@ -64,8 +64,32 @@ def test_selected_atoms_with_dftb():
     s.selected_atoms = ["H"]
     expected_settings = Settings({'selected_atoms': ['H'], 'specific':
                                     {'dftb': {'constraints': {'atom 1': '', 'atom 2': ''}, 'geometry': {'optim': 'cartesian'}}}})
-    assert str(dftb.generic2specific(s, mol)) == str(expected_settings)
+    assert dftb.generic2specific(s, mol) == expected_settings
     s.selected_atoms = [2,3,4,5]
     expected_settings = Settings({'selected_atoms': [2,3,4,5], 'specific':
                                     {'dftb': {'constraints': {'atom 1': '', 'atom 2': ''}, 'geometry': {'optim': 'cartesian'}}}})
     assert str(dftb.generic2specific(s, mol)) == str(expected_settings)
+
+def test_freeze_with_orca():
+    mol = molkit.from_smiles('CO')
+    s = Settings()
+    s.freeze = ["C", "O"]
+    expected_settings = Settings({'freeze': ['C', 'O'], 'specific':
+        {'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}})
+    assert str(orca.generic2specific(s, mol)) == str(expected_settings)
+    s.freeze = [0, 1]
+    expected_settings = Settings({'freeze': [0, 1], 'specific':
+        {'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}})
+    assert str(orca.generic2specific(s, mol)) == str(expected_settings)
+
+def test_selected_atoms_with_orca():
+    mol = molkit.from_smiles('CO')
+    s = Settings()
+    s.selected_atoms = ["H"]
+    expected_settings = Settings({'selected_atoms': ['H'], 'specific':
+        {'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}})
+    assert str(orca.generic2specific(s, mol)) == str(expected_settings)
+    s.selected_atoms = [2,3,4,5]
+    expected_settings = Settings({'selected_atoms': [2,3,4,5], 'specific':
+        {'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}})
+    assert str(orca.generic2specific(s, mol)) == str(expected_settings)
