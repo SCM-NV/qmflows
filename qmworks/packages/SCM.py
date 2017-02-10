@@ -69,8 +69,18 @@ class ADF(Package):
         """
         def freeze():
             settings.specific.adf.geometry.optim = "cartesian"
-            for a in value:
-                settings.specific.adf.constraints['atom ' + str(a + 1)] = ""
+            if not isinstance(value, list):
+                msg = 'freeze ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            if isinstance(value[0], int):
+                for a in value:
+                    at = 'atom ' + str(a + 1)
+                    settings.specific.adf.constraints[at] = ""
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol in value:
+                        at = 'atom ' + str(a + 1)
+                        settings.specific.adf.constraints[at] = ""
 
         def selected_atoms():
             settings.specific.adf.geometry.optim = "cartesian"
@@ -85,8 +95,8 @@ class ADF(Package):
             else:
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:
-                        name = 'atom ' + str(a + 1)
-                        settings.specific.adf.constraints[name] = ""
+                        at = 'atom ' + str(a + 1)
+                        settings.specific.adf.constraints[at] = ""
 
         def inithess():
             hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
@@ -223,9 +233,19 @@ class DFTB(Package):
         """
         def freeze():
             settings.specific.dftb.geometry.optim = "cartesian"
-            settings.specific.dftb.geometry.converge = "Grad=0.1"
-            for a in value:
-                settings.specific.dftb.constraints['atom ' + str(a + 1)] = ""
+            if not isinstance(value, list):
+                msg = 'freeze ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            if isinstance(value[0], int):
+                for a in value:
+                    at = 'atom ' + str(a + 1)
+                    settings.specific.dftb.constraints[at] = ""
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol in value:
+                        at = 'atom ' + str(a + 1)
+                        settings.specific.dftb.constraints[at] = ""
+
 
         def selected_atoms():
             settings.specific.dftb.geometry.optim = "cartesian"
