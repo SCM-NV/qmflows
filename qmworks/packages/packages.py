@@ -336,19 +336,19 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     return ret
 
 
-def call_default(job, n_processes=1):
+def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
     """
     with NCDisplay() as display:
         return run_parallel_opt(
             job, n_threads=n_processes,
-            registry=registry, jobdb_file='cache.json',
+            registry=registry, jobdb_file=cache,
             display=display)
 
 
-def call_xenon(job, n_processes=1, user_name=None, adapter='slurm', queue_name=None,
-               host_name=None, workdir=None, timeout=60000, **kwargs):
+def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
+               queue_name=None, host_name=None, workdir=None, timeout=60000, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
@@ -383,7 +383,7 @@ def call_xenon(job, n_processes=1, user_name=None, adapter='slurm', queue_name=N
 
         with NCDisplay() as display:
             result = run_xenon_prov(
-                job, Xe, "cache.json", n_processes,
+                job, Xe, cache, n_processes,
                 xenon_config, job_config, display=display)
 
     return result
