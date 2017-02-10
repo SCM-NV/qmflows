@@ -3,7 +3,7 @@ from .common import (AtomBasisKey, AtomBasisData, AtomXYZ, CGF, InfoMO,
 from .fileFunctions import json2Settings
 from .hdf5 import (StoreasHDF5, cp2k2hdf5, dump_to_hdf5, turbomole2hdf5)
 from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
-                       dftb, dirac, orca, registry, run)
+                       dftb, dirac, orca, gamess, registry, run)
 from .parsers import (manyXYZ, parse_string_xyz, read_cp2k_coefficients,
                       readCp2KOverlap, readTurbomoleBasis, readTurbomoleMO,
                       readXYZ, read_cp2k_number_of_orbitals)

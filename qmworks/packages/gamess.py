@@ -66,7 +66,54 @@ class GAMESS(Package):
         :param mol: molecular Geometry
         :type mol: plams Molecule
         """
-        warn('Keyword ' + key + ' doesn\'t exist')
+        """
+        some keywords provided by the user do not have a straightforward
+        translation to *GAMESS* input and require some hooks that handle the
+        special behaviour of the following keywords:
+
+        * ``freeze``
+        * ``selected_atoms``
+        """
+        def freeze():
+            if not isinstance(value, list):
+                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            sel_coords = []
+            if isinstance(value[0], int):
+                for a in value:
+                        sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol in value:
+                        sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
+            ifreez = Settings()
+            ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
+            settings.specific.gamess.update(ifreez)
+
+        def selected_atoms():
+            if not isinstance(value, list):
+                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            sel_coords = []
+            if isinstance(value[0], int):
+                for a in range(len(mol)):
+                    if a not in value:
+                        sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol not in value:
+                        sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
+            ifreez = Settings()
+            ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
+            settings.specific.gamess.update(ifreez)
+        # Available translations
+        functions = {'freeze': freeze,
+                     'selected_atoms': selected_atoms}
+        if key in functions:
+            functions[key]()
+        else:
+            msg = 'Generic keyword "' + key + '" not implemented for package Gamess.'
+            warn(msg)
 
 
 class Gamess_Result(Result):
