@@ -217,7 +217,10 @@ def calc_rmsd(mol1, mol2):
     """
     rdkit_mol1 = to_rdmol(mol1)
     rdkit_mol2 = to_rdmol(mol2)
-    return AllChem.GetBestRMS(rdkit_mol1, rdkit_mol2)
+    try:
+        return AllChem.GetBestRMS(rdkit_mol1, rdkit_mol2)
+    except:
+        return -999
 
 def modify_atom(mol, idx, element):
     """
