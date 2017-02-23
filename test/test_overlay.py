@@ -39,8 +39,6 @@ def test_overlay_cp2k_singlepoint():
 
     dft.qs.method = 'gpw'
     force.subsys.cell.periodic = 'xyz'
-    force.subsys.topology.coordinate = 'xyz'
-    force.subsys.topology.coord_file_name = ''
 
     g = s['specific']['cp2k']['global']
     g.print_level = 'low'

@@ -28,7 +28,7 @@ from noodles.serial.numpy import arrays_to_hdf5
 from qmworks.settings import Settings
 from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
-from qmworks.utils import (concatMap, initialize)
+from qmworks.utils import concatMap
 from warnings import warn
 # ==============================================================
 __all__ = ['import_parser', 'package_properties',
@@ -143,7 +143,7 @@ class Result:
         # Search for the specified output file in the folders
         file_pattern = ds.get('file_pattern')
         if file_pattern is None:
-            file_pattern = '{}.{}'.format(self.job_name, file_ext)
+            file_pattern = '{}*.{}'.format(self.job_name, file_ext)
 
         output_files = concatMap(partial(find_file_pattern, file_pattern),
                                  [plams_dir, work_dir])
@@ -155,8 +155,11 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = "Property {} not found. No output file \
-            called: {}.\n".format(prop, file_pattern)
+            msg = """
+            Property {} not found. No output file called: {}. Folder used:
+            plams_dir = {}\n
+            work_dir {}\n
+            """.format(prop, file_pattern, plams_dir, work_dir)
             raise FileNotFoundError(msg)
 
 
@@ -311,13 +314,12 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     initialize = False
     try:
         builtins.config
-        if path or folder:
-            msg = "Plams is already initialized.\n"
-            if path:
-                msg += "Ignoring specified path: {:s}\n".format(path)
-            if folder:
-                msg += "Ignoring specified folder: {:s}\n".format(folder)
+        if path and os.path.abspath(path) != builtins.config.jm.path or \
+                folder and folder != builtins.config.jm.folder:
+            msg = "Reinitializing Plams with new path and/or folder name.\n"
             warn(msg)
+            plams.finish()
+            plams.init(path=path, folder=folder)
     except:
         plams.init(path=path, folder=folder)
         initialize = True
@@ -334,46 +336,54 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     return ret
 
 
-def call_default(job, n_processes=1):
+def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
     """
     with NCDisplay() as display:
         return run_parallel_opt(
             job, n_threads=n_processes,
-            registry=registry, jobdb_file='cache.json',
+            registry=registry, jobdb_file=cache,
             display=display)
 
 
-def call_xenon(job, n_processes=1, **kwargs):
+def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
+               queue_name=None, host_name=None, workdir=None, timeout=60000, **kwargs):
     """
     See :
         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
     """
-    with XenonKeeper() as Xe:
+    dict_properties = {
+        'slurm': {'xenon.adaptors.slurm.ignore.version': 'true'},
+        'pbs': {'xenon.adaptors.pbs.ignore.version': 'true'}
+    }
+    with XenonKeeper(log_level='DEBUG') as Xe:
         certificate = Xe.credentials.newCertificateCredential(
-            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', 'fza900', '', None)
+            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
 
         xenon_config = XenonConfig(
-            jobs_scheme='slurm',
-            location='cartesius.surfsara.nl',
+            jobs_scheme=adapter,
+            location=host_name,
             credential=certificate,
-            jobs_properties={
-                'xenon.adaptors.slurm.ignore.version': 'true'
-            }
+            jobs_properties=dict_properties[adapter]
         )
+        print(xenon_config.__dict__)
+
+        if workdir is None:
+            workdir = '/home/' + user_name
 
         job_config = RemoteJobConfig(
             registry=registry,
-            working_dir='/home/fza900/WorkBench_Python',
             init=plams.init,
             finish=plams.finish,
-            time_out=5000
+            queue=queue_name,
+            time_out=timeout,
+            working_dir=workdir
         )
 
         with NCDisplay() as display:
             result = run_xenon_prov(
-                job, Xe, "cache.json", n_processes,
+                job, Xe, cache, n_processes,
                 xenon_config, job_config, display=display)
 
     return result

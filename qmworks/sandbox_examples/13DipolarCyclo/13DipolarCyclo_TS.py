@@ -38,7 +38,7 @@ settings.functional = "b3lyp"
 settings.specific.orca.basis.basis = "_3_21G"
 settings.specific.orca.basis.pol = "_d"
 settings.specific.orca.basis.diff = "_p"
-settings.specific.orca.main = 'UseSym'
+
 # Run the TS optimization, using the initial hessian from DFTB
 settings.inithess = freq_dftb.hessian
 

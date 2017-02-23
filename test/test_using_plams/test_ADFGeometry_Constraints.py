@@ -10,15 +10,14 @@ def test_partial_geometry_opt():
     exec(open('examples/Constrained_and_TS_optimizations/partial_geometry_opt.py').read(), {}, local_env)
     assert str(local_env['geom1']) == str(local_env['geom2'])
 
-def test_13dipolar_cyclo_ts():
+def test_h2o2_ts():
     """
-    Test TS optimization of a 1,3-dipolar-cycloaddition in ORCA using init hessian from DFTB
+    Test TS optimization of a rotational barrier in hydrogen peroxide with ORCA using init hessian from DFTB
     """
     local_env = {}
-    exec(open('examples/Constrained_and_TS_optimizations/13DipolarCyclo_TS.py').read(), {}, local_env)
-    assert local_env['optcycles'] < 5
-    assert abs(local_env['d1'] - 2.294) < 0.01
-    assert abs(local_env['d2'] - 2.294) < 0.01
+    exec(open('examples/Constrained_and_TS_optimizations/H2O2_TS.py').read(), {}, local_env)
+    assert local_env['n_optcycles'] < 7
+    assert local_env['ts_dihe'] == 0.0
 
 def test_generic_constraints():
     """

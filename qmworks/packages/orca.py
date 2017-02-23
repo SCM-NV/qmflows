@@ -31,8 +31,9 @@ class ORCA(Package):
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
 
-        job = plams.ORCAJob(molecule=mol, settings=orca_settings,
-                            name=job_name)
+        job = plams.interfaces.orca.ORCAJob(molecule=mol,
+                                            settings=orca_settings,
+                                            name=job_name)
         result = job.run()
 
         return ORCA_Result(orca_settings, mol, result.job.name,
@@ -117,28 +118,33 @@ class ORCA(Package):
             settings.specific.orca.geom.Constraints._end = cons
 
         def freeze():
-            cons = ''
-            for a in value:
-                cons += '{{ C {:d} C }}'.format(a)
-            settings.specific.orca.geom.Constraints._end = cons
-
-        def selected_atoms():
-            settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
+            cons = ''
             if isinstance(value[0], int):
-                cons = ''
+                for a in value:
+                    cons += '{{ C {:d} C }}'.format(a)
+            else:
+                for a in range(len(mol)):
+                    if mol.atoms[a].symbol in value:
+                        cons += '{{ C {:d} C }}'.format(a)
+            settings.specific.orca.geom.Constraints._end = cons
+
+        def selected_atoms():
+            if not isinstance(value, list):
+                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                raise RuntimeError(msg)
+            cons = ''
+            if isinstance(value[0], int):
                 for a in range(len(mol)):
                     if a not in value:
                         cons += '{{ C {:d} C }}'.format(a)
-                settings.specific.orca.geom.Constraints._end = cons
             else:
-                cons = ''
                 for a in range(len(mol)):
                     if mol.atoms[a].symbol not in value:
                         cons += '{{ C {:d} C }}'.format(a)
-                settings.specific.orca.geom.Constraints._end = cons
+            settings.specific.orca.geom.Constraints._end = cons
 
         # Available translations
         functions = {'inithess': inithess,

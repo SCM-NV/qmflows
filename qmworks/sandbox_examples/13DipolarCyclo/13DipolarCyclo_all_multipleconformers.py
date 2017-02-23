@@ -1,6 +1,6 @@
 # Default imports
 from qmworks import Settings, templates, run, molkit
-from qmworks.draw_workflow import draw_workflow
+#from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
@@ -72,10 +72,12 @@ bond2 = Distance(3, 4)
 
 # User define Settings
 settings = Settings()
-settings.functional = "b3lyp"
+settings.functional = "B3LYP_G"
 settings.specific.orca.basis.basis = "_6_31G"
 settings.specific.orca.basis.pol = "_d"
 settings.specific.orca.basis.diff = "_p"
+settings.specific.orca.pal.nprocs = 8
+settings.specific.orca.geom.MaxIter = 200
 settings.specific.dftb.dftb.scc.ndiis = 4
 settings.specific.dftb.dftb.scc.Mixing = 0.1
 settings.specific.dftb.dftb.scc.iterations = 300
@@ -138,7 +140,7 @@ for name, r1_smiles, r2_smiles, p_smiles in reactions:
 
 # Finalize and draw workflow
 wf = gather(*job_list)
-draw_workflow("wf.svg", wf._workflow)
+#draw_workflow("wf.svg", wf._workflow)
 
 # Actual execution of the jobs
 results = run(wf, n_processes=1)
@@ -146,17 +148,18 @@ results = run(wf, n_processes=1)
 # Extract table from results
 table = {}
 for r1_result, r2_result, p_result, ts_opt, ts_result in results:
-    # Retrieve the molecular coordinates
-    mol = ts_opt.molecule
-    d1 = bond1.get_current_value(mol)
-    d2 = bond2.get_current_value(mol)
+    if all( any(r.status == x for x in ['successful', 'copied']) for  r in [r1_result, r2_result, p_result, ts_opt, ts_result]):
+        # Retrieve the molecular coordinates
+        mol = ts_opt.molecule
+        d1 = bond1.get_current_value(mol)
+        d2 = bond2.get_current_value(mol)
 
-    Eact = (ts_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
-    Ereact = (p_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
-    name = p_result.molecule.properties.name
-    smiles = p_result.molecule.properties.smiles
-    nimfreq = sum([f < 0 for f in ts_result.frequencies])
-    table[name] = [smiles, Eact, Ereact, d1, d2, nimfreq, ts_opt.optcycles, ts_opt.runtime]
+        Eact = (ts_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
+        Ereact = (p_result.enthalpy - r1_result.enthalpy - r2_result.enthalpy) * hartree2kcal
+        name = p_result.molecule.properties.name
+        smiles = p_result.molecule.properties.smiles
+        nimfreq = sum([f < 0 for f in ts_result.frequencies])
+        table[name] = [smiles, Eact, Ereact, d1, d2, nimfreq, ts_opt.optcycles, ts_opt.runtime]
 
 # Print table
 print("Reaction Productsmiles    Eact  Ereact   Bond1   Bond2 NNegFreq TSoptCycles TSoptTime")

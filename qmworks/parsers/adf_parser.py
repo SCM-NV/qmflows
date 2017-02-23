@@ -8,7 +8,7 @@ def kfreader(path_t21, section=None, prop=None):
     """
     Use the plams KFfile to read the TAPE21 File.
     """
-    kf = plams.kftools.KFFile(path_t21)
+    kf = plams.tools.kftools.KFFile(path_t21)
     return kf.read(section, prop)
 
 
@@ -16,7 +16,7 @@ def extract_properties_rkf(path_rkf, key=None):
     """
     Read result from a DFTB computation using the job_name.rkf file.
     """
-    kf = plams.kftools.KFFile(path_rkf).read
+    kf = plams.tools.kftools.KFFile(path_rkf).read
     props = Settings()
 
     for i in range(kf('Properties', 'nEntries')):

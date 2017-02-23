@@ -7,9 +7,9 @@ from noodles import Storable
 from six import string_types
 
 
-class Settings(plams.Settings, Storable):
+class Settings(plams.core.settings.Settings, Storable):
     """
-    This is a subclass of the :class:`plams.Settings`.
+    This is a subclass of the :class:`plams.core.settings.Settings`.
     The difference with respect to plams' Settings are:
     - settings['a.b'] is equivalent to settings['a']['b'] = settings.a.b
     - in update(): settings.__block_replace = True results in removal of all
@@ -55,7 +55,7 @@ class Settings(plams.Settings, Storable):
     def copy(self):
         ret = Settings()
         for name in self:
-            if isinstance(self[name], plams.Settings):
+            if isinstance(self[name], plams.core.settings.Settings):
                 ret[name] = self[name].copy()
             else:
                 ret[name] = self[name]

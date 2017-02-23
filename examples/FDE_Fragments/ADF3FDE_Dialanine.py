@@ -40,7 +40,7 @@ supermol_job = dftb(templates.singlepoint, supermol,
                     job_name='supermol_singlepoint')
 
 # Calculate dipole with mfcc approach
-frags, caps = molkit.partition_protein(supermol, cap=None)
+frags, caps = molkit.partition_protein(supermol)
 mfcc_job = mfcc(dftb, frags, caps)
 
 supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))

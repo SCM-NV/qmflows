@@ -1,11 +1,11 @@
 
-__all__ = ['apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
-           'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles',
+__all__ = ['add_prot_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
+           'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles', 'from_smarts', 'partition_protein',
            'write_molblock']
 
 """
 @author: Lars Ridder
-@description: RDKit tools
+@description: A set of functions to manipulate molecules based on RDKit
 
 This is a series of functions that apply RDKit functionality on PLAMS molecules
 """
@@ -14,16 +14,28 @@ from rdkit import Chem, Geometry
 from rdkit.Chem import AllChem
 from plams import (Molecule, Bond, Atom)
 import sys
+import random
+from warnings import warn
 
 
-def from_rdmol(rdkit_mol):
+def from_rdmol(rdkit_mol, confid=-1):
     """
-    Translate an RDKit molecule into a PLAMS molecule type
+    Translate an RDKit molecule into a PLAMS molecule type.
+
+    :parameter rdkit_mol: RDKit molecule
+    :parameter int confid: conformer identifier from which to take coordinates
+    :type rdkit_mol: rdkit.Chem.Mol
+    :return: a PLAMS molecule
+    :rtype: plams.Molecule
+
     """
+    if isinstance(rdkit_mol, Molecule):
+        return rdkit_mol
+    # Create plams molecule
     plams_mol = Molecule()
     total_charge = 0
     Chem.Kekulize(rdkit_mol)
-    conf = rdkit_mol.GetConformer()
+    conf = rdkit_mol.GetConformer(id=confid)
     for atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(atom.GetIdx())
         ch = atom.GetFormalCharge()
@@ -42,8 +54,16 @@ def from_rdmol(rdkit_mol):
 
 def to_rdmol(plams_mol, sanitize=True):
     """
-    Translate a PLAMS molecule into an RDKit molecule type
+    Translate a PLAMS molecule into an RDKit molecule type.
+
+    :parameter plams_mol: PLAMS molecule
+    :type plams_mol: plams.Molecule
+    :return: an RDKit molecule
+    :rtype: rdkit.Chem.Mol
+
     """
+    if isinstance(plams_mol, Chem.Mol):
+        return plams_mol
     # Create rdkit molecule
     e = Chem.EditableMol(Chem.Mol())
     for atom in plams_mol.atoms:
@@ -68,33 +88,150 @@ def to_rdmol(plams_mol, sanitize=True):
     return rdmol
 
 
-def from_smiles(smiles):
+def from_smiles(smiles, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
-    Generates plams molecule from a smiles strings.
-    Includes explicit hydrogens and 3D coordinates
+    Generates plams molecule(s) from a smiles strings.
+
+    :parameter str smiles: A smiles string
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
     """
     smiles = str(smiles.split()[0])
-    molecule = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    rdkit_mol = Chem.AddHs(Chem.MolFromSmiles(smiles))
+    rdkit_mol.SetProp('smiles', smiles)
+    return get_conformations(rdkit_mol, nconfs, name, forcefield, rms)
+
+def from_smarts(smarts, nconfs=1, name=None, forcefield=None, rms=0.1):
+    """
+    Generates plams molecule(s) from a smarts strings.
+    This allows for example to define hydrogens explicitly.
+    However it is less suitable for aromatic molecules (use from_smiles in that case).
+
+    :parameter str smarts: A smarts string
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
+    """
+    smiles = str(smarts.split()[0])
+    mol = Chem.MolFromSmarts(smiles)
+    Chem.SanitizeMol(mol)
+    molecule = Chem.AddHs(mol)
     molecule.SetProp('smiles', smiles)
-    AllChem.EmbedMolecule(molecule, randomSeed=1)
-    AllChem.UFFOptimizeMolecule(molecule)
-    return from_rdmol(molecule)
+    return get_conformations(molecule, nconfs, name, forcefield, rms)
 
+def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
+    """
+    Generates 3D conformation(s) for and rdkit_mol
 
-def from_sequence(sequence):
+    :parameter rdkit_mol: RDKit molecule
+    :type rdkit_mol: rdkit.Chem.Mol
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
+    """
+    def MMFFenergy(cid):
+        ff = AllChem.MMFFGetMoleculeForceField(rdkit_mol, AllChem.MMFFGetMoleculeProperties(rdkit_mol), confId=cid)
+        try:
+            energy = ff.CalcEnergy()
+        except:
+            warn("MMFF energy calculation failed for molecule: " + Chem.MolToSmiles(rdkit_mol) + \
+                 "\nNo geometry optimization was performed.")
+            energy = 1e9
+        return energy
+    def UFFenergy(cid):
+        ff = AllChem.UFFGetMoleculeForceField(rdkit_mol, confId=cid)
+        try:
+            energy = ff.CalcEnergy()
+        except:
+            warn("MMFF energy calculation failed for molecule: " + Chem.MolToSmiles(rdkit_mol) + \
+                 "\nNo geometry optimization was performed.")
+            energy = 1e9
+        return energy
+
+    if name:
+        rdkit_mol.SetProp('name', name)
+    cids = list(AllChem.EmbedMultipleConfs(rdkit_mol, nconfs, pruneRmsThresh=rms, randomSeed=1))
+    if forcefield:
+        optimize_molecule, energy = {
+            'uff': [AllChem.UFFOptimizeMolecule, UFFenergy],
+            'mmff': [AllChem.MMFFOptimizeMolecule, MMFFenergy],
+            }[forcefield]
+        for cid in cids:
+            optimize_molecule(rdkit_mol, confId=cid)
+        cids.sort(key=energy)
+        if rms > 0:
+            keep=[cids[0]]
+            for cid in cids[1:]:
+                for id in keep:
+                    r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, id)
+                    if r < rms:
+                        break
+                else:
+                    keep.append(cid)
+        cids = keep
+    if nconfs == 1:
+        return from_rdmol(rdkit_mol)
+    else:
+        return [from_rdmol(rdkit_mol, cid) for cid in cids]
+
+def from_sequence(sequence, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
     Generates plams molecule from a peptide sequence.
-    Includes explicit hydrogens and 3D coordinates
-    """
-    molecule = Chem.MolFromSequence(sequence)
-    AllChem.EmbedMolecule(molecule)
-    AllChem.UFFOptimizeMolecule(molecule)
-    return from_rdmol(Chem.AddHs(molecule, addCoords=True))
+    Includes explicit hydrogens and 3D coordinates.
 
+    :parameter str sequence: A peptide sequence, e.g. 'HAG'
+    :parameter int nconfs: Number of conformers to be generated
+    :parameter str name: A name for the molecule
+    :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization and ranking of comformations
+                   The default value None results in skipping of the geometry optimization step
+    :parameter float rms: Root Mean Square deviation threshold for removing similar/equivalent conformations
+    :return: A peptide molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
+    :rtype: plams.Molecule or list of plams Molecules
+    """
+    rdkit_mol = Chem.AddHs(Chem.MolFromSequence(sequence))
+    rdkit_mol.SetProp('sequence', sequence)
+    return get_conformations(rdkit_mol, nconfs, name, forcefield, rms)
+
+def calc_rmsd(mol1, mol2):
+    """
+    Superimpose two molecules and calculate the root-mean-squared deviations of the atomic positions.
+    The molecules should be identical, but the ordering of the atoms may differ.
+
+    :param mol1: Molecule 1
+    :param mol2: Molecule 2
+    :return: The rmsd after superposition
+    :rtype: float
+    """
+    rdkit_mol1 = to_rdmol(mol1)
+    rdkit_mol2 = to_rdmol(mol2)
+    try:
+        return AllChem.GetBestRMS(rdkit_mol1, rdkit_mol2)
+    except:
+        return -999
 
 def modify_atom(mol, idx, element):
     """
-    Change atom "idx" in molecule "mol" to "element"
+    Change atom "idx" in molecule "mol" to "element" and add or remove hydrogens accordingly
+
+    :parameter mol: molecule to be modified
+    :type mol: plams.Molecule or rdkit.Chem.Mol
+    :parameter int idx: index of the atom to be modified
+    :parameter str element:
+    :return: Molecule with new element and possibly added or removed hydrogens
+    :rtype: plams.Molecule
     """
     rdmol = to_rdmol(mol)
     if rdmol.GetAtomWithIdx(idx).GetSymbol() == element:
@@ -111,11 +248,17 @@ def modify_atom(mol, idx, element):
         return from_rdmol(newmol)
 
 
-def apply_template(plams_mol, template):
+def apply_template(mol, template):
     """
-    Modifies bond orders in plams molecule according template smiles structure
+    Modifies bond orders in plams molecule according template smiles structure.
+
+    :parameter mol: molecule to be modified
+    :type mol: plams.Molecule or rdkit.Chem.Mol
+    :parameter str template: smiles string defining the correct chemical structure
+    :return: Molecule with correct chemical structure and provided 3D coordinates
+    :rtype: plams.Molecule
     """
-    rdmol = to_rdmol(plams_mol, sanitize=False)
+    rdmol = to_rdmol(mol, sanitize=False)
     template_mol = Chem.AddHs(Chem.MolFromSmiles(template))
     newmol = Chem.AllChem.AssignBondOrdersFromTemplate(template_mol, rdmol)
     return from_rdmol(newmol)
@@ -123,7 +266,15 @@ def apply_template(plams_mol, template):
 
 def apply_reaction_smarts(mol, reaction_smarts, complete=False):
     """
-    Applies reaction smirks and returns product
+    Applies reaction smirks and returns product.
+
+    :parameter mol: molecule to be modified
+    :type mol: plams.Molecule or rdkit.Chem.Mol
+    :parameter str reactions_smarts: Reactions smarts to be applied to molecule
+    :parameter complete: Apply reaction until no further changes occur or given fraction of reaction centers have been modified
+    :type complete: bool or float (value between 0 and 1)
+    :return: (product molecule, list of unchanged atoms)
+    :rtype: (plams.Molecule, list of int)
     """
     def react(reactant, reaction):
         """ Apply reaction to reactant and return products """
@@ -131,12 +282,15 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
         # if reaction doesn't apply, return the reactant
         if len(ps) == 0:
             return [(reactant, range(reactant.GetNumAtoms()))]
+        full = len(ps)
         while complete: # when complete is True
             # apply reaction until no further changes
-            reactant = ps[0][0]
+            r = random.randint(0,len(ps)-1)
+            print(r)
+            reactant = ps[r][0]
             ps = reaction.RunReactants([reactant])
             print('len:',len(ps))
-            if len(ps) == 0:
+            if len(ps) == 0 or len(ps)/full < (1-complete):
                 ps = [[reactant]]
                 break
         # add hydrogens and generate coordinates for new atoms
@@ -149,8 +303,7 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
             products.append((q, u))
         return products
 
-    if isinstance(mol, Molecule):
-        mol = to_rdmol(mol)
+    mol = to_rdmol(mol)
     reaction = AllChem.ReactionFromSmarts(reaction_smarts)
     # RDKit removes fragments that are disconnected from the reaction center
     # In order to keep these, the molecule is first split in separate fragments
@@ -168,7 +321,7 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
 
 
 def gen_coords(plamsmol):
-    """ Calculate 3D positions for atoms without coordinates """
+    """ Calculate 3D positions only for atoms without coordinates """
     rdmol = to_rdmol(plamsmol)
     unchanged = gen_coords_rdmol(rdmol)
     conf = rdmol.GetConformer()
@@ -215,8 +368,13 @@ def write_molblock(plams_mol, file=sys.stdout):
 
 def add_prot_Hs(rdmol):
     """
-    Add hydrogens to molecules read from PDB
-    Makes sure that the hydrogens get the correct PDBResidue info
+    Add hydrogens to protein molecules read from PDB.
+    Makes sure that the hydrogens get the correct PDBResidue info.
+
+    :param rdmol: An RDKit molecule containing a protein
+    :type rdmol: rdkit.Chem.Mol
+    :return: An RDKit molecule with explicit hydrogens added
+    :rtype: rdkit.Chem.Mol
     """
     retmol = Chem.AddHs(rdmol, addCoords=True)
     for atom in retmol.GetAtoms():
@@ -296,7 +454,14 @@ def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
     return ret_frag
 
 
-def partition_protein(rdmol, cap=None):
+def partition_protein(rdmol):
+    """
+    Splits a protein molecule into capped amino acid fragments and caps.
+
+    :param rdmol: A protein molecule
+    :type rdmol: rdkit.Chem.Mol
+    :return: list of fragments, list of caps
+    """
     caps = []
     em = Chem.RWMol(rdmol)
     # Split peptide bonds
