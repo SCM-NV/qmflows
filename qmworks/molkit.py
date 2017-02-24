@@ -34,7 +34,10 @@ def from_rdmol(rdkit_mol, confid=-1):
     # Create plams molecule
     plams_mol = Molecule()
     total_charge = 0
-    Chem.Kekulize(rdkit_mol)
+    try:
+        Chem.Kekulize(rdkit_mol)
+    except:
+        pass
     conf = rdkit_mol.GetConformer(id=confid)
     for atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(atom.GetIdx())
@@ -353,12 +356,13 @@ def gen_coords_rdmol(rdmol):
     rms = 1
     rs = 1
     # repeat embedding and alignment until the rms of mapped atoms is sufficiently small
-    while rms > 0.1:
-        AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs,
-                                    useBasicKnowledge=True)
-        # align new molecule to original coordinates
-        rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
-        rs += 1
+    if rdmol.GetNumAtoms() > len(maps):
+        while rms > 0.1:
+            AllChem.EmbedMolecule(rdmol, coordMap=coordDict, randomSeed=rs,
+                                        useBasicKnowledge=True)
+            # align new molecule to original coordinates
+            rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
+            rs += 1
     return unchanged
 
 
