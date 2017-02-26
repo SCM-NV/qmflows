@@ -181,7 +181,7 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
                         break
                 else:
                     keep.append(cid)
-        cids = keep
+            cids = keep
     if nconfs == 1:
         return from_rdmol(rdkit_mol)
     else:
