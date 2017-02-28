@@ -1,0 +1,155 @@
+<Feb28-2017> <09:15:08>  ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
+<Feb28-2017> <09:15:08>  Hydrogen (DZP)
+<Feb28-2017> <09:15:08>  RunType   : CREATE
+<Feb28-2017> <09:15:08>  Net Charge: 0 (Nuclei minus Electrons)
+<Feb28-2017> <09:15:08>  Symmetry  : ATOM
+ Coordinates
+   Atom         X           Y           Z   (Angstrom)
+   1.H         0.000000    0.000000    0.000000
+<Feb28-2017> <09:15:08>  >>>> CORORT
+<Feb28-2017> <09:15:08>  >>>> CLSMAT
+<Feb28-2017> <09:15:08>  >>>> ORTHON
+<Feb28-2017> <09:15:08>  >>>> GENPT
+<Feb28-2017> <09:15:08>  Block Length=  64
+<Feb28-2017> <09:15:08>  >>>> PTBAS
+<Feb28-2017> <09:15:08>  >>>> CYCLE
+<Feb28-2017> <09:15:08>              |Error|         MaxErr       Wt(A-DIIS)
+<Feb28-2017> <09:15:08>      1      0.00000000      0.00000000
+<Feb28-2017> <09:15:08>      2      0.04821042      0.04821042
+<Feb28-2017> <09:15:08>      3      0.00844396      0.00844396    100.0
+<Feb28-2017> <09:15:08>      4      0.00142332      0.00142332      0.4
+<Feb28-2017> <09:15:08>      5      0.00000254      0.00000254      0.0
+<Feb28-2017> <09:15:08>      6      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:08>  SCF converged
+<Feb28-2017> <09:15:08>      7      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:08>   Solutions with partially occupied orbitals may not be
+<Feb28-2017> <09:15:08>   lowest in energy. You might consider lowering the
+<Feb28-2017> <09:15:08>   symmetry in the input and explicitly specifying integer
+<Feb28-2017> <09:15:08>   occupations. In that case always check that you obtain
+<Feb28-2017> <09:15:08>   an aufbau solution.
+<Feb28-2017> <09:15:08>  >>>> POPAN
+<Feb28-2017> <09:15:08>  >>>> DEBYE
+<Feb28-2017> <09:15:08>  NORMAL TERMINATION
+<Feb28-2017> <09:15:08>  END
+<Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+<Feb28-2017> <09:15:09>  Nitrogen (DZP, 1s frozen)
+<Feb28-2017> <09:15:09>  RunType   : CREATE
+<Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
+<Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ Coordinates
+   Atom         X           Y           Z   (Angstrom)
+   1.N         0.000000    0.000000    0.000000
+<Feb28-2017> <09:15:09>  >>>> CORORT
+<Feb28-2017> <09:15:09>  >>>> CLSMAT
+<Feb28-2017> <09:15:09>  >>>> ORTHON
+<Feb28-2017> <09:15:09>  >>>> GENPT
+<Feb28-2017> <09:15:09>  Block Length=  68
+<Feb28-2017> <09:15:09>  >>>> PTBAS
+<Feb28-2017> <09:15:09>  >>>> CYCLE
+<Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
+<Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
+<Feb28-2017> <09:15:09>      2      1.55352192      1.26545951
+<Feb28-2017> <09:15:09>      3      1.35596060      1.04517403    100.0
+<Feb28-2017> <09:15:09>      4      0.32649935      0.23288809    100.0
+<Feb28-2017> <09:15:09>      5      0.32072222      0.23021072    100.0
+<Feb28-2017> <09:15:09>      6      0.29637899      0.21257226    100.0
+<Feb28-2017> <09:15:09>      7      0.00904537      0.00653757      5.6
+<Feb28-2017> <09:15:09>      8      0.00038970      0.00027675      0.0
+<Feb28-2017> <09:15:09>      9      0.00000358      0.00000254      0.0
+<Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:09>  SCF converged
+<Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
+<Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
+<Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
+<Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
+<Feb28-2017> <09:15:09>   an aufbau solution.
+<Feb28-2017> <09:15:09>  >>>> POPAN
+<Feb28-2017> <09:15:09>  >>>> DEBYE
+<Feb28-2017> <09:15:09>  NORMAL TERMINATION
+<Feb28-2017> <09:15:09>  END
+<Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+<Feb28-2017> <09:15:09>  Carbon (DZP, 1s frozen)
+<Feb28-2017> <09:15:09>  RunType   : CREATE
+<Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
+<Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ Coordinates
+   Atom         X           Y           Z   (Angstrom)
+   1.C         0.000000    0.000000    0.000000
+<Feb28-2017> <09:15:09>  >>>> CORORT
+<Feb28-2017> <09:15:09>  >>>> CLSMAT
+<Feb28-2017> <09:15:09>  >>>> ORTHON
+<Feb28-2017> <09:15:09>  >>>> GENPT
+<Feb28-2017> <09:15:09>  Block Length=  68
+<Feb28-2017> <09:15:09>  >>>> PTBAS
+<Feb28-2017> <09:15:09>  >>>> CYCLE
+<Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
+<Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
+<Feb28-2017> <09:15:09>      2      0.96171996      0.85251393
+<Feb28-2017> <09:15:09>      3      0.70122507      0.61067572    100.0
+<Feb28-2017> <09:15:09>      4      0.24646296      0.20483885    100.0
+<Feb28-2017> <09:15:09>      5      0.19766983      0.16582971    100.0
+<Feb28-2017> <09:15:09>      6      0.02770515      0.02303326     22.3
+<Feb28-2017> <09:15:09>      7      0.00502085      0.00418817      3.2
+<Feb28-2017> <09:15:09>      8      0.00011337      0.00009436      0.0
+<Feb28-2017> <09:15:09>      9      0.00000023      0.00000019      0.0
+<Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:09>  SCF converged
+<Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
+<Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
+<Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
+<Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
+<Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
+<Feb28-2017> <09:15:09>   an aufbau solution.
+<Feb28-2017> <09:15:09>  >>>> POPAN
+<Feb28-2017> <09:15:09>  >>>> DEBYE
+<Feb28-2017> <09:15:09>  NORMAL TERMINATION
+<Feb28-2017> <09:15:09>  END
+<Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 2
+<Feb28-2017> <09:15:10>  *** (NO TITLE) ***
+<Feb28-2017> <09:15:10>  RunType   : SINGLE POINT
+<Feb28-2017> <09:15:10>  Net Charge: 0 (Nuclei minus Electrons)
+<Feb28-2017> <09:15:10>  Symmetry  : C(3V)
+<Feb28-2017> <09:15:10>  >>>> FRAGM
+ Coordinates
+   Atom         X           Y           Z   (Angstrom)
+   1.C         0.000000    0.000000    0.656511
+   2.C         0.000000    0.000000   -0.783088
+   3.N         0.000000    0.000000   -1.946913
+   4.H        -0.512221   -0.887193    1.022016
+   5.H         1.024442    0.000000    1.022016
+   6.H        -0.512221    0.887193    1.022016
+<Feb28-2017> <09:15:10>  >>>> CORORT
+<Feb28-2017> <09:15:10>  >>>> CLSMAT
+<Feb28-2017> <09:15:10>  >>>> ORTHON
+<Feb28-2017> <09:15:10>  >>>> GENPT
+<Feb28-2017> <09:15:10>  Acc.Num.Int.=   4.000
+<Feb28-2017> <09:15:10>  Block Length= 126
+<Feb28-2017> <09:15:10>  >>>> PTBAS
+<Feb28-2017> <09:15:10>  >>>> CYCLE
+<Feb28-2017> <09:15:10>              |Error|         MaxErr       Wt(A-DIIS)
+<Feb28-2017> <09:15:10>      1      1.24920353      0.40539754
+<Feb28-2017> <09:15:10>      2      0.82842756      0.23452780    100.0
+<Feb28-2017> <09:15:10>      3      1.31369640      0.47481550    100.0
+<Feb28-2017> <09:15:10>      4      0.41532706      0.14608634    100.0
+<Feb28-2017> <09:15:10>      5      1.10513124      0.52789900    100.0
+<Feb28-2017> <09:15:10>      6      0.28541683      0.11034433    100.0
+<Feb28-2017> <09:15:10>      7      0.10653936      0.03268981     32.0
+<Feb28-2017> <09:15:10>      8      0.07824803      0.03412968     32.0
+<Feb28-2017> <09:15:10>      9      0.02108903      0.01043264      9.5
+<Feb28-2017> <09:15:10>     10      0.00452573      0.00220622      1.2
+<Feb28-2017> <09:15:10>     11      0.00017457      0.00007915      0.0
+<Feb28-2017> <09:15:11>     12      0.00001316      0.00000677      0.0
+<Feb28-2017> <09:15:11>     13      0.00000053      0.00000025      0.0
+<Feb28-2017> <09:15:11>  SCF converged
+<Feb28-2017> <09:15:11>     14      0.00000009      0.00000005      0.0
+<Feb28-2017> <09:15:11>  >>>> TOTEN
+<Feb28-2017> <09:15:11>  >>>> POPAN
+<Feb28-2017> <09:15:11>  >>>> DEBYE
+<Feb28-2017> <09:15:11>  >>>> AMETS
+<Feb28-2017> <09:15:11>   Bond Energy          -1.40948747 a.u.
+<Feb28-2017> <09:15:11>   Bond Energy         -38.35410562 eV
+<Feb28-2017> <09:15:11>   Bond Energy        -884.47       kcal/mol
+<Feb28-2017> <09:15:11>  >>>> POPUL
+<Feb28-2017> <09:15:11>  NORMAL TERMINATION
+<Feb28-2017> <09:15:11>  END

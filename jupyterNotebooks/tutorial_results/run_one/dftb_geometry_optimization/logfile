@@ -1,0 +1,75 @@
+<Feb28-2017> <09:14:04>  DFTB 2016  RunTime: Feb28-2017 09:14:04  Nodes: 1  Procs: 2
+<Feb28-2017> <09:14:04>  WARNING: non-SCC requested, but NOT supported by parameter set
+<Feb28-2017> <09:14:04>  Iteration    1
+<Feb28-2017> <09:14:04>  current energy                               -6.93138629 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -6.93138629     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.11786844     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.06478022     0.00066667    F
+<Feb28-2017> <09:14:04>  gradient max                        0.11786844
+<Feb28-2017> <09:14:04>  gradient rms                        0.06478022
+<Feb28-2017> <09:14:04>  cart. step max                      0.05557415     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.02494554     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    2
+<Feb28-2017> <09:14:04>  current energy                               -6.95307282 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.02168652     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.06976519     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.03803153     0.00066667    F
+<Feb28-2017> <09:14:04>  gradient max                        0.06976519
+<Feb28-2017> <09:14:04>  gradient rms                        0.03803153
+<Feb28-2017> <09:14:04>  cart. step max                      0.11719087     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.04989131     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    3
+<Feb28-2017> <09:14:04>  current energy                               -6.96156607 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00849325     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.10156181     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.04129787     0.00066667    F
+<Feb28-2017> <09:14:04>  gradient max                        0.10156181
+<Feb28-2017> <09:14:04>  gradient rms                        0.04129787
+<Feb28-2017> <09:14:04>  cart. step max                      0.04081550     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.01554426     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    4
+<Feb28-2017> <09:14:04>  current energy                               -6.96440808 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00284201     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.03050360     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.01110502     0.00066667    F
+<Feb28-2017> <09:14:04>  gradient max                        0.03050360
+<Feb28-2017> <09:14:04>  gradient rms                        0.01110502
+<Feb28-2017> <09:14:04>  cart. step max                      0.01324128     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.00550266     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    5
+<Feb28-2017> <09:14:04>  current energy                               -6.96463000 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00022192     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.00236817     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.00131441     0.00066667    F
+<Feb28-2017> <09:14:04>  gradient max                        0.00236817
+<Feb28-2017> <09:14:04>  gradient rms                        0.00131441
+<Feb28-2017> <09:14:04>  cart. step max                      0.00248661     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.00145702     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    6
+<Feb28-2017> <09:14:04>  current energy                               -6.96464473 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00001473     0.00001000    F
+<Feb28-2017> <09:14:04>  constrained gradient max            0.00124724     0.00100000    F
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.00041477     0.00066667    T
+<Feb28-2017> <09:14:04>  gradient max                        0.00124724
+<Feb28-2017> <09:14:04>  gradient rms                        0.00041477
+<Feb28-2017> <09:14:04>  cart. step max                      0.00252182     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.00133599     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    7
+<Feb28-2017> <09:14:04>  current energy                               -6.96464978 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00000505     0.00001000    T
+<Feb28-2017> <09:14:04>  constrained gradient max            0.00088450     0.00100000    T
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.00031905     0.00066667    T
+<Feb28-2017> <09:14:04>  gradient max                        0.00088450
+<Feb28-2017> <09:14:04>  gradient rms                        0.00031905
+<Feb28-2017> <09:14:04>  cart. step max                      0.00299195     0.00100000    F
+<Feb28-2017> <09:14:04>  cart. step rms                      0.00135759     0.00066667    F
+<Feb28-2017> <09:14:04>  Iteration    8
+<Feb28-2017> <09:14:04>  current energy                               -6.96465217 Hartree
+<Feb28-2017> <09:14:04>  energy change                      -0.00000239     0.00001000    T
+<Feb28-2017> <09:14:04>  constrained gradient max            0.00026769     0.00100000    T
+<Feb28-2017> <09:14:04>  constrained gradient rms            0.00014202     0.00066667    T
+<Feb28-2017> <09:14:04>  gradient max                        0.00026769
+<Feb28-2017> <09:14:04>  gradient rms                        0.00014202
+<Feb28-2017> <09:14:04>  cart. step max                      0.00028171     0.00100000    T
+<Feb28-2017> <09:14:04>  cart. step rms                      0.00011633     0.00066667    T
+<Feb28-2017> <09:14:04>  NORMAL TERMINATION
