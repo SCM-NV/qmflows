@@ -33,9 +33,9 @@ End Input
  Licensed to: Dr. Rob van Nieuwpoort / eScience Center / Amsterdam / NL
  SCM User ID: u17149
   
- ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
+ ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
 
- Temporary files are created in /tmp/kid_0.Rnbqyi
+ Temporary files are created in /tmp/kid_0.tQhzRn
 
  Hydrogen (DZP)
 
@@ -450,29 +450,29 @@ End Input
  Timing Statistics
  =================
   
- Total Used :                     CPU=        0.20      System=        0.02     Elapsed=        0.23
+ Total Used :                     CPU=        0.20      System=        0.01     Elapsed=        0.22
 
  Calls  Section                     ( Mean, Percentage )
  ---------------------------------------------------------------------------------------------------
-     3  ><      ................      0.00    0.79             0.00    0.01             0.00    0.23
-     1  INIT    ................      0.01    4.87             0.00   23.28             0.01    6.32
-     1  GEOMET  ................      0.00    0.60             0.00   19.69             0.01    2.34
-     1  INPUTA  ................      0.00    0.00             0.00    0.00             0.00    0.50
-     1  MAINSY  ................      0.00    1.98             0.00    0.00             0.00    1.26
+     3  ><      ................      0.00    0.16             0.00    1.72             0.00    0.25
+     1  INIT    ................      0.01    3.51             0.01   59.57             0.02    7.27
+     1  GEOMET  ................      0.00    2.11             0.00    3.03             0.00    2.13
+     1  INPUTA  ................      0.00    0.90             0.00    0.00             0.00    0.73
+     1  MAINSY  ................      0.00    1.69             0.00    0.00             0.00    1.27
      1  SYMFIT  ................      0.00    0.00             0.00    0.00             0.00    0.09
      1  CORORT  ................      0.00    0.00             0.00    0.00             0.00    0.07
-     1  SYMORB  ................      0.00    0.00             0.00    0.00             0.00    0.21
-     1  CLSMAT  ................      0.00    0.90             0.00    0.00             0.00    0.74
-     1  ORTHON  ................      0.00    0.17             0.00    0.00             0.00    0.26
-     1  GENPT   ................      0.01    2.84             0.00    0.53             0.01    2.44
-     1  PTBAS   ................      0.00    0.49             0.00    0.00             0.00    0.55
-     7  FOCKY   ................      0.02   70.24             0.00   39.45             0.02   69.30
-     7  FOCKTR  ................      0.00    1.04             0.00    0.19             0.00    1.04
-     7  SDIIS   ................      0.00    1.66             0.00   16.84             0.00    2.07
-     1  COREPS  ................      0.01    6.49             0.00    0.00             0.01    5.77
-     1  POPAN   ................      0.00    0.67             0.00    0.00             0.00    0.58
+     1  SYMORB  ................      0.00    0.00             0.00    0.00             0.00    0.14
+     1  CLSMAT  ................      0.00    0.67             0.00    0.00             0.00    0.78
+     1  ORTHON  ................      0.00    0.32             0.00    0.00             0.00    0.29
+     1  GENPT   ................      0.01    2.66             0.00    0.00             0.00    2.19
+     1  PTBAS   ................      0.00    0.36             0.00    0.00             0.00    0.46
+     7  FOCKY   ................      0.02   71.25             0.00   34.34             0.02   68.87
+     7  FOCKTR  ................      0.00    1.03             0.00    0.33             0.00    1.02
+     7  SDIIS   ................      0.00    2.01             0.00    1.01             0.00    1.97
+     1  COREPS  ................      0.01    5.87             0.00    0.00             0.01    5.49
+     1  POPAN   ................      0.00    0.79             0.00    0.00             0.00    0.66
      1  DEBYE   ................      0.00    0.12             0.00    0.00             0.00    0.11
-     1  EXIT PROCEDURE .........      0.01    7.16             0.00    0.00             0.01    6.13
+     1  EXIT PROCEDURE .........      0.01    6.56             0.00    0.00             0.01    6.20
 
 
  Currently Open Files (EXIT00)
@@ -496,39 +496,39 @@ End Input
 
  ***************************************************************************************************
  (LOGFILE)
- <Feb28-2017> <09:15:08>  ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:08>  Hydrogen (DZP)
- <Feb28-2017> <09:15:08>  RunType   : CREATE
- <Feb28-2017> <09:15:08>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:08>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:39>  Hydrogen (DZP)
+ <Feb28-2017> <12:33:39>  RunType   : CREATE
+ <Feb28-2017> <12:33:39>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:39>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.H         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:08>  >>>> CORORT
- <Feb28-2017> <09:15:08>  >>>> CLSMAT
- <Feb28-2017> <09:15:08>  >>>> ORTHON
- <Feb28-2017> <09:15:08>  >>>> GENPT
- <Feb28-2017> <09:15:08>  Block Length=  64
- <Feb28-2017> <09:15:08>  >>>> PTBAS
- <Feb28-2017> <09:15:08>  >>>> CYCLE
- <Feb28-2017> <09:15:08>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:08>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:08>      2      0.04821042      0.04821042
- <Feb28-2017> <09:15:08>      3      0.00844396      0.00844396    100.0
- <Feb28-2017> <09:15:08>      4      0.00142332      0.00142332      0.4
- <Feb28-2017> <09:15:08>      5      0.00000254      0.00000254      0.0
- <Feb28-2017> <09:15:08>      6      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>  SCF converged
- <Feb28-2017> <09:15:08>      7      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:08>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:08>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:08>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:08>   an aufbau solution.
- <Feb28-2017> <09:15:08>  >>>> POPAN
- <Feb28-2017> <09:15:08>  >>>> DEBYE
- <Feb28-2017> <09:15:08>  NORMAL TERMINATION
- <Feb28-2017> <09:15:08>  END
+ <Feb28-2017> <12:33:39>  >>>> CORORT
+ <Feb28-2017> <12:33:39>  >>>> CLSMAT
+ <Feb28-2017> <12:33:39>  >>>> ORTHON
+ <Feb28-2017> <12:33:39>  >>>> GENPT
+ <Feb28-2017> <12:33:39>  Block Length=  64
+ <Feb28-2017> <12:33:39>  >>>> PTBAS
+ <Feb28-2017> <12:33:39>  >>>> CYCLE
+ <Feb28-2017> <12:33:39>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:39>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:39>      2      0.04821042      0.04821042
+ <Feb28-2017> <12:33:39>      3      0.00844396      0.00844396    100.0
+ <Feb28-2017> <12:33:39>      4      0.00142332      0.00142332      0.4
+ <Feb28-2017> <12:33:39>      5      0.00000254      0.00000254      0.0
+ <Feb28-2017> <12:33:40>      6      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>      7      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
 
 Create N   file=/home/lars/adf2016.101/atomicdata/DZP/N.1s
 xc
@@ -564,9 +564,9 @@ End Input
  Licensed to: Dr. Rob van Nieuwpoort / eScience Center / Amsterdam / NL
  SCM User ID: u17149
   
- ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+ ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
 
- Temporary files are created in /tmp/kid_0.vw31EC
+ Temporary files are created in /tmp/kid_0.jnp1Iw
 
  Nitrogen (DZP, 1s frozen)
 
@@ -1071,29 +1071,29 @@ End Input
  Timing Statistics
  =================
   
- Total Used :                     CPU=        0.32      System=        0.02     Elapsed=        0.35
+ Total Used :                     CPU=        0.33      System=        0.01     Elapsed=        0.35
 
  Calls  Section                     ( Mean, Percentage )
  ---------------------------------------------------------------------------------------------------
-     3  ><      ................      0.00    0.41             0.00    0.01             0.00    0.15
-     1  INIT    ................      0.01    2.51             0.01   25.67             0.01    3.57
-     1  GEOMET  ................      0.00    1.20             0.00    0.00             0.00    1.42
-     1  INPUTA  ................      0.00    0.23             0.00    0.00             0.00    0.35
-     1  MAINSY  ................      0.00    1.47             0.00    0.00             0.00    1.28
+     3  ><      ................      0.00    0.10             0.00    0.02             0.00    0.14
+     1  INIT    ................      0.01    3.07             0.00   32.27             0.02    4.33
+     1  GEOMET  ................      0.00    1.34             0.00    1.36             0.00    1.37
+     1  INPUTA  ................      0.00    0.27             0.00    0.00             0.00    0.34
+     1  MAINSY  ................      0.01    1.54             0.00    0.11             0.00    1.37
      1  SYMFIT  ................      0.00    0.00             0.00    0.00             0.00    0.06
-     1  CORORT  ................      0.00    0.00             0.00    0.00             0.00    0.09
-     1  SYMORB  ................      0.00    0.55             0.00    0.00             0.00    0.15
-     1  CLSMAT  ................      0.00    0.36             0.00    0.00             0.00    0.53
-     1  ORTHON  ................      0.00    0.26             0.00    0.00             0.00    0.26
-     1  GENPT   ................      0.01    2.23             0.00    0.00             0.01    2.01
-     1  PTBAS   ................      0.00    0.32             0.00    0.00             0.00    0.37
-    11  FOCKY   ................      0.02   76.06             0.00   59.80             0.02   76.02
-    11  FOCKTR  ................      0.00    1.90             0.00    0.34             0.00    1.76
-    11  SDIIS   ................      0.00    2.32             0.00   14.17             0.00    2.32
-     1  COREPS  ................      0.02    5.36             0.00    0.00             0.02    5.07
-     1  POPAN   ................      0.00    0.53             0.00    0.00             0.00    0.45
-     1  DEBYE   ................      0.00    0.17             0.00    0.00             0.00    0.08
-     1  EXIT PROCEDURE .........      0.01    4.14             0.00    0.00             0.01    4.06
+     1  CORORT  ................      0.00    0.00             0.00    0.00             0.00    0.11
+     1  SYMORB  ................      0.00    0.26             0.00    0.00             0.00    0.14
+     1  CLSMAT  ................      0.00    0.49             0.00    0.00             0.00    0.58
+     1  ORTHON  ................      0.00    0.31             0.00    0.16             0.00    0.26
+     1  GENPT   ................      0.01    2.39             0.00    0.47             0.01    2.21
+     1  PTBAS   ................      0.00    0.30             0.00    0.00             0.00    0.41
+    11  FOCKY   ................      0.02   77.67             0.00    1.42             0.02   74.63
+    11  FOCKTR  ................      0.00    1.77             0.00    0.02             0.00    1.68
+    11  SDIIS   ................      0.00    2.45             0.00    0.04             0.00    2.36
+     1  COREPS  ................      0.01    3.86             0.00   32.43             0.02    4.86
+     1  POPAN   ................      0.00    0.00             0.00   31.02             0.00    0.61
+     1  DEBYE   ................      0.00    0.00             0.00    0.00             0.00    0.08
+     1  EXIT PROCEDURE .........      0.01    4.18             0.00    0.68             0.02    4.46
 
 
  Currently Open Files (EXIT00)
@@ -1117,76 +1117,76 @@ End Input
 
  ***************************************************************************************************
  (LOGFILE)
- <Feb28-2017> <09:15:08>  ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:08>  Hydrogen (DZP)
- <Feb28-2017> <09:15:08>  RunType   : CREATE
- <Feb28-2017> <09:15:08>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:08>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:39>  Hydrogen (DZP)
+ <Feb28-2017> <12:33:39>  RunType   : CREATE
+ <Feb28-2017> <12:33:39>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:39>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.H         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:08>  >>>> CORORT
- <Feb28-2017> <09:15:08>  >>>> CLSMAT
- <Feb28-2017> <09:15:08>  >>>> ORTHON
- <Feb28-2017> <09:15:08>  >>>> GENPT
- <Feb28-2017> <09:15:08>  Block Length=  64
- <Feb28-2017> <09:15:08>  >>>> PTBAS
- <Feb28-2017> <09:15:08>  >>>> CYCLE
- <Feb28-2017> <09:15:08>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:08>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:08>      2      0.04821042      0.04821042
- <Feb28-2017> <09:15:08>      3      0.00844396      0.00844396    100.0
- <Feb28-2017> <09:15:08>      4      0.00142332      0.00142332      0.4
- <Feb28-2017> <09:15:08>      5      0.00000254      0.00000254      0.0
- <Feb28-2017> <09:15:08>      6      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>  SCF converged
- <Feb28-2017> <09:15:08>      7      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:08>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:08>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:08>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:08>   an aufbau solution.
- <Feb28-2017> <09:15:08>  >>>> POPAN
- <Feb28-2017> <09:15:08>  >>>> DEBYE
- <Feb28-2017> <09:15:08>  NORMAL TERMINATION
- <Feb28-2017> <09:15:08>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:09>  Nitrogen (DZP, 1s frozen)
- <Feb28-2017> <09:15:09>  RunType   : CREATE
- <Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  >>>> CORORT
+ <Feb28-2017> <12:33:39>  >>>> CLSMAT
+ <Feb28-2017> <12:33:39>  >>>> ORTHON
+ <Feb28-2017> <12:33:39>  >>>> GENPT
+ <Feb28-2017> <12:33:39>  Block Length=  64
+ <Feb28-2017> <12:33:39>  >>>> PTBAS
+ <Feb28-2017> <12:33:39>  >>>> CYCLE
+ <Feb28-2017> <12:33:39>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:39>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:39>      2      0.04821042      0.04821042
+ <Feb28-2017> <12:33:39>      3      0.00844396      0.00844396    100.0
+ <Feb28-2017> <12:33:39>      4      0.00142332      0.00142332      0.4
+ <Feb28-2017> <12:33:39>      5      0.00000254      0.00000254      0.0
+ <Feb28-2017> <12:33:40>      6      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>      7      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:40>  Nitrogen (DZP, 1s frozen)
+ <Feb28-2017> <12:33:40>  RunType   : CREATE
+ <Feb28-2017> <12:33:40>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:40>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.N         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:09>  >>>> CORORT
- <Feb28-2017> <09:15:09>  >>>> CLSMAT
- <Feb28-2017> <09:15:09>  >>>> ORTHON
- <Feb28-2017> <09:15:09>  >>>> GENPT
- <Feb28-2017> <09:15:09>  Block Length=  68
- <Feb28-2017> <09:15:09>  >>>> PTBAS
- <Feb28-2017> <09:15:09>  >>>> CYCLE
- <Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:09>      2      1.55352192      1.26545951
- <Feb28-2017> <09:15:09>      3      1.35596060      1.04517403    100.0
- <Feb28-2017> <09:15:09>      4      0.32649935      0.23288809    100.0
- <Feb28-2017> <09:15:09>      5      0.32072222      0.23021072    100.0
- <Feb28-2017> <09:15:09>      6      0.29637899      0.21257226    100.0
- <Feb28-2017> <09:15:09>      7      0.00904537      0.00653757      5.6
- <Feb28-2017> <09:15:09>      8      0.00038970      0.00027675      0.0
- <Feb28-2017> <09:15:09>      9      0.00000358      0.00000254      0.0
- <Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>  SCF converged
- <Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:09>   an aufbau solution.
- <Feb28-2017> <09:15:09>  >>>> POPAN
- <Feb28-2017> <09:15:09>  >>>> DEBYE
- <Feb28-2017> <09:15:09>  NORMAL TERMINATION
- <Feb28-2017> <09:15:09>  END
+ <Feb28-2017> <12:33:40>  >>>> CORORT
+ <Feb28-2017> <12:33:40>  >>>> CLSMAT
+ <Feb28-2017> <12:33:40>  >>>> ORTHON
+ <Feb28-2017> <12:33:40>  >>>> GENPT
+ <Feb28-2017> <12:33:40>  Block Length=  68
+ <Feb28-2017> <12:33:40>  >>>> PTBAS
+ <Feb28-2017> <12:33:40>  >>>> CYCLE
+ <Feb28-2017> <12:33:40>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:40>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:40>      2      1.55352192      1.26545951
+ <Feb28-2017> <12:33:40>      3      1.35596060      1.04517403    100.0
+ <Feb28-2017> <12:33:40>      4      0.32649935      0.23288809    100.0
+ <Feb28-2017> <12:33:40>      5      0.32072222      0.23021072    100.0
+ <Feb28-2017> <12:33:40>      6      0.29637899      0.21257226    100.0
+ <Feb28-2017> <12:33:40>      7      0.00904537      0.00653757      5.6
+ <Feb28-2017> <12:33:40>      8      0.00038970      0.00027675      0.0
+ <Feb28-2017> <12:33:40>      9      0.00000358      0.00000254      0.0
+ <Feb28-2017> <12:33:40>     10      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>     11      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
 
 Create C   file=/home/lars/adf2016.101/atomicdata/DZP/C.1s
 xc
@@ -1222,9 +1222,9 @@ End Input
  Licensed to: Dr. Rob van Nieuwpoort / eScience Center / Amsterdam / NL
  SCM User ID: u17149
   
- ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+ ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
 
- Temporary files are created in /tmp/kid_0.ywWPdV
+ Temporary files are created in /tmp/kid_0.1tYlRX
 
  Carbon (DZP, 1s frozen)
 
@@ -1733,25 +1733,25 @@ End Input
 
  Calls  Section                     ( Mean, Percentage )
  ---------------------------------------------------------------------------------------------------
-     3  ><      ................      0.00    0.16             0.00    0.00             0.00    0.48
-     1  INIT    ................      0.01    3.12             0.00   23.42             0.01    4.22
-     1  GEOMET  ................      0.00    1.50             0.00    0.00             0.00    1.39
-     1  INPUTA  ................      0.00    0.31             0.00    0.00             0.00    0.39
-     1  MAINSY  ................      0.00    1.39             0.00    0.00             0.00    1.35
-     1  SYMFIT  ................      0.00    0.00             0.00    0.00             0.00    0.07
-     1  CORORT  ................      0.00    0.29             0.00    0.00             0.00    0.13
-     1  SYMORB  ................      0.00    0.21             0.00    0.00             0.00    0.15
-     1  CLSMAT  ................      0.00    0.61             0.00    0.00             0.00    0.63
-     1  ORTHON  ................      0.00    0.23             0.00    0.00             0.00    0.25
-     1  GENPT   ................      0.01    2.46             0.00    0.00             0.01    2.43
-     1  PTBAS   ................      0.00    0.40             0.00    0.00             0.00    0.34
-    11  FOCKY   ................      0.02   74.23             0.00   76.10             0.02   74.18
-    11  FOCKTR  ................      0.00    2.00             0.00    0.23             0.00    1.71
-    11  SDIIS   ................      0.00    2.47             0.00    0.25             0.00    2.42
-     1  COREPS  ................      0.02    5.43             0.00    0.00             0.02    5.01
-     1  POPAN   ................      0.00    0.47             0.00    0.00             0.00    0.47
-     1  DEBYE   ................      0.00    0.16             0.00    0.00             0.00    0.16
-     1  EXIT PROCEDURE .........      0.01    4.55             0.00    0.00             0.01    4.22
+     3  ><      ................      0.00    0.01             0.00    0.00             0.00    0.12
+     1  INIT    ................      0.01    2.99             0.00   19.48             0.01    4.45
+     1  GEOMET  ................      0.00    0.61             0.00   13.43             0.00    1.42
+     1  INPUTA  ................      0.00    0.00             0.00    3.65             0.00    0.34
+     1  MAINSY  ................      0.00    1.61             0.00    0.00             0.00    1.47
+     1  SYMFIT  ................      0.00    0.00             0.00    0.00             0.00    0.06
+     1  CORORT  ................      0.00    0.00             0.00    0.00             0.00    0.10
+     1  SYMORB  ................      0.00    0.26             0.00    0.00             0.00    0.15
+     1  CLSMAT  ................      0.00    0.51             0.00    0.00             0.00    0.61
+     1  ORTHON  ................      0.00    0.38             0.00    0.00             0.00    0.26
+     1  GENPT   ................      0.01    2.71             0.00    0.00             0.01    2.40
+     1  PTBAS   ................      0.00    0.27             0.00    0.00             0.00    0.42
+    11  FOCKY   ................      0.02   75.88             0.00   32.72             0.02   74.07
+    11  FOCKTR  ................      0.00    1.62             0.00   15.49             0.00    1.72
+    11  SDIIS   ................      0.00    2.47             0.00   15.24             0.00    2.49
+     1  COREPS  ................      0.02    5.61             0.00    0.00             0.02    5.11
+     1  POPAN   ................      0.00    0.55             0.00    0.00             0.00    0.54
+     1  DEBYE   ................      0.00    0.07             0.00    0.00             0.00    0.09
+     1  EXIT PROCEDURE .........      0.01    4.45             0.00    0.00             0.01    4.19
 
 
  Currently Open Files (EXIT00)
@@ -1775,113 +1775,113 @@ End Input
 
  ***************************************************************************************************
  (LOGFILE)
- <Feb28-2017> <09:15:08>  ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:08>  Hydrogen (DZP)
- <Feb28-2017> <09:15:08>  RunType   : CREATE
- <Feb28-2017> <09:15:08>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:08>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:39>  Hydrogen (DZP)
+ <Feb28-2017> <12:33:39>  RunType   : CREATE
+ <Feb28-2017> <12:33:39>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:39>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.H         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:08>  >>>> CORORT
- <Feb28-2017> <09:15:08>  >>>> CLSMAT
- <Feb28-2017> <09:15:08>  >>>> ORTHON
- <Feb28-2017> <09:15:08>  >>>> GENPT
- <Feb28-2017> <09:15:08>  Block Length=  64
- <Feb28-2017> <09:15:08>  >>>> PTBAS
- <Feb28-2017> <09:15:08>  >>>> CYCLE
- <Feb28-2017> <09:15:08>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:08>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:08>      2      0.04821042      0.04821042
- <Feb28-2017> <09:15:08>      3      0.00844396      0.00844396    100.0
- <Feb28-2017> <09:15:08>      4      0.00142332      0.00142332      0.4
- <Feb28-2017> <09:15:08>      5      0.00000254      0.00000254      0.0
- <Feb28-2017> <09:15:08>      6      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>  SCF converged
- <Feb28-2017> <09:15:08>      7      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:08>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:08>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:08>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:08>   an aufbau solution.
- <Feb28-2017> <09:15:08>  >>>> POPAN
- <Feb28-2017> <09:15:08>  >>>> DEBYE
- <Feb28-2017> <09:15:08>  NORMAL TERMINATION
- <Feb28-2017> <09:15:08>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:09>  Nitrogen (DZP, 1s frozen)
- <Feb28-2017> <09:15:09>  RunType   : CREATE
- <Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  >>>> CORORT
+ <Feb28-2017> <12:33:39>  >>>> CLSMAT
+ <Feb28-2017> <12:33:39>  >>>> ORTHON
+ <Feb28-2017> <12:33:39>  >>>> GENPT
+ <Feb28-2017> <12:33:39>  Block Length=  64
+ <Feb28-2017> <12:33:39>  >>>> PTBAS
+ <Feb28-2017> <12:33:39>  >>>> CYCLE
+ <Feb28-2017> <12:33:39>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:39>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:39>      2      0.04821042      0.04821042
+ <Feb28-2017> <12:33:39>      3      0.00844396      0.00844396    100.0
+ <Feb28-2017> <12:33:39>      4      0.00142332      0.00142332      0.4
+ <Feb28-2017> <12:33:39>      5      0.00000254      0.00000254      0.0
+ <Feb28-2017> <12:33:40>      6      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>      7      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:40>  Nitrogen (DZP, 1s frozen)
+ <Feb28-2017> <12:33:40>  RunType   : CREATE
+ <Feb28-2017> <12:33:40>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:40>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.N         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:09>  >>>> CORORT
- <Feb28-2017> <09:15:09>  >>>> CLSMAT
- <Feb28-2017> <09:15:09>  >>>> ORTHON
- <Feb28-2017> <09:15:09>  >>>> GENPT
- <Feb28-2017> <09:15:09>  Block Length=  68
- <Feb28-2017> <09:15:09>  >>>> PTBAS
- <Feb28-2017> <09:15:09>  >>>> CYCLE
- <Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:09>      2      1.55352192      1.26545951
- <Feb28-2017> <09:15:09>      3      1.35596060      1.04517403    100.0
- <Feb28-2017> <09:15:09>      4      0.32649935      0.23288809    100.0
- <Feb28-2017> <09:15:09>      5      0.32072222      0.23021072    100.0
- <Feb28-2017> <09:15:09>      6      0.29637899      0.21257226    100.0
- <Feb28-2017> <09:15:09>      7      0.00904537      0.00653757      5.6
- <Feb28-2017> <09:15:09>      8      0.00038970      0.00027675      0.0
- <Feb28-2017> <09:15:09>      9      0.00000358      0.00000254      0.0
- <Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>  SCF converged
- <Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:09>   an aufbau solution.
- <Feb28-2017> <09:15:09>  >>>> POPAN
- <Feb28-2017> <09:15:09>  >>>> DEBYE
- <Feb28-2017> <09:15:09>  NORMAL TERMINATION
- <Feb28-2017> <09:15:09>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:09>  Carbon (DZP, 1s frozen)
- <Feb28-2017> <09:15:09>  RunType   : CREATE
- <Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:40>  >>>> CORORT
+ <Feb28-2017> <12:33:40>  >>>> CLSMAT
+ <Feb28-2017> <12:33:40>  >>>> ORTHON
+ <Feb28-2017> <12:33:40>  >>>> GENPT
+ <Feb28-2017> <12:33:40>  Block Length=  68
+ <Feb28-2017> <12:33:40>  >>>> PTBAS
+ <Feb28-2017> <12:33:40>  >>>> CYCLE
+ <Feb28-2017> <12:33:40>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:40>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:40>      2      1.55352192      1.26545951
+ <Feb28-2017> <12:33:40>      3      1.35596060      1.04517403    100.0
+ <Feb28-2017> <12:33:40>      4      0.32649935      0.23288809    100.0
+ <Feb28-2017> <12:33:40>      5      0.32072222      0.23021072    100.0
+ <Feb28-2017> <12:33:40>      6      0.29637899      0.21257226    100.0
+ <Feb28-2017> <12:33:40>      7      0.00904537      0.00653757      5.6
+ <Feb28-2017> <12:33:40>      8      0.00038970      0.00027675      0.0
+ <Feb28-2017> <12:33:40>      9      0.00000358      0.00000254      0.0
+ <Feb28-2017> <12:33:40>     10      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>     11      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:40>  Carbon (DZP, 1s frozen)
+ <Feb28-2017> <12:33:40>  RunType   : CREATE
+ <Feb28-2017> <12:33:40>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:40>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.C         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:09>  >>>> CORORT
- <Feb28-2017> <09:15:09>  >>>> CLSMAT
- <Feb28-2017> <09:15:09>  >>>> ORTHON
- <Feb28-2017> <09:15:09>  >>>> GENPT
- <Feb28-2017> <09:15:09>  Block Length=  68
- <Feb28-2017> <09:15:09>  >>>> PTBAS
- <Feb28-2017> <09:15:09>  >>>> CYCLE
- <Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:09>      2      0.96171996      0.85251393
- <Feb28-2017> <09:15:09>      3      0.70122507      0.61067572    100.0
- <Feb28-2017> <09:15:09>      4      0.24646296      0.20483885    100.0
- <Feb28-2017> <09:15:09>      5      0.19766983      0.16582971    100.0
- <Feb28-2017> <09:15:09>      6      0.02770515      0.02303326     22.3
- <Feb28-2017> <09:15:09>      7      0.00502085      0.00418817      3.2
- <Feb28-2017> <09:15:09>      8      0.00011337      0.00009436      0.0
- <Feb28-2017> <09:15:09>      9      0.00000023      0.00000019      0.0
- <Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>  SCF converged
- <Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:09>   an aufbau solution.
- <Feb28-2017> <09:15:09>  >>>> POPAN
- <Feb28-2017> <09:15:09>  >>>> DEBYE
- <Feb28-2017> <09:15:09>  NORMAL TERMINATION
- <Feb28-2017> <09:15:09>  END
+ <Feb28-2017> <12:33:40>  >>>> CORORT
+ <Feb28-2017> <12:33:40>  >>>> CLSMAT
+ <Feb28-2017> <12:33:40>  >>>> ORTHON
+ <Feb28-2017> <12:33:40>  >>>> GENPT
+ <Feb28-2017> <12:33:40>  Block Length=  68
+ <Feb28-2017> <12:33:40>  >>>> PTBAS
+ <Feb28-2017> <12:33:40>  >>>> CYCLE
+ <Feb28-2017> <12:33:40>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:40>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:40>      2      0.96171996      0.85251393
+ <Feb28-2017> <12:33:40>      3      0.70122507      0.61067572    100.0
+ <Feb28-2017> <12:33:40>      4      0.24646296      0.20483885    100.0
+ <Feb28-2017> <12:33:40>      5      0.19766983      0.16582971    100.0
+ <Feb28-2017> <12:33:40>      6      0.02770515      0.02303326     22.3
+ <Feb28-2017> <12:33:40>      7      0.00502085      0.00418817      3.2
+ <Feb28-2017> <12:33:40>      8      0.00011337      0.00009436      0.0
+ <Feb28-2017> <12:33:40>      9      0.00000023      0.00000019      0.0
+ <Feb28-2017> <12:33:40>     10      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>     11      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
 
 
  Parallel Execution: Process Information
@@ -1950,13 +1950,13 @@ end input
  Licensed to: Dr. Rob van Nieuwpoort / eScience Center / Amsterdam / NL
  SCM User ID: u17149
   
- ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 2
+ ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 2
 
- Temporary files are created in /tmp/kid_0.gSqJYH
+ Temporary files are created in /tmp/kid_0.jf11oF
 
 
-Communication costs MPI_COMM_WORLD:      0.527 usec per message,   0.0036 usec per 8-byte item
-Communication costs for intra-node:      0.553 usec per message,   0.0037 usec per 8-byte item
+Communication costs MPI_COMM_WORLD:      0.507 usec per message,   0.0034 usec per 8-byte item
+Communication costs for intra-node:      0.525 usec per message,   0.0036 usec per 8-byte item
 
  *** (NO TITLE) ***
 
@@ -1994,15 +1994,15 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
  ----------------
  C:
          file : t21.C
-         jobid: ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+         jobid: ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
          title: Carbon (DZP, 1s frozen)
  N:
          file : t21.N
-         jobid: ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
+         jobid: ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
          title: Nitrogen (DZP, 1s frozen)
  H:
          file : t21.H
-         jobid: ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
+         jobid: ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
          title: Hydrogen (DZP)
 
 
@@ -2691,7 +2691,7 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
  CYCLE   13
   SDIIS (wt  1.000):  0.0000  0.0000 -0.0000 -0.0000 -0.0001  0.0000  0.0006  0.0069  0.0628  0.9297
   DIIS coefficients:  0.0000  0.0000 -0.0000 -0.0000 -0.0001  0.0000  0.0006  0.0069  0.0628  0.9297
- SCF Error: norm([F,P])=      0.000000526413, max([F,P])=      0.000000249201
+ SCF Error: norm([F,P])=      0.000000526419, max([F,P])=      0.000000249204
  orbitals (Q,E):
  ---------------
  A1 :1...5           ( 2.00    -0.8364)  ( 2.00    -0.7262)  ( 2.00    -0.4855)  ( 2.00    -0.3246)
@@ -2719,38 +2719,38 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
                         Occup              E (au)              E (eV)       Diff (eV) with prev. cycle
                         -----      --------------------        ------       --------------------------
  A1
-               1        2.000     -0.83637101350502E+00       -22.759              -2.24E-07
-               2        2.000     -0.72619064618438E+00       -19.761              -7.60E-09
-               3        2.000     -0.48551525948197E+00       -13.212              -3.01E-08
-               4        2.000     -0.32455042339325E+00        -8.831              -4.66E-07
-               5        0.000     -0.65837373588719E-02        -0.179
-               6        0.000      0.13100357724939E+00         3.565
+               1        2.000     -0.83637101350503E+00       -22.759              -2.24E-07
+               2        2.000     -0.72619064618439E+00       -19.761              -7.60E-09
+               3        2.000     -0.48551525948199E+00       -13.212              -3.01E-08
+               4        2.000     -0.32455042339326E+00        -8.831              -4.66E-07
+               5        0.000     -0.65837373588760E-02        -0.179
+               6        0.000      0.13100357724938E+00         3.565
                7        0.000      0.19039218315516E+00         5.181
-               8        0.000      0.38595013969361E+00        10.502
-               9        0.000      0.48025911334947E+00        13.069
-              10        0.000      0.64258196886775E+00        17.486
-              11        0.000      0.83982090285504E+00        22.853
+               8        0.000      0.38595013969360E+00        10.502
+               9        0.000      0.48025911334946E+00        13.069
+              10        0.000      0.64258196886774E+00        17.486
+              11        0.000      0.83982090285503E+00        22.853
               12        0.000      0.10673811181016E+01        29.045
               13        0.000      0.14255007526403E+01        38.790
               14        0.000      0.14903941989004E+01        40.556
  A2
-               1        0.000      0.77399116362999E+00        21.061
+               1        0.000      0.77399116362998E+00        21.061
  E1
-               1        4.000     -0.43862540604394E+00       -11.936               1.82E-08
-               2        4.000     -0.31228672212181E+00        -8.498              -2.24E-07
-               3        0.000     -0.25274654416124E-01        -0.688
-               4        0.000      0.95850330481885E-01         2.608
-               5        0.000      0.28838387911640E+00         7.847
-               6        0.000      0.41372579170760E+00        11.258
-               7        0.000      0.61362177487595E+00        16.697
+               1        4.000     -0.43862540604395E+00       -11.936               1.82E-08
+               2        4.000     -0.31228672212182E+00        -8.498              -2.24E-07
+               3        0.000     -0.25274654416130E-01        -0.688
+               4        0.000      0.95850330481879E-01         2.608
+               5        0.000      0.28838387911639E+00         7.847
+               6        0.000      0.41372579170759E+00        11.258
+               7        0.000      0.61362177487594E+00        16.697
                8        0.000      0.70792332399348E+00        19.264
-               9        0.000      0.93361400718712E+00        25.405
+               9        0.000      0.93361400718711E+00        25.405
               10        0.000      0.10040541937134E+01        27.322
               11        0.000      0.11498842411287E+01        31.290
               12        0.000      0.14009629889016E+01        38.122
   
- HOMO :        2 E1               -0.31228672212181E+00
- LUMO :        3 E1               -0.25274654416124E-01
+ HOMO :        2 E1               -0.31228672212182E+00
+ LUMO :        3 E1               -0.25274654416130E-01
   
 
 
@@ -2759,27 +2759,27 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
 
  Irrep        no.  (spin)   Occup              E (au)                E (eV)
  ---------------------------------------------------------------------------
- A1            1             2.00       -0.83637101350502E+00       -22.7588
- A1            2             2.00       -0.72619064618438E+00       -19.7607
- A1            3             2.00       -0.48551525948197E+00       -13.2115
- E1            1             4.00       -0.43862540604394E+00       -11.9356
- A1            4             2.00       -0.32455042339325E+00        -8.8315
- E1            2             4.00       -0.31228672212181E+00        -8.4978
- E1            3             0.00       -0.25274654416124E-01        -0.6878
- A1            5             0.00       -0.65837373588719E-02        -0.1792
- E1            4             0.00        0.95850330481885E-01         2.6082
- A1            6             0.00        0.13100357724939E+00         3.5648
+ A1            1             2.00       -0.83637101350503E+00       -22.7588
+ A1            2             2.00       -0.72619064618439E+00       -19.7607
+ A1            3             2.00       -0.48551525948199E+00       -13.2115
+ E1            1             4.00       -0.43862540604395E+00       -11.9356
+ A1            4             2.00       -0.32455042339326E+00        -8.8315
+ E1            2             4.00       -0.31228672212182E+00        -8.4978
+ E1            3             0.00       -0.25274654416130E-01        -0.6878
+ A1            5             0.00       -0.65837373588760E-02        -0.1792
+ E1            4             0.00        0.95850330481879E-01         2.6082
+ A1            6             0.00        0.13100357724938E+00         3.5648
  A1            7             0.00        0.19039218315516E+00         5.1808
- E1            5             0.00        0.28838387911640E+00         7.8473
- A1            8             0.00        0.38595013969361E+00        10.5022
- E1            6             0.00        0.41372579170760E+00        11.2581
- A1            9             0.00        0.48025911334947E+00        13.0685
- E1            7             0.00        0.61362177487595E+00        16.6975
- A1           10             0.00        0.64258196886775E+00        17.4855
+ E1            5             0.00        0.28838387911639E+00         7.8473
+ A1            8             0.00        0.38595013969360E+00        10.5022
+ E1            6             0.00        0.41372579170759E+00        11.2581
+ A1            9             0.00        0.48025911334946E+00        13.0685
+ E1            7             0.00        0.61362177487594E+00        16.6975
+ A1           10             0.00        0.64258196886774E+00        17.4855
  E1            8             0.00        0.70792332399348E+00        19.2636
- A2            1             0.00        0.77399116362999E+00        21.0614
- A1           11             0.00        0.83982090285504E+00        22.8527
- E1            9             0.00        0.93361400718712E+00        25.4049
+ A2            1             0.00        0.77399116362998E+00        21.0614
+ A1           11             0.00        0.83982090285503E+00        22.8527
+ E1            9             0.00        0.93361400718711E+00        25.4049
  E1           10             0.00        0.10040541937134E+01        27.3217
  A1           12             0.00        0.10673811181016E+01        29.0449
  E1           11             0.00        0.11498842411287E+01        31.2899
@@ -2970,11 +2970,11 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
 
    atom        charge        dip-x     dip-y     dip-z      quad-xx   quad-xy   quad-xz   quad-yy   quad-yz   quad-zz
  --------------------------------------------------------------------------------------------------------------------
-    1 C      0.239006     0.000111 -0.000000  0.015696    -0.041361 -0.000000 -0.000583 -0.041020  0.000000  0.082381
-    2 C      0.078564    -0.000111 -0.000000  0.116845    -0.504304  0.000000 -0.000354 -0.504495  0.000000  1.008799
-    3 N     -0.255326    -0.000007 -0.000000  0.465476    -0.346899  0.000000 -0.000043 -0.346935 -0.000000  0.693834
+    1 C      0.239006     0.000111 -0.000000  0.015696    -0.041361  0.000000 -0.000583 -0.041020  0.000000  0.082381
+    2 C      0.078564    -0.000111  0.000000  0.116845    -0.504304 -0.000000 -0.000354 -0.504495  0.000000  1.008799
+    3 N     -0.255326    -0.000007  0.000000  0.465476    -0.346899  0.000000 -0.000043 -0.346935  0.000000  0.693834
     4 H     -0.020787    -0.008038 -0.013947  0.009039    -0.053889  0.099046 -0.037022  0.117427 -0.064092 -0.063537
-    5 H     -0.020670     0.015947 -0.000000  0.008957     0.202825  0.000000  0.073801 -0.139247  0.000000 -0.063578
+    5 H     -0.020670     0.015947  0.000000  0.008957     0.202825  0.000000  0.073801 -0.139247 -0.000000 -0.063578
     6 H     -0.020787    -0.008038  0.013947  0.009039    -0.053889 -0.099046 -0.037022  0.117427  0.064092 -0.063537
 
  --------------------------------------- 
@@ -3021,11 +3021,11 @@ Communication costs for intra-node:      0.553 usec per message,   0.0037 usec p
             Q (a.u.)             Dipole moment (Debye)                                          Quadrupole moment (a.u.)
                                  x         y         z              xx        xy        xz        yy        yz        zz
 ------------------------------------------------------------------------------------------------------------------------
-MDC-m         0.0000        0.0006   -0.0000    2.5403          1.5162    0.0000    0.0007    1.5155   -0.0000   -3.0317
-MDC-d         0.0000        0.0002   -0.0000    4.1290          2.6806    0.0000    0.0003    2.6803   -0.0000   -5.3609
-MDC-q         0.0000       -0.1532   -0.0000    3.9680          2.3829    0.0000   -0.1746    2.5579   -0.0000   -4.9408
+MDC-m        -0.0000        0.0006   -0.0000    2.5403          1.5162    0.0000    0.0007    1.5155   -0.0000   -3.0317
+MDC-d        -0.0000        0.0002   -0.0000    4.1290          2.6806    0.0000    0.0003    2.6803   -0.0000   -5.3609
+MDC-q        -0.0000       -0.1532   -0.0000    3.9680          2.3829    0.0000   -0.1746    2.5579   -0.0000   -4.9408
  
-Fit.Dens.     0.0000        0.0002   -0.0000    4.1290          2.5785    0.0000   -0.0007    2.5796   -0.0000   -5.1581
+Fit.Dens.    -0.0000        0.0002   -0.0000    4.1290          2.5785    0.0000   -0.0007    2.5796   -0.0000   -5.1581
 
 
 
@@ -3033,7 +3033,7 @@ Fit.Dens.     0.0000        0.0002   -0.0000    4.1290          2.5785    0.0000
  Dipole Moment  ***  (Debye)  ***
  =============
   
- Vector   :        -0.00000000      0.00000000      4.13216456
+ Vector   :        -0.00000000     -0.00000000      4.13216456
  Magnitude:         4.13216456
 
  This molecular dipole moment is calculated with analytic integration
@@ -3093,42 +3093,42 @@ Pauli Repulsion
 
 Steric Interaction
   Pauli Repulsion (Delta E^Pauli):       4.875150883088459        132.6596          3059.20         12799.71
-  Electrostatic Interaction:            -0.894208070661770        -24.3326          -561.12         -2347.74
+  Electrostatic Interaction:            -0.894208070661769        -24.3326          -561.12         -2347.74
  (Electrostatic Interaction =
   Delta V_elstat in the BB paper)
                                       --------------------     -----------       ----------      -----------
-  Total Steric Interaction:              3.980942812426689        108.3270          2498.08         10451.96
+  Total Steric Interaction:              3.980942812426690        108.3270          2498.08         10451.96
  (Total Steric Interaction =
   Delta E^0 in the BB paper)
 
 Orbital Interactions
-  A1:                                   -3.015007413838081        -82.0425         -1891.95         -7915.90
+  A1:                                   -3.015007413838096        -82.0425         -1891.95         -7915.90
   A2:                                    0.000000000000000          0.0000             0.00             0.00
-  E1:                                   -2.375333776632305        -64.6361         -1490.54         -6236.44
+  E1:                                   -2.375333776632276        -64.6361         -1490.54         -6236.44
                                       --------------------     -----------       ----------      -----------
-  Total Orbital Interactions:           -5.390341190470385       -146.6786         -3382.49        -14152.34
+  Total Orbital Interactions:           -5.390341190470372       -146.6786         -3382.49        -14152.34
 
 Alternative Decomposition Orb.Int.
-  Kinetic:                             -12.251105998862933       -333.3696         -7687.69        -32165.27
-  Coulomb:                               6.518502294759446        177.3775          4090.42         17114.33
-  XC:                                    0.342262513633102          9.3134           214.77           898.61
+  Kinetic:                             -12.251105998862906       -333.3696         -7687.69        -32165.27
+  Coulomb:                               6.518502294759431        177.3775          4090.42         17114.33
+  XC:                                    0.342262513633104          9.3134           214.77           898.61
                                       --------------------     -----------       ----------      -----------
-  Total Orbital Interactions:           -5.390341190470385       -146.6786         -3382.49        -14152.34
+  Total Orbital Interactions:           -5.390341190470370       -146.6786         -3382.49        -14152.34
 
-  Residu (E=Steric+OrbInt+Res):         -0.000089095409193         -0.0024            -0.06            -0.23
+  Residu (E=Steric+OrbInt+Res):         -0.000089095409184         -0.0024            -0.06            -0.23
 
-Total Bonding Energy:                   -1.409487473452889        -38.3541          -884.47         -3700.61
+Total Bonding Energy:                   -1.409487473452866        -38.3541          -884.47         -3700.61
 
 
 Summary of Bonding Energy (energy terms are taken from the energy decomposition above)
 ======================================================================================
 
-  Electrostatic Energy:                 -0.894208070661770        -24.3326          -561.12         -2347.74
-  Kinetic Energy:                        1.344349622940012         36.5816           843.59          3529.59
-  Coulomb (Steric+OrbInt) Energy:       -0.600864349521036        -16.3504          -377.05         -1577.57
-  XC Energy:                            -1.258764676210095        -34.2527          -789.89         -3304.89
+  Electrostatic Energy:                 -0.894208070661769        -24.3326          -561.12         -2347.74
+  Kinetic Energy:                        1.344349622940038         36.5816           843.59          3529.59
+  Coulomb (Steric+OrbInt) Energy:       -0.600864349521041        -16.3504          -377.05         -1577.57
+  XC Energy:                            -1.258764676210093        -34.2527          -789.89         -3304.89
                                       --------------------     -----------       ----------      -----------
-  Total Bonding Energy:                 -1.409487473452888        -38.3541          -884.47         -3700.61
+  Total Bonding Energy:                 -1.409487473452864        -38.3541          -884.47         -3700.61
 
 
 Correction terms (incorporated in energies above; only for test purposes):
@@ -3456,38 +3456,38 @@ Exchange and Correlation
  Timing Statistics
  =================
   
- Total Used :                     CPU=        1.41      System=        0.20     Elapsed=        1.65
+ Total Used :                     CPU=        1.46      System=        0.22     Elapsed=        1.72
 
  Calls  Section                     ( Mean, Percentage )
  ---------------------------------------------------------------------------------------------------
-     3  ><      ................      0.00    0.03             0.00    0.04             0.00    0.05
-     1  INIT    ................      0.39   27.38             0.06   32.30             0.46   27.71
-     1  GEOMET  ................      0.00    0.34             0.01    3.69             0.01    0.79
-     1  FRAGM   ................      0.01    0.97             0.00    0.14             0.02    1.01
+     3  ><      ................      0.00    0.00             0.00    0.00             0.00    0.05
+     1  INIT    ................      0.32   21.75             0.11   49.27             0.43   25.01
+     1  GEOMET  ................      0.01    0.40             0.01    3.18             0.01    0.78
+     1  FRAGM   ................      0.01    0.67             0.00    1.61             0.02    0.96
      1  INPUTA  ................      0.00    0.00             0.00    0.00             0.00    0.01
-     1  ATDEN   ................      0.00    0.28             0.00    0.00             0.00    0.23
-     1  MAINSY  ................      0.00    0.34             0.00    1.50             0.01    0.51
+     1  ATDEN   ................      0.00    0.20             0.00    0.07             0.00    0.23
+     1  MAINSY  ................      0.01    0.62             0.00    0.08             0.01    0.52
      1  SYMFIT  ................      0.00    0.00             0.00    0.00             0.00    0.04
-     1  CORORT  ................      0.00    0.04             0.00    0.21             0.00    0.05
-     1  SYMORB  ................      0.00    0.09             0.00    0.00             0.00    0.08
-     1  CLSMAT  ................      0.00    0.34             0.00    0.00             0.01    0.31
-     1  ORTHON  ................      0.00    0.22             0.00    0.03             0.00    0.18
-     1  GENPT   ................      0.03    2.11             0.03   15.44             0.06    3.61
-     1  PTBAS   ................      0.01    0.52             0.00    0.36             0.01    0.61
-    14  FOCKY   ................      0.05   47.45             0.00   32.83             0.05   45.22
-    14  FOCKTR  ................      0.00    0.67             0.00    0.00             0.00    0.60
-    14  SDIIS   ................      0.00    0.85             0.00    1.73             0.00    0.95
-     1  COREPS  ................      0.07    4.90             0.00    1.64             0.07    4.37
-     1  TOTEN   ................      0.16   11.44             0.02    8.00             0.18   11.03
-     1  POPAN   ................      0.00    0.00             0.00    1.93             0.00    0.29
-     1  DEBYE   ................      0.00    0.00             0.00    0.00             0.00    0.10
+     1  CORORT  ................      0.00    0.06             0.00    0.00             0.00    0.04
+     1  SYMORB  ................      0.00    0.06             0.00    0.00             0.00    0.07
+     1  CLSMAT  ................      0.01    0.42             0.00    0.00             0.01    0.31
+     1  ORTHON  ................      0.00    0.14             0.00    0.00             0.00    0.18
+     1  GENPT   ................      0.04    2.75             0.02    7.05             0.06    3.29
+     1  PTBAS   ................      0.01    0.70             0.00    0.00             0.01    0.58
+    14  FOCKY   ................      0.05   51.86             0.00   23.85             0.06   47.97
+    14  FOCKTR  ................      0.00    0.70             0.00    1.44             0.00    0.58
+    14  SDIIS   ................      0.00    0.98             0.00    0.00             0.00    0.96
+     1  COREPS  ................      0.06    4.30             0.01    3.48             0.07    4.28
+     1  TOTEN   ................      0.19   13.13             0.01    3.33             0.20   11.55
+     1  POPAN   ................      0.00    0.00             0.00    0.00             0.00    0.28
+     1  DEBYE   ................      0.00    0.00             0.00    1.76             0.00    0.10
      1  INPUTE  ................      0.00    0.00             0.00    0.00             0.00    0.04
      1  SYMORE  ................      0.00    0.00             0.00    0.00             0.00    0.03
      1  METS    ................      0.00    0.00             0.00    0.00             0.00    0.02
-     1  CETS    ................      0.00    0.14             0.00    0.02             0.00    0.12
-     1  ELNRGY  ................      0.00    0.35             0.00    0.00             0.01    0.31
-     1  POPUL   ................      0.00    0.28             0.00    0.14             0.01    0.62
-     1  EXIT PROCEDURE .........      0.02    1.28             0.00    0.00             0.02    1.11
+     1  CETS    ................      0.00    0.03             0.00    0.01             0.00    0.16
+     1  ELNRGY  ................      0.00    0.29             0.00    1.63             0.01    0.30
+     1  POPUL   ................      0.00    0.02             0.00    1.61             0.01    0.62
+     1  EXIT PROCEDURE .........      0.01    0.93             0.00    1.63             0.02    1.04
 
 
  Currently Open Files (EXIT00)
@@ -3511,119 +3511,119 @@ Exchange and Correlation
 
  ***************************************************************************************************
  (LOGFILE)
- <Feb28-2017> <09:15:08>  ADF 2016  RunTime: Feb28-2017 09:15:08  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:08>  Hydrogen (DZP)
- <Feb28-2017> <09:15:08>  RunType   : CREATE
- <Feb28-2017> <09:15:08>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:08>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  ADF 2016  RunTime: Feb28-2017 12:33:39  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:39>  Hydrogen (DZP)
+ <Feb28-2017> <12:33:39>  RunType   : CREATE
+ <Feb28-2017> <12:33:39>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:39>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.H         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:08>  >>>> CORORT
- <Feb28-2017> <09:15:08>  >>>> CLSMAT
- <Feb28-2017> <09:15:08>  >>>> ORTHON
- <Feb28-2017> <09:15:08>  >>>> GENPT
- <Feb28-2017> <09:15:08>  Block Length=  64
- <Feb28-2017> <09:15:08>  >>>> PTBAS
- <Feb28-2017> <09:15:08>  >>>> CYCLE
- <Feb28-2017> <09:15:08>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:08>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:08>      2      0.04821042      0.04821042
- <Feb28-2017> <09:15:08>      3      0.00844396      0.00844396    100.0
- <Feb28-2017> <09:15:08>      4      0.00142332      0.00142332      0.4
- <Feb28-2017> <09:15:08>      5      0.00000254      0.00000254      0.0
- <Feb28-2017> <09:15:08>      6      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>  SCF converged
- <Feb28-2017> <09:15:08>      7      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:08>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:08>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:08>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:08>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:08>   an aufbau solution.
- <Feb28-2017> <09:15:08>  >>>> POPAN
- <Feb28-2017> <09:15:08>  >>>> DEBYE
- <Feb28-2017> <09:15:08>  NORMAL TERMINATION
- <Feb28-2017> <09:15:08>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:09>  Nitrogen (DZP, 1s frozen)
- <Feb28-2017> <09:15:09>  RunType   : CREATE
- <Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:39>  >>>> CORORT
+ <Feb28-2017> <12:33:39>  >>>> CLSMAT
+ <Feb28-2017> <12:33:39>  >>>> ORTHON
+ <Feb28-2017> <12:33:39>  >>>> GENPT
+ <Feb28-2017> <12:33:39>  Block Length=  64
+ <Feb28-2017> <12:33:39>  >>>> PTBAS
+ <Feb28-2017> <12:33:39>  >>>> CYCLE
+ <Feb28-2017> <12:33:39>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:39>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:39>      2      0.04821042      0.04821042
+ <Feb28-2017> <12:33:39>      3      0.00844396      0.00844396    100.0
+ <Feb28-2017> <12:33:39>      4      0.00142332      0.00142332      0.4
+ <Feb28-2017> <12:33:39>      5      0.00000254      0.00000254      0.0
+ <Feb28-2017> <12:33:40>      6      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>      7      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:40>  Nitrogen (DZP, 1s frozen)
+ <Feb28-2017> <12:33:40>  RunType   : CREATE
+ <Feb28-2017> <12:33:40>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:40>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.N         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:09>  >>>> CORORT
- <Feb28-2017> <09:15:09>  >>>> CLSMAT
- <Feb28-2017> <09:15:09>  >>>> ORTHON
- <Feb28-2017> <09:15:09>  >>>> GENPT
- <Feb28-2017> <09:15:09>  Block Length=  68
- <Feb28-2017> <09:15:09>  >>>> PTBAS
- <Feb28-2017> <09:15:09>  >>>> CYCLE
- <Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:09>      2      1.55352192      1.26545951
- <Feb28-2017> <09:15:09>      3      1.35596060      1.04517403    100.0
- <Feb28-2017> <09:15:09>      4      0.32649935      0.23288809    100.0
- <Feb28-2017> <09:15:09>      5      0.32072222      0.23021072    100.0
- <Feb28-2017> <09:15:09>      6      0.29637899      0.21257226    100.0
- <Feb28-2017> <09:15:09>      7      0.00904537      0.00653757      5.6
- <Feb28-2017> <09:15:09>      8      0.00038970      0.00027675      0.0
- <Feb28-2017> <09:15:09>      9      0.00000358      0.00000254      0.0
- <Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>  SCF converged
- <Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:09>   an aufbau solution.
- <Feb28-2017> <09:15:09>  >>>> POPAN
- <Feb28-2017> <09:15:09>  >>>> DEBYE
- <Feb28-2017> <09:15:09>  NORMAL TERMINATION
- <Feb28-2017> <09:15:09>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 1
- <Feb28-2017> <09:15:09>  Carbon (DZP, 1s frozen)
- <Feb28-2017> <09:15:09>  RunType   : CREATE
- <Feb28-2017> <09:15:09>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:09>  Symmetry  : ATOM
+ <Feb28-2017> <12:33:40>  >>>> CORORT
+ <Feb28-2017> <12:33:40>  >>>> CLSMAT
+ <Feb28-2017> <12:33:40>  >>>> ORTHON
+ <Feb28-2017> <12:33:40>  >>>> GENPT
+ <Feb28-2017> <12:33:40>  Block Length=  68
+ <Feb28-2017> <12:33:40>  >>>> PTBAS
+ <Feb28-2017> <12:33:40>  >>>> CYCLE
+ <Feb28-2017> <12:33:40>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:40>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:40>      2      1.55352192      1.26545951
+ <Feb28-2017> <12:33:40>      3      1.35596060      1.04517403    100.0
+ <Feb28-2017> <12:33:40>      4      0.32649935      0.23288809    100.0
+ <Feb28-2017> <12:33:40>      5      0.32072222      0.23021072    100.0
+ <Feb28-2017> <12:33:40>      6      0.29637899      0.21257226    100.0
+ <Feb28-2017> <12:33:40>      7      0.00904537      0.00653757      5.6
+ <Feb28-2017> <12:33:40>      8      0.00038970      0.00027675      0.0
+ <Feb28-2017> <12:33:40>      9      0.00000358      0.00000254      0.0
+ <Feb28-2017> <12:33:40>     10      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>     11      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 1
+ <Feb28-2017> <12:33:40>  Carbon (DZP, 1s frozen)
+ <Feb28-2017> <12:33:40>  RunType   : CREATE
+ <Feb28-2017> <12:33:40>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:40>  Symmetry  : ATOM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.C         0.000000    0.000000    0.000000
- <Feb28-2017> <09:15:09>  >>>> CORORT
- <Feb28-2017> <09:15:09>  >>>> CLSMAT
- <Feb28-2017> <09:15:09>  >>>> ORTHON
- <Feb28-2017> <09:15:09>  >>>> GENPT
- <Feb28-2017> <09:15:09>  Block Length=  68
- <Feb28-2017> <09:15:09>  >>>> PTBAS
- <Feb28-2017> <09:15:09>  >>>> CYCLE
- <Feb28-2017> <09:15:09>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:09>      1      0.00000000      0.00000000
- <Feb28-2017> <09:15:09>      2      0.96171996      0.85251393
- <Feb28-2017> <09:15:09>      3      0.70122507      0.61067572    100.0
- <Feb28-2017> <09:15:09>      4      0.24646296      0.20483885    100.0
- <Feb28-2017> <09:15:09>      5      0.19766983      0.16582971    100.0
- <Feb28-2017> <09:15:09>      6      0.02770515      0.02303326     22.3
- <Feb28-2017> <09:15:09>      7      0.00502085      0.00418817      3.2
- <Feb28-2017> <09:15:09>      8      0.00011337      0.00009436      0.0
- <Feb28-2017> <09:15:09>      9      0.00000023      0.00000019      0.0
- <Feb28-2017> <09:15:09>     10      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>  SCF converged
- <Feb28-2017> <09:15:09>     11      0.00000000      0.00000000      0.0
- <Feb28-2017> <09:15:09>   Solutions with partially occupied orbitals may not be
- <Feb28-2017> <09:15:09>   lowest in energy. You might consider lowering the
- <Feb28-2017> <09:15:09>   symmetry in the input and explicitly specifying integer
- <Feb28-2017> <09:15:09>   occupations. In that case always check that you obtain
- <Feb28-2017> <09:15:09>   an aufbau solution.
- <Feb28-2017> <09:15:09>  >>>> POPAN
- <Feb28-2017> <09:15:09>  >>>> DEBYE
- <Feb28-2017> <09:15:09>  NORMAL TERMINATION
- <Feb28-2017> <09:15:09>  END
- <Feb28-2017> <09:15:09>  ADF 2016  RunTime: Feb28-2017 09:15:09  Nodes: 1  Procs: 2
- <Feb28-2017> <09:15:10>  *** (NO TITLE) ***
- <Feb28-2017> <09:15:10>  RunType   : SINGLE POINT
- <Feb28-2017> <09:15:10>  Net Charge: 0 (Nuclei minus Electrons)
- <Feb28-2017> <09:15:10>  Symmetry  : C(3V)
- <Feb28-2017> <09:15:10>  >>>> FRAGM
+ <Feb28-2017> <12:33:40>  >>>> CORORT
+ <Feb28-2017> <12:33:40>  >>>> CLSMAT
+ <Feb28-2017> <12:33:40>  >>>> ORTHON
+ <Feb28-2017> <12:33:40>  >>>> GENPT
+ <Feb28-2017> <12:33:40>  Block Length=  68
+ <Feb28-2017> <12:33:40>  >>>> PTBAS
+ <Feb28-2017> <12:33:40>  >>>> CYCLE
+ <Feb28-2017> <12:33:40>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:40>      1      0.00000000      0.00000000
+ <Feb28-2017> <12:33:40>      2      0.96171996      0.85251393
+ <Feb28-2017> <12:33:40>      3      0.70122507      0.61067572    100.0
+ <Feb28-2017> <12:33:40>      4      0.24646296      0.20483885    100.0
+ <Feb28-2017> <12:33:40>      5      0.19766983      0.16582971    100.0
+ <Feb28-2017> <12:33:40>      6      0.02770515      0.02303326     22.3
+ <Feb28-2017> <12:33:40>      7      0.00502085      0.00418817      3.2
+ <Feb28-2017> <12:33:40>      8      0.00011337      0.00009436      0.0
+ <Feb28-2017> <12:33:40>      9      0.00000023      0.00000019      0.0
+ <Feb28-2017> <12:33:40>     10      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>  SCF converged
+ <Feb28-2017> <12:33:40>     11      0.00000000      0.00000000      0.0
+ <Feb28-2017> <12:33:40>   Solutions with partially occupied orbitals may not be
+ <Feb28-2017> <12:33:40>   lowest in energy. You might consider lowering the
+ <Feb28-2017> <12:33:40>   symmetry in the input and explicitly specifying integer
+ <Feb28-2017> <12:33:40>   occupations. In that case always check that you obtain
+ <Feb28-2017> <12:33:40>   an aufbau solution.
+ <Feb28-2017> <12:33:40>  >>>> POPAN
+ <Feb28-2017> <12:33:40>  >>>> DEBYE
+ <Feb28-2017> <12:33:40>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:40>  END
+ <Feb28-2017> <12:33:40>  ADF 2016  RunTime: Feb28-2017 12:33:40  Nodes: 1  Procs: 2
+ <Feb28-2017> <12:33:41>  *** (NO TITLE) ***
+ <Feb28-2017> <12:33:41>  RunType   : SINGLE POINT
+ <Feb28-2017> <12:33:41>  Net Charge: 0 (Nuclei minus Electrons)
+ <Feb28-2017> <12:33:41>  Symmetry  : C(3V)
+ <Feb28-2017> <12:33:41>  >>>> FRAGM
   Coordinates
     Atom         X           Y           Z   (Angstrom)
     1.C         0.000000    0.000000    0.656511
@@ -3632,37 +3632,37 @@ Exchange and Correlation
     4.H        -0.512221   -0.887193    1.022016
     5.H         1.024442    0.000000    1.022016
     6.H        -0.512221    0.887193    1.022016
- <Feb28-2017> <09:15:10>  >>>> CORORT
- <Feb28-2017> <09:15:10>  >>>> CLSMAT
- <Feb28-2017> <09:15:10>  >>>> ORTHON
- <Feb28-2017> <09:15:10>  >>>> GENPT
- <Feb28-2017> <09:15:10>  Acc.Num.Int.=   4.000
- <Feb28-2017> <09:15:10>  Block Length= 126
- <Feb28-2017> <09:15:10>  >>>> PTBAS
- <Feb28-2017> <09:15:10>  >>>> CYCLE
- <Feb28-2017> <09:15:10>              |Error|         MaxErr       Wt(A-DIIS)
- <Feb28-2017> <09:15:10>      1      1.24920353      0.40539754
- <Feb28-2017> <09:15:10>      2      0.82842756      0.23452780    100.0
- <Feb28-2017> <09:15:10>      3      1.31369640      0.47481550    100.0
- <Feb28-2017> <09:15:10>      4      0.41532706      0.14608634    100.0
- <Feb28-2017> <09:15:10>      5      1.10513124      0.52789900    100.0
- <Feb28-2017> <09:15:10>      6      0.28541683      0.11034433    100.0
- <Feb28-2017> <09:15:10>      7      0.10653936      0.03268981     32.0
- <Feb28-2017> <09:15:10>      8      0.07824803      0.03412968     32.0
- <Feb28-2017> <09:15:10>      9      0.02108903      0.01043264      9.5
- <Feb28-2017> <09:15:10>     10      0.00452573      0.00220622      1.2
- <Feb28-2017> <09:15:10>     11      0.00017457      0.00007915      0.0
- <Feb28-2017> <09:15:11>     12      0.00001316      0.00000677      0.0
- <Feb28-2017> <09:15:11>     13      0.00000053      0.00000025      0.0
- <Feb28-2017> <09:15:11>  SCF converged
- <Feb28-2017> <09:15:11>     14      0.00000009      0.00000005      0.0
- <Feb28-2017> <09:15:11>  >>>> TOTEN
- <Feb28-2017> <09:15:11>  >>>> POPAN
- <Feb28-2017> <09:15:11>  >>>> DEBYE
- <Feb28-2017> <09:15:11>  >>>> AMETS
- <Feb28-2017> <09:15:11>   Bond Energy          -1.40948747 a.u.
- <Feb28-2017> <09:15:11>   Bond Energy         -38.35410562 eV
- <Feb28-2017> <09:15:11>   Bond Energy        -884.47       kcal/mol
- <Feb28-2017> <09:15:11>  >>>> POPUL
- <Feb28-2017> <09:15:11>  NORMAL TERMINATION
- <Feb28-2017> <09:15:11>  END
+ <Feb28-2017> <12:33:41>  >>>> CORORT
+ <Feb28-2017> <12:33:41>  >>>> CLSMAT
+ <Feb28-2017> <12:33:41>  >>>> ORTHON
+ <Feb28-2017> <12:33:41>  >>>> GENPT
+ <Feb28-2017> <12:33:41>  Acc.Num.Int.=   4.000
+ <Feb28-2017> <12:33:41>  Block Length= 126
+ <Feb28-2017> <12:33:41>  >>>> PTBAS
+ <Feb28-2017> <12:33:41>  >>>> CYCLE
+ <Feb28-2017> <12:33:41>              |Error|         MaxErr       Wt(A-DIIS)
+ <Feb28-2017> <12:33:41>      1      1.24920353      0.40539754
+ <Feb28-2017> <12:33:41>      2      0.82842756      0.23452780    100.0
+ <Feb28-2017> <12:33:41>      3      1.31369640      0.47481550    100.0
+ <Feb28-2017> <12:33:41>      4      0.41532706      0.14608634    100.0
+ <Feb28-2017> <12:33:41>      5      1.10513124      0.52789900    100.0
+ <Feb28-2017> <12:33:41>      6      0.28541683      0.11034433    100.0
+ <Feb28-2017> <12:33:41>      7      0.10653936      0.03268981     32.0
+ <Feb28-2017> <12:33:41>      8      0.07824803      0.03412968     32.0
+ <Feb28-2017> <12:33:41>      9      0.02108903      0.01043264      9.5
+ <Feb28-2017> <12:33:42>     10      0.00452573      0.00220622      1.2
+ <Feb28-2017> <12:33:42>     11      0.00017457      0.00007915      0.0
+ <Feb28-2017> <12:33:42>     12      0.00001316      0.00000677      0.0
+ <Feb28-2017> <12:33:42>     13      0.00000053      0.00000025      0.0
+ <Feb28-2017> <12:33:42>  SCF converged
+ <Feb28-2017> <12:33:42>     14      0.00000009      0.00000005      0.0
+ <Feb28-2017> <12:33:42>  >>>> TOTEN
+ <Feb28-2017> <12:33:42>  >>>> POPAN
+ <Feb28-2017> <12:33:42>  >>>> DEBYE
+ <Feb28-2017> <12:33:42>  >>>> AMETS
+ <Feb28-2017> <12:33:42>   Bond Energy          -1.40948747 a.u.
+ <Feb28-2017> <12:33:42>   Bond Energy         -38.35410562 eV
+ <Feb28-2017> <12:33:42>   Bond Energy        -884.47       kcal/mol
+ <Feb28-2017> <12:33:42>  >>>> POPUL
+ <Feb28-2017> <12:33:42>  NORMAL TERMINATION
+ <Feb28-2017> <12:33:42>  END
