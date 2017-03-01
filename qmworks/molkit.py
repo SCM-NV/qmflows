@@ -179,7 +179,14 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
             keep=[cids[0]]
             for cid in cids[1:]:
                 for id in keep:
-                    r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, id)
+                    try:
+                        r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, id)
+                    except:
+                        r = rms+1
+                        message = "Alignment failed in multiple conformation generation: "
+                        message += Chem.MolToSmiles(rdkit_mol)
+                        message += "\nAssuming different conformations."
+                        warn(message)
                     if r < rms:
                         break
                 else:
