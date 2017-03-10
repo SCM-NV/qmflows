@@ -191,7 +191,7 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
                         break
                 else:
                     keep.append(cid)
-        cids = keep
+            cids = keep
     if nconfs == 1:
         return from_rdmol(rdkit_mol)
     else:
@@ -274,7 +274,7 @@ def apply_template(mol, template):
     return from_rdmol(newmol)
 
 
-def apply_reaction_smarts(mol, reaction_smarts, complete=False):
+def apply_reaction_smarts(mol, reaction_smarts, complete=False, forcefield=None):
     """
     Applies reaction smirks and returns product.
 
@@ -283,6 +283,8 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
     :parameter str reactions_smarts: Reactions smarts to be applied to molecule
     :parameter complete: Apply reaction until no further changes occur or given fraction of reaction centers have been modified
     :type complete: bool or float (value between 0 and 1)
+    :parameter forcefield: Specify 'uff' or 'mmff' to apply forcefield based geometry optimizatin of product structures
+    :type forcefield: str 
     :return: (product molecule, list of unchanged atoms)
     :rtype: (plams.Molecule, list of int)
     """
@@ -299,7 +301,6 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
             print(r)
             reactant = ps[r][0]
             ps = reaction.RunReactants([reactant])
-            print('len:',len(ps))
             if len(ps) == 0 or len(ps)/full < (1-complete):
                 ps = [[reactant]]
                 break
@@ -325,6 +326,8 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False):
         for p, u in react(frag, reaction):
             unchanged += [product.GetNumAtoms() + i for i in u]
             product = Chem.CombineMols(product, p)
+    if forcefield:
+        optimize_coordinates(product, forcefield, fixed=unchanged)
     # The molecule is returned together with a list of atom indices of the atoms that are identical to those
     # in the reactants. This list can be used in subsequent partial optimization of the molecule
     return (from_rdmol(product), unchanged)
@@ -371,6 +374,31 @@ def gen_coords_rdmol(rdmol):
             rms = AllChem.AlignMol(rdmol, ref, atomMap=maps)
             rs += 1
     return unchanged
+
+def optimize_coordinates(rdkit_mol, forcefield, fixed=[]):
+    def MMFFminimize():
+        ff = AllChem.MMFFGetMoleculeForceField(rdkit_mol, AllChem.MMFFGetMoleculeProperties(rdkit_mol))
+        for f in fixed:
+            ff.AddFixedPoint(f)
+        try:
+            ff.Minimize()
+        except:
+            warn("MMFF geometry optimization failed for molecule: " + Chem.MolToSmiles(rdkit_mol))
+    def UFFminimize():
+        ff = AllChem.UFFGetMoleculeForceField(rdkit_mol, ignoreInterfragInteractions=True)
+        for f in fixed:
+            ff.AddFixedPoint(f)
+            print('fixed: ', f)
+        try:
+            ff.Minimize()
+        except:
+            warn("UFF geometry optimization failed for molecule: " + Chem.MolToSmiles(rdkit_mol))
+    optimize_molecule = {
+        'uff': UFFminimize,
+        'mmff': MMFFminimize}[forcefield]
+    print(optimize_molecule)
+    optimize_molecule()
+    return
 
 
 def write_molblock(plams_mol, file=sys.stdout):
