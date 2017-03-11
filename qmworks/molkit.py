@@ -492,8 +492,7 @@ def get_fragment(mol, indices, incl_expl_Hs=True, neutralize=True):
     ret_frag.AddConformer(fragconf)
     return ret_frag
 
-
-def partition_protein(rdmol):
+def partition_protein(rdmol, residue_bonds=None, split_heteroatoms=True):
     """
     Splits a protein molecule into capped amino acid fragments and caps.
 
@@ -503,9 +502,22 @@ def partition_protein(rdmol):
     """
     caps = []
     em = Chem.RWMol(rdmol)
+    if split_heteroatoms:
+        for bond in rdmol.GetBonds():
+            resinfa = bond.GetBeginAtom().GetPDBResidueInfo()
+            resinfb = bond.GetEndAtom().GetPDBResidueInfo()
+            if resinfa.GetIsHeteroAtom() is not resinfb.GetIsHeteroAtom():
+                if resinfa.GetResidueNumber() != resinfb.GetResidueNumber():
+                    em.RemoveBond(bond.GetBeginAtomIdx(), bond.GetEndAtomIdx())
     # Split peptide bonds
     pept_bond = Chem.MolFromSmarts('[C;X4;H1,H2][CX3](=O)[NX3][C;X4;H1,H2][CX3](=O)')
     for match in rdmol.GetSubstructMatches(pept_bond):
+        if residue_bonds:
+            resa = rdmol.GetAtomWithIdx(match[1]).GetPDBResidueInfo().GetResidueNumber()
+            resb = rdmol.GetAtomWithIdx(match[3]).GetPDBResidueInfo().GetResidueNumber()
+            if (resa, resb) not in residue_bonds and (resb, resa) not in residue_bonds:
+                continue
+            print(dir(rdmol.GetAtomWithIdx(match[1]).GetPDBResidueInfo()))
         cap = get_fragment(rdmol, match[0:5])
         cap = add_prot_Hs(cap)
         caps.append(cap)
@@ -528,6 +540,5 @@ def partition_protein(rdmol):
         em.RemoveBond(match[1], match[2])
         add_fragment(em, cap_s1, match[2], 1, 1)
         add_fragment(em, cap_s2, match[1], 0, 1)
-    Chem.SanitizeMol(em)
-    frags = Chem.GetMolFrags(em.GetMol(), asMols=True)
+    frags = Chem.GetMolFrags(em.GetMol(), asMols=True, sanitizeFrags=False)
     return frags, caps
