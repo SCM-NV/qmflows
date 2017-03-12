@@ -283,7 +283,7 @@ def apply_reaction_smarts(mol, reaction_smarts, complete=False, forcefield=None)
     :parameter str reactions_smarts: Reactions smarts to be applied to molecule
     :parameter complete: Apply reaction until no further changes occur or given fraction of reaction centers have been modified
     :type complete: bool or float (value between 0 and 1)
-    :parameter forcefield: Specify 'uff' or 'mmff' to apply forcefield based geometry optimizatin of product structures
+    :parameter forcefield: Specify 'uff' or 'mmff' to apply forcefield based geometry optimization of product structures
     :type forcefield: str 
     :return: (product molecule, list of unchanged atoms)
     :rtype: (plams.Molecule, list of int)
@@ -388,7 +388,6 @@ def optimize_coordinates(rdkit_mol, forcefield, fixed=[]):
         ff = AllChem.UFFGetMoleculeForceField(rdkit_mol, ignoreInterfragInteractions=True)
         for f in fixed:
             ff.AddFixedPoint(f)
-            print('fixed: ', f)
         try:
             ff.Minimize()
         except:
@@ -396,7 +395,7 @@ def optimize_coordinates(rdkit_mol, forcefield, fixed=[]):
     optimize_molecule = {
         'uff': UFFminimize,
         'mmff': MMFFminimize}[forcefield]
-    print(optimize_molecule)
+    Chem.SanitizeMol(rdkit_mol)
     optimize_molecule()
     return
 
@@ -405,17 +404,18 @@ def write_molblock(plams_mol, file=sys.stdout):
     file.write(Chem.MolToMolBlock(to_rdmol(plams_mol)))
 
 
-def add_prot_Hs(rdmol):
+def add_prot_Hs(rdmol, forcefield=None):
     """
     Add hydrogens to protein molecules read from PDB.
     Makes sure that the hydrogens get the correct PDBResidue info.
 
     :param rdmol: An RDKit molecule containing a protein
     :type rdmol: rdkit.Chem.Mol
+    :param str forcefield: Specify 'uff' or 'mmff' to apply forcefield based geometry optimization on new atoms
     :return: An RDKit molecule with explicit hydrogens added
     :rtype: rdkit.Chem.Mol
     """
-    retmol = Chem.AddHs(rdmol, addCoords=True)
+    retmol = Chem.AddHs(rdmol)
     for atom in retmol.GetAtoms():
         if atom.GetPDBResidueInfo() is None and atom.GetSymbol() == 'H':
             bond = atom.GetBonds()[0]
@@ -426,9 +426,14 @@ def add_prot_Hs(rdmol):
             try:
                 ResInfo = connected_atom.GetPDBResidueInfo()
                 atom.SetMonomerInfo(ResInfo)
+                atomname = 'H'+atom.GetPDBResidueInfo().GetName()[1:]
+                atom.GetPDBResidueInfo().SetName(atomname)
             except:
                 print('Hydrogen annotation failed:', connected_atom.GetIdx(),
                       atom.GetIdx())
+    unchanged = gen_coords_rdmol(retmol)
+    if forcefield:
+        optimize_coordinates(retmol, forcefield, fixed=unchanged)
     return retmol
 
 
