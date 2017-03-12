@@ -1,5 +1,5 @@
 
-__all__ = ['add_prot_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
+__all__ = ['add_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'modify_atom',
            'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles', 'from_smarts', 'partition_protein',
            'write_molblock']
 
@@ -404,7 +404,7 @@ def write_molblock(plams_mol, file=sys.stdout):
     file.write(Chem.MolToMolBlock(to_rdmol(plams_mol)))
 
 
-def add_prot_Hs(rdmol, forcefield=None):
+def add_Hs(rdmol, forcefield=None):
     """
     Add hydrogens to protein molecules read from PDB.
     Makes sure that the hydrogens get the correct PDBResidue info.
@@ -429,8 +429,7 @@ def add_prot_Hs(rdmol, forcefield=None):
                 atomname = 'H'+atom.GetPDBResidueInfo().GetName()[1:]
                 atom.GetPDBResidueInfo().SetName(atomname)
             except:
-                print('Hydrogen annotation failed:', connected_atom.GetIdx(),
-                      atom.GetIdx())
+                pass
     unchanged = gen_coords_rdmol(retmol)
     if forcefield:
         optimize_coordinates(retmol, forcefield, fixed=unchanged)
@@ -524,7 +523,7 @@ def partition_protein(rdmol, residue_bonds=None, split_heteroatoms=True):
                 continue
             print(dir(rdmol.GetAtomWithIdx(match[1]).GetPDBResidueInfo()))
         cap = get_fragment(rdmol, match[0:5])
-        cap = add_prot_Hs(cap)
+        cap = add_Hs(cap)
         caps.append(cap)
         cap_o_ind = cap.GetSubstructMatch(Chem.MolFromSmarts('[C;X4][CX3]=O'))
         cap_o = get_fragment(cap, cap_o_ind, neutralize=False)
@@ -537,7 +536,7 @@ def partition_protein(rdmol, residue_bonds=None, split_heteroatoms=True):
     ss_bond = Chem.MolFromSmarts('[C;X4;H1,H2]SS[C;X4;H1,H2]')
     for match in rdmol.GetSubstructMatches(ss_bond):
         cap = get_fragment(rdmol, match[0:5])
-        cap = add_prot_Hs(cap)
+        cap = add_Hs(cap)
         caps.append(cap)
         cap_s_ind = cap.GetSubstructMatch(Chem.MolFromSmarts('[C;X4]SS[C;X4]'))
         cap_s1 = get_fragment(cap, cap_s_ind[0:2], neutralize=False)
