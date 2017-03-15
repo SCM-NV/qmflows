@@ -546,3 +546,19 @@ def partition_protein(rdmol, residue_bonds=None, split_heteroatoms=True):
         add_fragment(em, cap_s2, match[1], 0, 1)
     frags = Chem.GetMolFrags(em.GetMol(), asMols=True, sanitizeFrags=False)
     return frags, caps
+
+def charge_AAs(rdmol):
+    ionizations = {
+        'ARG_NH2': 1,
+        'LYS_NZ': 1,
+        'GLU_OE2': -1,
+        'ASP_OD2': -1}
+    for atom in rdmol.GetAtoms():
+        resinfo = atom.GetPDBResidueInfo()
+        res_atom = resinfo.GetResidueName() + '_' + resinfo.GetName().strip()
+        try:
+            atom.SetFormalCharge(ionizations[res_atom])
+            Chem.SanitizeMol(rdmol)
+        except KeyError:
+            pass
+        Chem.SanitizeMol(rdmol)

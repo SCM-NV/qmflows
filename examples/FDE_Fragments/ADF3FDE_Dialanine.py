@@ -33,7 +33,7 @@ rdmol = Chem.MolFromPDBBlock(dialanine_pdb)
 # Could be read from file with
 # rdmol = Chem.MolFromPDBFile('dialanine.pdb')
 
-supermol = molkit.add_prot_Hs(rdmol)
+supermol = molkit.add_Hs(rdmol)
 
 # Calculate dipole normally
 supermol_job = dftb(templates.singlepoint, supermol,
