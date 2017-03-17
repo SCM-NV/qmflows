@@ -6,13 +6,13 @@ from rdkit import Chem
 from typing import (Any, Callable, Dict, List)
 
 import base64
+import builtins
 import fnmatch
 import importlib
 import inspect
 import os
 import plams
 import pkg_resources as pkg
-import builtins
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
@@ -50,7 +50,7 @@ class Result:
     Class containing the result associated with a quantum chemistry simulation.
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, properties=None, status='done'):
+                 work_dir=None, properties=None, status='done', warnings=None):
         """
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -75,6 +75,7 @@ class Result:
                         'work_dir': work_dir}
         self.job_name = job_name
         self.status = status
+        self.warnings = warnings
 
     def as_dict(self):
         """
@@ -86,10 +87,11 @@ class Result:
             "molecule": self._molecule,
             "job_name": self.job_name,
             "archive": self.archive,
-            "status": self.status}
+            "status": self.status,
+            "warnings": self.warnings}
 
     def from_dict(cls, settings, molecule, job_name, archive,
-                  status):
+                  status, warnings):
         """
         Methods to deserialize an `Result`` object.
         """
@@ -119,7 +121,7 @@ class Result:
             Because Job: '{}' has failed. Check the output.\n
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
-            `module load AwesomeQuantumPackage/3.1421`
+            `module load AwesomeQuantumPackage/3.141592`
             """.format(prop, self.job_name))
             return None
 
@@ -175,7 +177,6 @@ class Package:
     Only two arguments are required
     """
     def __init__(self, pkg_name):
-        super(Package, self).__init__()
         self.pkg_name = pkg_name
 
     @schedule_hint(
@@ -199,8 +200,7 @@ class Package:
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                if isinstance(mol, Chem.Mol):
-                    mol = molkit.from_rdmol(mol)
+                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -211,13 +211,40 @@ class Package:
                 # Run the job
                 self.prerun()
                 result = self.run_job(job_settings, mol, **kwargs)
-            # Otherwise pass an empty Result instance
-            except plams.PlamsError:
+
+                # Check if there are warnings in the output that render the calculation
+                # useless from the point of view of the user
+                warnings_tolerance = kwargs.get("terminate_job_in_case_of_warnings")
+                output_warnings = result.warnings
+
+                if all(w is not None for w in [warnings_tolerance, output_warnings]):
+                    issues = [w(msg) for msg, w in output_warnings.items()
+                              if w in warnings_tolerance]
+                    if issues:
+                        msg = """
+                        The Following Warning are rendered unacceptable in the Current
+                        Workflow: {}\n
+                        The results from Job: {} are discarded.
+                        """.format(issues, job_name)
+                        result = Result(None, None, job_name=job_name, properties=properties,
+                                        status='failed')
+
+            # Otherwise pass an empty Result instance downstream
+            except plams.PlamsError as err:
+                msg = "Job {} has failed.\n{}".format(job_name, err)
+                warn(msg)
                 result = Result(None, None, job_name=job_name,
                                 properties=properties, status='failed')
             # except Exception as e:
             #     print("Exception e: ", type(e), e.args)
         else:
+            msg = """
+            Job {} has failed. Either the Settings or Molecule
+            objects are None, probably due to a previous calculation failure
+            """.format(job_name, err)
+            warn(msg)
+
+            # Send an empty object downstream
             result = Result(None, None, job_name=job_name,
                             properties=properties, status='failed')
 
@@ -485,6 +512,19 @@ def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
     # there are not keyword arguments in the function
     if not kwargs or not defaults:
         return fun(*args)
-    else:  # extract from kwargs only the used keyword arguments
         d = {k: kwargs[k] for k, _ in defaults}
+    else:  # extract from kwargs only the used keyword arguments
         return fun(*args, **d)
+
+
+def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
+    """
+    Look out for warnings in the output file.
+    """
+    output_files = list(find_file_pattern('*out', plams_dir))
+    if not output_files:
+        msg = "job: {} has failed. check folder: {}".format(job_name, plams_dir)
+        warn(msg)
+        return None
+    else:
+        return parser(output_files[0], package_warnings)
