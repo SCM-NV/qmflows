@@ -53,7 +53,7 @@ def parse_cp2k_warnings(file_name, package_warnings):
 
     # Return dict of Warnings
     try:
-        messages = parse_file(p, file_name).asList()
+        messages = p.parseFile(file_name).asList()
     except ParseException:
         return None
 
