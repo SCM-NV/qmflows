@@ -512,8 +512,8 @@ def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
     # there are not keyword arguments in the function
     if not kwargs or not defaults:
         return fun(*args)
-        d = {k: kwargs[k] for k, _ in defaults}
     else:  # extract from kwargs only the used keyword arguments
+        d = {k: kwargs[k] for k, _ in defaults}
         return fun(*args, **d)
 
 

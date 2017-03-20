@@ -142,23 +142,23 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 status='done'):
+                 status='done', warnings=None):
         # Load available property parser from Json file.
         properties = package_properties['adf']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties, status=status)
+                         properties=properties, status=status, warnings=warnings)
         # Create a KF reader instance
         self.kf = plams.tools.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         """
         Methods to deserialize an `ADF_Result` object.
         """
         plams_dir = archive["plams_dir"].path
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
-                          status)
+                          status, warnings)
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
@@ -246,7 +246,6 @@ class DFTB(Package):
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
 
-
         def selected_atoms():
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
@@ -268,18 +267,17 @@ class DFTB(Package):
                 for k, v in value.items():
                     ks = k.split()
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1])+1,
-                                                       int(ks[2])+1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
+                                                       int(ks[2]) + 1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1,
-                                                             int(ks[2])+1,
-                                                             int(ks[2])+1)
+                        name = 'angle {:d} {:d} {:d}'.format(
+                            int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1,
-                                   int(ks[3]) + 1, int(ks[4]) + 1)
+                        name = 'dihed {:d} {:d} {:d} {:d}'.format(
+                            int(ks[1]) + 1, int(ks[2]) + 1,
+                            int(ks[3]) + 1, int(ks[4]) + 1)
                         settings.specific.dftb.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -299,19 +297,19 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 status='done'):
+                 status='done', warnings=None):
         # Read available propiety parsers from a JSON file
         properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties, status=status)
+                         properties=properties, status=status, warnings=warnings)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         # create a kf reader instance
         self.kf = plams.tools.kftools.KFFile(kf_filename)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         return DFTB_Result(settings, molecule, job_name,
-                           archive["plams_dir"].path, status)
+                           archive["plams_dir"].path, status, warnings)
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):

@@ -216,10 +216,10 @@ class CP2K_Result(Result):
     """
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  properties=package_properties['cp2k'],
-                 status='successful'):
+                 status='successful', warnings=None):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, properties=properties,
-                         status=status)
+                         status=status, warnings=warnings)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status, warnings):

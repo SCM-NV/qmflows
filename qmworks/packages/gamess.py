@@ -121,14 +121,14 @@ class Gamess_Result(Result):
     Class providing access to CP2K result.
     """
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, status='done',
-                 properties=package_properties['gamess']):
+                 work_dir=None, status='done', warnings=None):
+        properties = package_properties['gamess']
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, properties=properties,
-                         status=status)
+                         status=status, warnings=warnings)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.
@@ -145,7 +145,7 @@ class Gamess_Result(Result):
         work_dir = archive.get("work_dir")
         return Gamess_Result(settings, molecule, job_name,
                              plams_dir=plams_dir, work_dir=work_dir,
-                             status=status)
+                             status=status, warnings=warnings)
 
     def __getattr__(self, prop):
         """Returns a section of the results.
