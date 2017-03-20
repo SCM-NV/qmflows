@@ -241,7 +241,7 @@ class Package:
             msg = """
             Job {} has failed. Either the Settings or Molecule
             objects are None, probably due to a previous calculation failure
-            """.format(job_name, err)
+            """.format(job_name)
             warn(msg)
 
             # Send an empty object downstream
