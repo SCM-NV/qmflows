@@ -9,7 +9,7 @@ from itertools import islice
 from pymonad import curry
 from pyparsing import (
     alphanums, alphas, CaselessLiteral, Empty, FollowedBy, Group, Literal,
-    nums, NotAny, oneOf, OneOrMore, Optional, restOfLine, srange,
+    nums, NotAny, oneOf, OneOrMore, Optional, ParseException, restOfLine, srange,
     Suppress, Word)
 
 import fnmatch
@@ -50,9 +50,14 @@ def parse_cp2k_warnings(file_name, package_warnings):
     Parse All the warnings found in an output file
     """
     p = parse_section("*** WARNING", "\n\n")
-    messages = parse_file(p, file_name).asList()
 
     # Return dict of Warnings
+    try:
+        messages = parse_file(p, file_name).asList()
+    except ParseException:
+        return None
+
+    # Search for warnings that match the ones provided by the user
     warnings = {m: assign_warning(package_warnings, m) for m in messages}
 
     if not warnings:
