@@ -48,11 +48,13 @@ class ORCA(Package):
         Translate generic keywords to their corresponding Orca keywords.
         """
 
-        def inithess():
+        def inithess(value):
             """
             Generate an seperate file containing the initial Hessian matrix used as
             guess for the computation.
             """
+            # Convert Hessian to numpy array
+            value = value if not isinstance(value, np.ndarray) else np.ndarray(value)
 
             def format_atom(atom):
                 symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
@@ -68,14 +70,12 @@ class ORCA(Package):
                     ret += '\n'
                     for j in range(dim):
                         ret += '{:7d}     '.format(j)
-                        ret += ' '.join('{:10.6f}'.format(hess[v + 6 * i][j]) for v in range(n_columns))
+                        ret += ' '.join('{:10.6f}'.format(hess[v + 6 * i][j])
+                                        for v in range(n_columns))
                         ret += '\n'
                 return ret
 
             # Check Hessian dimension
-            if not isinstance(value, np.ndarray):
-                value  = np.ndarray
-
             dim = value.size
             if len(value.shape) == 1:
                 dim = int(dim ** 0.5)
@@ -105,7 +105,7 @@ class ORCA(Package):
 
             return settings
 
-        def constraint():
+        def constraint(value):
             cons = ''
             if isinstance(value, Settings):
                 for k, v in value.items():
@@ -120,7 +120,7 @@ class ORCA(Package):
                         warn('Invalid constraint key: ' + k)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def freeze():
+        def freeze(value):
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
@@ -134,7 +134,7 @@ class ORCA(Package):
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def selected_atoms():
+        def selected_atoms(value):
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
@@ -155,7 +155,7 @@ class ORCA(Package):
                      'selected_atoms': selected_atoms,
                      'constraint': constraint}
         if key in functions:
-            functions[key]()
+            functions[key](value)
         else:
             msg = 'Keyword ' + key + ' not implemented for package ORCA'
             warn(msg)
