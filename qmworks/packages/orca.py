@@ -54,7 +54,7 @@ class ORCA(Package):
             guess for the computation.
             """
             # Convert Hessian to numpy array
-            value = value if isinstance(value, np.ndarray) else np.ndarray(value)
+            value = value if isinstance(value, np.ndarray) else np.array(value)
 
             def format_atom(atom):
                 symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
