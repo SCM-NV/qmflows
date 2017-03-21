@@ -10,7 +10,7 @@ from pymonad import curry
 from pyparsing import (
     alphanums, alphas, CaselessLiteral, Empty, FollowedBy, Group, Literal,
     nums, NotAny, oneOf, OneOrMore, Optional, ParseException, restOfLine, srange,
-    Suppress, Word)
+    SkipTo, Suppress, Word)
 
 import fnmatch
 import numpy as np
@@ -20,7 +20,7 @@ import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (
-    floatNumber, minusOrplus, natural, parse_file, parse_section, point)
+    floatNumber, minusOrplus, natural, point)
 from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
@@ -49,7 +49,7 @@ def parse_cp2k_warnings(file_name, package_warnings):
     """
     Parse All the warnings found in an output file
     """
-    p = parse_section("*** WARNING", "\n\n")
+    p = Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n')
 
     # Return dict of Warnings
     try:
