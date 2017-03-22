@@ -116,7 +116,7 @@ class ADF(Package):
                     elif ks[0] == 'angle' and len(ks) == 4:
                         name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1,
                                                              int(ks[2]) + 1,
-                                                             int(ks[2]) + 1)
+                                                             int(ks[3]) + 1)
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
@@ -274,7 +274,7 @@ class DFTB(Package):
                     elif ks[0] == 'angle' and len(ks) == 4:
                         name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1,
                                                              int(ks[2])+1,
-                                                             int(ks[2])+1)
+                                                             int(ks[3])+1)
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
