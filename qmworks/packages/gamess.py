@@ -106,9 +106,48 @@ class GAMESS(Package):
             ifreez = Settings()
             ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
             settings.specific.gamess.update(ifreez)
+
+        def constraint():
+            if isinstance(value, Settings):
+                s = Settings()
+                if len(mol) == 2:
+                    degr = 1
+                    # s['izmat(1)'] = '1,1,2'
+                else:
+                    degr = 3 * len(mol) - 6
+                    s.auto = ".TRUE."
+                    s.dlc = ".TRUE."
+                settings.specific.gamess.contrl.nzvar = degr
+                i = 1
+                for k, v in value.items():
+                    ks = k.split()
+                    # print('--->', ks, type(ks[2]), type(value), v)
+                    if ks[0] == 'dist' and len(ks) == 3:
+                        n = 'ifzmat({:d})'.format(i)
+                        s[n] = "1,{},{}".format(int(ks[1]) + 1, int(ks[2]) + 1)
+                        n = 'fvalue({:d})'.format(i)
+                        s[n] = v
+                    elif ks[0] == 'angle' and len(ks) == 4:
+                        n = 'ifzmat({:d})'.format(i)
+                        s[n] = "2,{},{},{}".format(int(ks[1]) + 1,
+                                                   int(ks[2]) + 1,
+                                                   int(ks[3]) + 1)
+                        n = 'fvalue({:d})'.format(i)
+                        s[n] = v
+                    elif ks[0] == 'dihed' and len(ks) == 5:
+                        n = 'ifzmat({:d})'.format(i)
+                        s[n] = "3,{},{},{},{}".format(int(ks[1]) + 1, int(ks[2]) + 1,
+                                                      int(ks[3]) + 1, int(ks[4]) + 1)
+                        n = 'fvalue({:d})'.format(i)
+                        s[n] = v
+                    else:
+                        warn('Invalid constraint key: ' + k)
+                    i += 1
+                settings.specific.gamess.zmat = s
         # Available translations
         functions = {'freeze': freeze,
-                     'selected_atoms': selected_atoms}
+                     'selected_atoms': selected_atoms,
+                     'constraint': constraint}
         if key in functions:
             functions[key]()
         else:
