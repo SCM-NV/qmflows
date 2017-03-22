@@ -76,11 +76,11 @@ class ORCA(Package):
                 return ret
 
             # Check Hessian dimension
-            dim = value.size
-            if len(value.shape) == 1:
-                dim = int(dim ** 0.5)
+            if value.ndim == 1:
+                dim = int(value.size ** 0.5)
                 hess = np.reshape(value, (dim, dim))
             else:
+                dim = value.shape[0]
                 hess = value
 
             # Header
