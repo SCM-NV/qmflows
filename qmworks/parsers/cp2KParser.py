@@ -76,7 +76,7 @@ def assign_warning(package_warnings, msg):
     if not warnings:
         return RuntimeWarning
     else:
-        warnings[0]
+        return warnings[0]
 
 
 # ===========>Parse Coefficient
