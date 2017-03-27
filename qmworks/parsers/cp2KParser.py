@@ -9,8 +9,8 @@ from itertools import islice
 from pymonad import curry
 from pyparsing import (
     alphanums, alphas, CaselessLiteral, Empty, FollowedBy, Group, Literal,
-    nums, NotAny, oneOf, OneOrMore, Optional, ParseException, restOfLine, srange,
-    SkipTo, Suppress, Word)
+    nums, NotAny, oneOf, OneOrMore, Optional, restOfLine, srange,
+    SkipTo, Suppress, Word, ZeroOrMore)
 
 import fnmatch
 import numpy as np
@@ -49,13 +49,10 @@ def parse_cp2k_warnings(file_name, package_warnings):
     """
     Parse All the warnings found in an output file
     """
-    p = Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n')
+    p = ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
 
     # Return dict of Warnings
-    try:
-        messages = p.parseFile(file_name).asList()
-    except ParseException:
-        return None
+    messages = p.parseFile(file_name).asList()
 
     # Search for warnings that match the ones provided by the user
     warnings = {m: assign_warning(package_warnings, m) for m in messages}
