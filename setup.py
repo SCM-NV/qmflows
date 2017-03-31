@@ -13,6 +13,7 @@ setup(
     keywords='chemistry workflows simulation materials',
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
+              "qmworks.data.dictionaries",
               "qmworks.hdf5",
               "qmworks.packages", "qmworks.parsers",
               "qmworks.templates"],
