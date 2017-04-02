@@ -1,7 +1,7 @@
 
 __all__ = ['add_Hs', 'apply_reaction_smarts', 'apply_template', 'gen_coords_rdmol', 'get_backbone_atoms', 'modify_atom',
            'to_rdmol', 'from_rdmol', 'from_sequence', 'from_smiles', 'from_smarts', 'partition_protein',
-           'write_molblock']
+           'readpdb', 'writepdb']
 
 """
 @author: Lars Ridder
@@ -431,6 +431,7 @@ def write_molblock(plams_mol, file=sys.stdout):
 def readpdb(pdb_file, removeHs=False, return_rdmol=False):
     """
     Generate a molecule from a PDB file
+
     :param pdb_file: The PDB file to read
     :type pdb_file: str or file
     :param bool removeHs: Hydrogens are removed if Trur
@@ -442,6 +443,20 @@ def readpdb(pdb_file, removeHs=False, return_rdmol=False):
         pdb_file = open(pdb_file, 'r')
     pdb_mol = Chem.MolFromPDBBlock(pdb_file.read(), removeHs=removeHs)
     return pdb_mol if return_rdmol else from_rdmol(pdb_mol)
+
+def writepdb(mol, pdb_file=sys.stdout):
+    """
+    Write a PDB file from a molecule
+
+    :parameter mol: molecule to be exported to PDB
+    :type mol: plams.Molecule or rdkit.Chem.Mol
+    :param pdb_file: The PDB file to write to, or a filename
+    :type pdb_file: str or file
+    """
+    mol = to_rdmol(mol)
+    if isinstance(pdb_file, str):
+        pdb_file = open(pdb_file, 'w')
+    pdb_file.write(Chem.MolToPDBBlock(mol))
 
 def add_Hs(mol, forcefield=None, return_rdmol=False):
     """
