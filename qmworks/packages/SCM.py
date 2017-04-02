@@ -74,11 +74,11 @@ class ADF(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in value:
-                    at = 'atom ' + str(a + 1)
+                    at = 'atom ' + str(a)
                     settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
@@ -89,12 +89,12 @@ class ADF(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
@@ -110,18 +110,18 @@ class ADF(Package):
                     ks = k.split()
                     # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
-                                                       int(ks[2]) + 1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]),
+                                                       int(ks[2]))
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1,
-                                                             int(ks[2]) + 1,
-                                                             int(ks[3]) + 1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]),
+                                                             int(ks[2]),
+                                                             int(ks[3]))
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1,
-                                   int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]), int(ks[2]),
+                                   int(ks[3]), int(ks[4]))
                         settings.specific.adf.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -238,11 +238,11 @@ class DFTB(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in value:
-                    at = 'atom ' + str(a + 1)
+                    at = 'atom ' + str(a)
                     settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
 
@@ -253,12 +253,12 @@ class DFTB(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[name] = ""
 
@@ -267,17 +267,17 @@ class DFTB(Package):
                 for k, v in value.items():
                     ks = k.split()
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
-                                                       int(ks[2]) + 1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]),
+                                                       int(ks[2]))
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
                         name = 'angle {:d} {:d} {:d}'.format(
-                            int(ks[1]) + 1, int(ks[2]) + 1, int(ks[2]) + 1)
+                            int(ks[1]), int(ks[2]), int(ks[2]))
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.format(
-                            int(ks[1]) + 1, int(ks[2]) + 1,
-                            int(ks[3]) + 1, int(ks[4]) + 1)
+                            int(ks[1]), int(ks[2]),
+                            int(ks[3]), int(ks[4]))
                         settings.specific.dftb.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)

@@ -14,7 +14,7 @@ jobs = []
 # loop over distances
 for distance in [1.0, 1.1, 1.2]:
     s = Settings()
-    s.constraint['dist 0 1'] = distance
+    s.constraint['dist 1 2'] = distance
     # loop over packages
     for package in [dftb, adf, orca]:
         job_name = package.pkg_name + '_' + str(distance)

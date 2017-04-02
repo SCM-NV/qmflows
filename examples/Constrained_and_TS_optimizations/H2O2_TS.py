@@ -9,7 +9,7 @@ from qmworks import orca, dftb, templates, molkit, Dihedral, run, Settings
 h2o2 = molkit.from_smarts('[H]OO[H]')
 
 # Define dihedral angle
-dihe = Dihedral(0, 1, 2, 3)
+dihe = Dihedral(1, 2, 3, 4)
 
 # Constrained geometry optimization with DFTB
 # The dihedral is set to 0.0 to obtain an approximate TS

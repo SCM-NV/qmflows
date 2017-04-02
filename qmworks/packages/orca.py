@@ -110,12 +110,13 @@ class ORCA(Package):
             if isinstance(value, Settings):
                 for k, v in value.items():
                     ks = k.split()
+                    atoms = [int(a) - 1 for a in ks[1:]]
                     if ks[0] == 'dist' and len(ks) == 3:
-                        cons += '{{ B {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ B {:d} {:d} {:f} C }}'.format(*atoms, v)
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        cons += '{{ A {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ A {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        cons += '{{ D {:s} {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
                     else:
                         warn('Invalid constraint key: ' + k)
             settings.specific.orca.geom.Constraints._end = cons
@@ -127,10 +128,10 @@ class ORCA(Package):
             cons = ''
             if isinstance(value[0], int):
                 for a in value:
-                    cons += '{{ C {:d} C }}'.format(a)
+                    cons += '{{ C {:d} C }}'.format(a - 1)
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
@@ -141,11 +142,11 @@ class ORCA(Package):
             cons = ''
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         cons += '{{ C {:d} C }}'.format(a)
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 

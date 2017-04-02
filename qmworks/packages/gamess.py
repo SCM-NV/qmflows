@@ -80,11 +80,12 @@ class GAMESS(Package):
                 raise RuntimeError(msg)
             sel_coords = []
             if isinstance(value[0], int):
-                for a in value:
+                for v in value:
+                        a = v - 1
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             ifreez = Settings()
             ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
@@ -97,11 +98,11 @@ class GAMESS(Package):
             sel_coords = []
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a+1 not in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             ifreez = Settings()
             ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
@@ -124,20 +125,20 @@ class GAMESS(Package):
                     # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
                         n = 'ifzmat({:d})'.format(i)
-                        s[n] = "1,{},{}".format(int(ks[1]) + 1, int(ks[2]) + 1)
+                        s[n] = "1,{},{}".format(int(ks[1]), int(ks[2]))
                         n = 'fvalue({:d})'.format(i)
                         s[n] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
                         n = 'ifzmat({:d})'.format(i)
-                        s[n] = "2,{},{},{}".format(int(ks[1]) + 1,
-                                                   int(ks[2]) + 1,
-                                                   int(ks[3]) + 1)
+                        s[n] = "2,{},{},{}".format(int(ks[1]),
+                                                   int(ks[2]),
+                                                   int(ks[3]))
                         n = 'fvalue({:d})'.format(i)
                         s[n] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         n = 'ifzmat({:d})'.format(i)
-                        s[n] = "3,{},{},{},{}".format(int(ks[1]) + 1, int(ks[2]) + 1,
-                                                      int(ks[3]) + 1, int(ks[4]) + 1)
+                        s[n] = "3,{},{},{},{}".format(int(ks[1]), int(ks[2]),
+                                                      int(ks[3]), int(ks[4]))
                         n = 'fvalue({:d})'.format(i)
                         s[n] = v
                     else:
