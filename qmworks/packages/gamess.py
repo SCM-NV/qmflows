@@ -46,7 +46,7 @@ class GAMESS(Package):
         r = job.run()
 
         # Relative job path
-        relative_plams_path = '/'.join(r.job.path.split('/'))[-2:]
+        relative_plams_path = '/'.join(r.job.path.split('/')[-2:])
 
         result = Gamess_Result(gamess_settings, mol, r.job.name,
                                plams_dir=relative_plams_path, work_dir=work_dir,

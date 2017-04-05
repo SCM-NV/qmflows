@@ -38,7 +38,7 @@ class ORCA(Package):
         result = job.run()
 
         # Relative job path
-        relative_plams_path = '/'.join(result.job.path.split('/'))[-2:]
+        relative_plams_path = '/'.join(result.job.path.split('/')[-2:])
 
         return ORCA_Result(orca_settings, mol, result.job.name,
                            plams_dir=relative_plams_path, status=job.status)

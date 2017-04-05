@@ -54,7 +54,7 @@ class ADF(Package):
         relative_path_t21 = '/'.join(path_t21.split('/')[-3:])
 
         # Relative job path
-        relative_plams_path = '/'.join(result.job.path.split('/'))[-2:]
+        relative_plams_path = '/'.join(result.job.path.split('/')[-2:])
 
         adf_result = ADF_Result(
             adf_settings, mol, result.job.name, relative_path_t21,
