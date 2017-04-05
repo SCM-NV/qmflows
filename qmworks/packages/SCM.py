@@ -47,10 +47,18 @@ class ADF(Package):
         job = plams.interfaces.adfsuite.ADFJob(name=job_name, molecule=mol,
                                                settings=adf_settings)
         result = job.run()
+        # Path to the tape 21 file
         path_t21 = result._kf.path
 
-        adf_result = ADF_Result(adf_settings, mol, result.job.name, path_t21,
-                                plams_dir=result.job.path, status=job.status)
+        # Relative path to the CWD
+        relative_path_t21 = '/'.join(path_t21.split('/')[-3:])
+
+        # Relative job path
+        relative_plams_path = '/'.join(result.job.path.split('/'))[-2:]
+
+        adf_result = ADF_Result(
+            adf_settings, mol, result.job.name, relative_path_t21,
+            plams_dir=relative_plams_path, status=job.status)
 
         return adf_result
 
@@ -78,7 +86,7 @@ class ADF(Package):
                     settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol in value:
+                    if mol[a + 1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
