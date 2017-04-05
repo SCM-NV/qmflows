@@ -36,7 +36,7 @@ def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
         cmd += [script]
 
     new_cmd = cmd + [filename]
-    ret = subprocess.check_output(new_cmd, cwd=plams_dir).decode('utf-8').split('\n')
+    ret = subprocess.check_output(new_cmd).decode('utf-8').split('\n')
     if ret[-1] == '':
         ret = ret[:-1]
     result = []
