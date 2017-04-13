@@ -48,7 +48,7 @@ class ADF(Package):
                                                settings=adf_settings)
         result = job.run()
         path_t21 = result._kf.path
-
+        
         adf_result = ADF_Result(adf_settings, mol, result.job.name, path_t21,
                                 plams_dir=result.job.path, status=job.status)
 
@@ -221,7 +221,7 @@ class DFTB(Package):
             builtins.config.jm.remove_job(job)
 
         return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path)
+                           plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
