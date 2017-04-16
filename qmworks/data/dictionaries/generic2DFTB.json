@@ -1,5 +1,6 @@
 {
     "optimize": ["task.runtype","GO"],
-    "ts": ["task.runtype","TS"]
+    "ts": ["task.runtype","TS"],
+    "charge": "system.charge"
 }
 

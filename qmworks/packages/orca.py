@@ -48,11 +48,13 @@ class ORCA(Package):
         Translate generic keywords to their corresponding Orca keywords.
         """
 
-        def inithess():
+        def inithess(value):
             """
             Generate an seperate file containing the initial Hessian matrix used as
             guess for the computation.
             """
+            # Convert Hessian to numpy array
+            value = value if isinstance(value, np.ndarray) else np.array(value)
 
             def format_atom(atom):
                 symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
@@ -68,16 +70,17 @@ class ORCA(Package):
                     ret += '\n'
                     for j in range(dim):
                         ret += '{:7d}     '.format(j)
-                        ret += ' '.join('{:10.6f}'.format(hess[v + 6 * i][j]) for v in range(n_columns))
+                        ret += ' '.join('{:10.6f}'.format(hess[v + 6 * i][j])
+                                        for v in range(n_columns))
                         ret += '\n'
                 return ret
 
             # Check Hessian dimension
-            dim = len(value)
-            if len(value.shape) == 1:
-                dim = int(dim ** 0.5)
+            if value.ndim == 1:
+                dim = int(value.size ** 0.5)
                 hess = np.reshape(value, (dim, dim))
             else:
+                dim = value.shape[0]
                 hess = value
 
             # Header
@@ -102,47 +105,48 @@ class ORCA(Package):
 
             return settings
 
-        def constraint():
+        def constraint(value):
             cons = ''
             if isinstance(value, Settings):
                 for k, v in value.items():
                     ks = k.split()
+                    atoms = [int(a) - 1 for a in ks[1:]]
                     if ks[0] == 'dist' and len(ks) == 3:
-                        cons += '{{ B {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ B {:d} {:d} {:f} C }}'.format(*atoms, v)
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        cons += '{{ A {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ A {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        cons += '{{ D {:s} {:s} {:s} {:s} {:f} C }}'.format(*ks[1:], v)
+                        cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
                     else:
                         warn('Invalid constraint key: ' + k)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def freeze():
+        def freeze(value):
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
             cons = ''
             if isinstance(value[0], int):
                 for a in value:
-                    cons += '{{ C {:d} C }}'.format(a)
+                    cons += '{{ C {:d} C }}'.format(a - 1)
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def selected_atoms():
+        def selected_atoms(value):
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
             cons = ''
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         cons += '{{ C {:d} C }}'.format(a)
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
@@ -152,7 +156,7 @@ class ORCA(Package):
                      'selected_atoms': selected_atoms,
                      'constraint': constraint}
         if key in functions:
-            functions[key]()
+            functions[key](value)
         else:
             msg = 'Keyword ' + key + ' not implemented for package ORCA'
             warn(msg)
@@ -162,16 +166,16 @@ class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 status='done'):
+                 status='done', warnings=None):
         properties = package_properties['orca']
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, properties=properties,
-                         status=status)
+                         status=status, warnings=warnings)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         plams_dir = archive["plams_dir"].path
-        return ORCA_Result(settings, molecule, job_name, plams_dir, status)
+        return ORCA_Result(settings, molecule, job_name, plams_dir, status, warnings)
 
     @property
     def molecule(self):

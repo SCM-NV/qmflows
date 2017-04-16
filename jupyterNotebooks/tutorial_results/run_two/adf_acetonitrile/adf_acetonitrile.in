@@ -1,0 +1,38 @@
+atoms
+      1         C      2.419290      0.606560      0.000000 
+      2         C      1.671470      1.829570      0.000000 
+      3         N      1.065290      2.809960      0.000000 
+      4         H      2.000000      0.000000      1.000000 
+      5         H      2.000000      0.000000     -1.000000 
+      6         H      3.600000      0.800000      0.000000 
+end
+
+basis
+  core large
+  type DZP
+end
+
+constraints
+  atom 2
+  atom 3
+  atom 4
+end
+
+geometry
+  optim cartesian
+end
+
+integration
+  accint 6.0
+end
+
+scf
+  converge 1e-06
+  iterations 100
+end
+
+xc
+  lda
+end
+
+end input

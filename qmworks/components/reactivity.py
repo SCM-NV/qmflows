@@ -20,7 +20,7 @@ class Distance:
         if isinstance(mol, Molecule):
             mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
-        return AllChem.GetBondLength(conf, self.atom1, self.atom2)
+        return AllChem.GetBondLength(conf, self.atom1 - 1, self.atom2 - 1)
 
     def get_settings(self, value=None, mol=None):
         s = Settings()
@@ -48,9 +48,9 @@ class Angle:
             mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
         if rad:
-            return AllChem.GetAngleRad(conf, self.atom1, self.atom2, self.atom3)
+            return AllChem.GetAngleRad(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1)
         else:
-            return AllChem.GetAngleDeg(conf, self.atom1, self.atom2, self.atom3)
+            return AllChem.GetAngleDeg(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1)
 
     def get_settings(self, value=None, mol=None):
         s = Settings()
@@ -79,9 +79,9 @@ class Dihedral:
             mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
         if rad:
-            return AllChem.GetDihedralRad(conf, self.atom1, self.atom2, self.atom3, self.atom4)
+            return AllChem.GetDihedralRad(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1)
         else:
-            return AllChem.GetDihedralDeg(conf, self.atom1, self.atom2, self.atom3, self.atom4)
+            return AllChem.GetDihedralDeg(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1)
 
     def get_settings(self, value=None, mol=None):
         s = Settings()

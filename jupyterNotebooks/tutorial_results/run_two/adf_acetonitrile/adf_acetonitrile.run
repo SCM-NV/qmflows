@@ -1,0 +1,4 @@
+#!/bin/sh
+
+$ADFBIN/adf <adf_acetonitrile.in
+

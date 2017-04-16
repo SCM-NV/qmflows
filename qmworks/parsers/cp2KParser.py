@@ -1,4 +1,3 @@
-
 __author__ = "Felipe Zapata"
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
@@ -8,9 +7,10 @@ __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
 from collections import namedtuple
 from itertools import islice
 from pymonad import curry
-from pyparsing import (alphanums, alphas, CaselessLiteral, Empty, FollowedBy,
-                       Group, Literal, nums, NotAny, oneOf, OneOrMore,
-                       Optional, restOfLine, srange, Suppress, Word)
+from pyparsing import (
+    alphanums, alphas, CaselessLiteral, Empty, FollowedBy, Group, Literal,
+    nums, NotAny, oneOf, OneOrMore, Optional, restOfLine, srange,
+    SkipTo, Suppress, Word, ZeroOrMore)
 
 import fnmatch
 import numpy as np
@@ -19,7 +19,8 @@ import re
 import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
-from qmworks.parsers.parser import (floatNumber, minusOrplus, natural, point)
+from qmworks.parsers.parser import (
+    floatNumber, minusOrplus, natural, point)
 from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
@@ -40,7 +41,41 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     5     1 cd  3px      -0.0013339995106232    -0.0100914249163043
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
+# =========>Parse Warnings
 
+
+def parse_cp2k_warnings(file_name, package_warnings):
+    """
+    Parse All the warnings found in an output file
+    """
+    p = ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
+
+    # Return dict of Warnings
+    messages = p.parseFile(file_name).asList()
+
+    # Search for warnings that match the ones provided by the user
+    warnings = {m: assign_warning(package_warnings, m) for m in messages}
+
+    if not warnings:
+        return None
+    else:
+        return warnings
+
+
+def assign_warning(package_warnings, msg):
+    """
+    Assign an specific Warning from the ``package_warnings``
+    or a generic warnings
+    """
+    warnings = [w for k, w in package_warnings.items() if k in msg]
+
+    if not warnings:
+        return RuntimeWarning
+    else:
+        return warnings[0]
+
+
+# ===========>Parse Coefficient
 floatArray = np.vectorize(float)
 
 

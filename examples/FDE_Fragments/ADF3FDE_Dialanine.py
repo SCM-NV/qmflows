@@ -8,11 +8,13 @@ from rdkit import Chem
 # User Defined imports
 from qmworks.packages.SCM import dftb
 
-# For the purpose of the example, define the pdb block here.
-# Could als be read from file.
+import io
+# ----------------------------------------------------------------
 
-dialanine_pdb = '''
-HEADER    OXIDOREDUCTASE                          06-JUL-94   1PBE
+# For the purpose of the example, define the pdb file here.
+
+dialanine_pdb = io.StringIO(
+'''HEADER    OXIDOREDUCTASE                          06-JUL-94   1PBE
 TITLE     CRYSTAL STRUCTURE OF THE P-HYDROXYBENZOATE HYDROXYLASE-SUBSTRATE
 TITLE    2 COMPLEX REFINED AT 1.9 ANGSTROMS RESOLUTION. ANALYSIS OF THE ENZYME-
 TITLE    3 SUBSTRATE AND ENZYME-PRODUCT COMPLEXES
@@ -27,13 +29,11 @@ ATOM    944  C   ALA A 125      33.073 104.318  71.705  1.00 26.31           C
 ATOM    945  O   ALA A 125      32.743 104.415  72.876  1.00 22.69           O
 ATOM    946  CB  ALA A 125      33.596 106.405  70.359  1.00 22.03           C
 END
-'''
+''')
 
-rdmol = Chem.MolFromPDBBlock(dialanine_pdb)
-# Could be read from file with
-# rdmol = Chem.MolFromPDBFile('dialanine.pdb')
+supermol = molkit.readpdb(dialanine_pdb)
 
-supermol = molkit.add_prot_Hs(rdmol)
+supermol = molkit.add_Hs(supermol)
 
 # Calculate dipole normally
 supermol_job = dftb(templates.singlepoint, supermol,

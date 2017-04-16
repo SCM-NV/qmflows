@@ -17,7 +17,7 @@ def test_store_basisSet():
     path_basis = 'test/test_files/basis_turbomole'
     keyBasis = InputKey("basis", [path_basis])
 
-    with h5py.File(path_hdf5, chunks=True) as f5:
+    with h5py.File(path_hdf5) as f5:
         try:
             # Store the basis sets
             turbomole2hdf5(f5, [keyBasis])

@@ -1,0 +1,4 @@
+#!/bin/sh
+
+$ADFBIN/dftb <dftb_geometry_optimization.in
+

@@ -22,8 +22,8 @@ def test_linear_ts():
     settings.basis = "SZ"
     settings.specific.dftb.dftb.scc
 
-    constraint1 = Distance(0, 4)
-    constraint2 = Distance(2, 3)
+    constraint1 = Distance(1, 5)
+    constraint2 = Distance(3, 4)
 
     # scan input
     pes = PES(cnc, constraints=[constraint1, constraint2],

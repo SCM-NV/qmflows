@@ -8,15 +8,17 @@ from rdkit import Chem
 # User Defined imports
 from qmworks.packages.SCM import dftb
 
-# For the purpose of the example, define the pdb block here.
-# Could als be read from file.
+import io
+# ----------------------------------------------------------------
+
+# For the purpose of the example, define the pdb file here.
 
 # It turned out important to rename the terminal carboxyl oxygens
 # to which hydrogens were connected to "OXT" in order for RDKIT
 # to correctly interpret the connectivity of the cys_cys.pdb
 
-cys_cys_pdb = '''
-HEADER
+cys_cys_pdb = io.StringIO(
+'''HEADER
 ATOM      1  N   CYS A   1      10.708  18.274  27.487  1.00  0.00           N
 ATOM      2  CA  CYS A   1      11.790  18.118  26.530  1.00  0.00           C
 ATOM      3  C   CYS A   1      11.911  16.696  25.950  1.00  0.00           C
@@ -43,13 +45,9 @@ ATOM     23  H   CYS A   2      17.819  19.103  28.978  1.00  0.00           H
 ATOM     24  H   CYS A   2      16.673  16.910  29.246  1.00  0.00           H
 ATOM     25  H   CYS A   2      16.973  15.766  27.908  1.00  0.00           H
 ATOM     26  H   CYS A   2      17.213  17.290  25.357  1.00  0.00           H
-'''
+''')
 
-rdmol = Chem.MolFromPDBBlock(cys_cys_pdb, removeHs=False)
-# Could be read from file with
-# rdmol = Chem.MolFromPDBFile('cys_cys.pdb', removeHs=False)
-
-supermol = rdmol
+supermol = molkit.readpdb(cys_cys_pdb)
 
 # Calculate dipole normally
 supermol_job = dftb(templates.singlepoint, supermol,

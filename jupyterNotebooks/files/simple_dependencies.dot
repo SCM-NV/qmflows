@@ -1,0 +1,45 @@
+digraph G {
+
+	edge[arrowhead=vee]
+	node[style=filled, color=white, shape=box]
+
+   subgraph clusterMD{
+	MD[label="Molecular dynamics", shape=octagon]
+
+	f1[label="Frame 1"]
+	f2[label="Frame 2"]
+	f3[label="Frame 3"]
+	fm[label="Frame M"]
+
+	MD -> f1;
+	MD -> f2;
+	MD -> f3;
+	MD -> fm;
+
+	sp1[label="Single\npoint 1"]
+	sp2[label="Single\npoint 2"]	
+	sp3[label="Single\npoint 3"]
+	spm[label="Single\npoint m"]
+
+
+	st1[label="Sucessful"]
+	st2[label="Sucessful"]
+	st3[label="failed"]	
+	stM[label="Sucessful"]	
+
+
+	e1[label="Energy 1"]
+	e2[label="Energy 2"]
+	e3[label="None"]	
+	em[label="Energy m"]
+	
+        f1 -> sp1 -> st1 -> e1;
+	f2 -> sp2 -> st2 -> e2;
+	f3 -> sp3 -> st3 -> e3;
+	fm -> spm -> stM -> em;
+
+	
+	color=cornsilk1;
+	style=filled;
+   }
+}

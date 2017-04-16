@@ -48,7 +48,7 @@ class ADF(Package):
                                                settings=adf_settings)
         result = job.run()
         path_t21 = result._kf.path
-
+        
         adf_result = ADF_Result(adf_settings, mol, result.job.name, path_t21,
                                 plams_dir=result.job.path, status=job.status)
 
@@ -74,11 +74,11 @@ class ADF(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in value:
-                    at = 'atom ' + str(a + 1)
+                    at = 'atom ' + str(a)
                     settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
@@ -89,12 +89,12 @@ class ADF(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
@@ -110,18 +110,18 @@ class ADF(Package):
                     ks = k.split()
                     # print('--->', ks, type(ks[2]), type(value), v)
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]) + 1,
-                                                       int(ks[2]) + 1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]),
+                                                       int(ks[2]))
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]) + 1,
-                                                             int(ks[2]) + 1,
-                                                             int(ks[2]) + 1)
+                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]),
+                                                             int(ks[2]),
+                                                             int(ks[3]))
                         settings.specific.adf.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
                         name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1,
-                                   int(ks[3]) + 1, int(ks[4]) + 1)
+                            format(int(ks[1]), int(ks[2]),
+                                   int(ks[3]), int(ks[4]))
                         settings.specific.adf.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -142,23 +142,23 @@ class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
     def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 status='done'):
+                 status='done', warnings=None):
         # Load available property parser from Json file.
         properties = package_properties['adf']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties, status=status)
+                         properties=properties, status=status, warnings=warnings)
         # Create a KF reader instance
         self.kf = plams.tools.kftools.KFFile(path_t21)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         """
         Methods to deserialize an `ADF_Result` object.
         """
         plams_dir = archive["plams_dir"].path
         path_t21 = join(plams_dir, '{}.t21'.format(job_name))
         return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
-                          status)
+                          status, warnings)
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
@@ -221,7 +221,7 @@ class DFTB(Package):
             builtins.config.jm.remove_job(job)
 
         return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path)
+                           plams_dir=result.job.path, status=job.status)
 
     def postrun(self):
         pass
@@ -238,14 +238,13 @@ class DFTB(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in value:
-                    at = 'atom ' + str(a + 1)
+                    at = 'atom ' + str(a)
                     settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol in value:
+                    if mol[a+1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
-
 
         def selected_atoms():
             settings.specific.dftb.geometry.optim = "cartesian"
@@ -254,12 +253,12 @@ class DFTB(Package):
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a not in value:
+                    if a + 1 not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol.atoms[a].symbol not in value:
+                    if mol[a+1].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[name] = ""
 
@@ -268,18 +267,17 @@ class DFTB(Package):
                 for k, v in value.items():
                     ks = k.split()
                     if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1])+1,
-                                                       int(ks[2])+1)
+                        name = 'dist {:d} {:d}'.format(int(ks[1]),
+                                                       int(ks[2]))
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1])+1,
-                                                             int(ks[2])+1,
-                                                             int(ks[2])+1)
+                        name = 'angle {:d} {:d} {:d}'.format(
+                            int(ks[1]), int(ks[2]), int(ks[2]))
                         settings.specific.dftb.constraints[name] = v
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]) + 1, int(ks[2]) + 1,
-                                   int(ks[3]) + 1, int(ks[4]) + 1)
+                        name = 'dihed {:d} {:d} {:d} {:d}'.format(
+                            int(ks[1]), int(ks[2]),
+                            int(ks[3]), int(ks[4]))
                         settings.specific.dftb.constraints[name] = v
                     else:
                         warn('Invalid constraint key: ' + k)
@@ -299,19 +297,19 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
     def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 status='done'):
+                 status='done', warnings=None):
         # Read available propiety parsers from a JSON file
         properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties, status=status)
+                         properties=properties, status=status, warnings=warnings)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         # create a kf reader instance
         self.kf = plams.tools.kftools.KFFile(kf_filename)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status):
+    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         return DFTB_Result(settings, molecule, job_name,
-                           archive["plams_dir"].path, status)
+                           archive["plams_dir"].path, status, warnings)
 
     @property
     def molecule(self, unit='bohr', internal=False, n=1):

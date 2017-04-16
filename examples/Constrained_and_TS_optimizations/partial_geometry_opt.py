@@ -5,7 +5,7 @@ methanol = molkit.from_smiles('CO')
 
 # optimize only H atoms
 s = Settings()
-s.freeze = [0, 1]
+s.freeze = [1, 2]
 geom_job1 = adf(templates.geometry.overlay(s), methanol, job_name='geom_job1').molecule
 
 # optimize only H atoms
