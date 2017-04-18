@@ -32,8 +32,11 @@ class DIRAC(Package):
                                               molecule=mol)
         result = job.run()
 
+        # Relative job path
+        relative_plams_path = '/'.join(result.job.path.split('/')[-2:])
+
         return DIRAC_Result(dirac_settings, mol, result.job.name,
-                            plams_dir=result.job.path, status=job.status)
+                            plams_dir=relative_plams_path, status=job.status)
 
     def postrun(self):
         pass

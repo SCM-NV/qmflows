@@ -45,8 +45,11 @@ class GAMESS(Package):
                                                 settings=gamess_settings)
         r = job.run()
 
+        # Relative job path
+        relative_plams_path = '/'.join(r.job.path.split('/')[-2:])
+
         result = Gamess_Result(gamess_settings, mol, r.job.name,
-                               plams_dir=r.job.path, work_dir=work_dir,
+                               plams_dir=relative_plams_path, work_dir=work_dir,
                                status=job.status)
 
         return result
@@ -85,7 +88,7 @@ class GAMESS(Package):
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol in value:
+                    if mol[a + 1].symbol in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             ifreez = Settings()
             ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
@@ -98,11 +101,11 @@ class GAMESS(Package):
             sel_coords = []
             if isinstance(value[0], int):
                 for a in range(len(mol)):
-                    if a+1 not in value:
+                    if a + 1 not in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol not in value:
+                    if mol[a + 1].symbol not in value:
                         sel_coords += [str(i) for i in range(a * 3 + 1, a * 3 + 4)]
             ifreez = Settings()
             ifreez.statpt = "IFREEZ(1)=" + ",".join(sel_coords)
