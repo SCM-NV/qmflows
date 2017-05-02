@@ -80,10 +80,7 @@ class CP2K(Package):
         warnings = parse_output_warnings(job_name, r.job.path,
                                          parse_cp2k_warnings, cp2k_warnings)
 
-        # Relative job path
-        relative_plams_path = '/'.join(r.job.path.split('/')[-2:])
-
-        result = CP2K_Result(cp2k_settings, mol, job_name, relative_plams_path,
+        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path,
                              work_dir, status=job.status, warnings=warnings)
 
         return result
