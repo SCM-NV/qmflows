@@ -25,6 +25,7 @@
         "kt2": {"gga":"KT2"},
         "b3lyp": {"hybrid":"B3LYP"},
         "b3lyp*": {"hybrid":"B3LYP*"},
+        "camy-b3lyp": {"hybrid": "CAMY-B3LYP", "Xcfun": ""},
         "b1lyp": {"hybrid":"B1LYP"},
         "kmlyp": {"hybrid":"KMLYP"},
         "o3lyp": {"hybrid":"O3LYP"},

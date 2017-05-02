@@ -15,21 +15,25 @@ from .templates import (freq, geometry, get_template, singlepoint, ts)
 from .settings import Settings
 from .utils import (chunksOf, concat, concatMap, dict2Setting,
                     settings2Dict, zipWith, zipWith3)
-from .components import *
+from .components import (
+    adf_fragmentsjob, Angle, Dihedral, Distance,
+    find_first_job, Fragment, mfcc, MFCC_Result, PES,
+    select_max, select_min)
 
 
-__all__ = ['AtomBasisData', 'AtomBasisKey', 'AtomXYZ', 'CGF', 'InfoMO',
-           'InputKey', 'MO', 'Package', 'Result', 'SerMolecule',
-           'SerSettings', 'Settings', 'StoreasHDF5', 'adf',
-           'apply_reaction_smarts',
-           'apply_template', 'chunksOf', 'concat', 'concatMap', 'cp2k',
-           'cp2k2hdf5', 'dftb', 'dict2Setting', 'dirac', 'dump_to_hdf5',
-           'freq', 'gen_coords_rdmol', 'geometry',
-           'get_template', 'json2Settings', 'manyXYZ', 'modify_atom',
-           'orca', 'parse_string_xyz', 'to_rdmol', 'from_rdmol',
-           'readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
-           'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
-           'read_cp2k_number_of_orbitals', 'registry',
-           'run', 'select_max',
-           'from_sequence', 'settings2Dict', 'singlepoint', 'from_smiles',
-           'ts', 'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']
+__all__ = [
+    'Angle', 'AtomBasisData', 'AtomBasisKey', 'AtomXYZ',
+    'CGF', 'Dihedral', 'Distance', 'Fragment',
+    'InfoMO', 'InputKey', 'MO', 'MFCC_Result', 'Package', 'PES',
+    'Result', 'SerMolecule', 'SerSettings',
+    'Settings', 'StoreasHDF5',
+    'adf', 'adf_fragmentsjob', 'apply_reaction_smarts', 'apply_template',
+    'chunksOf', 'concat', 'concatMap', 'cp2k', 'cp2k2hdf5', 'dftb',
+    'dict2Setting', 'dirac', 'dump_to_hdf5', 'find_first_job', 'freq',
+    'from_sequence',  'from_smiles', 'gamess', 'gen_coords_rdmol', 'geometry',
+    'get_template', 'json2Settings', 'manyXYZ', 'mfcc', 'modify_atom', 'orca',
+    'parse_string_xyz', 'to_rdmol', 'from_rdmol', 'read_cp2k_coefficients',
+    'readCp2KOverlap', 'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
+    'read_cp2k_number_of_orbitals', 'registry', 'run', 'select_max',
+    'select_max', 'select_min', 'settings2Dict', 'singlepoint', 'ts',
+    'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']
