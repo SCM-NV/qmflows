@@ -21,7 +21,7 @@ floatNumberDot = Regex(r'(\-)?(\d+)?(\.)(\d*)?([eE][\-\+]\d+)?')
 
 
 # Parse Utilities
-anyChar     = Regex('.')
+anyChar = Regex('.')
 skipAnyChar = Suppress(anyChar)
 skipSupress = lambda z: Suppress(SkipTo(z))
 skipLine = Suppress(skipSupress('\n'))

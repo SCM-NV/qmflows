@@ -139,7 +139,8 @@ def parse_molecular_orbitals(file_name):
     block_lines = n_contracted + 4
 
     tuple_energies, tuple_coeffs = tuple(
-        zip(*(read_column_orbitals(xs) for xs in chunksOf(lines, block_lines))))
+        zip(*(read_column_orbitals(xs)
+              for xs in chunksOf(lines, block_lines))))
 
     return np.hstack(tuple_energies), np.hstack(tuple_coeffs)
 
@@ -178,6 +179,31 @@ def parse_basis_set(file_name):
 
 def create_parser_element():
     """
-    Parser to read the basis set of a given element
+    Parser to read the basis set of a given element in
+    the following format:
+
+    # Basis set for element : O
+      NewGTO O
+      S 5
+        1    2266.1767785000     -0.0053893504
+        2     340.8701019100     -0.0402347214
+        3      77.3631351670     -0.1800818421
+        4      21.4796449400     -0.4682885766
+        5       6.6589433124     -0.4469261716
+      S 1
+        1       0.8097597567      1.0000000000
+      S 1
+        1       0.2553077223      1.0000000000
+      P 3
+        1      17.7215043170      0.0626302488
+        2       3.8635505440      0.3333113849
+        3       1.0480920883      0.7414863830
+      P 1
+        1       0.2764154441      1.0000000000
+      D 1
+        1       1.2000000000      1.0000000000
+       end;
     """
+    # header = pa.Suppress(pa.Literal('# Basis set for element :')) + \
+    #          pa.Word(pa.alphas) + skipLine
     pass
