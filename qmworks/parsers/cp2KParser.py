@@ -15,12 +15,11 @@ from pyparsing import (
 import fnmatch
 import numpy as np
 import os
-import re
 import subprocess
 # ==================> Internal modules <====================
 from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.parsers.parser import (
-    floatNumber, minusOrplus, natural, point)
+    floatNumber, minusOrplus, natural, point, try_search_pattern)
 from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
@@ -257,7 +256,7 @@ def read_mos_data_input(path_input):
 
     return added_mos, range_mos
 
-    
+
 def read_cp2k_number_of_orbitals(file_name):
     """
     Look for the line ' Number of molecular orbitals:'
@@ -272,24 +271,11 @@ def read_cp2k_number_of_orbitals(file_name):
     return MO_metadata(*[int(x) for x in xs])
 
 
-def try_search_pattern(pat, file_name):
-    """
-    Search for an specific pattern in  a file
-    """
-    try:
-        with open(file_name, 'r') as f:
-            for line in f:
-                if re.search(pat, line):
-                    return line
-    except NameError:
-        return None
-    except FileNotFoundError:
-        msg2 = 'There is not a file: {}\n'.format(file_name)
-        raise RuntimeError(msg2)
 
-
-# Molecular Orbital Coefficients and EigenValues
 def move_restart_coeff(path):
+    """
+    Rename Molecular Orbital Coefficients and EigenValues
+    """
     root, file_name = os.path.split(path)
     # Current work directory
     cwd = os.path.realpath('.')

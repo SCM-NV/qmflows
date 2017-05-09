@@ -15,5 +15,6 @@
 		"kwargs": {"script": "/ATOM       NA         ZA/ {getline; while ($0 != \"\") {print $5;getline}}"}},
     "hessian": {"parser": "orca_parser", "function": "parse_hessian", "file_ext": "hess"},
     "frequencies": {"parser": "orca_parser", "function": "parse_frequencies", "file_ext": "hess"},
-    "normal_modes": {"parser": "orca_parser", "function": "parse_normal_modes", "file_ext": "hess"}
+    "normal_modes": {"parser": "orca_parser", "function": "parse_normal_modes", "file_ext": "hess"},
+    "orbitals": {"parser":  "orca_parser", "function": "parse_molecular_orbitals", "file_ext": "out"}
 }

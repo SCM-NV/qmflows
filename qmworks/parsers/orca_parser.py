@@ -2,13 +2,15 @@
 from plams import (Atom, Molecule)
 from pyparsing import (alphanums, Group, OneOrMore, Word)
 from .parser import (floatNumber, parse_file, parse_section, skipLine,
-                     skipSupress, string_array_to_molecule)
+                     skipSupress, string_array_to_molecule, try_search_pattern)
 from qmworks.utils import chunksOf
 from .xyzParser import manyXYZ
 
 import numpy as np
 
 # Type hints
+from typing import (List, Tuple)
+
 Vector = np.ndarray
 Matrix = np.ndarray
 
@@ -114,3 +116,50 @@ def read_block(lines):
     :returns: Numpy array
     """
     return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))
+
+
+def parse_molecular_orbitals(file_name):
+    """
+    Read the Molecular orbital from the orca output
+    """
+    n_contracted = try_search_pattern(
+        "# of contracted basis functions", file_name).split()[-1]
+
+    # Parse the blocks of MOs
+    start = 'MOLECULAR ORBITALS'
+    end = '\n\n'
+    block = parse_file(parse_section(start, end), file_name).asList()
+
+    # split the block in lines  discarding the first line
+    lines = block[0].splitlines()[1:]
+
+    # Lines in each block
+    n_contracted = int(n_contracted)
+    block_lines = n_contracted + 4
+
+    tuple_energies, tuple_coeffs = tuple(
+        zip(*(read_column_orbitals(xs) for xs in chunksOf(lines, block_lines))))
+
+    return np.hstack(tuple_energies), np.hstack(tuple_coeffs)
+
+
+def read_column_orbitals(lines: List) -> Tuple:
+    """
+    Read a set of maximum 6 columns containing the Molecular orbitals in a
+      format similar to:
+                        0         1         2         3         4         5
+                   -19.12661  -0.94591  -0.47899  -0.35256  -0.28216   0.00756
+                     2.00000   2.00000   2.00000   2.00000   2.00000   0.00000
+                    --------  --------  --------  --------  --------  --------
+    0H   1s        -0.002625 -0.226108 -0.331594 -0.177649  0.000002 -0.074461
+    0H   2s         0.002789 -0.015914 -0.107136 -0.054883  0.000001 -0.398168
+    0H   1pz       -0.001404 -0.016000 -0.008447 -0.009195  0.027232  0.002729
+    0H   1px        0.002631  0.023125  0.025515 -0.010664  0.005733  0.008004
+    0H   1py       -0.001684 -0.022031 -0.006086 -0.022644 -0.013760  0.008735
+    """
+    energies = np.array(lines[1].split(), dtype=np.float)
+
+    coefficients = np.array(
+        [z.split()[2:] for z in lines[4:]], dtype=np.float)
+
+    return energies, coefficients
