@@ -7,6 +7,7 @@ from qmworks.utils import chunksOf
 from .xyzParser import manyXYZ
 
 import numpy as np
+import pyparsing as pa
 
 # Type hints
 from typing import (List, Tuple)
@@ -163,3 +164,20 @@ def read_column_orbitals(lines: List) -> Tuple:
         [z.split()[2:] for z in lines[4:]], dtype=np.float)
 
     return energies, coefficients
+
+
+def parse_basis_set(file_name):
+    """
+    Read the basis set used by Orca. It is printed by specifying the keyword:
+      !printbase
+    """
+    pass
+    # parserElements = create_parser_element()
+    # parser = pa.Suppress(header) + pa.OneorMore(parserElements)
+
+
+def create_parser_element():
+    """
+    Parser to read the basis set of a given element
+    """
+    pass
