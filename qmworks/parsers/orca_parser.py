@@ -1,8 +1,10 @@
 
+from itertools import chain
 from plams import (Atom, Molecule)
 from pyparsing import (alphanums, Group, OneOrMore, Word)
-from .parser import (floatNumber, parse_file, parse_section, skipLine,
+from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule, try_search_pattern)
+from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
 from qmworks.utils import chunksOf
 from .xyzParser import manyXYZ
 
@@ -119,7 +121,7 @@ def read_block(lines):
     return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))
 
 
-def parse_molecular_orbitals(file_name):
+def parse_molecular_orbitals(file_name: str) -> Tuple:
     """
     Read the Molecular orbital from the orca output
     """
@@ -142,7 +144,7 @@ def parse_molecular_orbitals(file_name):
         zip(*(read_column_orbitals(xs)
               for xs in chunksOf(lines, block_lines))))
 
-    return np.hstack(tuple_energies), np.hstack(tuple_coeffs)
+    return InfoMO(np.hstack(tuple_energies), np.hstack(tuple_coeffs))
 
 
 def read_column_orbitals(lines: List) -> Tuple:
@@ -167,14 +169,54 @@ def read_column_orbitals(lines: List) -> Tuple:
     return energies, coefficients
 
 
-def parse_basis_set(file_name):
+def parse_basis_set(file_name: str) -> Tuple:
     """
     Read the basis set used by Orca. It is printed by specifying the keyword:
       !printbase
     """
-    pass
-    # parserElements = create_parser_element()
-    # parser = pa.Suppress(header) + pa.OneorMore(parserElements)
+    parse_basis_name = skipSupress('Your calculation utilizes the basis: ') + \
+        skipSupress(pa.Literal(':')) + pa.Suppress(pa.Literal(':')) + \
+        pa.SkipTo('\n')
+    header = skipSupress('BASIS SET IN INPUT FORMAT') + skipLine * 2
+    parserElements = create_parser_element()
+    parser = parse_basis_name + pa.Suppress(header) + \
+        pa.Group(pa.OneOrMore(parserElements))
+
+    basis = parse_file(parser, file_name).asList()
+
+    return create_basis_data(basis)
+
+
+def create_basis_data(basis: List) -> Tuple:
+    """
+    Convert the parse data into Contracted Gauss functions information
+    """
+    basis_name = basis[0]
+    atom_keys, atom_basis = zip(*[create_CGFs_per_atom(basis_name, xs)
+                                  for xs in basis[1]])
+
+    return atom_keys, atom_basis
+
+
+def create_CGFs_per_atom(basis_name: str, xs: List) -> Tuple:
+    """
+    Create the structure of the CGFs for each atom
+    """
+    atom_name = xs[0]
+    formats, primitives = zip(*[((x[0], int(x[1])), x[2:]) for x in xs[1:]])
+
+    # flatten de primitives
+    primitives = list(chain(*chain(*primitives)))
+
+    # order in coefficients and exponents the CGFs
+    nPrimitives = len(primitives) // 2
+    exponents, coefficients = np.array(
+        primitives, dtype=np.float).reshape(nPrimitives, 2).transpose()
+
+    atom_basis_key = AtomBasisKey(atom_name, basis_name, formats)
+    atom_basis_data = AtomBasisData(exponents, coefficients)
+
+    return atom_basis_key, atom_basis_data
 
 
 def create_parser_element():
@@ -204,6 +246,11 @@ def create_parser_element():
         1       1.2000000000      1.0000000000
        end;
     """
-    # header = pa.Suppress(pa.Literal('# Basis set for element :')) + \
-    #          pa.Word(pa.alphas) + skipLine
-    pass
+    header = pa.Suppress(pa.Literal('# Basis set for element :')) + \
+        pa.Word(pa.alphas) + skipLine
+
+    parseCGF = pa.Group(
+        pa.Word(pa.alphas, exact=1)  + natural +
+        pa.Group(pa.OneOrMore(pa.Suppress(natural) + floatNumber * 2)))
+
+    return pa.Group(header + pa.OneOrMore(parseCGF) + pa.Suppress(pa.Literal('end;')))

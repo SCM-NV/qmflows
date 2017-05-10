@@ -271,7 +271,6 @@ def read_cp2k_number_of_orbitals(file_name):
     return MO_metadata(*[int(x) for x in xs])
 
 
-
 def move_restart_coeff(path):
     """
     Rename Molecular Orbital Coefficients and EigenValues
