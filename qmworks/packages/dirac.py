@@ -1,14 +1,9 @@
+__all__ = ['dirac']
 
-# =======>  Standard and third party Python Libraries <======
-from warnings import warn
-import plams
-
-# ==================> Internal modules <====================
 from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
-
-# ==================> <======================
-__all__ = ['dirac', 'DIRAC', 'DIRAC_Result']
+from scm import plams
+from warnings import warn
 
 
 class DIRAC(Package):

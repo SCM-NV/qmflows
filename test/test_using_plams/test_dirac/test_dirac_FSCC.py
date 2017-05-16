@@ -1,6 +1,6 @@
 
-from plams import (Atom, Molecule)
-from qmworks import (dirac, run, Settings)
+from scm.plams import (Atom, Molecule)
+from qmworks import (dirac, Settings)
 
 
 def main():

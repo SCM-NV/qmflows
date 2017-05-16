@@ -1,7 +1,7 @@
 
 from nose.plugins.attrib import attr
-from plams import Molecule
 from qmworks import (concat, Settings, templates, zipWith)
+from scm.plams import Molecule
 
 # User Defined imports
 from qmworks.packages.gamess import gamess

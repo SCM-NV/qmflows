@@ -1,6 +1,6 @@
 
 from noodles import gather
-from plams import Molecule
+from scm.plams import Molecule
 from qmworks import (dirac, run, Settings)
 
 
@@ -45,8 +45,8 @@ def create_job(name, mol):
 
     s.specific.dirac.molecule.coordinates.units = "AU"
 
-
     return  dirac(s, mol, job_name=name)
 
+
 if __name__ == "__main__":
-    main()
+    test_numgrad()

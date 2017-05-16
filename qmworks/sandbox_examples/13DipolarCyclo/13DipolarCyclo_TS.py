@@ -5,9 +5,9 @@ from qmworks import Settings, templates, run
 from qmworks.packages.SCM import dftb
 from qmworks.packages import orca
 from qmworks.components import Distance
-
-import plams
+from scm import plams
 import io
+
 # ========== =============
 
 # 5 membered ring from which ozone will dissociate

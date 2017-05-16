@@ -4,9 +4,10 @@ from qmworks import Settings, templates
 from qmworks.packages import Result
 from qmworks.packages.SCM import adf
 from noodles import gather, schedule, Storable
-from plams import Molecule
+from scm.plams import Molecule
 
 import numpy as np
+
 
 @schedule
 class MFCC_Result(Result):
@@ -41,6 +42,7 @@ class Fragment(Storable):
     def __init__(self, result, mol_list):
         self.result = result
         self.mol_list = gather(*mol_list)
+
 
 @schedule
 def adf_fragmentsjob(settings, mol, *frozen_frags):

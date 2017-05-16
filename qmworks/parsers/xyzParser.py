@@ -3,7 +3,7 @@ __author__ = "Felipe Zapata"
 __all__ = ['parse_string_xyz', 'readXYZ', 'manyXYZ', "string_to_plams_Molecule"]
 
 # ===================> Standard libraries and third-party <====================
-from plams import (Atom, Molecule)
+from scm.plams import (Atom, Molecule)
 from pyparsing   import (alphas, Group, LineEnd, OneOrMore, restOfLine,
                          Suppress, Word)
 

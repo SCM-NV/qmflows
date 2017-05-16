@@ -1,9 +1,9 @@
 
 __all__ = ['Settings']
 
-import plams
 
 from noodles import Storable
+from scm import plams
 from six import string_types
 
 
@@ -107,11 +107,10 @@ class Settings(plams.core.settings.Settings, Storable):
                 if name not in self or not isinstance(self[name], Settings):
                     self[name] = other[name].copy()
                 else:
-                    # __block_replace can be used to remove all existing key value pairs in an input block
+                    # _block_replace can be used to remove all existing key value pairs in an input block
                     if ('__block_replace' in other[name] and other[name]['__block_replace'] == True) or \
                         ('__block_replace' in self[name] and self[name]['__block_replace'] == True):
                         self[name] = Settings()
                     self[name].update(other[name])
             else:
                 self[name] = other[name]
-
