@@ -3,7 +3,6 @@ from qmworks import (templates, run)
 from qmworks import molkit
 from qmworks.components import mfcc
 from noodles import gather
-from rdkit import Chem
 
 # User Defined imports
 from qmworks.packages.SCM import dftb

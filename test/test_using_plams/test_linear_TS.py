@@ -1,6 +1,6 @@
 # Default imports
 from nose.plugins.attrib import attr
-from plams import Molecule
+from scm.plams import Molecule
 from qmworks import (Settings, run)
 
 # User Defined imports

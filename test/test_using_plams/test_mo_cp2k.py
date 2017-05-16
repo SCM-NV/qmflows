@@ -3,7 +3,7 @@
 from collections import namedtuple
 from nose.plugins.attrib import attr
 from os.path import join
-from plams import Molecule
+from scm.plams import Molecule
 from qmworks import (run, Settings, templates)
 from qmworks.hdf5 import dump_to_hdf5
 from qmworks.packages import cp2k

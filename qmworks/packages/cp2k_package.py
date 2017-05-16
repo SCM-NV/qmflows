@@ -1,13 +1,13 @@
-# =======>  Standard and third party Python Libraries <======
-from warnings import warn
-import plams
+__all__ = ['cp2k']
 
-# ==================> Internal modules <====================
 from qmworks.data.dictionaries.warningsCP2K import cp2k_warnings
 from qmworks.packages.packages import (
     Package, package_properties, parse_output_warnings, Result)
 from qmworks.parsers.cp2KParser import parse_cp2k_warnings
 from qmworks.settings import Settings
+from scm import plams
+from warnings import warn
+
 
 # ====================================<>=======================================
 charge_dict = {

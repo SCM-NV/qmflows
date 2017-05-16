@@ -1,6 +1,6 @@
 # Default imports
 
-from plams import Molecule
+from scm.plams import Molecule
 from qmworks import (Settings, run, templates)
 from qmworks.packages.SCM import adf
 from qmworks.components import Fragment, adf_fragmentsjob

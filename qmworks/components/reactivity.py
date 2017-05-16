@@ -4,7 +4,7 @@ __all__ = ['Distance', 'Angle', 'Dihedral', 'PES']
 from qmworks import templates, molkit
 from qmworks.settings import Settings
 from noodles import gather, schedule
-from plams import Molecule
+from scm.plams import Molecule
 from rdkit.Chem import AllChem
 
 
@@ -78,10 +78,11 @@ class Dihedral:
         if isinstance(mol, Molecule):
             mol = molkit.to_rdmol(mol)
         conf = mol.GetConformer()
+        xs = [self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1]
         if rad:
-            return AllChem.GetDihedralRad(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1)
+            return AllChem.GetDihedralRad(conf, *xs)
         else:
-            return AllChem.GetDihedralDeg(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1)
+            return AllChem.GetDihedralDeg(conf, *xs)
 
     def get_settings(self, value=None, mol=None):
         s = Settings()
@@ -91,7 +92,8 @@ class Dihedral:
                 raise RuntimeError(msg)
             else:
                 value = self.get_current_value(mol)
-        s["dihed {:d} {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3, self.atom4)] = value
+        key = "dihed {:d} {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3, self.atom4)
+        s[key] = value
         return s
 
 

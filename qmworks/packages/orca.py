@@ -1,12 +1,13 @@
-# =======>  Standard and third party Python Libraries <======
+__all__ = ['orca']
+
 from os.path import join
 from qmworks.settings import Settings
 from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.parsers.orca_parser import parse_molecule
+from scm import plams
 from warnings import warn
 
 import builtins
-import plams
 import numpy as np
 # ============================= Orca ==========================================
 

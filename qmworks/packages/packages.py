@@ -3,6 +3,7 @@
 from functools import partial
 from os.path import join
 from rdkit import Chem
+from scm import plams
 from typing import (Any, Callable, Dict, List)
 
 import base64
@@ -11,7 +12,6 @@ import fnmatch
 import importlib
 import inspect
 import os
-import plams
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================

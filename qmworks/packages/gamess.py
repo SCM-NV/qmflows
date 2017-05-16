@@ -1,11 +1,9 @@
-# =======>  Standard and third party Python Libraries <======
+__all__ = ['gamess']
+
 from qmworks.packages.packages import (Package, package_properties, Result)
 from qmworks.settings import Settings
+from scm import plams
 from warnings import warn
-
-import plams
-# ======================================<>=====================================
-__all__ = ['gamess']
 
 
 class GAMESS(Package):
