@@ -1,6 +1,6 @@
 # Default imports
 from qmworks import Settings, templates, run, molkit
-#from qmworks.draw_workflow import draw_workflow
+# from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
@@ -9,7 +9,6 @@ from qmworks.packages.orca import orca as adf
 # from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
 from qmworks.components import Distance, select_max, select_min
 
-import plams
 # ========== =============
 
 hartree2kcal = 627.5095

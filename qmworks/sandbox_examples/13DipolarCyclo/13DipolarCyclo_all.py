@@ -4,11 +4,11 @@ from qmworks.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb#, adf
+from qmworks.packages.SCM import dftb
 from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
 from qmworks.components import Distance, PES, select_max
 
-import plams
+from scm import plams
 # ========== =============
 
 plams.init()

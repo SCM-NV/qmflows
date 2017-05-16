@@ -8,9 +8,9 @@ __all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting',
 from functools import  wraps
 from itertools import chain
 from pymonad   import curry
+from scm import plams
 
 import builtins
-import plams
 # ======================> List Functions <========================
 
 

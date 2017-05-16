@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
-from plams import Molecule
 from qmworks import (dftb, run, templates)
+from scm.plams import Molecule
 
 
 @attr('slow')

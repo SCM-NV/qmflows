@@ -1,5 +1,5 @@
 
-from plams import Molecule
+from scm.plams import Molecule
 from qmworks import (Settings, templates, run)
 
 # User Defined imports

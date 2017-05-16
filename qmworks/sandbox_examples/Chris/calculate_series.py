@@ -1,10 +1,10 @@
 # Default imports
-from qmworks import (Settings, templates, run, molkit)
 from noodles import gather
+from qmworks import (Settings, templates, run, molkit)
 
 # User Defined imports
 from qmworks import orca, dftb
-import plams
+from scm import plams
 # ========== =============
 
 template = "Cc1cc(C)cc(C)c1[PH+](c2c(C)cc(C)cc2C)C[BH3-]"
@@ -39,7 +39,7 @@ for mod, smirks in list_of_modifications.items():
     s.freeze = freeze
     s.specific.dftb.dftb.resourcesdir = 'QUASINANO2015'
     partial_geometry = dftb(templates.geometry.overlay(s), temp2,
-                           job_name="partial_opt_" + mod)
+                            job_name="partial_opt_" + mod)
     freq_dftb = dftb(templates.freq.overlay(s), partial_geometry.molecule,
                      job_name="freq_" + mod)
     s = Settings()
@@ -48,9 +48,9 @@ for mod, smirks in list_of_modifications.items():
     s.specific.orca.basis.pol = "_d"
     s.inithess = freq_dftb.hessian
     ts = orca(templates.ts.overlay(s), freq_dftb.molecule,
-                        job_name="ts_" + mod)
+              job_name="ts_" + mod)
     freq = orca(templates.freq.overlay(s), ts.molecule,
-                    job_name="freq" + mod)
+                job_name="freq" + mod)
     job_list.append(freq)
 
 results = run(gather(*job_list), folder="Chris_results", n_processes=1)
