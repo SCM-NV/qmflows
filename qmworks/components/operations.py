@@ -7,8 +7,8 @@ from noodles import schedule_hint, find_first
 @schedule_hint()
 def find_first_job(pred, packagelist, settings, molecule, job_name, **kwargs):
     joblist = [package(
-        settings, molecule, job_name=package.pkg_name+"_"+job_name, **kwargs)
-               for package in packagelist]
+        settings, molecule, job_name=package.pkg_name + "_" + job_name, **kwargs)
+        for package in packagelist]
     return find_first(pred, joblist)
 
 
@@ -57,9 +57,9 @@ def select_min(results, prop='energy'):
 
 def sel_min(results, prop):
     line = "From " + prop + " values: "
-    for i in range(len(results)):
-        if isinstance(results[i], list):
-            n = sel_min(results[i], prop)
+    for i, r  in enumerate(results):
+        if isinstance(r, list):
+            n = sel_min(r, prop)
             results[i] = n
         else:
             line += "{:12.6f}".format(results[i].__getattr__(prop), end="")

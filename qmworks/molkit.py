@@ -116,7 +116,7 @@ def set_PDBresidueInfo(rdkit_atom, pdb_info):
         atom_pdb_residue_info.__getattribute__(set_function)(value)
     rdkit_atom.SetMonomerInfo(atom_pdb_residue_info)
 
-    
+
 def from_smiles(smiles, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
     Generates plams molecule(s) from a smiles strings.

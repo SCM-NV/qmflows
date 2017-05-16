@@ -51,7 +51,7 @@ class ADF(Package):
         result = job.run()
         # Path to the tape 21 file
         path_t21 = result._kf.path
-        
+
         # Relative path to the CWD
         relative_path_t21 = '/'.join(path_t21.split('/')[-3:])
 

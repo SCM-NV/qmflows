@@ -340,14 +340,14 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 
     initialize = False
     try:
-        builtins.config
-        if path and os.path.abspath(path) != builtins.config.jm.path or \
-                folder and folder != builtins.config.jm.folder:
+        config = getattr(builtins, 'config')
+        if path and os.path.abspath(path) != config.jm.path or \
+                folder and folder != config.jm.folder:
             msg = "Reinitializing Plams with new path and/or folder name.\n"
             warn(msg)
             plams.finish()
             plams.init(path=path, folder=folder)
-    except:
+    except AttributeError:
         plams.init(path=path, folder=folder)
         initialize = True
     builtins.config.log.stdout = 0
