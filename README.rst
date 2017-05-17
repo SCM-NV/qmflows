@@ -110,8 +110,8 @@ Now you are ready to use *qmworks*.
 
   **Notes:**
 
-    - Once the libraries and the virtual environment are installed, you only need to type
-       ``source activate qmworks`` each time that you want to use the software.
+  - Once the libraries and the virtual environment are installed, you only need to type
+    ``source activate qmworks`` each time that you want to use the software.
 
 
 .. _remote_setup:
