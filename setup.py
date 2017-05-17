@@ -11,6 +11,7 @@ setup(
     url='https://github.com/SCM-NV/qmworks',
     author_email='',
     keywords='chemistry workflows simulation materials',
+    package_dir={'': 'src'},
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
               "qmworks.data.dictionaries",
