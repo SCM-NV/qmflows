@@ -116,7 +116,7 @@ def set_PDBresidueInfo(rdkit_atom, pdb_info):
         atom_pdb_residue_info.__getattribute__(set_function)(value)
     rdkit_atom.SetMonomerInfo(atom_pdb_residue_info)
 
-    
+
 def from_smiles(smiles, nconfs=1, name=None, forcefield=None, rms=0.1):
     """
     Generates plams molecule(s) from a smiles strings.
@@ -216,9 +216,9 @@ def get_conformations(rdkit_mol, nconfs=1, name=None, forcefield=None, rms=-1):
         if rms > 0:
             keep = [cids[0]]
             for cid in cids[1:]:
-                for id in keep:
+                for idx in keep:
                     try:
-                        r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, id)
+                        r = AllChem.AlignMol(rdkit_mol, rdkit_mol, cid, idx)
                     except:
                         r = rms + 1
                         message = "Alignment failed in multiple conformation generation: "
