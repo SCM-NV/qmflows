@@ -108,49 +108,50 @@ Now you are ready to use *qmworks*.
  
 .. _remote_setup:
 
+..
 
-Remote/Xenon setup
-------------------
+   Remote/Xenon setup
+   ------------------
 
-QMWorks supports running jobs over a variety of cluster computing schedulers
-like Slurm and Torque. You program and run your workflows from your laptop, but
-the jobs are run at the remote site. For this to work you need to setup QMWorks
-both locally and remotely. In addition you need to add a Bash script that loads
-the VirtualEnv and starts the Noodles remote worker. This remote worker acts as
-a pilot job, reading job descriptions from input and returning the results. If
-you defined the remote VirtualEnv with the name `qmworks`, the following Bash
-script gives an idea of what you need:
+   QMWorks supports running jobs over a variety of cluster computing schedulers
+   like Slurm and Torque. You program and run your workflows from your laptop, but
+   the jobs are run at the remote site. For this to work you need to setup QMWorks
+   both locally and remotely. In addition you need to add a Bash script that loads
+   the VirtualEnv and starts the Noodles remote worker. This remote worker acts as
+   a pilot job, reading job descriptions from input and returning the results. If
+   you defined the remote VirtualEnv with the name `qmworks`, the following Bash
+   script gives an idea of what you need:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    #!/bin/bash
-    # comment/uncomment lines that you need
+       #!/bin/bash
+       # comment/uncomment lines that you need
 
-    # If you need ADF, and it is available in a module
-    module load adf/2016.102
-    # or if you installed it yourself
-    # ADFHOME=${HOME}/.local/opt/adf
-    # source ${ADFHOME}/bin/adfrc.sh
+       # If you need ADF, and it is available in a module
+       module load adf/2016.102
+       # or if you installed it yourself
+       # ADFHOME=${HOME}/.local/opt/adf
+       # source ${ADFHOME}/bin/adfrc.sh
 
-    # Point PLAMS to its place
-    export PLAMSDEFAULTS="${HOME}/.local/src/plams/utils/plams_defaults.py"
+       # Point PLAMS to its place
+       export PLAMSDEFAULTS="${HOME}/.local/src/plams/utils/plams_defaults.py"
 
-    # Go to the directory that contains this script
-    cd "$(dirname "${BASH_SOURCE[0]}")"
+       # Go to the directory that contains this script
+       cd "$(dirname "${BASH_SOURCE[0]}")"
 
-    # Activate the VirtualEnv
-    source activate qmworks
+       # Activate the VirtualEnv
+       source activate qmworks
 
-    # Start the remote worker
-    python -m noodles.worker ${@:2}
+       # Start the remote worker
+       python -m noodles.worker ${@:2}
 
-    # Bye!
-    source deactivate
+       # Bye!
+       source deactivate
 
-**Notes:**
+   **Notes:**
 
-- Once the libraries and the virtual environment are installed, you only need to type
-  ``source activate qmworks`` each time that you want to use the software.
+   - Once the libraries and the virtual environment are installed, you only need to type
+     ``source activate qmworks`` each time that you want to use the software.
 
 
 
