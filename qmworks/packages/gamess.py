@@ -58,13 +58,7 @@ class GAMESS(Package):
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
         """
-        Create the settings input for complex gamess-us keys.
-        some keywords provided by the user do not have a straightforward
-        translation to *GAMESS* input and require some hooks that handle the
-        special behaviour of the following keywords:
-
-        * ``freeze``
-        * ``selected_atoms``
+        Create the settings input for complex cp2k keys
 
         :param settings: Job Settings.
         :type settings: :class:`~qmworks.Settings`
@@ -72,6 +66,14 @@ class GAMESS(Package):
         :param value: Value store in ``settings``.
         :param mol: molecular Geometry
         :type mol: plams Molecule
+        """
+        """
+        some keywords provided by the user do not have a straightforward
+        translation to *GAMESS* input and require some hooks that handle the
+        special behaviour of the following keywords:
+
+        * ``freeze``
+        * ``selected_atoms``
         """
         def freeze():
             if not isinstance(value, list):
