@@ -247,7 +247,6 @@ def read_mos_data_input(path_input):
     """
     Try to read the added_mos parameter and the range of printed MOs
     """
-    pass
     properties = ["ADDED_MOS", "MO_INDEX_RANGE"]
     l1, l2 = [try_search_pattern(x, path_input) for x in properties]
     added_mos = l1.split()[-1] if l1 is not None else None

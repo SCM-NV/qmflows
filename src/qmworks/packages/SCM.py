@@ -51,7 +51,7 @@ class ADF(Package):
         result = job.run()
         # Path to the tape 21 file
         path_t21 = result._kf.path
-        
+
         # Relative path to the CWD
         relative_path_t21 = '/'.join(path_t21.split('/')[-3:])
 
@@ -104,7 +104,7 @@ class ADF(Package):
                         settings.specific.adf.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol not in value:
+                    if mol[a + 1].symbol not in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
@@ -252,7 +252,7 @@ class DFTB(Package):
                     settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol in value:
+                    if mol[a + 1].symbol in value:
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
 
@@ -268,7 +268,7 @@ class DFTB(Package):
                         settings.specific.dftb.constraints[at] = ""
             else:
                 for a in range(len(mol)):
-                    if mol[a+1].symbol not in value:
+                    if mol[a + 1].symbol not in value:
                         name = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[name] = ""
 
