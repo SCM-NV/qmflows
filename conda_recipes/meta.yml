@@ -1,0 +1,29 @@
+
+package:
+  name: qmworks
+  version: "0.1.4"
+
+source:
+   url: https://pypi.python.org/packages/b0/42/6d70d224f7a0a06c740b0fb318f3c3693b8f7234a2da41fc033238d4b64d/qmworks-0.1.4.tar.gz
+   md5: 599eadf8ac1623778025811c8590f1ca
+   git_url: https://github.com/SCM-NV/qmworks
+
+build:
+  number: 1
+  script: python setup.py install
+  skip: True # [not win]
+
+requirements:
+  build:
+     - python
+     - filelock
+     - hdf5
+     - msgpack-python
+     - noodles
+     - numpy
+     - pyxenon
+     - tinydb
+
+test:
+  requires:
+    - nose
