@@ -21,9 +21,23 @@ requirements:
      - msgpack-python
      - noodles
      - numpy
+     - plams
      - pyxenon
      - tinydb
 
+run:
+  - python
+     
 test:
   requires:
     - nose
+
+about:
+  home: https://github.com/SCM-NV/qmworks
+  license: LGPL-3.0
+  license_file: LICENSE.md
+
+extra:
+  recipe-maintainers:
+       - FelipeZapata
+       - LarsRidders
