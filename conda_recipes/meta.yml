@@ -16,25 +16,13 @@ build:
 requirements:
   build:
      - python
-     - filelock
      - hdf5
-     - msgpack-python
-     - noodles
+     - rdkit
      - numpy
-     - plams
-     - pyxenon
-     - tinydb
 
 run:
      - python
-     - filelock
-     - hdf5
-     - msgpack-python
-     - noodles
-     - numpy
-     - plams
-     - pyxenon
-     - tinydb
+
      
 test:
   requires:
