@@ -24,10 +24,9 @@ from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
-# =========================<>=============================
+
 # Molecular Orbitals Parsing
 # MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
-# AFTER SCF STEP -1
 
 # 1                      2
 #                          -0.9857682741370732    -0.9831467097855797
