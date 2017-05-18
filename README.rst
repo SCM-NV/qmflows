@@ -103,7 +103,7 @@ Package installation
 
 - Then
 
-  ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks  https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade``
+  ``pip install qmworks --upgrade``
   
 Now you are ready to use *qmworks*. 
  

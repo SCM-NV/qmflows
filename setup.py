@@ -28,11 +28,14 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles',
+    install_requires=['h5py', 'numpy', 'noodles', 'plams',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python'],
-    extras_require={'test': ['nose', 'coverage']}
+    extras_require={'test': ['nose', 'coverage']},
+    dependency_links=[
+        "https://github.com/SCM-NV/plams/tarball/master#egg=plams"
+    ]
 
 )
 
