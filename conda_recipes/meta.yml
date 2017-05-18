@@ -26,7 +26,15 @@ requirements:
      - tinydb
 
 run:
-  - python
+     - python
+     - filelock
+     - hdf5
+     - msgpack-python
+     - noodles
+     - numpy
+     - plams
+     - pyxenon
+     - tinydb
      
 test:
   requires:
