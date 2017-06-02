@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='qmworks',
-    version='0.1.4',
+    version='0.1.5',
     description='Automation of computations in quantum chemistry',
     license='',
     url='https://github.com/SCM-NV/qmworks',
