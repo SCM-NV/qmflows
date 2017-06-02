@@ -48,15 +48,6 @@ also access direclty more advanced examples_.
  
 Installation
 ============
-First check that you have available in your system **Python >= 3.5**. Otherwise, you can download it from here_.
-Because **QMWorks** depends on a set of libraries that are not pat of the python ecosystem, you need first
-to install these dependecies_  using a virtual-environment_. Finally, you can proceed to the package installation_
-
-
-
-.. _virtual-environment:
-Installation using a virtual environment (recommended)
-======================================================
 
 - Download miniconda for python >= 3.5: miniconda_ (also you can install the complete anaconda_ version).
 
@@ -107,6 +98,12 @@ Package installation
   
 Now you are ready to use *qmworks*. 
  
+
+Latest stable version
+---------------------
+If you want to install the latest stable version directly from github
+you can use the following command:
+ ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks``
 
   **Notes:**
 
