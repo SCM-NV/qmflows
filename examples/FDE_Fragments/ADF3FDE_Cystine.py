@@ -1,13 +1,13 @@
 # Default imports
-from qmworks import (templates, run)
-from qmworks import molkit
-from qmworks.components import mfcc
+from qmworks import (templates, run, molkit, Settings)
+from qmworks.components import mfcc, adf3fde
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
+from qmworks.packages.SCM import adf
 
-import io
+import io, sys
+sys.setrecursionlimit(200)
 # ----------------------------------------------------------------
 
 # For the purpose of the example, define the pdb file here.
@@ -48,16 +48,33 @@ ATOM     26  H   CYS A   2      17.213  17.290  25.357  1.00  0.00           H
 
 supermol = molkit.readpdb(cys_cys_pdb)
 
-# Calculate dipole normally
-supermol_job = dftb(templates.singlepoint, supermol,
+# Calculate  normally
+supermol_job = adf(templates.singlepoint, supermol,
                     job_name='supermol_singlepoint')
-supermol_dipole = supermol_job.dipole
 
-# Calculate dipole with mfcc approach
+settings = Settings()
+settings.functional = 'bp86'
+settings.charge = '0'
+settings.basis = 'SZ'
+settings.specific.adf.basis.core = 'large'
+settings.specific.adf.stofit = ''
+settings.specific.adf.save = 'tape21'
+settings.specific.adf.eprint.sfo = 'NOEIG NOOVL NOORBPOP'
+settings.specific.adf.eprint.scf = 'NOPOP'
+settings.specific.adf.symmetry = 'tol=1e-2'
+settings.specific.adf.geometry.sp = ""
+
+# Calculate with mfcc approach
 frags, caps = molkit.partition_protein(supermol)
-mfcc_job = mfcc(dftb, frags, caps)
+mfcc_job = mfcc(adf, frags, caps, settings)
 
-supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
+# Calculate with adf3fde
+fde_settings = Settings({'RHO1FITTED':'','CapDensConv':1e-3})
+fragment_settings = Settings({'fdedenstype': 'SCFfitted'})
 
-print(supermol_dipole)
-print(mfcc_dipole)
+adf3fde_job = adf3fde(mfcc_job.frags, mfcc_job.caps, settings, fde_settings, fragment_settings, cycles=2)
+supermol_dipole, mfcc_dipole, adf3fde_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole, adf3fde_job.dipole))
+
+print('Supermol: ', supermol_dipole)
+print('MFCC', mfcc_dipole)
+print('ADF3FDE:', adf3fde_dipole)

@@ -4,6 +4,7 @@ from scm.plams import Molecule
 from qmworks import (Settings, run, templates)
 from qmworks.packages.SCM import adf
 from qmworks.components import Fragment, adf_fragmentsjob
+from noodles import gather
 
 import io
 # ----------------------------------------------------------------
@@ -48,10 +49,11 @@ r_h2o_1 = adf(templates.singlepoint.overlay(settings), m_h2o_1, job_name="h2o_1"
 # Prepare second water fragment
 r_h2o_2 = adf(templates.singlepoint.overlay(settings), m_h2o_2, job_name="h2o_2")
 
-frozen_frags = [Fragment(r_h2o_1, [m_h2o_1]),
-                Fragment(r_h2o_2, [m_h2o_2])]
+frags = gather(Fragment(r_h2o_1, m_h2o_1, isfrozen=True),
+               Fragment(r_h2o_2, m_h2o_2, isfrozen=True),
+               Fragment(None, m_mol))
 
-job_fde = adf_fragmentsjob(templates.singlepoint. overlay(settings), m_mol, *frozen_frags)
+job_fde = adf_fragmentsjob(templates.singlepoint. overlay(settings), frags, job_name="test_fde_fragments")
 
 # Perform FDE job and get dipole
 # This gets the dipole moment of the active subsystem only
