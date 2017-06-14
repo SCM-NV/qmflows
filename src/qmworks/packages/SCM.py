@@ -160,6 +160,16 @@ class ADF_Result(Result):
         # Create a KF reader instance
         self.kf = plams.tools.kftools.KFFile(path_t21)
 
+    def __deepcopy__(self, memo):
+        return ADF_Result(self.settings,
+                          self._molecule,
+                          self.job_name,
+                          self.kf.path,
+                          plams_dir = self.archive['plams_dir'].path,
+                          status = self.status,
+                          warnings = self.warnings
+                          )
+
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
         """

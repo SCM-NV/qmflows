@@ -23,9 +23,9 @@ class Settings(plams.core.settings.Settings, Storable):
         Like plams Settings.__getitem__, but
         "settings['a.b'] == 'c'" is equivalent to "settings['a']['b'] == 'c'"
         """
-        if isinstance(name, string_types) and name.find('.') > -1:
-            names = name.split('.')
-            return dict.__getitem__(self, names[0]).__getitem__('.'.join(names[1:]))
+#         if isinstance(name, string_types) and name.find('.') > -1:
+#             names = name.split('.')
+#             return dict.__getitem__(self, names[0]).__getitem__('.'.join(names[1:]))
         return dict.__getitem__(self, name)
 
     def __setitem__(self, name, value):
@@ -35,22 +35,24 @@ class Settings(plams.core.settings.Settings, Storable):
         """
         if isinstance(value, dict):
             value = Settings(value)
-        if isinstance(name, string_types) and name.find('.') > -1:
-            names = name.split('.')
-            dict.__getitem__(self, names[0]).__setitem__('.'.join(names[1:]), value)
-        else:
-            dict.__setitem__(self, name, value)
+#         if isinstance(name, string_types) and name.find('.') > -1:
+#             names = name.split('.')
+#             dict.__getitem__(self, names[0]).__setitem__('.'.join(names[1:]), value)
+#         else:
+#             dict.__setitem__(self, name, value)
+        dict.__setitem__(self, name, value)
 
     def __delitem__(self, name):
         """
         Like plams Settings.__setitem__, but
         "del settings['a.b']" is equivalent to "del settings['a']['b'] = 'c'"
         """
-        if isinstance(name, string_types) and name.find('.') > -1:
-            names = name.split('.')
-            dict.__getitem__(self, names[0]).__delitem__('.'.join(names[1:]))
-        else:
-            dict.__delitem__(self, name)
+#         if isinstance(name, string_types) and name.find('.') > -1:
+#             names = name.split('.')
+#             dict.__getitem__(self, names[0]).__delitem__('.'.join(names[1:]))
+#         else:
+#             dict.__delitem__(self, name)
+        dict.__delitem__(self, name)
 
     def copy(self):
         ret = Settings()

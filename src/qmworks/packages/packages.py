@@ -77,6 +77,17 @@ class Result:
         self.status = status
         self.warnings = warnings
 
+    def __deepcopy__(self, memo):
+        print(dir(self))
+        return Result(self.settings,
+                      self._molecule,
+                      self.job_name,
+                      plams_dir = self.archive['plams_dir'].path,
+                      work_dir = self.archive['work_dir'],
+                      status = self.status,
+                      warnings = self.warnings
+                      )
+
     def as_dict(self):
         """
         Method to serialize as a JSON dictionary the results given
@@ -280,7 +291,7 @@ class Package:
                         if isinstance(key[1], dict):
                             value = key[1][v]
                         else:
-                            value = key[1]
+                            value = {key[1]: v}
                         if value:
                             v = value
                         key = key[0]
