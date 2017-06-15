@@ -9,6 +9,7 @@ from qmworks.packages.packages import (Package, package_properties, Result)
 from scm import plams
 
 import builtins
+import struct
 
 # ========================= ADF ============================
 
@@ -324,7 +325,12 @@ class DFTB_Result(Result):
                          properties=properties, status=status, warnings=warnings)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         # create a kf reader instance
-        self.kf = plams.tools.kftools.KFFile(kf_filename)
+        try:
+            self.kf = plams.tools.kftools.KFFile(kf_filename)
+        except struct.error:
+            msg = "RKF:{} is corrupted.\nProbably because job: has failed."
+            print(msg.format(kf_filename, job_name))
+            self.kf = None
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
