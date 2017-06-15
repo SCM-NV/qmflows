@@ -334,10 +334,12 @@ class DFTB_Result(Result):
         properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties, status=status, warnings=warnings)
-        kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
-        # create a kf reader instance
-
-        self.kf = plams.tools.kftools.KFFile(kf_filename)
+        if plams_dir is not None:
+            kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
+            # create a kf reader instance
+            self.kf = plams.tools.kftools.KFFile(kf_filename)
+        else:
+            self.kf = None
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
