@@ -244,6 +244,8 @@ class DFTB(Package):
             path = result.job.path
         except struct.error:
             job.status = 'failed'
+            name = job_name
+            path = None
             msg = "job:{} has failed.\nRKF is corrupted"
             print(msg.format(job_name))
 
