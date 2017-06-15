@@ -237,7 +237,15 @@ class DFTB(Package):
         job = plams.interfaces.adfsuite.DFTBJob(name=job_name, molecule=mol,
                                                 settings=dftb_settings)
 
-        result = job.run()
+        # Check RKF status
+        try:
+            result = job.run()
+
+        except struct.error:
+            job.status = 'failed'
+            msg = "job:{} has failed."
+            print(msg.format(job_name))
+
         if job.status in ['failed', 'crashed']:
             builtins.config.jm.remove_job(job)
 
@@ -325,12 +333,8 @@ class DFTB_Result(Result):
                          properties=properties, status=status, warnings=warnings)
         kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
         # create a kf reader instance
-        try:
-            self.kf = plams.tools.kftools.KFFile(kf_filename)
-        except struct.error:
-            msg = "RKF:{} is corrupted.\nProbably because job:{} has failed."
-            print(msg.format(kf_filename, job_name))
-            self.kf = None
+
+        self.kf = plams.tools.kftools.KFFile(kf_filename)
 
     @classmethod
     def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
