@@ -328,7 +328,7 @@ class DFTB_Result(Result):
         try:
             self.kf = plams.tools.kftools.KFFile(kf_filename)
         except struct.error:
-            msg = "RKF:{} is corrupted.\nProbably because job: has failed."
+            msg = "RKF:{} is corrupted.\nProbably because job:{} has failed."
             print(msg.format(kf_filename, job_name))
             self.kf = None
 
