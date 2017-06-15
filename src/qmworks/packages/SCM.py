@@ -240,17 +240,18 @@ class DFTB(Package):
         # Check RKF status
         try:
             result = job.run()
-
+            name = result.job.name
+            path = result.job.path
         except struct.error:
             job.status = 'failed'
-            msg = "job:{} has failed."
+            msg = "job:{} has failed.\nRKF is corrupted"
             print(msg.format(job_name))
 
         if job.status in ['failed', 'crashed']:
             builtins.config.jm.remove_job(job)
 
-        return DFTB_Result(dftb_settings, mol, result.job.name,
-                           plams_dir=result.job.path, status=job.status)
+        return DFTB_Result(dftb_settings, mol, name,
+                           plams_dir=path, status=job.status)
 
     def postrun(self):
         pass
