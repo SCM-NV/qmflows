@@ -33,7 +33,6 @@ setup(
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python']
     # extras_require={'test': ['nose', 'coverage']},
-    ]
 
 )
 
