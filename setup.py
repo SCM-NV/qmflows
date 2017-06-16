@@ -32,7 +32,7 @@ setup(
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python'],
-    extras_require={'test': ['nose', 'coverage']},
+    # extras_require={'test': ['nose', 'coverage']},
     dependency_links=[
         "https://github.com/SCM-NV/plams/tarball/master#egg=plams"
     ]
