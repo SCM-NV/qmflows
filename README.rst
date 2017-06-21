@@ -80,7 +80,7 @@ Using the conda environment the following packages should be installed:
 
 - install HDF5_ using conda:
 
-  - ``conda install -y -q --name qmworks -c anaconda hdf5``
+  - ``conda install -y -q --name qmworks -c anaconda h5py``
     
 
 .. _installation:
