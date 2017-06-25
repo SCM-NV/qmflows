@@ -16,7 +16,7 @@ import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
-from noodles.display import (NCDisplay)
+from noodles.display import (DumbDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
@@ -367,7 +367,7 @@ def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
     """
-    with NCDisplay() as display:
+    with DumbDisplay() as display:
         return run_parallel_opt(
             job, n_threads=n_processes,
             registry=registry, jobdb_file=cache,
@@ -408,7 +408,7 @@ def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='
             working_dir=workdir
         )
 
-        with NCDisplay() as display:
+        with DumbDisplay() as display:
             result = run_xenon_prov(
                 job, Xe, cache, n_processes,
                 xenon_config, job_config, display=display)
