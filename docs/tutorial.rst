@@ -1,5 +1,5 @@
-Tutorial
-========
+Advanced tutorial
+===============
 
 The following tutorial is an HTML version of the jupyter notebook tutorial found at:
 https://github.com/SCM-NV/qmworks/tree/master/jupyterNotebooks
