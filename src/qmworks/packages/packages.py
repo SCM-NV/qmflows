@@ -439,7 +439,7 @@ class SerMolecule(Serialiser):
         return make_rec(obj.as_dict())
 
     def decode(self, cls, data):
-        return plams.Molecule.from_dict(**data)
+        return plams.Molecule.from_dict(data)
 
 
 class SerMol(Serialiser):
