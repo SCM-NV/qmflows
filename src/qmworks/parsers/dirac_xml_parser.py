@@ -1,4 +1,6 @@
 
+__all__ = ['parse_xml']
+
 import importlib
 import xml.etree.ElementTree as ET
 

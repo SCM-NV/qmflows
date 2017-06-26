@@ -1,39 +1,12 @@
-from .common import (AtomBasisKey, AtomBasisData, AtomXYZ, CGF, InfoMO,
-                     InputKey, MO)
-from .fileFunctions import json2Settings
-from .hdf5 import (StoreasHDF5, cp2k2hdf5, dump_to_hdf5, turbomole2hdf5)
-from .packages import (Package, Result, SerMolecule, SerSettings, adf, cp2k,
-                       dftb, dirac, orca, gamess, registry, run)
-from .parsers import (manyXYZ, parse_string_xyz, read_cp2k_coefficients,
-                      readCp2KOverlap, readTurbomoleBasis, readTurbomoleMO,
-                      readXYZ, read_cp2k_number_of_orbitals)
-from .molkit import (apply_reaction_smarts, apply_template, gen_coords_rdmol,
-                     modify_atom,
-                     to_rdmol, from_rdmol, from_sequence, from_smiles,
-                     write_molblock)
-from .templates import (freq, geometry, get_template, singlepoint, ts)
-from .settings import Settings
-from .utils import (chunksOf, concat, concatMap, dict2Setting,
-                    settings2Dict, zipWith, zipWith3)
-from .components import (
-    adf_fragmentsjob, Angle, Dihedral, Distance,
-    find_first_job, Fragment, mfcc, MFCC_Result, PES,
-    select_max, select_min)
+from .common import *
+from .components import *
+# from .examples import *
+from .fileFunctions import *
+from .hdf5 import *
+from .molkit import *
+from .packages import *
+from .parsers import *
+from .templates import *
+from .settings import *
+from .utils import *
 
-
-__all__ = [
-    'Angle', 'AtomBasisData', 'AtomBasisKey', 'AtomXYZ',
-    'CGF', 'Dihedral', 'Distance', 'Fragment',
-    'InfoMO', 'InputKey', 'MO', 'MFCC_Result', 'Package', 'PES',
-    'Result', 'SerMolecule', 'SerSettings',
-    'Settings', 'StoreasHDF5',
-    'adf', 'adf_fragmentsjob', 'apply_reaction_smarts', 'apply_template',
-    'chunksOf', 'concat', 'concatMap', 'cp2k', 'cp2k2hdf5', 'dftb',
-    'dict2Setting', 'dirac', 'dump_to_hdf5', 'find_first_job', 'freq',
-    'from_sequence',  'from_smiles', 'gamess', 'gen_coords_rdmol', 'geometry',
-    'get_template', 'json2Settings', 'manyXYZ', 'mfcc', 'modify_atom', 'orca',
-    'parse_string_xyz', 'to_rdmol', 'from_rdmol', 'read_cp2k_coefficients',
-    'readCp2KOverlap', 'readTurbomoleBasis', 'readTurbomoleMO', 'readXYZ',
-    'read_cp2k_number_of_orbitals', 'registry', 'run', 'select_max',
-    'select_max', 'select_min', 'settings2Dict', 'singlepoint', 'ts',
-    'turbomole2hdf5', 'write_molblock', 'zipWith', 'zipWith3']

@@ -4,7 +4,6 @@ __all__ = ['Settings']
 
 from noodles import Storable
 from scm import plams
-from six import string_types
 
 
 class Settings(plams.core.settings.Settings, Storable):

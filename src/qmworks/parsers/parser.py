@@ -1,6 +1,9 @@
 __author__ = "Felipe Zapata"
 
-# ===============> Standard libraries and third-party <========================
+__all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
+           'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
+
+
 from scm.plams import (Atom, Molecule)
 from pyparsing import (CaselessKeyword, Combine, Literal, nums, Optional,
                        ParseException, Regex, SkipTo, Suppress, Word)

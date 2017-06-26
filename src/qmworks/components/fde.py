@@ -1,6 +1,7 @@
 __all__ = ['mfcc', 'MFCC_Result', 'adf3fde', 'ADF3FDE_Result', 'Fragment', 'adf_fragmentsjob']
 
-from qmworks import Settings, templates
+from qmworks import templates
+from qmworks.settings import Settings
 from qmworks.packages import Result
 from qmworks.packages.SCM import adf
 from noodles import gather, schedule, Storable
@@ -25,6 +26,7 @@ class MFCC_Result(Result):
         for cap in self.caps:
             dipole -= cap.result.dipole
         return dipole
+
 
 def mfcc(package, frags, caps, settings=None):
     mfcc_settings = templates.singlepoint
@@ -61,7 +63,7 @@ class Fragment(Storable):
 
 
 @schedule
-def adf_fragmentsjob(settings, frags, caps = None, fragment_settings=None, job_name='fde'):
+def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_name='fde'):
     mol_tot = Molecule()
     frag_settings = Settings()
     cap_ids = {}
@@ -95,6 +97,7 @@ def adf_fragmentsjob(settings, frags, caps = None, fragment_settings=None, job_n
     frag_settings.specific.adf.fde.PW91k = ""
     return adf(settings.overlay(frag_settings), mol_tot, job_name=job_name)
 
+
 class ADF3FDE_Result(Result):
     def __init__(self, frags, caps):
         self.frags = frags
@@ -111,6 +114,7 @@ class ADF3FDE_Result(Result):
             dipole -= cap.result.dipole
         return dipole
 
+
 def adf3fde(frags, caps, settings, fde_settings, fragment_settings, cycles=1):
     adf3fde_settings = templates.singlepoint
     adf3fde_settings.specific.adf.allow = "partialsuperfrags"
@@ -119,16 +123,19 @@ def adf3fde(frags, caps, settings, fde_settings, fragment_settings, cycles=1):
     adf3fde_settings.specific.adf.fde = fde_settings
 
     for i in range(cycles):
-        frags = adf3fde_cycle(frags, caps, adf3fde_settings, fragment_settings, job_name='fde_'+str(i))
+        frags = adf3fde_cycle(
+            frags, caps, adf3fde_settings, fragment_settings, job_name='fde_' + str(i))
     return schedule(ADF3FDE_Result)(frags, caps)
+
 
 @schedule
 def adf3fde_cycle(frags, caps, adf3fde_settings, fragment_settings, job_name='fde'):
     new_frags = []
     for i, frag in enumerate(frags):
         frag.isfrozen = False
-        new_frags.append(schedule(Fragment)(adf_fragmentsjob(adf3fde_settings, frags, caps,
-                                         fragment_settings, job_name=job_name+'_'+str(i)), frag.mol, pack_tape=True))
+        new_frags.append(schedule(Fragment)(adf_fragmentsjob(
+            adf3fde_settings, frags, caps, fragment_settings,
+            job_name=job_name + '_' + str(i)), frag.mol, pack_tape=True))
         frag.isfrozen = True
 
     return gather(*new_frags)
@@ -149,8 +156,9 @@ def pack_t21(fn):
     @param fn: The filename of the TAPE21 to be packed.
     @type  fn: str
     """
-    from scm.plams import KFReader, KFFile
-    import subprocess, os
+    from scm.plams import KFReader
+    import os
+    import subprocess
 
     fn_orig = fn + ".orig"
     os.rename(fn, fn_orig)
