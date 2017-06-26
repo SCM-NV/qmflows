@@ -6,7 +6,7 @@ This workflow captures the resulting error and submits the same job to ORCA.
 """
 from noodles import gather
 from qmworks import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
-
+import numpy as np
 
 def is_successful(result):
     """
@@ -37,7 +37,9 @@ def example_freqs():
     # Run workflow
     results = run(gather(*jobs), n_processes=1)
 
-    print(results)
+    freqs = np.array([r.frequencies[-3:] for r in results])
+
+    return freqs
 
 if __name__ == "__main__":
     example_freqs()

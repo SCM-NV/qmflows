@@ -1,14 +1,16 @@
 from nose.plugins.attrib import attr
-
+from qmworks.examples import example_freqs
+import numpy as np
 
 @attr('slow')
 def test_calc_freqs():
     """
     Test conditional workflow for freq calculation.
     """
-    local_env = {}
-    exec(open('examples/Conditional_workflows/calc_freqs.py').read(), {}, local_env)
-    ref_table = "pbe         1533.267  3676.165  3817.097\n" +\
-                "b3lyp       1515.799  3670.390  3825.813\n" +\
-                "blyp        1529.691  3655.573  3794.110\n"
-    assert str(local_env['table']) == ref_table
+    test = example_freqs()
+    expected = np.array(
+        [[1533.26703326, 3676.16470838, 3817.0971787],
+         [1515.798647, 3670.390391, 3825.813363],
+         [1529.69058854, 3655.57330642, 3794.10972377]])
+
+    assert np.allclose(test, expected)
