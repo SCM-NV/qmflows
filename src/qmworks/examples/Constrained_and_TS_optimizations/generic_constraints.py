@@ -2,7 +2,7 @@ __all__ = ['example_generic_constraints']
 
 from noodles import gather
 from qmworks import dftb, adf, orca, run, Settings, templates, molkit
-
+import numpy as np
 
 def example_generic_constraints():
     """
@@ -26,5 +26,7 @@ def example_generic_constraints():
 
     # run the jobs
     results = run(gather(*jobs))
-
-    return results
+    energies = np.array([r.energy for r in results])
+    names = [r.job_name for r in results]
+    
+    return names, energies

@@ -31,7 +31,7 @@ def test_FDE_Fragments():
     """
     Test FDE Fragments
     """
-    expected_dipoles = np.array([0.7121563946400686, 1.226454515723674e-08, 2.5011261589064955e-17])
+    expected_dipoles = np.array([6.87741620e-01, 5.01660545e-08, 2.50460019e-17])
     test_dipoles = example_FDE_fragments()
     assert_dipoles(expected_dipoles, test_dipoles)
 
