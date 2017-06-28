@@ -2,6 +2,7 @@ from nose.plugins.attrib import attr
 from qmworks.examples import example_freqs
 import numpy as np
 
+
 @attr('slow')
 def test_calc_freqs():
     """
