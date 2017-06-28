@@ -82,6 +82,6 @@ ATOM     26  H   CYS A   2      17.213  17.290  25.357  1.00  0.00           H
         gather(supermol_job.dipole, mfcc_job.dipole, adf3fde_job.dipole))
 
     print("Supermolecule dipole: ", supermol_dipole)
-    print("mfcc dipole: ". mfcc_dipole)
+    print("mfcc dipole: ", mfcc_dipole)
 
     return supermol_dipole, mfcc_dipole, adf3fde_dipole

@@ -46,6 +46,6 @@ END
     supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
 
     print("Supermolecule dipole: ", supermol_dipole)
-    print("mfcc dipole: ". mfcc_dipole)
+    print("mfcc dipole: ", mfcc_dipole)
 
     return supermol_dipole, mfcc_dipole
