@@ -115,7 +115,7 @@ def adf3fde(frags, caps, settings, fde_settings, fragment_settings, cycles=1):
     adf3fde_settings = templates.singlepoint
     adf3fde_settings.specific.adf.allow = "partialsuperfrags"
     if settings:
-        adf3fde_settings.update(settings)
+        adf3fde_settings = settings.overlay(adf3fde_settings)
     adf3fde_settings.specific.adf.fde = fde_settings
 
     for i in range(cycles):
