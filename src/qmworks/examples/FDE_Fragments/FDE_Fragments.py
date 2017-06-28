@@ -7,7 +7,6 @@ from qmworks.packages.SCM import adf
 from qmworks.components import Fragment, adf_fragmentsjob
 from noodles import gather
 import io
-import numpy as np
 
 
 def example_FDE_fragments():
@@ -59,4 +58,6 @@ def example_FDE_fragments():
     # This gets the dipole moment of the active subsystem only
     dipole_fde = run(job_fde.dipole)
 
-    return np.array(dipole_fde)
+    print('FDE dipole:', dipole_fde)
+
+    return dipole_fde

@@ -2,7 +2,7 @@ __all__ = ['example_generic_constraints']
 
 from noodles import gather
 from qmworks import dftb, adf, orca, run, Settings, templates, molkit
-import numpy as np
+
 
 def example_generic_constraints():
     """
@@ -26,7 +26,22 @@ def example_generic_constraints():
 
     # run the jobs
     results = run(gather(*jobs))
-    energies = np.array([r.energy for r in results])
+    energies = [r.energy for r in results]
     names = [r.job_name for r in results]
-    
+
+    # put resulting energies into a dictionary
+    table = {'dftb': {}, 'adf': {}, 'orca': {}}
+    for r in results:
+        package, distance = r.job_name.split('_')
+        table[package][distance] = round(r.energy, 6)
+
+    # print table
+    hartree_to_kcalpermol = 627.094
+    for package in ['dftb', 'adf', 'orca']:
+        row = [package]
+        for distance in ['1.0', '1.1', '1.2']:
+            val = table[package][distance] - table[package]['1.0']
+            row.append(round(val * hartree_to_kcalpermol, 2))
+        print('{:10s} {:10.2f} {:10.2f} {:10.2f}'.format(*row))
+
     return names, energies

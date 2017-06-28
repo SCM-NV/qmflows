@@ -1,12 +1,8 @@
 __all__ = ['example_freqs']
-"""
-This examples illustrates the possibility to use different packages interchangeably.
-Analytical frequencies are not available for B3LYP in ADF
-This workflow captures the resulting error and submits the same job to ORCA.
-"""
+
 from noodles import gather
 from qmworks import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
-import numpy as np
+
 
 def is_successful(result):
     """
@@ -16,6 +12,11 @@ def is_successful(result):
 
 
 def example_freqs():
+    """
+    This examples illustrates the possibility to use different packages interchangeably.
+    Analytical frequencies are not available for B3LYP in ADF
+    This workflow captures the resulting error and submits the same job to ORCA.
+    """
     # Generate water molecule
     water = molkit.from_smiles('[OH2]', forcefield='mmff')
 
@@ -37,7 +38,14 @@ def example_freqs():
     # Run workflow
     results = run(gather(*jobs), n_processes=1)
 
-    freqs = np.array([r.frequencies[-3:] for r in results])
+    # extrac results
+    freqs = [r.frequencies[-3:] for r in results]
+    functionals = ['pbe', 'b3lyp', 'blyp']
+
+    # Print the result
+    table = ["{:10s}{:10.3f}{:10.3f}{:10.3f}\n".format(fun, *fs)
+             for fun, fs in zip(functionals, freqs)]
+    print(table)
 
     return freqs
 

@@ -7,9 +7,8 @@ from noodles import gather
 
 # User Defined imports
 from qmworks.packages.SCM import dftb
-
 import io
-import numpy as np
+
 
 def example_ADF3FDE_Dialanine():
     # For the purpose of the example, define the pdb file here.
@@ -46,4 +45,7 @@ END
 
     supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
 
-    return np.array((supermol_dipole, mfcc_dipole))
+    print("Supermolecule dipole: ", supermol_dipole)
+    print("mfcc dipole: ". mfcc_dipole)
+
+    return supermol_dipole, mfcc_dipole

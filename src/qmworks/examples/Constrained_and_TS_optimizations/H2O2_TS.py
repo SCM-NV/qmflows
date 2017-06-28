@@ -38,6 +38,9 @@ def example_H2O2_TS():
     ts_dihe = round(dihe.get_current_value(result.molecule))
     n_optcycles = result.optcycles
 
+    print('Dihedral angle (degrees): {:.0f}'.format(ts_dihe))
+    print('Number of optimization cycles: {:d}'.format(n_optcycles))
+
     return ts_dihe, n_optcycles
 
 

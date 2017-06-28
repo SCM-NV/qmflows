@@ -8,7 +8,6 @@ from noodles import gather
 from qmworks.packages.SCM import adf
 
 import io
-import numpy as np
 import sys
 sys.setrecursionlimit(200)
 
@@ -81,5 +80,8 @@ ATOM     26  H   CYS A   2      17.213  17.290  25.357  1.00  0.00           H
         mfcc_job.frags, mfcc_job.caps, settings, fde_settings, fragment_settings, cycles=2)
     supermol_dipole, mfcc_dipole, adf3fde_dipole = run(
         gather(supermol_job.dipole, mfcc_job.dipole, adf3fde_job.dipole))
+
+    print("Supermolecule dipole: ", supermol_dipole)
+    print("mfcc dipole: ". mfcc_dipole)
 
     return supermol_dipole, mfcc_dipole, adf3fde_dipole
