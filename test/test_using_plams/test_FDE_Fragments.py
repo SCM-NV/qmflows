@@ -25,7 +25,6 @@ def test_ADF3FDE_Cystine():
 
     assert_dipoles(expected_dipoles, example_ADF3FDE_Cystine())
 
-
 @attr('slow')
 def test_FDE_Fragments():
     """
