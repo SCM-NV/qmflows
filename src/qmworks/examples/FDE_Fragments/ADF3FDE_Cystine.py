@@ -1,22 +1,27 @@
+__all__ = ['example_ADF3FDE_Cystine']
+
 # Default imports
 from qmworks import (templates, run, molkit, Settings)
 from qmworks.components import mfcc, adf3fde
 from noodles import gather
-
 # User Defined imports
 from qmworks.packages.SCM import adf
 
-import io, sys
+import io
+import numpy as np
+import sys
 sys.setrecursionlimit(200)
-# ----------------------------------------------------------------
 
-# For the purpose of the example, define the pdb file here.
 
-# It turned out important to rename the terminal carboxyl oxygens
-# to which hydrogens were connected to "OXT" in order for RDKIT
-# to correctly interpret the connectivity of the cys_cys.pdb
+def example_ADF3FDE_Cystine():
+    """
+    For the purpose of the example, define the pdb file here.
 
-cys_cys_pdb = io.StringIO(
+    It turned out important to rename the terminal carboxyl oxygens
+    to which hydrogens were connected to "OXT" in order for RDKIT
+    to correctly interpret the connectivity of the cys_cys.pdb
+    """
+    cys_cys_pdb = io.StringIO(
 '''HEADER
 ATOM      1  N   CYS A   1      10.708  18.274  27.487  1.00  0.00           N
 ATOM      2  CA  CYS A   1      11.790  18.118  26.530  1.00  0.00           C
@@ -46,35 +51,35 @@ ATOM     25  H   CYS A   2      16.973  15.766  27.908  1.00  0.00           H
 ATOM     26  H   CYS A   2      17.213  17.290  25.357  1.00  0.00           H
 ''')
 
-supermol = molkit.readpdb(cys_cys_pdb)
+    supermol = molkit.readpdb(cys_cys_pdb)
 
-# Calculate  normally
-supermol_job = adf(templates.singlepoint, supermol,
-                    job_name='supermol_singlepoint')
+    # Calculate  normally
+    supermol_job = adf(templates.singlepoint, supermol,
+                       job_name='supermol_singlepoint')
 
-settings = Settings()
-settings.functional = 'bp86'
-settings.charge = '0'
-settings.basis = 'SZ'
-settings.specific.adf.basis.core = 'large'
-settings.specific.adf.stofit = ''
-settings.specific.adf.save = 'tape21'
-settings.specific.adf.eprint.sfo = 'NOEIG NOOVL NOORBPOP'
-settings.specific.adf.eprint.scf = 'NOPOP'
-settings.specific.adf.symmetry = 'tol=1e-2'
-settings.specific.adf.geometry.sp = ""
+    settings = Settings()
+    settings.functional = 'bp86'
+    settings.charge = '0'
+    settings.basis = 'SZ'
+    settings.specific.adf.basis.core = 'large'
+    settings.specific.adf.stofit = ''
+    settings.specific.adf.save = 'tape21'
+    settings.specific.adf.eprint.sfo = 'NOEIG NOOVL NOORBPOP'
+    settings.specific.adf.eprint.scf = 'NOPOP'
+    settings.specific.adf.symmetry = 'tol=1e-2'
+    settings.specific.adf.geometry.sp = ""
 
-# Calculate with mfcc approach
-frags, caps = molkit.partition_protein(supermol)
-mfcc_job = mfcc(adf, frags, caps, settings)
+    # Calculate with mfcc approach
+    frags, caps = molkit.partition_protein(supermol)
+    mfcc_job = mfcc(adf, frags, caps, settings)
 
-# Calculate with adf3fde
-fde_settings = Settings({'RHO1FITTED':'','CapDensConv':1e-3})
-fragment_settings = Settings({'fdedenstype': 'SCFfitted'})
+    # Calculate with adf3fde
+    fde_settings = Settings({'RHO1FITTED': '', 'CapDensConv': 1e-3})
+    fragment_settings = Settings({'fdedenstype': 'SCFfitted'})
 
-adf3fde_job = adf3fde(mfcc_job.frags, mfcc_job.caps, settings, fde_settings, fragment_settings, cycles=2)
-supermol_dipole, mfcc_dipole, adf3fde_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole, adf3fde_job.dipole))
+    adf3fde_job = adf3fde(
+        mfcc_job.frags, mfcc_job.caps, settings, fde_settings, fragment_settings, cycles=2)
+    supermol_dipole, mfcc_dipole, adf3fde_dipole = run(
+        gather(supermol_job.dipole, mfcc_job.dipole, adf3fde_job.dipole))
 
-print('Supermol: ', supermol_dipole)
-print('MFCC', mfcc_dipole)
-print('ADF3FDE:', adf3fde_dipole)
+    return supermol_dipole, mfcc_dipole, adf3fde_dipole

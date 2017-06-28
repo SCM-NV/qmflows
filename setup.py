@@ -15,6 +15,7 @@ setup(
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
               "qmworks.data.dictionaries",
+              "qmworks.examples",
               "qmworks.hdf5",
               "qmworks.packages", "qmworks.parsers",
               "qmworks.templates"],
@@ -31,9 +32,8 @@ setup(
     install_requires=['h5py', 'numpy', 'noodles', 'plams',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
-                      'filelock', 'msgpack-python']
-    # extras_require={'test': ['nose', 'coverage']},
-
+                      'filelock', 'msgpack-python'],
+    extras_require={'test': ['nose', 'coverage']},
+    dependency_links=[
+        "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
 )
-
-

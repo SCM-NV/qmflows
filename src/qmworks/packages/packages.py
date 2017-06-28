@@ -1,4 +1,9 @@
 
+__all__ = ['import_parser', 'package_properties',
+           'Package', 'run', 'registry', 'Result',
+           'SerMolecule', 'SerSettings']
+
+
 # ========>  Standard and third party Python Libraries <======
 from functools import partial
 from os.path import join
@@ -30,10 +35,6 @@ from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
 from qmworks.utils import concatMap
 from warnings import warn
-# ==============================================================
-__all__ = ['import_parser', 'package_properties',
-           'Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
 
 package_properties = {
     'adf': 'data/dictionaries/propertiesADF.json',
@@ -82,10 +83,10 @@ class Result:
         return Result(self.settings,
                       self._molecule,
                       self.job_name,
-                      plams_dir = self.archive['plams_dir'].path,
-                      work_dir = self.archive['work_dir'],
-                      status = self.status,
-                      warnings = self.warnings
+                      plams_dir=self.archive['plams_dir'].path,
+                      work_dir=self.archive['work_dir'],
+                      status=self.status,
+                      warnings=self.warnings
                       )
 
     def as_dict(self):
