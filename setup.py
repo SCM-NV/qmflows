@@ -32,6 +32,7 @@ setup(
     install_requires=['h5py', 'numpy', 'noodles', 'plams',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
-                      'filelock', 'msgpack-python'],
+                      'filelock', 'msgpack-python',
+                      'sphinx_rtd_theme'],
     extras_require={'test': ['nose', 'coverage']}
 )
