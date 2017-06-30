@@ -29,7 +29,7 @@ class ADF(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, job_name='ADFjob'):
+    def run_job(settings, mol, job_name='ADFjob', nproc=None):
         """
         Execute ADF job.
 
@@ -46,6 +46,8 @@ class ADF(Package):
         :returns: :class:`~qmworks.packages.SCM.ADF_Result`
         """
         adf_settings = Settings()
+        if nproc:
+            adf_settings.runscript.nproc = nproc
         adf_settings.input = settings.specific.adf
         job = plams.interfaces.adfsuite.ADFJob(name=job_name, molecule=mol,
                                                settings=adf_settings)
@@ -216,7 +218,7 @@ class DFTB(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, job_name='DFTBjob'):
+    def run_job(settings, mol, job_name='DFTBjob', nproc=None):
         """
         Execute an DFTB job with the *ADF* quantum package.
 
@@ -233,6 +235,8 @@ class DFTB(Package):
         :returns: :class:`~qmworks.packages.SCM.DFTB_Result`
         """
         dftb_settings = Settings()
+        if nproc:
+            dftb_settings.runscript.nproc = nproc
         dftb_settings.input = settings.specific.dftb
         job = plams.interfaces.adfsuite.DFTBJob(name=job_name, molecule=mol,
                                                 settings=dftb_settings)
