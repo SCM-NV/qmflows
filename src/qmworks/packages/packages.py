@@ -17,6 +17,7 @@ import fnmatch
 import importlib
 import inspect
 import os
+import uuid
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
@@ -508,6 +509,13 @@ def find_file_pattern(pat, folder):
                    fnmatch.filter(os.listdir(folder), pat))
     else:
         return []
+
+
+def get_tmpfile_name():
+    tmpfolder = builtins.config.jm.workdir + '/tmpfiles'
+    if not os.path.exists(tmpfolder):
+        os.mkdir(tmpfolder)
+    return tmpfolder + '/' + str(uuid.uuid4())
 
 
 def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:

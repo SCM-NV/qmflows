@@ -5,7 +5,7 @@ __all__ = ['adf', 'dftb']
 from os.path import join
 from warnings import warn
 from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, package_properties, Result)
+from qmworks.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from scm import plams
 
 import builtins
@@ -110,7 +110,7 @@ class ADF(Package):
                         settings.specific.adf.constraints[at] = ""
 
         def inithess():
-            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+            hess_path = get_tmpfile_name()
             hess_file = open(hess_path, "w")
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
             settings.specific.adf.geometry.inithess = hess_path

@@ -2,7 +2,7 @@ __all__ = ['orca']
 
 from os.path import join
 from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, package_properties, Result)
+from qmworks.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from qmworks.parsers.orca_parser import parse_molecule
 from scm import plams
 from warnings import warn
@@ -101,7 +101,7 @@ class ORCA(Package):
             hess_str += '\n\n$end\n'
 
             # Store the hessian in the plams_dir
-            hess_path = builtins.config.jm.workdir + "/tmp_hessian.txt"
+            hess_path = get_tmpfile_name()
             with open(hess_path, "w") as hess_file:
                 hess_file.write(hess_str)
 
