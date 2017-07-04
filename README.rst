@@ -10,7 +10,7 @@
 ================
 QMWorks
 ================
-
+See http://scm-nv.github.io/qmworks/ for tutorials and documentation.
 
 Motivation
 ==========
