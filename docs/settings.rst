@@ -1,7 +1,7 @@
 Settings
 --------
 
-Settings| is a :mod:`dict` subclass that represent the data in a hierarchical tree-like structure. for example ::
+|Settings| is a :mod:`dict` subclass implemented in PLAMS_ and modified in *QMWorks*. This class represents the data in a hierarchical tree-like structure. for example ::
 
   from qmworks import Settings, templates
 
@@ -43,3 +43,6 @@ API
    :members:	       
    :special-members:
    :exclude-members: __weakref__
+
+
+.. _PLAMS: https://www.scm.com/doc/plams/settings.html

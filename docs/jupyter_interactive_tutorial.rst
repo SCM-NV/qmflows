@@ -57,7 +57,7 @@ command to initialize the environment:
 
 To leave the environment the following command is used
 
-    .. code:: bash
+.. code:: bash
 
     (qmworks)[user@int1 ~]$ source deactivate
     discarding /home/user/anaconda3/envs/qmworks/bin from PATH
@@ -83,7 +83,7 @@ Currently **QMWORKS** offers an interface with the following simulation
 software: **SCM** (ADF and DTFB), **CP2K**, **ORCA**, **GAMESS-US** and
 **DIRAC**.
 
- Please make sure that the packages you want to use in QMworks are
+Please make sure that the packages you want to use in QMworks are
 installed and active; in most supercomputer the simulation package are
 available using a command like (consult your system administrator):
 
@@ -95,7 +95,7 @@ Also some simulation packages required that you configure a ``scratch``
 folder. For instance *Orca* requires a **SCR** folder to be defnied
 while *ADF* called it **SCM\_TMPDIR**.
 
- With ``qmworks`` you can write a python script that simply calls one of
+With ``qmworks`` you can write a python script that simply calls one of
 the package objects **adf**, **dftb**, **cp2k**, **orca**,
 **gamess** or **dirac**. As arguments to the call, you need
 to provide a ``settings`` objects
@@ -220,7 +220,7 @@ input properties that are present in most simulation packages like a
 *basis set* while *specific* keywords allow the user to apply specific
 keywords for a package that are not in a generic dictionary.
 
- Expert info: *Settings* are a subclass of python
+Expert info: *Settings* are a subclass of python
 `dictionaries <https://docs.python.org/3.5/tutorial/datastructures.html#dictionaries>`__
 to represent herarchical structures, like
 
