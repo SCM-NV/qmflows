@@ -1,8 +1,5 @@
 
-Basic usage tutorial
-====================
-
-1. Installation in Unix 
+Installation in Unix 
 -------------------------
 
 -  | conda installation. Type in your console the following command:
@@ -69,7 +66,7 @@ For a more comprenhensive discussion of conda environments see:
 `https://conda.io/docs/index.html`
 
 What is QMworks?
-=================
+-----------------
 
 QMworks is a python library that enables executing complicated workflows
 of interdependent quantum chemical (QM) calculations in python. It aims
@@ -80,11 +77,11 @@ on top of the powerful Noodles framework for executing the calculations
 in parallel where possible.
 
 The basics: calling packages
-=============================
+-----------------------------
 
 Currently **QMWORKS** offers an interface with the following simulation
-software: \* **SCM (ADF and DTFB)** \* **CP2K** \* **ORCA** \*
-**GAMESS-US** \* **DIRAC**
+software: **SCM** (ADF and DTFB), **CP2K**, **ORCA**, **GAMESS-US** and
+**DIRAC**.
 
  Please make sure that the packages you want to use in QMworks are
 installed and active; in most supercomputer the simulation package are
@@ -99,8 +96,9 @@ folder. For instance *Orca* requires a **SCR** folder to be defnied
 while *ADF* called it **SCM\_TMPDIR**.
 
  With ``qmworks`` you can write a python script that simply calls one of
-the package objects **adf, dftb, cp2k, orca, gamess** or **dirac**. As
-arguments to the call, you need to provide a ``settings`` objects
+the package objects **adf**, **dftb**, **cp2k**, **orca**,
+**gamess** or **dirac**. As arguments to the call, you need
+to provide a ``settings`` objects
 defining the input of a calculation, a molecular geometry, and,
 optionally, a job name that enables you to find back the "raw" data of
 the calculation later on.
@@ -185,8 +183,8 @@ subsequent calculations.
     
 
 
- Settings and templates
-=======================
+Settings and templates
+-----------------------
 
 In the above example ``templates.geometry`` was actually a predefined
 Settings object. You can define and manipulate Settings in a completely
@@ -469,8 +467,8 @@ for ADF package:
     
 
 
- Combining multiple jobs 
-=========================
+Combining multiple jobs 
+-------------------------
 
 Multiple jobs can be combined, while calling the run function only once.
 The script below combines components outlined above:

@@ -55,7 +55,7 @@ you to find back the "raw" data of the calculation later on.
 
   .. code:: bash
 
-    load module superAwesomeQuantumPackage/3.141592
+    module load module superAwesomeQuantumPackage/3.141592
 
     Also some simulation packages required that you configure a ``scratch`` folder. For instance *Orca* requires a ``SCR`` folder to be defined while *ADF*  called it ``SCM_TMPDIR``.
 
