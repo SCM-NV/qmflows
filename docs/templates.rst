@@ -53,16 +53,37 @@ For Example, the default parameter for a geometry optimization using ADF are giv
        ................
 
 
+The templates in `JSON` format are translated to python dictionaries using the :func:`get_template`. This templates can be used by themselves in the calculations
+or more keywords can be attached to them modifying the default values. For example the default values to carry a single point calculation using the **ORCA** quantum
+package are:
+
+.. code::
+
+   from qmworks.templates import singlepoint
+   print(singlepoint.specific.orca)
+
+   basis:
+         basis: 	sto_sz
+   method: 	
+         functional: 	lda
+          method: 	dft
+
+We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation:
+
+.. code::
+   from qmworks.templates import singlepoint
+   singlepoint.specific.orca.basis.basis = 'DZP'
+
+    print(singlepoint.specific.orca)
+
+    basis: 	
+      basis: 	DZP
+    method: 	
+      functional: 	lda
+      method: 	dft
+	  
+
 .. autofunction:: get_template
-
-		  
-		  
-.. _dictionaries:
-
-Dictionaries
-~~~~~~~~~~~~
-While templates_ are as defaults, the *JSON* files stored in the dictionaries folder are use to translate the generic keywords provided by the user to specific keywords used for each package. For instance these files are used by the class :meth:`~qmworks.packages.Package`  
-
 
 
 
