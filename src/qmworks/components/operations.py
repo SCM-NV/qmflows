@@ -33,9 +33,15 @@ def select_max(results, prop='energy'):
 
 @schedule_hint()
 def select_max_dict(dictionary, prop):
-    k = max(dictionary, key=lambda k: dictionary[k].__getattr__(prop))
-    print("Selected " + str(k) + ": " + str(dictionary[k].__getattr__(prop)))
-    return dictionary[k]
+    def key(k):
+        ret = getattr(dictionary[k], prop)
+        if isinstance(ret, (float, int)):
+            return ret
+        else:
+            return float("-inf")
+    selected_key = max(dictionary, key=key)
+    print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
+    return dictionary[selected_key]
 
 @schedule_hint()
 def select_min(results, prop='energy'):
@@ -57,7 +63,13 @@ def select_min(results, prop='energy'):
 
 @schedule_hint()
 def select_min_dict(dictionary, prop):
-    k = min(dictionary, key=lambda k: dictionary[k].__getattr__(prop))
-    print("Selected " + str(k) + ": " + str(dictionary[k].__getattr__(prop)))
-    return dictionary[k]
+    def key(k):
+        ret = getattr(dictionary[k], prop)
+        if isinstance(ret, (float, int)):
+            return ret
+        else:
+            return float("inf")
+    selected_key = min(dictionary, key=key)
+    print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
+    return dictionary[selected_key]
 
