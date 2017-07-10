@@ -1,8 +1,8 @@
 
- TUTORIAL 
-==========
+TUTORIAL 
+=========
 
- Table of content 
+Table of content 
 ------------------
 
 1. **Packages**
@@ -542,7 +542,7 @@ several formats like: *xyz* , *pdb*, *mol*, etc.
 
 .. code:: python
 
-    from plams import Molecule
+    from scm.plams import Molecule
     acetonitrile = Molecule("files/acetonitrile.xyz")
     print(acetonitrile)
 
@@ -550,7 +550,7 @@ You can also create the molecule one atom at a time
 
 .. code:: python
 
-    from plams import (Atom, Molecule)
+    from scm.plams import (Atom, Molecule)
     m  = Molecule()
     m.add_atom(Atom(symbol='C', coords=(2.41929, 0.60656 , 0.0)))
     m.add_atom(Atom(symbol='C', coords=(1.67147,  1.82957, 0.0)))
@@ -659,7 +659,7 @@ function, as shown below
 
 .. code:: python
 
-    from plams import Molecule
+    from scm.plams import Molecule
     from qmworks import (adf, run, Settings, templates)
 
     # Settings
@@ -669,7 +669,7 @@ function, as shown below
     s.freeze = [1, 2, 3]
 
     # molecule 
-    from plams import Molecule
+    from scm.plams import Molecule
     acetonitrile = Molecule("acetonitrile.xyz")
 
     # Job 
@@ -684,26 +684,25 @@ console:
 
 .. code:: bash
 
-    (qmworks)[user@int1 ~]$ python acetonitrile_opt.py
+    python acetonitrile_opt.py
 
 you will then see in your ``current work directory`` something similar
 to the following
 
-.. code:: bash
-
+  ::
     (qmworks)[user@int1 ~]$ ls 
     acetonitrile      acetonitrile_opt.py   cache.json   acetonitrile.xyz  
 
- acetonitrile is the folder containing the output from the quantum
+acetonitrile is the folder containing the output from the quantum
 package call (``ADF`` in this case). The ``cache.json`` file contains
 all the information required to perform a restart, as we will explore
 below. Inside the acetonitrile you can find the input/output files
 resulting from the simulation
 
-.. code:: bash
+ ::
    (qmworks)[user@int1 ~]$ ls acetonitrile   acetonitrile.log  acetonitrile_opt
 
-.. code:: bash   
+ ::
    bash (qmworks)[user@int1 ~]$ ls acetonitrile/acetonitrile_opt  acetonitrile_opt.dill  acetonitrile_opt.out  logfile  t21.N  acetonitrile_opt.err   acetonitrile_opt.run  t21.C  acetonitrile_opt.in    acetonitrile_opt.t21  t21.H
 
 Extracting Properties 
@@ -764,8 +763,8 @@ The whole script is
 .. code:: python
 
     from qmworks import (adf, orca, run, templates, Settings)
-    from plams import Molecule
-    import plams
+    from scm.plams import Molecule
+    from scm import plams
 
     def main():
         s = templates.geometry

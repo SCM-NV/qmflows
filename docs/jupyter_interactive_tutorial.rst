@@ -18,7 +18,7 @@ Installation in Unix
 
 .. code:: bash
 	  
-   conda create -q -n qmworks
+   conda create -q -n qmworks python
 
 -  | Install dependecies
 
@@ -110,7 +110,7 @@ First we define a molecule, for example by reading one from an xyz file
 
 .. code:: python
 
-    from plams import Molecule
+    from scm.plams import Molecule
     acetonitrile = Molecule("files/acetonitrile.xyz")
     print(acetonitrile)
 
@@ -476,7 +476,7 @@ The script below combines components outlined above:
 
 .. code:: python
 
-    from plams import Molecule
+    from scm.plams import Molecule
     from qmworks import dftb, adf, templates, run, Settings
     
     acetonitrile = Molecule("files/acetonitrile.xyz")
