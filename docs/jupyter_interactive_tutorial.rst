@@ -105,7 +105,8 @@ the calculation later on.
 
 Let's see how this works:
 
-First we define a molecule, for example by reading one from an xyz file:
+First we define a molecule, for example by reading one from an xyz file
+(you can get the file from here :download:`_files/acetonitrile.xyz`):
 
 .. code:: python
 
