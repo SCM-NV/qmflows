@@ -1,4 +1,8 @@
 
+__all__ = [
+    'parse_basis_set', 'parse_hessian', 'parse_frequencies', 'parse_molecule',
+    'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
+
 from itertools import chain
 from scm.plams import (Atom, Molecule)
 from pyparsing import (alphanums, Group, OneOrMore, Word)

@@ -1,3 +1,4 @@
+__all__ = ['example_ADF3FDE_Dialanine']
 # Default imports
 from qmworks import (templates, run)
 from qmworks import molkit
@@ -6,13 +7,13 @@ from noodles import gather
 
 # User Defined imports
 from qmworks.packages.SCM import dftb
-
 import io
-# ----------------------------------------------------------------
 
-# For the purpose of the example, define the pdb file here.
 
-dialanine_pdb = io.StringIO(
+def example_ADF3FDE_Dialanine():
+    # For the purpose of the example, define the pdb file here.
+
+    dialanine_pdb = io.StringIO(
 '''HEADER    OXIDOREDUCTASE                          06-JUL-94   1PBE
 TITLE     CRYSTAL STRUCTURE OF THE P-HYDROXYBENZOATE HYDROXYLASE-SUBSTRATE
 TITLE    2 COMPLEX REFINED AT 1.9 ANGSTROMS RESOLUTION. ANALYSIS OF THE ENZYME-
@@ -30,19 +31,21 @@ ATOM    946  CB  ALA A 125      33.596 106.405  70.359  1.00 22.03           C
 END
 ''')
 
-supermol = molkit.readpdb(dialanine_pdb)
+    supermol = molkit.readpdb(dialanine_pdb)
 
-supermol = molkit.add_Hs(supermol)
+    supermol = molkit.add_Hs(supermol)
 
-# Calculate dipole normally
-supermol_job = dftb(templates.singlepoint, supermol,
-                    job_name='supermol_singlepoint')
+    # Calculate dipole normally
+    supermol_job = dftb(templates.singlepoint, supermol,
+                        job_name='supermol_singlepoint')
 
-# Calculate dipole with mfcc approach
-frags, caps = molkit.partition_protein(supermol)
-mfcc_job = mfcc(dftb, frags, caps)
+    # Calculate dipole with mfcc approach
+    frags, caps = molkit.partition_protein(supermol)
+    mfcc_job = mfcc(dftb, frags, caps)
 
-supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
+    supermol_dipole, mfcc_dipole = run(gather(supermol_job.dipole, mfcc_job.dipole))
 
-print(supermol_dipole)
-print(mfcc_dipole)
+    print("Supermolecule dipole: ", supermol_dipole)
+    print("mfcc dipole: ", mfcc_dipole)
+
+    return supermol_dipole, mfcc_dipole

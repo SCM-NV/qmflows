@@ -1,4 +1,9 @@
 
+__all__ = ['import_parser', 'package_properties',
+           'Package', 'run', 'registry', 'Result',
+           'SerMolecule', 'SerSettings']
+
+
 # ========>  Standard and third party Python Libraries <======
 from functools import partial
 from os.path import join
@@ -12,11 +17,12 @@ import fnmatch
 import importlib
 import inspect
 import os
+import uuid
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
-from noodles.display import (DumbDisplay)
+from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
 from noodles.serial import (Serialiser, Registry, AsDict)
@@ -30,10 +36,6 @@ from qmworks import molkit
 from qmworks.fileFunctions import json2Settings
 from qmworks.utils import concatMap
 from warnings import warn
-# ==============================================================
-__all__ = ['import_parser', 'package_properties',
-           'Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
 
 package_properties = {
     'adf': 'data/dictionaries/propertiesADF.json',
@@ -76,6 +78,17 @@ class Result:
         self.job_name = job_name
         self.status = status
         self.warnings = warnings
+
+    def __deepcopy__(self, memo):
+        print(dir(self))
+        return Result(self.settings,
+                      self._molecule,
+                      self.job_name,
+                      plams_dir=self.archive['plams_dir'].path,
+                      work_dir=self.archive['work_dir'],
+                      status=self.status,
+                      warnings=self.warnings
+                      )
 
     def as_dict(self):
         """
@@ -280,7 +293,7 @@ class Package:
                         if isinstance(key[1], dict):
                             value = key[1][v]
                         else:
-                            value = key[1]
+                            value = {key[1]: v}
                         if value:
                             v = value
                         key = key[0]
@@ -367,7 +380,7 @@ def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
     """
-    with DumbDisplay() as display:
+    with NCDisplay() as display:
         return run_parallel_opt(
             job, n_threads=n_processes,
             registry=registry, jobdb_file=cache,
@@ -408,7 +421,7 @@ def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='
             working_dir=workdir
         )
 
-        with DumbDisplay() as display:
+        with NCDisplay() as display:
             result = run_xenon_prov(
                 job, Xe, cache, n_processes,
                 xenon_config, job_config, display=display)
@@ -428,7 +441,7 @@ class SerMolecule(Serialiser):
         return make_rec(obj.as_dict())
 
     def decode(self, cls, data):
-        return plams.Molecule.from_dict(**data)
+        return plams.Molecule.from_dict(data)
 
 
 class SerMol(Serialiser):
@@ -496,6 +509,13 @@ def find_file_pattern(pat, folder):
                    fnmatch.filter(os.listdir(folder), pat))
     else:
         return []
+
+
+def get_tmpfile_name():
+    tmpfolder = builtins.config.jm.workdir + '/tmpfiles'
+    if not os.path.exists(tmpfolder):
+        os.mkdir(tmpfolder)
+    return tmpfolder + '/' + str(uuid.uuid4())
 
 
 def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:

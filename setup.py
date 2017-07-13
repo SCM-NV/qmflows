@@ -5,7 +5,7 @@ from setuptools import setup
 
 setup(
     name='qmworks',
-    version='0.1.5',
+    version='0.2',
     description='Automation of computations in quantum chemistry',
     license='',
     url='https://github.com/SCM-NV/qmworks',
@@ -15,6 +15,7 @@ setup(
     packages=["qmworks", "qmworks.components",
               "qmworks.data",
               "qmworks.data.dictionaries",
+              "qmworks.examples",
               "qmworks.hdf5",
               "qmworks.packages", "qmworks.parsers",
               "qmworks.templates"],
@@ -28,9 +29,12 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles', 'plams',
+    install_requires=['h5py', 'numpy', 'noodles', 'plams>=1.1.1',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
-                      'filelock', 'msgpack-python'],
-    extras_require={'test': ['nose', 'coverage']}
+                      'filelock', 'msgpack-python',
+                      'sphinx_rtd_theme'],
+    extras_require={'test': ['nose', 'coverage']},
+    dependency_links=[
+        "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
 )

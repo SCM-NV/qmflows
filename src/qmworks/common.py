@@ -5,10 +5,9 @@ __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
            'InfoMO', 'InputKey', 'MO']
 
 
-# ================> Python Standard  and third-party <==========
 from collections import namedtuple
 
-# ======================================================================
+
 # Named Tuples
 AtomBasisKey = namedtuple("AtomBasisKey", ("atom", "basis", "basisFormat"))
 AtomBasisData = namedtuple("AtomBasisData", ("exponents", "coefficients"))

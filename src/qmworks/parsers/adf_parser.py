@@ -1,4 +1,6 @@
 
+__all__ = ['kfreader', 'extract_properties_rkf']
+
 from qmworks.settings import Settings
 from scm import plams
 import numpy as np
@@ -12,7 +14,7 @@ def kfreader(path_t21, section=None, prop=None):
     return kf.read(section, prop)
 
 
-def extract_properties_rkf(path_rkf, key=None):
+def extract_properties_rkf(path_rkf, key=None, subkey=None):
     """
     Read result from a DFTB computation using the job_name.rkf file.
     """
@@ -24,7 +26,7 @@ def extract_properties_rkf(path_rkf, key=None):
         subtype = kf('Properties', 'Subtype(' + str(i + 1) + ')').strip()
         value = kf('Properties', 'Value(' + str(i + 1) + ')')
         props[typ][subtype] = value
-    ret = props[key]
+    ret = props[key][subkey]
     if isinstance(ret, list):
         ret = np.array(ret)
     return ret

@@ -1,4 +1,7 @@
 from nose.plugins.attrib import attr
+from qmworks.examples import (
+    example_generic_constraints, example_H2O2_TS, example_partial_geometry_opt)
+import numpy as np
 
 
 @attr('slow')
@@ -6,25 +9,28 @@ def test_partial_geometry_opt():
     """
     Test partial geometry optimization.
     """
-    local_env = {}
-    exec(open('examples/Constrained_and_TS_optimizations/partial_geometry_opt.py').read(), {}, local_env)
-    assert str(local_env['geom1']) == str(local_env['geom2'])
+    geom1, geom2 = example_partial_geometry_opt()
+    assert str(geom1) == str(geom2)
 
+
+@attr('slow')
 def test_h2o2_ts():
     """
-    Test TS optimization of a rotational barrier in hydrogen peroxide with ORCA using init hessian from DFTB
+    Test TS optimization of a rotational barrier in hydrogen peroxide
+    with ORCA using init hessian from DFTB.
     """
-    local_env = {}
-    exec(open('examples/Constrained_and_TS_optimizations/H2O2_TS.py').read(), {}, local_env)
-    assert local_env['n_optcycles'] < 7
-    assert local_env['ts_dihe'] == 0.0
+    ts_dihe, n_optcycles = example_H2O2_TS()
+    assert (n_optcycles < 7)
+    assert ts_dihe == 0.0
 
+
+@attr('slow')
 def test_generic_constraints():
     """
     Test generic distance constraints on all packages
     """
-    local_env = {}
-    exec(open('examples/Constrained_and_TS_optimizations/generic_constraints.py').read(), {}, local_env)
-    assert local_env['table'] == {'adf': {'1.1': -0.276479, '1.0': -0.284003, '1.2': -0.258743},
-                                  'dftb': {'1.1': -4.747407, '1.0': -4.760192, '1.2': -4.732274},
-                                  'orca': {'1.1': -99.430973, '1.0': -99.438656, '1.2': -99.415615}}
+    names, test_energies = example_generic_constraints()
+    expected_energies = [-4.76019173, -0.28400262, -99.43865603, -4.74740691, -0.27647907,
+                         -99.43097285, -4.73227438, -0.25874316, -99.41561528]
+
+    assert np.allclose(test_energies, expected_energies, rtol=1e-3)
