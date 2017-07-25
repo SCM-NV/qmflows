@@ -164,4 +164,4 @@ script gives an idea of what you need:
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
 .. _jupyter-notebook: http://jupyter.org/
 .. _tutorial-qmworks: https://github.com/SCM-NV/qmworks/tree/master/jupyterNotebooks
-.. _examples: https://github.com/SCM-NV/qmworks/tree/develop/examples
+.. _examples: https://github.com/SCM-NV/qmworks/tree/master/src/qmworks/examples
