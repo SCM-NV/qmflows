@@ -16,7 +16,7 @@ install:
   # Install virtual enviroment 
   - conda create -q -n qmworks python=3.5
   - conda install --name qmworks -c anaconda hdf5
-  - conda install --name qmworks -c https://conda.anaconda.org/rdkit rdkit
+  - conda install --name qmworks -c rdkit rdkit
   - source activate qmworks
 
   # Package dependencies
