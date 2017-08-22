@@ -25,6 +25,7 @@ from noodles import (schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
+from noodles.run.runners import run_parallel_with_display
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerStorable
 from noodles.run.xenon import (
@@ -379,12 +380,18 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
+    Caching can be turned off by specifying cache=None
     """
     with NCDisplay() as display:
-        return run_parallel_opt(
-            job, n_threads=n_processes,
-            registry=registry, jobdb_file=cache,
-            display=display)
+        if cache is None:
+            return run_parallel_with_display(
+                job, n_threads=n_processes,
+                display=display)
+        else:
+            return run_parallel_opt(
+                job, n_threads=n_processes,
+                registry=registry, jobdb_file=cache,
+                display=display)
 
 
 def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
