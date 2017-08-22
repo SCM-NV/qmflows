@@ -132,11 +132,11 @@ class Result:
         elif (self.status in crash_status) and not is_private:
             warn("""
             It is not possible to retrieve property: '{}'
-            Because Job: '{}' has failed. Check the output.\n
+            Because Job: '{}' has {}. Check the output.\n
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """.format(prop, self.job_name))
+            """.format(prop, self.job_name, self.status))
             return None
 
     def get_property(self, prop):
