@@ -28,8 +28,8 @@ from noodles.run.run_with_prov import run_parallel_opt
 from noodles.run.runners import run_parallel_with_display
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerStorable
-from noodles.run.xenon import (
-    XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
+# from noodles.run.xenon import (
+#     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
 from noodles.serial.numpy import arrays_to_hdf5
 
 from qmworks.settings import Settings
@@ -368,8 +368,8 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     builtins.config.jobmanager.jobfolder_exists = 'rename'
     if runner is None:
         ret = call_default(job, **kwargs)
-    elif runner.lower() == 'xenon':
-        ret = call_xenon(job, **kwargs)
+    # elif runner.lower() == 'xenon':
+    #     ret = call_xenon(job, **kwargs)
     else:
         raise "Don't know runner: {}".format(runner)
     if initialize:
@@ -394,46 +394,46 @@ def call_default(job, n_processes=1, cache='cache.json'):
                 display=display)
 
 
-def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
-               queue_name=None, host_name=None, workdir=None, timeout=60000, **kwargs):
-    """
-    See :
-        https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
-    """
-    dict_properties = {
-        'slurm': {'xenon.adaptors.slurm.ignore.version': 'true'},
-        'pbs': {'xenon.adaptors.pbs.ignore.version': 'true'}
-    }
-    with XenonKeeper(log_level='DEBUG') as Xe:
-        certificate = Xe.credentials.newCertificateCredential(
-            'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
+# def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
+#                queue_name=None, host_name=None, workdir=None, timeout=60000, **kwargs):
+#     """
+#     See :
+#         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
+#     """
+#     dict_properties = {
+#         'slurm': {'xenon.adaptors.slurm.ignore.version': 'true'},
+#         'pbs': {'xenon.adaptors.pbs.ignore.version': 'true'}
+#     }
+#     with XenonKeeper(log_level='DEBUG') as Xe:
+#         certificate = Xe.credentials.newCertificateCredential(
+#             'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
 
-        xenon_config = XenonConfig(
-            jobs_scheme=adapter,
-            location=host_name,
-            credential=certificate,
-            jobs_properties=dict_properties[adapter]
-        )
-        print(xenon_config.__dict__)
+#         xenon_config = XenonConfig(
+#             jobs_scheme=adapter,
+#             location=host_name,
+#             credential=certificate,
+#             jobs_properties=dict_properties[adapter]
+#         )
+#         print(xenon_config.__dict__)
 
-        if workdir is None:
-            workdir = '/home/' + user_name
+#         if workdir is None:
+#             workdir = '/home/' + user_name
 
-        job_config = RemoteJobConfig(
-            registry=registry,
-            init=plams.init,
-            finish=plams.finish,
-            queue=queue_name,
-            time_out=timeout,
-            working_dir=workdir
-        )
+#         job_config = RemoteJobConfig(
+#             registry=registry,
+#             init=plams.init,
+#             finish=plams.finish,
+#             queue=queue_name,
+#             time_out=timeout,
+#             working_dir=workdir
+#         )
 
-        with NCDisplay() as display:
-            result = run_xenon_prov(
-                job, Xe, cache, n_processes,
-                xenon_config, job_config, display=display)
+#         with NCDisplay() as display:
+#             result = run_xenon_prov(
+#                 job, Xe, cache, n_processes,
+#                 xenon_config, job_config, display=display)
 
-    return result
+#     return result
 
 
 class SerMolecule(Serialiser):
