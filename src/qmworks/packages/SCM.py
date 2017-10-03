@@ -49,7 +49,7 @@ class ADF(Package):
         if nproc:
             adf_settings.runscript.nproc = nproc
         adf_settings.input = settings.specific.adf
-        job = plams.interfaces.adfsuite.ADFJob(name=job_name, molecule=mol,
+        job = plams.ADFJob(name=job_name, molecule=mol,
                                                settings=adf_settings)
         result = job.run()
         # Path to the tape 21 file
@@ -161,7 +161,7 @@ class ADF_Result(Result):
         super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
                          properties=properties, status=status, warnings=warnings)
         # Create a KF reader instance
-        self.kf = plams.tools.kftools.KFFile(path_t21)
+        self.kf = plams.KFFile(path_t21)
 
     def __deepcopy__(self, memo):
         return ADF_Result(self.settings,
@@ -238,7 +238,7 @@ class DFTB(Package):
         if nproc:
             dftb_settings.runscript.nproc = nproc
         dftb_settings.input = settings.specific.dftb
-        job = plams.interfaces.adfsuite.DFTBJob(name=job_name, molecule=mol,
+        job = plams.DFTBJob(name=job_name, molecule=mol,
                                                 settings=dftb_settings)
 
         # Check RKF status
@@ -341,7 +341,7 @@ class DFTB_Result(Result):
         if plams_dir is not None:
             kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
             # create a kf reader instance
-            self.kf = plams.tools.kftools.KFFile(kf_filename)
+            self.kf = plams.KFFile(kf_filename)
         else:
             self.kf = None
 

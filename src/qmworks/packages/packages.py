@@ -243,7 +243,7 @@ class Package:
                                         status='failed')
 
             # Otherwise pass an empty Result instance downstream
-            except plams.PlamsError as err:
+            except plams.core.errors.PlamsError as err:
                 msg = "Job {} has failed.\n{}".format(job_name, err)
                 warn(msg)
                 result = Result(None, None, job_name=job_name,

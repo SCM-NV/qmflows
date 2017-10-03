@@ -42,8 +42,8 @@ def mfcc(package, frags, caps, settings=None):
         cap_label = 'cap' + str(i + 1)
         for a in frag:
             if a.coords in capped_atoms:
-                a.name = cap_label
-                capped_atoms[a.coords].name = cap_label
+                a.properties.name = cap_label
+                capped_atoms[a.coords].properties.name = cap_label
 
     frag_jobs = [package(mfcc_settings, frag, job_name="mfcc_frag_" + str(i))
                  for i, frag in enumerate(frags)]
@@ -79,9 +79,9 @@ def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_nam
         frag_id = 'frag' + str(i + 1)
         if frag.result:
             for a in frag.mol:
-                a.fragment = frag_id
+                a.properties.adf.fragment = frag_id
                 if a.coords in cap_ids:
-                    a.fragment += '  fs=' + cap_ids[a.coords]
+                    a.properties.adf.fragment += '  fs=' + cap_ids[a.coords]
             path = frag.result.kf.path
             key = frag_id + ' ' + path + ' subfrag=active'
             if frag.isfrozen:
