@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8" />
-<title>tutorial</title>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>tutorial</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
 <style type="text/css">
@@ -13,8 +11,8 @@
 *
 */
 /*!
- * Bootstrap v3.3.6 (http://getbootstrap.com)
- * Copyright 2011-2015 Twitter, Inc.
+ * Bootstrap v3.3.7 (http://getbootstrap.com)
+ * Copyright 2011-2016 Twitter, Inc.
  * Licensed under MIT (https://github.com/twbs/bootstrap/blob/master/LICENSE)
  */
 /*! normalize.css v3.0.3 | MIT License | github.com/necolas/normalize.css */
@@ -1109,7 +1107,6 @@ a:focus {
   text-decoration: underline;
 }
 a:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -2538,7 +2535,6 @@ select[size] {
 input[type="file"]:focus,
 input[type="radio"]:focus,
 input[type="checkbox"]:focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -3029,7 +3025,6 @@ select[multiple].input-lg {
 .btn.focus,
 .btn:active.focus,
 .btn.active.focus {
-  outline: thin dotted;
   outline: 5px auto -webkit-focus-ring-color;
   outline-offset: -2px;
 }
@@ -8760,6 +8755,9 @@ body > #header .header-bar {
     margin-left: 10px;
   }
 }
+[dir="rtl"] #ipython_notebook {
+  float: right !important;
+}
 #noscript {
   width: auto;
   padding-top: 16px;
@@ -8962,8 +8960,14 @@ span#login_widget > .button .badge,
  *
  * Author: Jupyter Development Team
  */
+[dir="rtl"] #tabs li {
+  float: right;
+}
 ul#tabs {
   margin-bottom: 4px;
+}
+[dir="rtl"] ul#tabs {
+  margin-right: 0px;
 }
 ul#tabs a {
   padding-top: 6px;
@@ -8986,6 +8990,16 @@ ul.breadcrumb span {
 }
 .list_toolbar .tree-buttons {
   padding-top: 1px;
+}
+[dir="rtl"] .list_toolbar .tree-buttons {
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-right {
+  padding-top: 1px;
+  float: left !important;
+}
+[dir="rtl"] .list_toolbar .pull-left {
+  float: right !important;
 }
 .dynamic-buttons {
   padding-top: 3px;
@@ -9122,6 +9136,9 @@ ul.breadcrumb span {
 #tree-selector {
   padding-right: 0px;
 }
+[dir="rtl"] #tree-selector a {
+  float: right;
+}
 #button-select-all {
   min-width: 50px;
 }
@@ -9211,6 +9228,9 @@ ul#new-menu {
   left: auto;
   right: 0;
 }
+[dir="rtl"] #new-menu {
+  text-align: right;
+}
 .kernel-menu-icon {
   padding-right: 12px;
   width: 24px;
@@ -9255,6 +9275,9 @@ ul#new-menu {
 }
 #running .panel-group .panel .panel-body .list_container .list_item:last-child {
   border-bottom: 0px;
+}
+[dir="rtl"] #running .col-sm-8 {
+  float: right !important;
 }
 .delete-button {
   display: none;
@@ -9551,6 +9574,7 @@ div.cell.selected.jupyter-soft-selected {
   }
 }
 div.inner_cell {
+  min-width: 0;
   /* Old browsers */
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -9571,11 +9595,6 @@ div.inner_cell {
   box-flex: 1;
   /* Modern browsers */
   flex: 1;
-}
-@-moz-document url-prefix() {
-  div.inner_cell {
-    overflow-x: hidden;
-  }
 }
 /* input_area and input_prompt must match in top border and margin for alignment */
 div.input_area {
@@ -11246,7 +11265,7 @@ div#pager .ui-resizable-handle::after {
 }
 .shortcut_key {
   display: inline-block;
-  width: 20ex;
+  width: 21ex;
   text-align: right;
   font-family: monospace;
 }
@@ -11558,6 +11577,7 @@ ul.typeahead-list > li > a {
   box-shadow: 0px 0px 12px 1px rgba(87, 87, 87, 0.2);
 }
 .terminal-app .terminal {
+  width: 100%;
   float: left;
   font-family: monospace;
   color: white;
@@ -11571,6 +11591,9 @@ ul.typeahead-list > li > a {
 .terminal-app .terminal dummy-screen {
   line-height: 1em;
   font-size: 14px;
+}
+.terminal-app .terminal .xterm-rows {
+  padding: 10px;
 }
 .terminal-app .terminal-cursor {
   color: black;
@@ -11631,8 +11654,10 @@ ul.typeahead-list > li > a {
 .highlight .mh { color: #666666 } /* Literal.Number.Hex */
 .highlight .mi { color: #666666 } /* Literal.Number.Integer */
 .highlight .mo { color: #666666 } /* Literal.Number.Oct */
+.highlight .sa { color: #BA2121 } /* Literal.String.Affix */
 .highlight .sb { color: #BA2121 } /* Literal.String.Backtick */
 .highlight .sc { color: #BA2121 } /* Literal.String.Char */
+.highlight .dl { color: #BA2121 } /* Literal.String.Delimiter */
 .highlight .sd { color: #BA2121; font-style: italic } /* Literal.String.Doc */
 .highlight .s2 { color: #BA2121 } /* Literal.String.Double */
 .highlight .se { color: #BB6622; font-weight: bold } /* Literal.String.Escape */
@@ -11643,9 +11668,11 @@ ul.typeahead-list > li > a {
 .highlight .s1 { color: #BA2121 } /* Literal.String.Single */
 .highlight .ss { color: #19177C } /* Literal.String.Symbol */
 .highlight .bp { color: #008000 } /* Name.Builtin.Pseudo */
+.highlight .fm { color: #0000FF } /* Name.Function.Magic */
 .highlight .vc { color: #19177C } /* Name.Variable.Class */
 .highlight .vg { color: #19177C } /* Name.Variable.Global */
 .highlight .vi { color: #19177C } /* Name.Variable.Instance */
+.highlight .vm { color: #19177C } /* Name.Variable.Magic */
 .highlight .il { color: #666666 } /* Literal.Number.Integer.Long */
     </style>
 <style type="text/css">
@@ -11687,24 +11714,6 @@ ul.typeahead-list > li > a {
 .ansi-bold { font-weight: bold; }
 
     </style>
-<style type="text/css">
-    /*
-    Name:       Base16 Solarized Light
-    Author:     Ethan Schoonover (http://ethanschoonover.com/solarized)
-    CodeMirror template adapted for IPython Notebook by Nikhil Sonnad (https://github.com/nsonnad/base16-ipython-notebook)
-    CodeMirror template by Jan T. Sott (https://github.com/idleberg/base16-chrome-devtools)
-    Original Base16 color scheme by Chris Kempson (https://github.com/chriskempson/base16)
-*/
-
-/* Uncomment to use a custom font */
-div#notebook, div.CodeMirror, div.output_area pre, div.output_wrapper, div.prompt {
-    font-family: "Georgia", monospace !important; font-size: 13pt;
-}
-
-/* div { */
-/*     text-align-last: start; */
-/* } */
-    </style>
 
 
 <style type="text/css">
@@ -11717,9 +11726,7 @@ body {
 div#notebook {
   overflow: visible;
   border-top: none;
-}
-
-@media print {
+}@media print {
   div.cell {
     display: block;
     page-break-inside: avoid;
@@ -11740,7 +11747,7 @@ div#notebook {
 
 <!-- Loading mathjax macro -->
 <!-- Load mathjax -->
-    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS_HTML"></script>
     <!-- MathJax configuration -->
     <script type="text/x-mathjax-config">
     MathJax.Hub.Config({
@@ -11764,17 +11771,26 @@ div#notebook {
   <div tabindex="-1" id="notebook" class="border-box-sizing">
     <div class="container" id="notebook-container">
 
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h1 id="-TUTORIAL-"><font color="green"> TUTORIAL </font><a class="anchor-link" href="#-TUTORIAL-">&#182;</a></h1>
+<h1 id="-TUTORIAL-"><font color="green"> TUTORIAL </font><a class="anchor-link" href="#-TUTORIAL-">&#182;</a></h1><h2 id="-Table-of-content-"><font color="green"> Table of content </font><a class="anchor-link" href="#-Table-of-content-">&#182;</a></h2><ol>
+<li><strong>Installation</strong></li>
+<li><strong>Packages</strong></li>
+<li><strong>Settings</strong></li>
+<li><strong>Templates</strong></li>
+<li><strong>Molecules</strong></li>
+<li><strong> Runinng a quantum mechanics simulation</strong></li>
+<li><strong>How the run function works?</strong></li>
+<li><strong> Advanced examples</strong></li>
+<li><strong>Exception handling</strong></li>
+</ol>
+
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -11790,7 +11806,7 @@ div#notebook {
 </ul>
 <ul>
 <li><p>create new virtual environment</p>
-<div class="highlight"><pre><span></span>conda create -q -n qmworks <span class="nv">python</span><span class="o">=</span>3.5
+<div class="highlight"><pre><span></span>conda create -q -n qmworks
 </pre></div>
 </li>
 <li><p>Install dependecies</p>
@@ -11802,28 +11818,18 @@ conda install --name qmworks -c https://conda.anaconda.org/rdkit rdkit
 <div class="highlight"><pre><span></span><span class="nb">source</span> activate qmworks
 </pre></div>
 </li>
-<li><p>install <strong>qmworks</strong> dependencies</p>
-<div class="highlight"><pre><span></span>pip install https://github.com/SCM-NV/qmworks/tarball/master#egg<span class="o">=</span>qmworks https://github.com/SCM-NV/plams/tarball/master#egg<span class="o">=</span>plams --upgrade
+<li><p>install <strong>qmworks</strong></p>
+<div class="highlight"><pre><span></span>pip install qmworks --upgrade
 </pre></div>
-<p>### You are ready to start!</p>
+<p><strong> You are ready to start! </strong></p>
 </li>
 </ul>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <h2 id="-Starting-the-environment--"><font color="green"> Starting the environment  </font><a class="anchor-link" href="#-Starting-the-environment--">&#182;</a></h2><p>Once <em>QMWORKS</em>  has been installed the user should run the following command to initialize the environment:</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -11831,14 +11837,13 @@ conda install --name qmworks -c https://conda.anaconda.org/rdkit rdkit
 discarding /home/user/anaconda3/bin from PATH
 prepending /home/user/anaconda3/envs/qmworks/bin to PATH
 <span class="o">(</span>qmworks<span class="o">)[</span>user@int1 ~<span class="o">]</span>$ python --version
-Python 3.5.2 :: Anaconda custom <span class="o">(</span>64-bit<span class="o">)</span>
+Python <span class="m">3</span>.5.2 :: Anaconda custom <span class="o">(</span><span class="m">64</span>-bit<span class="o">)</span>
 </pre></div>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -11847,8 +11852,7 @@ Python 3.5.2 :: Anaconda custom <span class="o">(</span>64-bit<span class="o">)<
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -11859,42 +11863,48 @@ discarding /home/user/anaconda3/envs/qmworks/bin from PATH
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-QMWorks-Packages-"><font color="green"> QMWorks Packages </font><a class="anchor-link" href="#-QMWorks-Packages-">&#182;</a></h2><p>Currently <code>qmworks</code> offers an interface with the following simulation software:</p>
+<h2 id="-2.-What-is-QMworks?-"><font color="green"> 2. What is QMworks? </font><a class="anchor-link" href="#-2.-What-is-QMworks?-">&#182;</a></h2><p>QMworks is a python library that enables executing complex workflows of interdependent quantum chemical (QM) calculations in python. It aims at providing a common interface to multiple QM packages, enabling easy and systematic generation of the calculation inputs, as well as facilitating automatic analysis of the results. Furthermore it is build on top of the powerful <a href="http://nlesc.github.io/noodles/">Noodles</a> framework for executing the calculations in parallel where possible. Together with the <a href="https://github.com/SCM-NV/PLAMS">Plams</a> library to interface with the different QM simulation packages.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-Packages-"><font color="green"> Packages </font><a class="anchor-link" href="#-Packages-">&#182;</a></h2><p>Currently <code>QMWorks</code> offers an interface with the following simulation softwares:</p>
 <ul>
-<li>SCM (ADF and DTFB)</li>
-<li>CP2K</li>
-<li>ORCA</li>
-<li>GAMESS-US</li>
-<li>DIRAC</li>
+<li><a href="https://www.scm.com/">SCM</a> (ADF and DTFB)</li>
+<li><a href="https://www.cp2k.org/">CP2K</a></li>
+<li><a href="https://orcaforum.cec.mpg.de/">ORCA</a></li>
+<li><a href="http://www.msg.ameslab.gov/gamess/">GAMESS-US</a></li>
+<li><a href="http://diracprogram.org/doku.php">DIRAC</a></li>
 </ul>
 <p>If you are interested in having support for other packages, request it using the <a href="https://github.com/SCM-NV/qmworks/issues">github-issues</a> system (Sorry but Gaussian is out of the menu!).</p>
-<p>The inteaction between the aforementioned packages and <em>qmworks</em> is carry out through a set of python function: 
-<em>adf, dftb, cp2k, orca, gamess and dirac</em>. These function invoked the quantum package using 2 mandatory arguments: a <strong>Settings</strong> object describing the input and a <strong>Molecule</strong> object containing the molecular geometry as will be detailed below.</p>
-<h4 id="-Thecnical-note:-"><font color="orange"> Thecnical note: </font><a class="anchor-link" href="#-Thecnical-note:-">&#182;</a></h4><p>It is the users resposability to install or load the simulation packages that they want to use, in most supercomputer the simulation package are available using a command like (consult your system administrator):</p>
-<div class="highlight"><pre><span></span>load module superAwesomeQuantumPackage/3.1421
+<p>With <code>qmworks</code> you can write a python script that simply calls one of the package objects 
+<strong>adf, dftb, cp2k, orca, gamess</strong> or <strong>dirac</strong>. As arguments to the call, you need to provide a <code>Settings</code> objects defining the input of a calculation, a molecular geometry represented by an object called <code>Molecule</code>, and, optionally, a job name that enables you to find back the "raw" data of the calculation later on.</p>
+<h3 id="-Technical-note:-"><font color="orange"> Technical note: </font><a class="anchor-link" href="#-Technical-note:-">&#182;</a></h3><p><code>It is the user responsability to install or load the simulation packages that he/she wants to use. In most supercomputers these simulation packages are available using a command like (consult your system administrator):</code></p>
+<div class="highlight"><pre><span></span>load module superAwesomeQuantumPackage/3.141592
 </pre></div>
-<p>Also some simulation packages required that you configure a <code>scratch</code> folder. For instance <em>Orca</em> requires a <code>SCR</code> folder to be defnied while <em>ADF</em>  called it <code>SCM_TMPDIR</code>.</p>
+<p><code>Also some simulation packages required that you configure a ``scratch`` folder. For instance *Orca* requires a ``SCR`` folder to be defined while *ADF*  called it ``SCM_TMPDIR``.</code></p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-QMWorks-Settings-"><font color="green"> QMWorks Settings </font><a class="anchor-link" href="#-QMWorks-Settings-">&#182;</a></h2><p><em>Settings</em> are a subclass of python <a href="https://docs.python.org/3.5/tutorial/datastructures.html#dictionaries">dictionaries</a> to represent herarchical structures, like</p>
+<h2 id="-3.-QMWorks-Settings-"><font color="green"> 3. QMWorks Settings </font><a class="anchor-link" href="#-3.-QMWorks-Settings-">&#182;</a></h2><p><em>Settings</em> are a subclass of python <a href="https://docs.python.org/3.5/tutorial/datastructures.html#dictionaries">dictionaries</a> to represent hierarchical structures, like</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -11905,7 +11915,7 @@ discarding /home/user/anaconda3/envs/qmworks/bin from PATH
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[30]:</div>
+<div class="prompt input_prompt">In&nbsp;[1]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">Settings</span>
@@ -11921,15 +11931,14 @@ discarding /home/user/anaconda3/envs/qmworks/bin from PATH
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>These hierachical resemble the input structure used in most quantum simulation package. For instance the basis set section in ADF is given by something like:</p>
 
 <pre><code>Basis
-  Type SZ
+  Type DZP
   Core Large
 End</code></pre>
 <p>We can resemble this structure using <strong>Settings</strong>,</p>
@@ -11939,7 +11948,7 @@ End</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[31]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
@@ -11952,16 +11961,15 @@ End</code></pre>
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>We are creating the <em>adf</em>  herarchy under a key called <em>specific</em>, this key is used to differenciate keywords that are unique to a certain quantum package from those that can be used in several packages as we will see in the next section.</p>
+<p>We are creating the <em>adf</em>  hierarchy under a key called <em>specific</em>, this key is used to differentiate keywords that are unique to a certain quantum package from those that can be used in several packages as we will see in the next section.</p>
 <p>similarly, we can define <code>Settings</code> for all the sections</p>
 
 <pre><code>Basis
-  Type SZ
+  Type DZP
 End
 
 Constraints
@@ -11991,7 +11999,7 @@ End</code></pre>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[32]:</div>
+<div class="prompt input_prompt">In&nbsp;[2]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
@@ -12010,7 +12018,7 @@ End</code></pre>
 <span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">integration</span><span class="o">.</span><span class="n">accint</span> <span class="o">=</span> <span class="mf">6.0</span>
 
 <span class="c1"># SCF</span>
-<span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">scf</span><span class="o">.</span><span class="n">converge</span> <span class="o">=</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span>
+<span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">scf</span><span class="o">.</span><span class="n">converge</span> <span class="o">=</span> <span class="mf">1e-6</span>
 <span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">scf</span><span class="o">.</span><span class="n">iterations</span> <span class="o">=</span> <span class="mi">100</span>
 
 <span class="c1"># Functional</span>
@@ -12027,7 +12035,11 @@ End</code></pre>
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>specific: 	
          adf: 	
@@ -12054,8 +12066,7 @@ End</code></pre>
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12064,12 +12075,11 @@ End</code></pre>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="-Generic-Keywords-"><font color="green"> Generic Keywords </font><a class="anchor-link" href="#-Generic-Keywords-">&#182;</a></h3><p>Many of the quantum chemistry packages use gaussian type orbitals (GTO) to perform the simulation (in contrast to the slater type orbitals). These package use the same standards for the basis set and it will be really handy if we can defined a "generic" keyword for basis sets.
+<h3 id="-Generic-Keywords-"><font color="green"> Generic Keywords </font><a class="anchor-link" href="#-Generic-Keywords-">&#182;</a></h3><p>Quantum chemistry packages use gaussian type orbitals (GTO) or  slater type orbitals (STO) to perform the simulation. The packages use the same standards for the basis set and it will be really handy if we can defined a "generic" keyword for basis sets.
 Fortunately <code>qmworks</code> already offers such keyword that can be used among the packages that use the same basis standard,</p>
 
 </div>
@@ -12077,7 +12087,7 @@ Fortunately <code>qmworks</code> already offers such keyword that can be used am
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[33]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
@@ -12089,25 +12099,94 @@ Fortunately <code>qmworks</code> already offers such keyword that can be used am
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>Internally <strong>qmworks</strong> will create a hierarchical structure representing the basis <em>DZP</em> for the packages that can handle that basis set.
+<p>Internally <strong>QMWorks</strong> will create a hierarchical structure representing basis <em>DZP</em> for the packages that can handle that basis set.
 Other generic keyowrds like: <code>functional</code>, <code>inithess</code>, etc. have been implemented.</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h3 id="--Templates-"><font color="green">  Templates </font><a class="anchor-link" href="#--Templates-">&#182;</a></h3><p>As has been shown so far,  <strong>Settings</strong> can be specified in two way: generic or specific. Generic keywords represent input properties that are present in most simulation packages like a <em>basis set</em> while <em>specific</em> keywords resemble the input structure of a given package.</p>
-<p><em>Generic</em> and <em>Specific</em> <strong>Settings</strong>  can express both simple and complex simulation inputs,  but it would be nice if we can predifined a set of templates for the most common quantum chemistry simulations like: single point calculations, geometry optimizations, transition state optimization, frequency calculations, etc.
-<em>qmworks</em> Already has a predefined set of templates  containing some defaults that the user can modify for her/his own purpose. <code>Templates</code> are stored inside the <code>qmworks.templates</code> module and are load from <em>JSON</em> files. A JSON file is basically a nested dictionary that is translated to a <code>Settings</code> object by <em>qmworks</em>.</p>
+<p>The Following table describes some of the available generic keywords and the Packages where the funcionality is implemented</p>
+<table>
+<thead><tr>
+<th style="text-align:center">Generic  Keyword</th>
+<th style="text-align:center">Packages</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">basis</td>
+<td style="text-align:center">ADF, CP2K, Orca</td>
+<td style="text-align:center">Set the Basis set</td>
+</tr>
+<tr>
+<td style="text-align:center">cell_angles</td>
+<td style="text-align:center">CP2K</td>
+<td style="text-align:center">Specified the angles of the unit cell</td>
+</tr>
+<tr>
+<td style="text-align:center">cell_parameters</td>
+<td style="text-align:center">CP2K</td>
+<td style="text-align:center">Specified the vectors of the unit cell</td>
+</tr>
+<tr>
+<td style="text-align:center">constraint</td>
+<td style="text-align:center">ADF, Orca</td>
+<td style="text-align:center">Constrain the distance, angle or dihedral angle for a set of molecules</td>
+</tr>
+<tr>
+<td style="text-align:center">freeze</td>
+<td style="text-align:center">ADF, Gamess, Orca</td>
+<td style="text-align:center">Freeze a set of atoms indicated by their indexes or symbols</td>
+</tr>
+<tr>
+<td style="text-align:center">functional</td>
+<td style="text-align:center">ADF, CP2K</td>
+<td style="text-align:center">Set the DFT functional</td>
+</tr>
+<tr>
+<td style="text-align:center">inithess</td>
+<td style="text-align:center">ADF, Orca</td>
+<td style="text-align:center">Provide an initial Hessian matrix</td>
+</tr>
+<tr>
+<td style="text-align:center">optimize</td>
+<td style="text-align:center">ADF, DFTB, Orca</td>
+<td style="text-align:center">Perform a molecular optimization</td>
+</tr>
+<tr>
+<td style="text-align:center">selected_atoms</td>
+<td style="text-align:center">ADF, Gamess, Orca</td>
+<td style="text-align:center">Optimize the given set of atoms while keeping the rest fixed</td>
+</tr>
+<tr>
+<td style="text-align:center">ts</td>
+<td style="text-align:center">ADF, DFTB, Orca</td>
+<td style="text-align:center">Carry out a transition state optimization</td>
+</tr>
+</tbody>
+</table>
+<p>Note: <strong>QMworks</strong> Does not have chemical intuition and if you provide a meaningless keyword,
+like a wrong basis set it will not warm you.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="--4.-Templates-"><font color="green">  4. Templates </font><a class="anchor-link" href="#--4.-Templates-">&#182;</a></h2><p>As has been shown so far,  <strong>Settings</strong> can be specified in two ways: generic or specific. Generic keywords represent input properties that are present in most simulation packages like a <em>basis set</em> while <em>specific</em> keywords resemble the input structure of a given package.</p>
+<p><em>Generic</em> and <em>Specific</em> <strong>Settings</strong>  can express both simple and complex simulation inputs,  but it would be nice if we can pre-defined a set of templates for the most common quantum chemistry simulations like: single point calculations, geometry optimizations, transition state optimization, frequency calculations, etc.
+<em>qmworks</em> already has a pre-defined set of templates  containing some defaults that the user can modify for her/his own purpose. <code>Templates</code> are stored inside the <code>qmworks.templates</code> module and are load from <em>JSON</em> files. A JSON file is basically a nested dictionary that is translated to a <code>Settings</code> object by <em>qmworks</em>.</p>
 <p>Below it is shown the defaults for single point calculation</p>
 
 </div>
@@ -12115,103 +12194,112 @@ Other generic keyowrds like: <code>functional</code>, <code>inithess</code>, etc
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[34]:</div>
+<div class="prompt input_prompt">In&nbsp;[3]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">single_point</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;specific&quot;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s2">&quot;adf&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;SZ&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;lda&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;integration&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;accint&quot;</span><span class="p">:</span> <span class="mf">4.0</span><span class="p">},</span>
-            <span class="s2">&quot;scf&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;converge&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span>
-            <span class="s2">&quot;iterations&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span> <span class="p">},</span>
-        <span class="s2">&quot;dftb&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;task&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;runtype&quot;</span><span class="p">:</span> <span class="s2">&quot;SP&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;dftb&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;resourcesdir&quot;</span><span class="p">:</span> <span class="s2">&quot;DFTB.org/3ob-3-1&quot;</span><span class="p">}</span> <span class="p">},</span>
-        <span class="s2">&quot;cp2k&quot;</span> <span class="p">:</span> <span class="p">{</span>
-          <span class="s2">&quot;force_eval&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="s2">&quot;dft&quot;</span><span class="p">:</span> <span class="p">{</span>
-                  <span class="s2">&quot;basis_set_file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                  <span class="s2">&quot;mgrid&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;cutoff&quot;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
-                      <span class="s2">&quot;ngrids&quot;</span><span class="p">:</span> <span class="mi">4</span>
-                  <span class="p">},</span>
-                  <span class="s2">&quot;potential_file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                  <span class="s2">&quot;print&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;mo&quot;</span><span class="p">:</span> <span class="p">{</span>
-                          <span class="s2">&quot;add_last&quot;</span>  <span class="p">:</span> <span class="s2">&quot;numeric&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;each&quot;</span><span class="p">:</span> <span class="p">{</span>
-                              <span class="s2">&quot;qs_scf&quot;</span><span class="p">:</span> <span class="mi">0</span>
-                          <span class="p">},</span>
-                          <span class="s2">&quot;eigenvalues&quot;</span> <span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;eigenvectors&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;filename&quot;</span><span class="p">:</span> <span class="s2">&quot;./mo.data&quot;</span><span class="p">,</span>
-                          <span class="s2">&quot;ndigits&quot;</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span>
-                          <span class="s2">&quot;occupation_numbers&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
-                      <span class="p">}</span>
-                  <span class="p">},</span>
-                  <span class="s2">&quot;qs&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;gpw&quot;</span>
-                  <span class="p">},</span>
-                  <span class="s2">&quot;scf&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;added_mos&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
-                      <span class="s2">&quot;eps_scf&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="n">e</span><span class="o">-</span><span class="mi">06</span><span class="p">,</span>
-                      <span class="s2">&quot;max_scf&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-                      <span class="s2">&quot;scf_guess&quot;</span><span class="p">:</span> <span class="s2">&quot;restart&quot;</span>
-                  <span class="p">},</span>
-                  <span class="s2">&quot;xc&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;xc_functional&quot;</span><span class="p">:</span> <span class="s2">&quot;pbe&quot;</span>
-                  <span class="p">}</span>
-              <span class="p">},</span>
-              <span class="s2">&quot;subsys&quot;</span><span class="p">:</span> <span class="p">{</span>
-                  <span class="s2">&quot;cell&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;periodic&quot;</span><span class="p">:</span> <span class="s2">&quot;xyz&quot;</span>
-                  <span class="p">},</span>
-                  <span class="s2">&quot;topology&quot;</span><span class="p">:</span> <span class="p">{</span>
-                      <span class="s2">&quot;coordinate&quot;</span><span class="p">:</span> <span class="s2">&quot;xyz&quot;</span><span class="p">,</span>
-                      <span class="s2">&quot;coord_file_name&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span>
-                  <span class="p">}</span>
-              <span class="p">}</span>
-          <span class="p">},</span>
-          <span class="s2">&quot;global&quot;</span><span class="p">:</span> <span class="p">{</span>
-              <span class="s2">&quot;print_level&quot;</span><span class="p">:</span> <span class="s2">&quot;low&quot;</span><span class="p">,</span>
-              <span class="s2">&quot;project&quot;</span><span class="p">:</span> <span class="s2">&quot;qmworks-cp2k&quot;</span><span class="p">,</span>
-              <span class="s2">&quot;run_type&quot;</span><span class="p">:</span> <span class="s2">&quot;energy_force&quot;</span>
-          <span class="p">}</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;dirac&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;DIRAC&quot;</span><span class="p">:</span> <span class="s2">&quot;WAVEFUNCTION&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;HAMILTONIAN&quot;</span><span class="p">:</span> <span class="s2">&quot;LEVY-LEBLOND&quot;</span><span class="p">,</span>
-            <span class="s2">&quot;WAVE FUNCTION&quot;</span><span class="p">:</span> <span class="s2">&quot;SCF&quot;</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;gamess&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;gbasis&quot;</span><span class="p">:</span> <span class="s2">&quot;sto&quot;</span><span class="p">,</span> <span class="s2">&quot;ngauss&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">},</span>
-            <span class="s2">&quot;contrl&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;scftyp&quot;</span><span class="p">:</span> <span class="s2">&quot;rhf&quot;</span><span class="p">,</span> <span class="s2">&quot;dfttyp&quot;</span><span class="p">:</span> <span class="s2">&quot;pbe&quot;</span><span class="p">}</span>
-        <span class="p">},</span>
-        <span class="s2">&quot;orca&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;dft&quot;</span><span class="p">,</span>
-                <span class="s2">&quot;functional&quot;</span><span class="p">:</span> <span class="s2">&quot;lda&quot;</span><span class="p">},</span>
-            <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="p">{</span>
-                <span class="s2">&quot;basis&quot;</span><span class="p">:</span> <span class="s2">&quot;sto_sz&quot;</span><span class="p">}</span>
-        <span class="p">}</span>
-    <span class="p">}</span>
-<span class="p">}</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">templates</span>
+<span class="n">templates</span><span class="o">.</span><span class="n">singlepoint</span>
 </pre></div>
 
 </div>
 </div>
 </div>
 
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt output_prompt">Out[3]:</div>
+
+
+
+
+<div class="output_text output_subarea output_execute_result">
+<pre>_ipython_canary_method_should_not_exist_: 	
+specific: 	
+         adf: 	
+             basis: 	
+                   type: 	SZ
+             integration: 	
+                         accint: 	4.0
+             scf: 	
+                 converge: 	1e-06
+                 iterations: 	100
+             xc: 	
+                __block_replace: 	True
+                lda: 	
+         cp2k: 	
+              force_eval: 	
+                         dft: 	
+                             basis_set_file_name: 	
+                             mgrid: 	
+                                   cutoff: 	400
+                                   ngrids: 	4
+                             potential_file_name: 	
+                             print: 	
+                                   mo: 	
+                                      add_last: 	numeric
+                                      each: 	
+                                           qs_scf: 	0
+                                      eigenvalues: 	
+                                      eigenvectors: 	
+                                      filename: 	./mo.data
+                                      ndigits: 	36
+                                      occupation_numbers: 	
+                             qs: 	
+                                method: 	gpw
+                             scf: 	
+                                 added_mos: 	
+                                 eps_scf: 	1e-06
+                                 max_scf: 	200
+                                 scf_guess: 	restart
+                             xc: 	
+                                xc_functional: 	pbe
+                         subsys: 	
+                                cell: 	
+                                     periodic: 	xyz
+              global: 	
+                     print_level: 	low
+                     project: 	qmworks-cp2k
+                     run_type: 	energy_force
+         dftb: 	
+              dftb: 	
+                   resourcesdir: 	DFTB.org/3ob-3-1
+              task: 	
+                   runtype: 	SP
+         dirac: 	
+               DIRAC: 	WAVEFUNCTION
+               HAMILTONIAN: 	LEVY-LEBLOND
+               WAVE FUNCTION: 	SCF
+         gamess: 	
+                basis: 	
+                      gbasis: 	sto
+                      ngauss: 	3
+                contrl: 	
+                       dfttyp: 	pbe
+                       scftyp: 	rhf
+         orca: 	
+              basis: 	
+                    basis: 	sto_sz
+              method: 	
+                     functional: 	lda
+                     method: 	dft
+</pre>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>The question is then, how I can modify a template with my own changes?</p>
+<p>The question is then, <em>how I can modify a template with my own changes?</em></p>
 <p>Suppose you are perfoming a bunch of  constrained <em>DFT</em> optimizations using <code>ADF</code> . You need first to define a basis set  and the constrains.</p>
 
 </div>
@@ -12219,7 +12307,7 @@ Other generic keyowrds like: <code>functional</code>, <code>inithess</code>, etc
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[35]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
@@ -12236,8 +12324,7 @@ Other generic keyowrds like: <code>functional</code>, <code>inithess</code>, etc
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12249,7 +12336,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[36]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">templates</span>
@@ -12261,8 +12348,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12274,19 +12360,146 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-Molecule-"><font color="green"> Molecule </font><a class="anchor-link" href="#-Molecule-">&#182;</a></h2><p>The next component to carry out a simulation is a molecular geometry.  <em>qmworks</em> offers a convinient way to read Molecular geometries using the the <a href="https://www.scm.com/doc/plams/molecule.html">Plams</a> library in several formats like: <em>xyz</em> ( default), <em>pdb</em>, mol, etc.</p>
+<p>Below it is shown a combination of templates, generic  and specific keywords to generate the input for a <code>CP2K</code> job</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[37]:</div>
+<div class="prompt input_prompt">In&nbsp;[7]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">templates</span>
+
+<span class="c1"># Template</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">singlepoint</span>
+
+<span class="c1"># Generic keywords</span>
+<span class="n">s</span><span class="o">.</span><span class="n">cell_angles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">90.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">,</span> <span class="mf">90.0</span><span class="p">]</span>
+<span class="n">s</span><span class="o">.</span><span class="n">cell_parameters</span><span class="o">=</span>  <span class="mf">38.0</span>  
+<span class="n">s</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;DZVP-MOLOPT-SR-GTH&#39;</span>
+<span class="n">s</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span><span class="s1">&#39;GTH-PBE&#39;</span>
+
+<span class="c1"># Specific Keywords</span>
+<span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">cp2k</span><span class="o">.</span><span class="n">force_eval</span><span class="o">.</span><span class="n">dft</span><span class="o">.</span><span class="n">scf</span><span class="o">.</span><span class="n">max_scf</span>  <span class="o">=</span> <span class="mi">100</span>
+<span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">cp2k</span><span class="o">.</span><span class="n">force_eval</span><span class="o">.</span><span class="n">subsys</span><span class="o">.</span><span class="n">cell</span><span class="o">.</span><span class="n">periodic</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
+<div class="output_wrapper">
+<div class="output">
+
+
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
+<div class="output_subarea output_stream output_stdout output_text">
+<pre>_ipython_canary_method_should_not_exist_: 	
+basis: 	DZVP-MOLOPT-SR-GTH
+cell_angles: 	[90.0, 90.0, 90.0]
+cell_parameters: 	38.0
+potential: 	GTH-PBE
+specific: 	
+         adf: 	
+             basis: 	
+                   type: 	SZ
+             integration: 	
+                         accint: 	4.0
+             scf: 	
+                 converge: 	1e-06
+                 iterations: 	100
+             xc: 	
+                __block_replace: 	True
+                lda: 	
+         cp2k: 	
+              force_eval: 	
+                         dft: 	
+                             basis_set_file_name: 	
+                             mgrid: 	
+                                   cutoff: 	400
+                                   ngrids: 	4
+                             potential_file_name: 	
+                             print: 	
+                                   mo: 	
+                                      add_last: 	numeric
+                                      each: 	
+                                           qs_scf: 	0
+                                      eigenvalues: 	
+                                      eigenvectors: 	
+                                      filename: 	./mo.data
+                                      ndigits: 	36
+                                      occupation_numbers: 	
+                             qs: 	
+                                method: 	gpw
+                             scf: 	
+                                 added_mos: 	
+                                 eps_scf: 	1e-06
+                                 max_scf: 	100
+                                 scf_guess: 	restart
+                             xc: 	
+                                xc_functional: 	pbe
+                         subsys: 	
+                                cell: 	
+                                     periodic: 	None
+              global: 	
+                     print_level: 	low
+                     project: 	qmworks-cp2k
+                     run_type: 	energy_force
+         dftb: 	
+              dftb: 	
+                   resourcesdir: 	DFTB.org/3ob-3-1
+              task: 	
+                   runtype: 	SP
+         dirac: 	
+               DIRAC: 	WAVEFUNCTION
+               HAMILTONIAN: 	LEVY-LEBLOND
+               WAVE FUNCTION: 	SCF
+         gamess: 	
+                basis: 	
+                      gbasis: 	sto
+                      ngauss: 	3
+                contrl: 	
+                       dfttyp: 	pbe
+                       scftyp: 	rhf
+         orca: 	
+              basis: 	
+                    basis: 	sto_sz
+              method: 	
+                     functional: 	lda
+                     method: 	dft
+
+</pre>
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-5.-Molecule-"><font color="green"> 5. Molecule </font><a class="anchor-link" href="#-5.-Molecule-">&#182;</a></h2><p>The next component to carry out a simulation is a molecular geometry.  <em>qmworks</em> offers a convinient way to read Molecular geometries using the <a href="https://www.scm.com/doc/plams/molecule.html">Plams</a> library in several formats like: <em>xyz</em> , <em>pdb</em>, <em>mol</em>, etc.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">plams</span> <span class="k">import</span> <span class="n">Molecule</span>
@@ -12298,30 +12511,8 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 </div>
 
-<div class="output_wrapper">
-<div class="output">
-
-
-<div class="output_area"><div class="prompt"></div>
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>  Atoms: 
-    1         C      2.419290      0.606560      0.000000 
-    2         C      1.671470      1.829570      0.000000 
-    3         N      1.065290      2.809960      0.000000 
-    4         H      2.000000      0.000000      1.000000 
-    5         H      2.000000      0.000000     -1.000000 
-    6         H      3.600000      0.800000      0.000000 
-
-</pre>
 </div>
-</div>
-
-</div>
-</div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12332,7 +12523,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[44]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">plams</span> <span class="k">import</span> <span class="p">(</span><span class="n">Atom</span><span class="p">,</span> <span class="n">Molecule</span><span class="p">)</span>
@@ -12350,19 +12541,99 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 </div>
 
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p><strong>QMWorks</strong> Can also handle smiles as shown below</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing code_cell rendered">
+<div class="input">
+<div class="prompt input_prompt">In&nbsp;[6]:</div>
+<div class="inner_cell">
+    <div class="input_area">
+<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks.molkit</span> <span class="k">import</span> <span class="n">from_smiles</span>
+
+<span class="c1"># String representing the smile</span>
+<span class="n">smile</span> <span class="o">=</span> <span class="s1">&#39;C1CC2(CCCCC2)C=C1&#39;</span>
+<span class="c1">#Molecule creation</span>
+<span class="n">mol</span> <span class="o">=</span> <span class="n">from_smiles</span><span class="p">(</span><span class="n">smile</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mol</span><span class="p">)</span>
+</pre></div>
+
+</div>
+</div>
+</div>
+
 <div class="output_wrapper">
 <div class="output">
 
 
-<div class="output_area"><div class="prompt"></div>
+<div class="output_area">
+
+<div class="prompt"></div>
+
+
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>  Atoms: 
-    1         C      2.419290      0.606560      0.000000 
-    2         C      1.671470      1.829570      0.000000 
-    3         N      1.065290      2.809960      0.000000 
-    4         H      2.000000      0.000000      1.000000 
-    5         H      2.000000      0.000000     -1.000000 
-    6         H      3.600000      0.800000      0.000000 
+    1         C      2.798599     -0.150460      0.089927 
+    2         C      1.615862     -0.067227     -0.832063 
+    3         C      0.376333      0.019368      0.053118 
+    4         C     -0.347606      1.253513     -0.326955 
+    5         C     -1.822801      1.252517     -0.204840 
+    6         C     -2.446980     -0.058315      0.156076 
+    7         C     -1.752081     -1.139264     -0.623091 
+    8         C     -0.361478     -1.268307     -0.080395 
+    9         C      0.939434      0.095296      1.441284 
+   10         C      2.254053      0.292268      1.391042 
+   11         H      3.270712     -1.144983      0.118276 
+   12         H      3.579260      0.571882     -0.225622 
+   13         H      1.583048     -0.956205     -1.489932 
+   14         H      1.723819      0.828427     -1.481830 
+   15         H     -0.086390      1.553756     -1.374861 
+   16         H      0.059603      2.087392      0.301854 
+   17         H     -2.168065      1.989676      0.564557 
+   18         H     -2.314662      1.598505     -1.150678 
+   19         H     -3.508879     -0.050718     -0.200863 
+   20         H     -2.505664     -0.256055      1.238793 
+   21         H     -2.273284     -2.097029     -0.440451 
+   22         H     -1.722856     -0.837576     -1.680683 
+   23         H      0.171167     -1.989673     -0.753019 
+   24         H     -0.417079     -1.810866      0.897936 
+   25         H      0.453939     -0.226576      2.367445 
+   26         H      2.901995      0.510654      2.244971 
+  Bonds: 
+   (1)--1.0--(2)
+   (2)--1.0--(3)
+   (3)--1.0--(4)
+   (4)--1.0--(5)
+   (5)--1.0--(6)
+   (6)--1.0--(7)
+   (7)--1.0--(8)
+   (3)--1.0--(9)
+   (9)--2.0--(10)
+   (10)--1.0--(1)
+   (8)--1.0--(3)
+   (1)--1.0--(11)
+   (1)--1.0--(12)
+   (2)--1.0--(13)
+   (2)--1.0--(14)
+   (4)--1.0--(15)
+   (4)--1.0--(16)
+   (5)--1.0--(17)
+   (5)--1.0--(18)
+   (6)--1.0--(19)
+   (6)--1.0--(20)
+   (7)--1.0--(21)
+   (7)--1.0--(22)
+   (8)--1.0--(23)
+   (8)--1.0--(24)
+   (9)--1.0--(25)
+   (10)--1.0--(26)
 
 </pre>
 </div>
@@ -12372,19 +12643,27 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-Create-a-job-for-a-quantum-package"><font color="green"> Create a job for a quantum package</font><a class="anchor-link" href="#-Create-a-job-for-a-quantum-package">&#182;</a></h2><p>We now have our components to perform a calculation: <strong>Settings</strong> and <strong>Molecule</strong>. We can now invoke a quantum chemistry package to perform the computation,</p>
+<p>The Molecule class has an extensive functionally to carry out molecular manipulations, for a comprenhesive disccusion about it have a look at the <a href="https://www.scm.com/doc/plams/molecule.html">molecule documentation</a>. Also the module <code>qmworks.molkit</code> contains an extensive functionality to apply transformation over a molecule using the <a href="http://www.rdkit.org/">RDKit</a> library.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-6.-Runinng-a-quantum-mechanics-simulation-"><font color="green"> 6. Runinng a quantum mechanics simulation </font><a class="anchor-link" href="#-6.-Runinng-a-quantum-mechanics-simulation-">&#182;</a></h2><p>We now have our components to perform a calculation: <strong>Settings</strong> and <strong>Molecule</strong>. We can now invoke a quantum chemistry package to perform the computation,</p>
 
 </div>
 </div>
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[38]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">adf</span>
@@ -12396,70 +12675,134 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>the previous code snippet <em>does not execute the code inmediatly</em>, instead the simulation is started when the user invokes the run function, as shown below</p>
+<p>the previous code snippet <em>does not execute the code immediatly</em>, instead the simulation is started when the user invokes the run function, as shown below</p>
 <div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">plams</span> <span class="kn">import</span> <span class="n">Molecule</span>
-<span class="kn">from</span> <span class="nn">qmworks</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adf</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmworks</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adf</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">Settings</span><span class="p">,</span> <span class="n">templates</span><span class="p">)</span>
 
 <span class="c1"># Settings</span>
-<span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+<span class="n">s</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">geometry</span>
 <span class="n">s</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="s2">&quot;DZP&quot;</span>
 <span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="s2">&quot;Large&quot;</span>
 <span class="n">s</span><span class="o">.</span><span class="n">freeze</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
 
 <span class="c1"># molecule </span>
 <span class="kn">from</span> <span class="nn">plams</span> <span class="kn">import</span> <span class="n">Molecule</span>
-<span class="n">acetonitrile</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;files/acetonitrile.xyz&quot;</span><span class="p">)</span>
+<span class="n">acetonitrile</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;acetonitrile.xyz&quot;</span><span class="p">)</span>
 
 <span class="c1"># Job </span>
-<span class="n">optmized_mol_adf</span> <span class="o">=</span> <span class="n">adf</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">acetonitrile</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="s1">&#39;acetonitrile_opt&#39;</span><span class="p">)</span>
+<span class="n">optimized_mol_adf</span> <span class="o">=</span> <span class="n">adf</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">acetonitrile</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="s1">&#39;acetonitrile_opt&#39;</span><span class="p">)</span>
+
 <span class="c1"># run the  job</span>
-<span class="n">results</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">optimized_mol_adf</span><span class="p">)</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">optimized_mol_adf</span><span class="o">.</span><span class="n">molecule</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="s1">&#39;acetonitrile&#39;</span><span class="p">)</span>
+</pre></div>
+<p>you can run the previous script by saving it in a file called <code>acetonitrile_opt.py</code> and typing the following command in your console:</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>qmworks<span class="o">)[</span>user@int1 ~<span class="o">]</span>$ python acetonitrile_opt.py
+</pre></div>
+<p>you will then see in your <code>current work directory</code> something similar to the following</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>qmworks<span class="o">)[</span>user@int1 ~<span class="o">]</span>$ ls 
+acetonitrile      acetonitrile_opt.py   cache.json   acetonitrile.xyz
+</pre></div>
+<p><font color='blue'> acetonitrile </font> is the folder containing the output from the quantum package call (<code>ADF</code> in this case). The <code>cache.json</code> file contains all the information required to perform a restart, as we will explore below.
+ Inside the <font color='blue'> acetonitrile </font> you can find the input/output files resulting from the simulation</p>
+<div class="highlight"><pre><span></span><span class="o">(</span>qmworks<span class="o">)[</span>user@int1 ~<span class="o">]</span>$ ls acetonitrile 
+ acetonitrile.log  acetonitrile_opt
+</pre></div>
+<div class="highlight"><pre><span></span><span class="o">(</span>qmworks<span class="o">)[</span>user@int1 ~<span class="o">]</span>$ ls acetonitrile/acetonitrile_opt
+ acetonitrile_opt.dill  acetonitrile_opt.out  logfile  t21.N
+ acetonitrile_opt.err   acetonitrile_opt.run  t21.C
+ acetonitrile_opt.in    acetonitrile_opt.t21  t21.H
 </pre></div>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="--Extracting-Properties-"><font color="green">  Extracting Properties </font><a class="anchor-link" href="#--Extracting-Properties-">&#182;</a></h2><p>We can easily extract the <em>optimized geometry</em> from the <em>ADF</em> calculation using the following notation</p>
+<h2 id="--Extracting-Properties-"><font color="green">  Extracting Properties </font><a class="anchor-link" href="#--Extracting-Properties-">&#182;</a></h2>
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<p>In general, properties are extracted using the standard <code>Object.attribute</code> notation in python, as shown below.</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing code_cell rendered">
-<div class="input">
-<div class="prompt input_prompt">In&nbsp;[39]:</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
 <div class="inner_cell">
-    <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="n">optmized_mol_adf</span> <span class="o">=</span> <span class="n">job</span><span class="o">.</span><span class="n">molecule</span>
+<div class="text_cell_render border-box-sizing rendered_html">
+<div class="highlight"><pre><span></span><span class="n">result</span> <span class="o">=</span> <span class="n">optmized_mol_adf</span><span class="o">.</span><span class="n">molecule</span>
 </pre></div>
 
 </div>
 </div>
 </div>
-
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<p>In general, properties are extracted using the standard <code>Object.attribute</code> notation in python, as in the above example.</p>
-<p>User can request for properties like: energy, frequencies, dipole, etc. The Available properties depends on the package (have a look to the more detail <a href="https://github.com/SCM-NV/qmworks/tree/develop/jupyterNotebooks">package tutorial</a>)</p>
+<p>Some of the available properties are shown in the following table,</p>
+<table>
+<thead><tr>
+<th style="text-align:center">Property</th>
+<th style="text-align:center">type</th>
+<th style="text-align:center">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">dipole</td>
+<td style="text-align:center">Double</td>
+<td style="text-align:center">Molecular dipole mopment</td>
+</tr>
+<tr>
+<td style="text-align:center">energy</td>
+<td style="text-align:center">Double</td>
+<td style="text-align:center">Total energy</td>
+</tr>
+<tr>
+<td style="text-align:center">enthalpy</td>
+<td style="text-align:center">Double</td>
+<td style="text-align:center">Enthalpy</td>
+</tr>
+<tr>
+<td style="text-align:center">gradient</td>
+<td style="text-align:center">Numpy array</td>
+<td style="text-align:center">First derivatives of the energy</td>
+</tr>
+<tr>
+<td style="text-align:center">hessian</td>
+<td style="text-align:center">Numpy array</td>
+<td style="text-align:center">Second derivative of the energy </td>
+</tr>
+<tr>
+<td style="text-align:center">molecule</td>
+<td style="text-align:center">Molecule</td>
+<td style="text-align:center">Object representing a physical entity</td>
+</tr>
+<tr>
+<td style="text-align:center">runtime</td>
+<td style="text-align:center">Double</td>
+<td style="text-align:center">Time spent in the simulation</td>
+</tr>
+</tbody>
+</table>
+<p>On the background <em>QMWorks</em> has a mechanism to read the properties from the output files and make them available inside Python.</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12467,8 +12810,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12479,7 +12821,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[40]:</div>
+<div class="prompt input_prompt">In&nbsp;[&nbsp;]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="k">import</span> <span class="n">orca</span>
@@ -12499,19 +12841,17 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 <p>The whole script is</p>
-<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adf</span><span class="p">,</span> <span class="n">orca</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
+<div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">qmworks</span> <span class="kn">import</span> <span class="p">(</span><span class="n">adf</span><span class="p">,</span> <span class="n">orca</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">templates</span><span class="p">,</span> <span class="n">Settings</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">plams</span> <span class="kn">import</span> <span class="n">Molecule</span>
 <span class="kn">import</span> <span class="nn">plams</span>
 
 <span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
-    <span class="n">acetonitrile</span> <span class="o">=</span> <span class="n">Molecule</span><span class="p">(</span><span class="s2">&quot;files/acetonitrile.xyz&quot;</span><span class="p">)</span>
-    <span class="n">s</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="n">templates</span><span class="o">.</span><span class="n">geometry</span>
     <span class="n">s</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="s2">&quot;DZP&quot;</span>
     <span class="n">s</span><span class="o">.</span><span class="n">specific</span><span class="o">.</span><span class="n">adf</span><span class="o">.</span><span class="n">basis</span><span class="o">.</span><span class="n">core</span> <span class="o">=</span> <span class="s2">&quot;large&quot;</span>
 
@@ -12529,16 +12869,12 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
     <span class="n">frequencies</span> <span class="o">=</span> <span class="n">job_freq</span><span class="o">.</span><span class="n">frequencies</span>
 
     <span class="k">print</span><span class="p">(</span><span class="n">run</span><span class="p">(</span><span class="n">frequencies</span><span class="p">))</span>
-
-<span class="k">if</span>  <span class="n">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
-    <span class="n">main</span><span class="p">()</span>
 </pre></div>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12547,8 +12883,7 @@ Now you merge your <strong>Settings</strong> with the correspoding template to c
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12588,38 +12923,16 @@ End</code></pre>
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-How-the-run-function-works?-"><font color="green"> How the run function works? </font><a class="anchor-link" href="#-How-the-run-function-works?-">&#182;</a></h2><h3 id="-A-little-discussion-about-graphs-"><font color="green"> A little discussion about graphs </font><a class="anchor-link" href="#-A-little-discussion-about-graphs-">&#182;</a></h3><p><em>qmworks</em> is meant to be used for both workflow generation and execution,</p>
-<p><img src="simple_graph.png"></p>
+<h2 id="-Running-in-a-supercomputer-"><font color="green"> Running in a supercomputer </font><a class="anchor-link" href="#-Running-in-a-supercomputer-">&#182;</a></h2><p>Running in <strong>Cartesius</strong> or <strong>Bazis</strong> through the <em>Slurm</em> resource manager can be done using and script like</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<h2 id="-Running-in-a-supercomputer-"><font color="green"> Running in a supercomputer </font><a class="anchor-link" href="#-Running-in-a-supercomputer-">&#182;</a></h2>
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
-<p>Running in <strong>Cartesius</strong> or <strong>Bazis</strong> through the <em>Slurm</em> resource manager can be done using and script like</p>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
@@ -12634,30 +12947,20 @@ module load adf/2016.102
 <span class="nb">source</span> activate qmworks
 python optimization_ADF_freq_ORCA.py
 </pre></div>
-
-</div>
-</div>
-</div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
-</div>
-<div class="inner_cell">
-<div class="text_cell_render border-box-sizing rendered_html">
 <p>The Slurm output looks like:</p>
 
 </div>
 </div>
 </div>
-<div class="cell border-box-sizing text_cell rendered">
-<div class="prompt input_prompt">
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
 </div>
 <div class="inner_cell">
 <div class="text_cell_render border-box-sizing rendered_html">
 
 <pre><code>load orca/3.0.3 (PATH)
-discarding /home/fza900/anaconda3/envs/qmworks/bin from PATH
-prepending /home/fza900/anaconda3/envs/qmworks/bin to PATH
-[11:17:59] PLAMS working folder: /nfs/home6/fza900/orca/Opt/example/plams.23412
+discarding /home/user/anaconda3/envs/qmworks/bin from PATH
+prepending /home/user/anaconda3/envs/qmworks/bin to PATH
+[11:17:59] PLAMS working folder: /nfs/home/user/orca/Opt/example/plams.23412
 +-(running jobs)
 | Running adf ...
 [11:17:59] Job ADFjob started
@@ -12673,7 +12976,101 @@ prepending /home/fza900/anaconda3/envs/qmworks/bin to PATH
 </div>
 </div>
 </div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-7.-How-the-run-function-works?-"><font color="green"> 7. How the run function works? </font><a class="anchor-link" href="#-7.-How-the-run-function-works?-">&#182;</a></h2><h3 id="-A-little-discussion-about-graphs-"><font color="green"> A little discussion about graphs </font><a class="anchor-link" href="#-A-little-discussion-about-graphs-">&#182;</a></h3><p><em>qmworks</em> is meant to be used for both workflow generation and execution. When you write a python script representing a workflow you are explicitly declaring  set of computations and their dependencies. For instance the following workflow represent <em>ADF</em> and <em>Orca</em> computations of the aforementioned example. In this <a href="https://en.wikipedia.org/wiki/Graph_theory">graph</a> the octagons represent quantum simulation using a package, while the ovals represent both user input or data extracted from a simulation. Finally, the arrows (called edges) represent the dependencies between all these objects.
+<img src="simple_graph.png"></p>
+<p><strong>QMWorks</strong> automatically identify the dependencies between computations and run them in the correct order (if possible in parallel).</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="-Restarting-a-simulation-"><font color="green"> Restarting a simulation </font><a class="anchor-link" href="#-Restarting-a-simulation-">&#182;</a></h3><p>If you are running many computationally expensive calculations in a supercomputer, it can happen that the computations take more time than that allowed by the resource manager in your supercomputer and the workflows gets cancel.  But do not worry, you do not need to re-run all the computations. Fortunately, <em>QMWorks</em> offers a mechanism to restart the workflow computations.</p>
+<p>When running a workflow you will see that <em>QMWorks</em> creates a set of files called <code>cache</code>. These files contain the information about the workflow and its calculation. <strong>In order to restart a workflow you only need to relaunch it</strong>, that's it!</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-8.-Advanced-Examples-"><font color="green"> 8. Advanced Examples </font><a class="anchor-link" href="#-8.-Advanced-Examples-">&#182;</a></h2><h3 id="-Conditional-Workflows-"><font color="green"> Conditional Workflows </font><a class="anchor-link" href="#-Conditional-Workflows-">&#182;</a></h3><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">noodles</span> <span class="kn">import</span> <span class="n">gather</span>
+<span class="kn">from</span> <span class="nn">qmworks</span> <span class="kn">import</span> <span class="n">dftb</span><span class="p">,</span> <span class="n">adf</span><span class="p">,</span> <span class="n">orca</span><span class="p">,</span> <span class="n">run</span><span class="p">,</span> <span class="n">Settings</span><span class="p">,</span> <span class="n">templates</span><span class="p">,</span> <span class="n">molkit</span><span class="p">,</span> <span class="n">find_first_job</span>
+
+<span class="c1"># This examples illustrates the possibility to use different packages interchangeably.</span>
+<span class="c1"># Analytical frequencies are not available for B3LYP in ADF</span>
+<span class="c1"># This workflow captures the resulting error and submits the same job to ORCA.</span>
+
+<span class="c1"># Define the condition for a successful calculation</span>
+<span class="k">def</span> <span class="nf">is_successful</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">result</span><span class="o">.</span><span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="s2">&quot;crashed&quot;</span><span class="p">]</span>
+
+<span class="c1"># Generate water molecule</span>
+<span class="n">water</span> <span class="o">=</span> <span class="n">molkit</span><span class="o">.</span><span class="n">from_smiles</span><span class="p">(</span><span class="s1">&#39;[OH2]&#39;</span><span class="p">,</span> <span class="n">forcefield</span><span class="o">=</span><span class="s1">&#39;mmff&#39;</span><span class="p">)</span>
+
+<span class="c1"># Pre-optimize the water molecule</span>
+<span class="n">opt_water</span> <span class="o">=</span> <span class="n">dftb</span><span class="p">(</span>
+     <span class="n">templates</span><span class="o">.</span><span class="n">geometry</span><span class="p">,</span> <span class="n">water</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="s2">&quot;dftb_geometry&quot;</span><span class="p">)</span>
+
+<span class="n">jobs</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># Generate freq jobs for 3 functionals</span>
+<span class="k">for</span> <span class="n">functional</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;pbe&#39;</span><span class="p">,</span> <span class="s1">&#39;b3lyp&#39;</span><span class="p">,</span> <span class="s1">&#39;blyp&#39;</span><span class="p">]:</span>
+    <span class="n">s</span><span class="o">=</span><span class="n">Settings</span><span class="p">()</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">basis</span> <span class="o">=</span> <span class="s1">&#39;DZ&#39;</span>
+    <span class="n">s</span><span class="o">.</span><span class="n">functional</span> <span class="o">=</span> <span class="n">functional</span>
+    <span class="c1"># Try to perform the jobs with adf or orca</span>
+    <span class="c1"># take result from  first successful calculation</span>
+    <span class="n">freqjob</span> <span class="o">=</span> <span class="n">find_first_job</span><span class="p">(</span>
+          <span class="n">is_successful</span><span class="p">,</span> <span class="p">[</span><span class="n">adf</span><span class="p">,</span> <span class="n">orca</span><span class="p">],</span> <span class="n">templates</span><span class="o">.</span><span class="n">freq</span><span class="o">.</span><span class="n">overlay</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> 
+          <span class="n">opt_water</span><span class="o">.</span><span class="n">molecule</span><span class="p">,</span> <span class="n">job_name</span><span class="o">=</span><span class="n">functional</span><span class="p">)</span>
+    <span class="n">jobs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">freqjob</span><span class="p">)</span>
+
+<span class="c1"># Run workflow</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">run</span><span class="p">(</span><span class="n">gather</span><span class="p">(</span><span class="o">*</span><span class="n">jobs</span><span class="p">),</span> <span class="n">n_processes</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+<p>After running the above script you have a table like</p>
+
+<pre><code>pbe     1533.267   3676.165   3817.097
+b3lyp   1515.799   3670.390   3825.813
+blyp    1529.691   3655.573   3794.110</code></pre>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h3 id="-Non-adiabatic-couplings-"><font color="green"> Non-adiabatic couplings </font><a class="anchor-link" href="#-Non-adiabatic-couplings-">&#182;</a></h3><p><a href="https://github.com/SCM-NV/qmworks-namd">qmworks-namd</a> is a package based on <strong>QMWorks</strong> to compute the Non-adiabatic couplings for large system involving thr use of <strong>QMWorks</strong>, <a href="http://cython.org/">Cython</a> and <a href="http://www.numpy.org/">Numpy</a>.</p>
+
+</div>
+</div>
+</div>
+<div class="cell border-box-sizing text_cell rendered"><div class="prompt input_prompt">
+</div>
+<div class="inner_cell">
+<div class="text_cell_render border-box-sizing rendered_html">
+<h2 id="-9.--Exception-Handling--"><font color="green"> 9.  Exception Handling  </font><a class="anchor-link" href="#-9.--Exception-Handling--">&#182;</a></h2><p>Suppose you have a set of non-dependent calculations, for example single point calculations coming from a molecular dynamic trajectory, as shown in the figure below
+<img src="simple_dependencies.png"></p>
+<p>If one of the single point calculations fails, the rest of the point in the workflow will keep on running and the failed job will return a <strong>None</strong>  value for the requested property.</p>
+<p>If the single point calculation would be the dependency of another quantum calculation then the computation will crash.</p>
+
+</div>
+</div>
+</div>
     </div>
   </div>
 </body>
+
+ 
+
+
 </html>
