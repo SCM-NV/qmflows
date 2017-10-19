@@ -14,22 +14,22 @@ install:
   - conda info -a
 
   # Install virtual enviroment 
-  - conda create -q -n qmworks python=3.5
-  - conda install --name qmworks -c anaconda hdf5
-  - conda install --name qmworks -c rdkit rdkit
-  - source activate qmworks
+  - conda create -q -n qmflows python=3.5
+  - conda install --name qmflows -c anaconda hdf5
+  - conda install --name qmflows -c rdkit rdkit
+  - source activate qmflows
 
   # Package dependencies
   - pip install nose coverage
-  - source activate qmworks
+  - source activate qmflows
 
-  # Install qmworks package
+  # Install qmflows package
   - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
   - pip install .
   
 script:
   # Run the unitary tests excluding the expensive computations
-  - nosetests --with-coverage --cover-erase --cover-package=qmworks -a 'fast' --exclude='test_using_plams' -v
+  - nosetests --with-coverage --cover-erase --cover-package=qmflows -a 'fast' --exclude='test_using_plams' -v
 
 branches:
   only:

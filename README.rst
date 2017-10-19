@@ -1,16 +1,16 @@
 
-.. image:: https://img.shields.io/github/license/SCM-NV/qmworks.svg?maxAge=2592000
-   :target: https://github.com/SCM-NV/qmworks/blob/master/LICENSE.md
-.. image:: https://travis-ci.org/SCM-NV/qmworks.svg?branch=master
-   :target: https://travis-ci.org/SCM-NV/qmworks 
+.. image:: https://img.shields.io/github/license/SCM-NV/qmflows.svg?maxAge=2592000
+   :target: https://github.com/SCM-NV/qmflows/blob/master/LICENSE.md
+.. image:: https://travis-ci.org/SCM-NV/qmflows.svg?branch=master
+   :target: https://travis-ci.org/SCM-NV/qmflows 
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
 .. image:: https://img.shields.io/codacy/grade/e27821fb6289410b8f58338c7e0bc686.svg?maxAge=2592000
-   :target: https://www.codacy.com/app/tifonzafel/qmworks/dashboard	
+   :target: https://www.codacy.com/app/tifonzafel/qmflows/dashboard	
 	   
 ================
-QMWorks
+QMFlows
 ================
-See http://scm-nv.github.io/qmworks/ for tutorials and documentation.
+See http://scm-nv.github.io/qmflows/ for tutorials and documentation.
 
 Motivation
 ==========
@@ -42,7 +42,7 @@ automate the following tasks:
 
 Tutorial and Examples
 ---------------------
-A tutorial written as a jupyter-notebook_ is available from: tutorial-qmworks_. You can
+A tutorial written as a jupyter-notebook_ is available from: tutorial-qmflows_. You can
 also access direclty more advanced examples_.
     
  
@@ -57,11 +57,11 @@ Installation
 
 - Create a new virtual environment using the following commands:
 
-  - ``conda create -n qmworks python=3.5`` 
+  - ``conda create -n qmflows python=3.5`` 
 
 - Activate the new virtual environment
   
-  - ``source activate qmworks``
+  - ``source activate qmflows``
 
 To exit the virtual environment type  ``source deactivate``.
     
@@ -76,11 +76,11 @@ Using the conda environment the following packages should be installed:
 
 - install rdkit_ using the following command:
 
-  - ``conda install -y -q --name qmworks -c https://conda.anaconda.org/rdkit rdkit``
+  - ``conda install -y -q --name qmflows -c https://conda.anaconda.org/rdkit rdkit``
 
 - install HDF5_ using conda:
 
-  - ``conda install -y -q --name qmworks -c anaconda h5py``
+  - ``conda install -y -q --name qmflows -c anaconda h5py``
     
 
 .. _installation:
@@ -90,25 +90,25 @@ Package installation
     
 - Type in your terminal,
 
-  ``source activate qmworks``  
+  ``source activate qmflows``  
 
 - Then
 
-  ``pip install qmworks --upgrade``
+  ``pip install qmflows --upgrade``
   
-Now you are ready to use *qmworks*. 
+Now you are ready to use *qmflows*. 
  
 
 Latest stable version
 ---------------------
 If you want to install the latest stable version directly from github
 you can use the following command:
- ``pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks``
+ ``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
 
   **Notes:**
 
   - Once the libraries and the virtual environment are installed, you only need to type
-    ``source activate qmworks`` each time that you want to use the software.
+    ``source activate qmflows`` each time that you want to use the software.
 
 
 .. _remote_setup:
@@ -116,13 +116,13 @@ you can use the following command:
 Remote/Xenon setup
 ------------------
 
-QMWorks supports running jobs over a variety of cluster computing schedulers
+Qmflows supports running jobs over a variety of cluster computing schedulers
 like Slurm and Torque. You program and run your workflows from your laptop, but
-the jobs are run at the remote site. For this to work you need to setup QMWorks
+the jobs are run at the remote site. For this to work you need to setup Qmflows
 both locally and remotely. In addition you need to add a Bash script that loads
 the VirtualEnv and starts the Noodles remote worker. This remote worker acts as
 a pilot job, reading job descriptions from input and returning the results. If
-you defined the remote VirtualEnv with the name `qmworks`, the following Bash
+you defined the remote VirtualEnv with the name `qmflows`, the following Bash
 script gives an idea of what you need:
 
 .. code-block:: bash
@@ -143,7 +143,7 @@ script gives an idea of what you need:
     cd "$(dirname "${BASH_SOURCE[0]}")"
 
     # Activate the VirtualEnv
-    source activate qmworks
+    source activate qmflows
 
     # Start the remote worker
     python -m noodles.worker ${@:2}
@@ -163,5 +163,5 @@ script gives an idea of what you need:
 .. _rdkit: http://www.rdkit.org
 .. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
 .. _jupyter-notebook: http://jupyter.org/
-.. _tutorial-qmworks: https://github.com/SCM-NV/qmworks/tree/master/jupyterNotebooks
-.. _examples: https://github.com/SCM-NV/qmworks/tree/master/src/qmworks/examples
+.. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
+.. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
