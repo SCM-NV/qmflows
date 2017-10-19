@@ -1,7 +1,7 @@
 
 __all__ = ['kfreader', 'extract_properties_rkf']
 
-from qmworks.settings import Settings
+from qmflows.settings import Settings
 from scm import plams
 import numpy as np
 

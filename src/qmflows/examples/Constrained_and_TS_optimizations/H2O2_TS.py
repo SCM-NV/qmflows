@@ -1,6 +1,6 @@
 __all__ = ['example_H2O2_TS']
 
-from qmworks import orca, dftb, templates, molkit, Dihedral, run, Settings
+from qmflows import orca, dftb, templates, molkit, Dihedral, run, Settings
 
 
 def example_H2O2_TS():

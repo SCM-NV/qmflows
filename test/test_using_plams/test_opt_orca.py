@@ -1,13 +1,13 @@
 # Default imports
 from math import sqrt
 from nose.plugins.attrib import attr
-from qmworks import (concat, Settings, templates, zipWith)
+from qmflows import (concat, Settings, templates, zipWith)
 from scm.plams import Molecule
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
-from qmworks.packages.orca import orca
-from qmworks.packages import run
+from qmflows.packages.SCM import dftb
+from qmflows.packages.orca import orca
+from qmflows.packages import run
 import operator
 
 

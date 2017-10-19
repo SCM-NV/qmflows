@@ -7,7 +7,7 @@ from os.path import join
 import json
 import pkg_resources as pkg
 #  ==================> Internal Modules  <=====================
-from qmworks.utils import dict2Setting
+from qmflows.utils import dict2Setting
 # ==================================================
 
 
@@ -27,7 +27,7 @@ def get_template(template_name):
     * Frequencies
     """
     path = join("data/templates", template_name)
-    xs = pkg.resource_string("qmworks", path)
+    xs = pkg.resource_string("qmflows", path)
     s = json.loads(xs.decode())  # Json object must be string
     return dict2Setting(s)
 

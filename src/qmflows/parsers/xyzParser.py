@@ -7,9 +7,9 @@ from scm.plams import (Atom, Molecule)
 from pyparsing   import (alphas, Group, LineEnd, OneOrMore, restOfLine,
                          Suppress, Word)
 
-from qmworks.common import AtomXYZ
-from qmworks.parsers.parser import (floatNumber, natural)
-from qmworks.utils import zipWith
+from qmflows.common import AtomXYZ
+from qmflows.parsers.parser import (floatNumber, natural)
+from qmflows.utils import zipWith
 # =============================================================================
 
 header  = natural + LineEnd() + restOfLine

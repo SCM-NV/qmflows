@@ -1,12 +1,12 @@
 # Default imports
-from qmworks import Settings, templates, run, molkit
-from qmworks.draw_workflow import draw_workflow
+from qmflows import Settings, templates, run, molkit
+from qmflows.draw_workflow import draw_workflow
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
-from qmworks.packages.SCM import dftb as adf  # This is for testing purposes
-from qmworks.components import Distance, PES, select_max
+from qmflows.packages.SCM import dftb
+from qmflows.packages.SCM import dftb as adf  # This is for testing purposes
+from qmflows.components import Distance, PES, select_max
 
 from scm import plams
 # ========== =============

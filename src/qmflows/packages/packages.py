@@ -31,10 +31,10 @@ from noodles.run.xenon import (
     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
 from noodles.serial.numpy import arrays_to_hdf5
 
-from qmworks.settings import Settings
-from qmworks import molkit
-from qmworks.fileFunctions import json2Settings
-from qmworks.utils import concatMap
+from qmflows.settings import Settings
+from qmflows import molkit
+from qmflows.fileFunctions import json2Settings
+from qmflows.utils import concatMap
 from warnings import warn
 
 package_properties = {
@@ -55,7 +55,7 @@ class Result:
                  work_dir=None, properties=None, status='done', warnings=None):
         """
         :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
+        :type settings: :class:`~qmflows.Settings`
         :param molecule: molecular Geometry
         :type molecule: plams Molecule
         :param job_name: Name of the computations
@@ -71,7 +71,7 @@ class Result:
         """
         self.settings = settings
         self._molecule = molecule
-        xs = pkg.resource_string("qmworks", properties)
+        xs = pkg.resource_string("qmflows", properties)
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": Path(plams_dir),
                         'work_dir': work_dir}
@@ -316,7 +316,7 @@ class Package:
         the specific keywords of ``self.pkg_name``.
         """
         path = join("data/dictionaries", self.generic_dict_file)
-        str_json = pkg.resource_string("qmworks", path)
+        str_json = pkg.resource_string("qmflows", path)
 
         return json2Settings(str_json)
 
@@ -461,7 +461,7 @@ class SerMol(Serialiser):
 
 class SerSettings(Serialiser):
     """
-    Class to encode and decode the ~qmworks.Settings class using
+    Class to encode and decode the ~qmflows.Settings class using
     its internal dictionary structure.
     """
 
@@ -493,7 +493,7 @@ def registry():
             Settings: SerSettings()})
 
 
-def import_parser(ds, module_root="qmworks.parsers"):
+def import_parser(ds, module_root="qmflows.parsers"):
     """
     Import parser for the corresponding property.
     """

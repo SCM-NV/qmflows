@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
-from qmworks.templates import (freq, geometry, singlepoint, ts)
-from qmworks.utils import (dict2Setting, settings2Dict)
+from qmflows.templates import (freq, geometry, singlepoint, ts)
+from qmflows.utils import (dict2Setting, settings2Dict)
 
 
 @attr('fast')

@@ -8,9 +8,9 @@ from pyparsing import (alphanums, alphas, delimitedList, Group, Literal,
                        nestedExpr, nums, OneOrMore, restOfLine, SkipTo,
                        Suppress, Word)
 
-from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
-from qmworks.parsers.parser import (floatNumber, floatNumberDot, natural)
-from qmworks.utils import (concat, concatMap, zipWith, zipWith3)
+from qmflows.common import (AtomBasisData, AtomBasisKey, InfoMO)
+from qmflows.parsers.parser import (floatNumber, floatNumberDot, natural)
+from qmflows.utils import (concat, concatMap, zipWith, zipWith3)
 
 from .cp2KParser import swapCoeff
 

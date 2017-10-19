@@ -2,7 +2,7 @@
 __all__ = ['awk_file', 'extract_line_value']
 
 from pyparsing import  (OneOrMore, SkipTo, Suppress)
-from qmworks.parsers.parser import parse_file
+from qmflows.parsers.parser import parse_file
 
 import os
 import subprocess

@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks.examples import example_freqs
+from qmflows.examples import example_freqs
 import numpy as np
 
 

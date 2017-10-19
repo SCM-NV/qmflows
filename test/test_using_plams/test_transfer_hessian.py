@@ -1,11 +1,11 @@
 from nose.plugins.attrib import attr
-from qmworks import Settings, templates, molkit
+from qmflows import Settings, templates, molkit
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
-from qmworks.packages.orca import orca
-from qmworks.packages import run
+from qmflows.packages.SCM import dftb
+from qmflows.packages.orca import orca
+from qmflows.packages import run
 
 
 @attr('slow')

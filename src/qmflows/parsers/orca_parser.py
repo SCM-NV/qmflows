@@ -8,8 +8,8 @@ from scm.plams import (Atom, Molecule)
 from pyparsing import (alphanums, Group, OneOrMore, Word)
 from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule, try_search_pattern)
-from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
-from qmworks.utils import chunksOf
+from qmflows.common import (AtomBasisData, AtomBasisKey, InfoMO)
+from qmflows.utils import chunksOf
 from .xyzParser import manyXYZ
 
 import numpy as np

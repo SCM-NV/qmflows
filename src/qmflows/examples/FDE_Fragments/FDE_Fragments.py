@@ -2,9 +2,9 @@ __all__ = ['example_FDE_fragments']
 
 # Default imports
 from scm.plams import Molecule
-from qmworks import (Settings, run, templates)
-from qmworks.packages.SCM import adf
-from qmworks.components import Fragment, adf_fragmentsjob
+from qmflows import (Settings, run, templates)
+from qmflows.packages.SCM import adf
+from qmflows.components import Fragment, adf_fragmentsjob
 from noodles import gather
 import io
 

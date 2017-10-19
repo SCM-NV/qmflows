@@ -1,10 +1,10 @@
 # Default imports
-from qmworks import Settings, templates, run
+from qmflows import Settings, templates, run
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
-from qmworks.packages import orca
-from qmworks.components import Distance
+from qmflows.packages.SCM import dftb
+from qmflows.packages import orca
+from qmflows.components import Distance
 from scm import plams
 import io
 

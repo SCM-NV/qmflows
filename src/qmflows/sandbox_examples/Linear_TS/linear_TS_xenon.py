@@ -1,13 +1,13 @@
 # Default imports
-from qmworks import Settings, templates, run
+from qmflows import Settings, templates, run
 from noodles import gather
 from plams import Molecule
 
 # User Defined imports
 from math import sqrt
-from qmworks.packages.SCM import dftb, adf
-from qmworks.components import PES_scan, select_max
-from qmworks.packages import (init, finish, registry)
+from qmflows.packages.SCM import dftb, adf
+from qmflows.components import PES_scan, select_max
+from qmflows.packages import (init, finish, registry)
 
 def bond_distance(r1, r2):
     return sqrt(sum((x - y) ** 2 for x, y in zip(r1, r2)))

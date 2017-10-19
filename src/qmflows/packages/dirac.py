@@ -1,7 +1,7 @@
 __all__ = ['dirac']
 
-from qmworks.packages.packages import (Package, package_properties, Result)
-from qmworks.settings import Settings
+from qmflows.packages.packages import (Package, package_properties, Result)
+from qmflows.settings import Settings
 from scm import plams
 from warnings import warn
 

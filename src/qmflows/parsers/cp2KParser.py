@@ -17,10 +17,10 @@ import numpy as np
 import os
 import subprocess
 # ==================> Internal modules <====================
-from qmworks.common import (AtomBasisData, AtomBasisKey, InfoMO)
-from qmworks.parsers.parser import (
+from qmflows.common import (AtomBasisData, AtomBasisKey, InfoMO)
+from qmflows.parsers.parser import (
     floatNumber, minusOrplus, natural, point, try_search_pattern)
-from qmworks.utils import (chunksOf, concat, zipWith, zipWith3)
+from qmflows.utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))

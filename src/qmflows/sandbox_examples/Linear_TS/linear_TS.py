@@ -1,11 +1,11 @@
 # Default imports
-from qmworks import (Settings, run)
+from qmflows import (Settings, run)
 from plams import Molecule
 
 # User Defined imports
 from math import sqrt
-from qmworks.packages.SCM import dftb, adf
-from qmworks.components import (Distance, PES, select_max)
+from qmflows.packages.SCM import dftb, adf
+from qmflows.components import (Distance, PES, select_max)
 
 # ========== =============
 

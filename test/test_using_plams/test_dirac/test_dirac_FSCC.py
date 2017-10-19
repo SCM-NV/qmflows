@@ -1,6 +1,6 @@
 
 from scm.plams import (Atom, Molecule)
-from qmworks import (dirac, Settings)
+from qmflows import (dirac, Settings)
 
 
 def main():

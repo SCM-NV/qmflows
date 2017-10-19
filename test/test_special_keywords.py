@@ -1,4 +1,4 @@
-from qmworks import Settings, gamess, adf, dftb, orca, molkit
+from qmflows import Settings, gamess, adf, dftb, orca, molkit
 
 def test_freeze_with_gamess():
     mol = molkit.from_smiles('CO')

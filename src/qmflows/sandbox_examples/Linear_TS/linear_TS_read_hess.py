@@ -1,12 +1,12 @@
 # Default imports
-from qmworks import Settings, templates, run
+from qmflows import Settings, templates, run
 from noodles import gather
 from plams import Molecule
 
 # User Defined imports
 from math import sqrt
-from qmworks.packages.SCM import dftb, adf
-from qmworks.components import PES_scan, select_max
+from qmflows.packages.SCM import dftb, adf
+from qmflows.components import PES_scan, select_max
 
 import plams
 # ========== =============

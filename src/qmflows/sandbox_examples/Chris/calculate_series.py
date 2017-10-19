@@ -1,9 +1,9 @@
 # Default imports
 from noodles import gather
-from qmworks import (Settings, templates, run, molkit)
+from qmflows import (Settings, templates, run, molkit)
 
 # User Defined imports
-from qmworks import orca, dftb
+from qmflows import orca, dftb
 from scm import plams
 # ========== =============
 

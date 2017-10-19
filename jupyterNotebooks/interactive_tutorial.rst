@@ -12,18 +12,18 @@ Basic usage tutorial
    | ``bash    bash miniconda.sh -b -p $HOME/miniconda``
 
 -  create new virtual environment
-   ``bash    conda create -q -n qmworks python=3.5``
+   ``bash    conda create -q -n qmflows python=3.5``
 
 -  Install dependecies
-   ``bash     conda install --name qmworks -c anaconda hdf5    conda install --name qmworks -c https://conda.anaconda.org/rdkit rdkit``
+   ``bash     conda install --name qmflows -c anaconda hdf5    conda install --name qmflows -c https://conda.anaconda.org/rdkit rdkit``
 
--  Start environment ``bash    source activate qmworks``
+-  Start environment ``bash    source activate qmflows``
 
--  install **qmworks** dependencies
+-  install **qmflows** dependencies
 
    .. code:: bash
 
-        pip install https://github.com/SCM-NV/qmworks/tarball/master#egg=qmworks https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
+        pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
 
    .. rubric:: You are ready to start!
       :name: you-are-ready-to-start
@@ -36,18 +36,18 @@ command to initialize the environment:
 
 .. code:: bash
 
-    [user@int1 ~]$ source activate qmworks
+    [user@int1 ~]$ source activate qmflows
     discarding /home/user/anaconda3/bin from PATH
-    prepending /home/user/anaconda3/envs/qmworks/bin to PATH
-    (qmworks)[user@int1 ~]$ python --version
+    prepending /home/user/anaconda3/envs/qmflows/bin to PATH
+    (qmflows)[user@int1 ~]$ python --version
     Python 3.5.2 :: Anaconda custom (64-bit)
 
 To leave the environment the following command is used
 
 .. code:: bash
 
-    (qmworks)[user@int1 ~]$ source deactivate
-    discarding /home/user/anaconda3/envs/qmworks/bin from PATH
+    (qmflows)[user@int1 ~]$ source deactivate
+    discarding /home/user/anaconda3/envs/qmflows/bin from PATH
 
 To finalize preparations before running QMworks: if you don't want the
 results to end up in the current work directory, create a new results
@@ -87,7 +87,7 @@ Also some simulation packages required that you configure a ``scratch``
 folder. For instance *Orca* requires a **SCR** folder to be defnied
 while *ADF* called it **SCM\_TMPDIR**.
 
- With ``qmworks`` you can write a python script that simply calls one of
+ With ``qmflows`` you can write a python script that simply calls one of
 the package objects **adf, dftb, cp2k, orca, gamess** or **dirac**. As
 arguments to the call, you need to provide a ``settings`` objects
 defining the input of a calculation, a molecular geometry, and,
@@ -122,7 +122,7 @@ the dftb package object:
 
 .. code:: ipython3
 
-    from qmworks import dftb, templates, run
+    from qmflows import dftb, templates, run
     job = dftb(templates.geometry, acetonitrile, job_name="dftb_geometry_optimization")
     print(job)
 
@@ -144,11 +144,11 @@ python object.
 
 .. parsed-literal::
 
-    [09:14:04] PLAMS working folder: /home/lars/workspace/qmworks/jupyterNotebooks/tutorial_results/run_one
+    [09:14:04] PLAMS working folder: /home/lars/workspace/qmflows/jupyterNotebooks/tutorial_results/run_one
     ╭─(running jobs)
     │ Running dftb dftb_geometry_optimization...
     ╰[s[1A[50C([38;2;60;180;100m✔[0m)[u─(success)
-    <qmworks.packages.SCM.DFTB_Result object at 0x7f6c8e30bcf8>
+    <qmflows.packages.SCM.DFTB_Result object at 0x7f6c8e30bcf8>
 
 
 We can easily retrieve the calculated properties from the DFTB
@@ -186,7 +186,7 @@ specific keywords, to provide maximum flexibility.
 
 .. code:: ipython3
 
-    from qmworks import Settings
+    from qmflows import Settings
     s = Settings()
     s.basis = "DZP"
     s.specific.adf.basis.core = "large"
@@ -268,7 +268,7 @@ In QMworks/PLAMS multiple settings objects can be combined using the
                                          periodic: 	xyz
                   global: 	
                          print_level: 	low
-                         project: 	qmworks-cp2k
+                         project: 	qmflows-cp2k
                          run_type: 	geometry_optimization
                   motion: 	
                          geo_opt: 	
@@ -317,7 +317,7 @@ the `PLAMS software <https://www.scm.com/doc/plams/index.html>`__.
 
 .. code:: ipython3
 
-    from qmworks import adf
+    from qmflows import adf
     print(adf.generic2specific(merged_settings))
 
 
@@ -369,7 +369,7 @@ the `PLAMS software <https://www.scm.com/doc/plams/index.html>`__.
                                          periodic: 	xyz
                   global: 	
                          print_level: 	low
-                         project: 	qmworks-cp2k
+                         project: 	qmflows-cp2k
                          run_type: 	geometry_optimization
                   motion: 	
                          geo_opt: 	
@@ -413,7 +413,7 @@ for ADF package:
 
 .. parsed-literal::
 
-    [09:14:04] PLAMS working folder: /home/lars/workspace/qmworks/jupyterNotebooks/tutorial_results/run_two
+    [09:14:04] PLAMS working folder: /home/lars/workspace/qmflows/jupyterNotebooks/tutorial_results/run_two
     ╭─(running jobs)
     │ Running adf adf_acetonitrile...
     [s[1A[50C([38;2;60;180;100m✔[0m)[u╰─(success)
@@ -467,7 +467,7 @@ The script below combines components outlined above:
 .. code:: ipython3
 
     from plams import Molecule
-    from qmworks import dftb, adf, templates, run, Settings
+    from qmflows import dftb, adf, templates, run, Settings
     
     acetonitrile = Molecule("files/acetonitrile.xyz")
     
@@ -485,7 +485,7 @@ The script below combines components outlined above:
 
 .. parsed-literal::
 
-    [09:15:08] PLAMS working folder: /home/lars/workspace/qmworks/jupyterNotebooks/tutorial_results/workflow
+    [09:15:08] PLAMS working folder: /home/lars/workspace/qmflows/jupyterNotebooks/tutorial_results/workflow
     ╭─(running jobs)
     │ Running dftb dftb_opt...
     [s[1A[50C([38;2;60;180;100m✔[0m)[u│ Running adf adf_single...

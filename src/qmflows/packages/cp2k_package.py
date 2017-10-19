@@ -1,10 +1,10 @@
 __all__ = ['cp2k']
 
-from qmworks.data.dictionaries.warningsCP2K import cp2k_warnings
-from qmworks.packages.packages import (
+from qmflows.data.dictionaries.warningsCP2K import cp2k_warnings
+from qmflows.packages.packages import (
     Package, package_properties, parse_output_warnings, Result)
-from qmworks.parsers.cp2KParser import parse_cp2k_warnings
-from qmworks.settings import Settings
+from qmflows.parsers.cp2KParser import parse_cp2k_warnings
+from qmflows.settings import Settings
 from scm import plams
 from warnings import warn
 
@@ -46,7 +46,7 @@ class CP2K(Package):
         Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
+        :type settings: :class:`~qmflows.Settings`
         :param mol: molecular Geometry
         :type mol: plams Molecule
         :param hdf5_file: Path to the HDF5 file that contains the
@@ -94,7 +94,7 @@ class CP2K(Package):
         Create the settings input for complex cp2k keys
 
         :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
+        :type settings: :class:`~qmflows.Settings`
         :param key: Special key declared in ``settings``.
         :param value: Value store in ``settings``.
         :param mol: molecular Geometry

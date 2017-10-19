@@ -46,7 +46,7 @@ def zipWith3(f, xs, ys, zs):
 
 
 # ================> Dict Functions
-from qmworks.settings   import Settings
+from qmflows.settings   import Settings
 
 
 def settings2Dict(s):

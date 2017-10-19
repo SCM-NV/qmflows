@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks.examples import (
+from qmflows.examples import (
     example_ADF3FDE_Cystine, example_ADF3FDE_Dialanine, example_FDE_fragments)
 import numpy as np
 

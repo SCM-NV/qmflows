@@ -1,11 +1,11 @@
 
 from nose.plugins.attrib import attr
-from qmworks import (concat, Settings, templates, zipWith)
+from qmflows import (concat, Settings, templates, zipWith)
 from scm.plams import Molecule
 
 # User Defined imports
-from qmworks.packages.gamess import gamess
-from qmworks.packages import run
+from qmflows.packages.gamess import gamess
+from qmflows.packages import run
 
 import operator
 

@@ -53,7 +53,7 @@
           },
           "global": {
               "print_level": "low",
-              "project": "qmworks-cp2k",
+              "project": "qmflows-cp2k",
               "run_type": "energy_force"
           }
         },

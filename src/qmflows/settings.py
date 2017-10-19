@@ -86,7 +86,7 @@ class Settings(plams.core.settings.Settings, Storable):
 
         For example:
 
-        >>> from qmworks import Settings
+        >>> from qmflows import Settings
         >>> t=Settings()
         >>> t.input.xc.lda = ""
         >>> u = Settings()

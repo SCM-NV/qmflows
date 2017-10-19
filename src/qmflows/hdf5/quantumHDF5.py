@@ -9,8 +9,8 @@ from os.path import join
 import h5py
 import numpy as np
 # ==================> Internal modules <==========
-from qmworks.parsers.cp2KParser import readCp2KBasis
-from qmworks.parsers.turbomoleParser import readTurbomoleBasis
+from qmflows.parsers.cp2KParser import readCp2KBasis
+from qmflows.parsers.turbomoleParser import readTurbomoleBasis
 
 # ====================><==============================
 

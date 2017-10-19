@@ -1,9 +1,9 @@
 __all__ = ['orca']
 
 from os.path import join
-from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
-from qmworks.parsers.orca_parser import parse_molecule
+from qmflows.settings import Settings
+from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
+from qmflows.parsers.orca_parser import parse_molecule
 from scm import plams
 from warnings import warn
 

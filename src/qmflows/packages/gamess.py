@@ -1,7 +1,7 @@
 __all__ = ['gamess']
 
-from qmworks.packages.packages import (Package, package_properties, Result)
-from qmworks.settings import Settings
+from qmflows.packages.packages import (Package, package_properties, Result)
+from qmflows.settings import Settings
 from scm import plams
 from warnings import warn
 
@@ -28,7 +28,7 @@ class GAMESS(Package):
         Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
+        :type settings: :class:`~qmflows.Settings`
         :param mol: molecular Geometry
         :type mol: plams Molecule
         :param input_file_name: Optional name for the input.
@@ -67,7 +67,7 @@ class GAMESS(Package):
         * ``selected_atoms``
 
         :param settings: Job Settings.
-        :type settings: :class:`~qmworks.Settings`
+        :type settings: :class:`~qmflows.Settings`
         :param key: Special key declared in ``settings``.
         :param value: Value store in ``settings``.
         :param mol: molecular Geometry

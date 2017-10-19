@@ -1,7 +1,7 @@
 
 from noodles import gather
 from scm.plams import Molecule
-from qmworks import (dirac, run, Settings)
+from qmflows import (dirac, run, Settings)
 
 
 def test_numgrad():

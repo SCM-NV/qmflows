@@ -1,7 +1,7 @@
 __all__ = ['example_freqs']
 
 from noodles import gather
-from qmworks import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
+from qmflows import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
 
 
 def is_successful(result):

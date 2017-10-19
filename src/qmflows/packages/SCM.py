@@ -4,8 +4,8 @@ __all__ = ['adf', 'dftb']
 
 from os.path import join
 from warnings import warn
-from qmworks.settings import Settings
-from qmworks.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
+from qmflows.settings import Settings
+from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from scm import plams
 
 import builtins
@@ -43,7 +43,7 @@ class ADF(Package):
         :parameter out_file_name: The user can provide a name for the
                                   job output.
         :type out_file_name: String
-        :returns: :class:`~qmworks.packages.SCM.ADF_Result`
+        :returns: :class:`~qmflows.packages.SCM.ADF_Result`
         """
         adf_settings = Settings()
         if nproc:
@@ -232,7 +232,7 @@ class DFTB(Package):
         :parameter out_file_name: The user can provide a name for the
                                  job output.
         :type out_file_name: String
-        :returns: :class:`~qmworks.packages.SCM.DFTB_Result`
+        :returns: :class:`~qmflows.packages.SCM.DFTB_Result`
         """
         dftb_settings = Settings()
         if nproc:

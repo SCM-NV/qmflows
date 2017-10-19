@@ -1,9 +1,9 @@
 
 from scm.plams import Molecule
-from qmworks import (Settings, templates, run)
+from qmflows import (Settings, templates, run)
 
 # User Defined imports
-from qmworks.packages import (adf, dirac, dftb, gamess, orca)
+from qmflows.packages import (adf, dirac, dftb, gamess, orca)
 
 
 def isNone(x):

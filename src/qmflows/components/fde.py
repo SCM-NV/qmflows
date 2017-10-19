@@ -1,9 +1,9 @@
 __all__ = ['mfcc', 'MFCC_Result', 'adf3fde', 'ADF3FDE_Result', 'Fragment', 'adf_fragmentsjob']
 
-from qmworks import templates
-from qmworks.settings import Settings
-from qmworks.packages import Result
-from qmworks.packages.SCM import adf
+from qmflows import templates
+from qmflows.settings import Settings
+from qmflows.packages import Result
+from qmflows.packages.SCM import adf
 from noodles import gather, schedule, Storable
 from scm.plams import Molecule
 

@@ -1,7 +1,7 @@
 __all__ = ['example_generic_constraints']
 
 from noodles import gather
-from qmworks import dftb, adf, orca, run, Settings, templates, molkit
+from qmflows import dftb, adf, orca, run, Settings, templates, molkit
 
 
 def example_generic_constraints():

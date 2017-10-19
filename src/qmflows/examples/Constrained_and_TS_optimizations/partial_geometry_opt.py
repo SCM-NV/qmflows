@@ -1,7 +1,7 @@
 __all__ = ['example_partial_geometry_opt']
 
 from noodles import gather
-from qmworks import adf, run, Settings, templates, molkit
+from qmflows import adf, run, Settings, templates, molkit
 
 
 def example_partial_geometry_opt():

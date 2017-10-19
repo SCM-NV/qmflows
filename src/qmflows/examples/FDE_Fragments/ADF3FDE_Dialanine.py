@@ -1,12 +1,12 @@
 __all__ = ['example_ADF3FDE_Dialanine']
 # Default imports
-from qmworks import (templates, run)
-from qmworks import molkit
-from qmworks.components import mfcc
+from qmflows import (templates, run)
+from qmflows import molkit
+from qmflows.components import mfcc
 from noodles import gather
 
 # User Defined imports
-from qmworks.packages.SCM import dftb
+from qmflows.packages.SCM import dftb
 import io
 
 

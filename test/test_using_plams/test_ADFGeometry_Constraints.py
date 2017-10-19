@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks.examples import (
+from qmflows.examples import (
     example_generic_constraints, example_H2O2_TS, example_partial_geometry_opt)
 import numpy as np
 

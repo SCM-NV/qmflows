@@ -2,7 +2,7 @@
 __all__ = ['json2Settings']
 
 # ================> Python Standard  and third-party <=========================
-from qmworks.utils import dict2Setting
+from qmflows.utils import dict2Setting
 
 import json
 

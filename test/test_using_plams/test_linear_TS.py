@@ -1,11 +1,11 @@
 # Default imports
 from nose.plugins.attrib import attr
 from scm.plams import Molecule
-from qmworks import (Settings, run)
+from qmflows import (Settings, run)
 
 # User Defined imports
-from qmworks.components import (PES, select_max, Distance)
-from qmworks.packages.SCM import (dftb, adf)
+from qmflows.components import (PES, select_max, Distance)
+from qmflows.packages.SCM import (dftb, adf)
 
 
 @attr('slow')

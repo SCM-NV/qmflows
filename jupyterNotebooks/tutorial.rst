@@ -24,18 +24,18 @@
 -  | then add miniconda to your path
    | ``bash    bash miniconda.sh -b -p $HOME/miniconda``
 
--  create new virtual environment ``bash    conda create -q -n qmworks``
+-  create new virtual environment ``bash    conda create -q -n qmflows``
 
 -  Install dependecies
-   ``bash     conda install --name qmworks -c anaconda hdf5    conda install --name qmworks -c https://conda.anaconda.org/rdkit rdkit``
+   ``bash     conda install --name qmflows -c anaconda hdf5    conda install --name qmflows -c https://conda.anaconda.org/rdkit rdkit``
 
--  Start environment ``bash    source activate qmworks``
+-  Start environment ``bash    source activate qmflows``
 
--  install **qmworks**
+-  install **qmflows**
 
    .. code:: bash
 
-        pip install qmworks --upgrade
+        pip install qmflows --upgrade
 
    \*\* You are ready to start! \*\*
 
@@ -47,18 +47,18 @@ command to initialize the environment:
 
 .. code:: bash
 
-    [user@int1 ~]$ source activate qmworks
+    [user@int1 ~]$ source activate qmflows
     discarding /home/user/anaconda3/bin from PATH
-    prepending /home/user/anaconda3/envs/qmworks/bin to PATH
-    (qmworks)[user@int1 ~]$ python --version
+    prepending /home/user/anaconda3/envs/qmflows/bin to PATH
+    (qmflows)[user@int1 ~]$ python --version
     Python 3.5.2 :: Anaconda custom (64-bit)
 
 To leave the environment the following command is used
 
 .. code:: bash
 
-    (qmworks)[user@int1 ~]$ source deactivate
-    discarding /home/user/anaconda3/envs/qmworks/bin from PATH
+    (qmflows)[user@int1 ~]$ source deactivate
+    discarding /home/user/anaconda3/envs/qmflows/bin from PATH
 
  2. What is QMworks? 
 ---------------------
@@ -84,10 +84,10 @@ softwares: \* `SCM <https://www.scm.com/>`__ (ADF and DTFB) \*
 `DIRAC <http://diracprogram.org/doku.php>`__
 
 If you are interested in having support for other packages, request it
-using the `github-issues <https://github.com/SCM-NV/qmworks/issues>`__
+using the `github-issues <https://github.com/SCM-NV/qmflows/issues>`__
 system (Sorry but Gaussian is out of the menu!).
 
-With ``qmworks`` you can write a python script that simply calls one of
+With ``qmflows`` you can write a python script that simply calls one of
 the package objects **adf, dftb, cp2k, orca, gamess** or **dirac**. As
 arguments to the call, you need to provide a ``Settings`` objects
 defining the input of a calculation, a molecular geometry represented by
@@ -116,7 +116,7 @@ to represent hierarchical structures, like
 
 .. code:: ipython3
 
-    from qmworks import Settings
+    from qmflows import Settings
     
     s = Settings()
     s.b.z
@@ -226,7 +226,7 @@ Represented by the following code
     
 
 
-You don't need to explicitly declare the ``end`` keyword, *qmworks*
+You don't need to explicitly declare the ``end`` keyword, *qmflows*
 knows how to hande them.
 
  Generic Keywords 
@@ -235,7 +235,7 @@ knows how to hande them.
 Quantum chemistry packages use gaussian type orbitals (GTO) or slater
 type orbitals (STO) to perform the simulation. The packages use the same
 standards for the basis set and it will be really handy if we can
-defined a "generic" keyword for basis sets. Fortunately ``qmworks``
+defined a "generic" keyword for basis sets. Fortunately ``qmflows``
 already offers such keyword that can be used among the packages that use
 the same basis standard,
 
@@ -351,18 +351,18 @@ are present in most simulation packages like a *basis set* while
 complex simulation inputs, but it would be nice if we can pre-defined a
 set of templates for the most common quantum chemistry simulations like:
 single point calculations, geometry optimizations, transition state
-optimization, frequency calculations, etc. *qmworks* already has a
+optimization, frequency calculations, etc. *qmflows* already has a
 pre-defined set of templates containing some defaults that the user can
 modify for her/his own purpose. ``Templates`` are stored inside the
-``qmworks.templates`` module and are load from *JSON* files. A JSON file
+``qmflows.templates`` module and are load from *JSON* files. A JSON file
 is basically a nested dictionary that is translated to a ``Settings``
-object by *qmworks*.
+object by *qmflows*.
 
 Below it is shown the defaults for single point calculation
 
 .. code:: ipython3
 
-    from qmworks import templates
+    from qmflows import templates
     templates.singlepoint
 
 
@@ -415,7 +415,7 @@ Below it is shown the defaults for single point calculation
                                          periodic: 	xyz
                   global: 	
                          print_level: 	low
-                         project: 	qmworks-cp2k
+                         project: 	qmflows-cp2k
                          run_type: 	energy_force
              dftb: 	
                   dftb: 	
@@ -466,7 +466,7 @@ using a method called ``overlay``.
 
 .. code:: ipython3
 
-    from qmworks import templates
+    from qmflows import templates
     inp = templates.geometry.overlay(s)
 
 The ``overlay`` method takes as input a template containing a default
@@ -482,7 +482,7 @@ keywords to generate the input for a ``CP2K`` job
 
 .. code:: ipython3
 
-    from qmworks import templates
+    from qmflows import templates
     
     # Template
     s = templates.singlepoint
@@ -551,7 +551,7 @@ keywords to generate the input for a ``CP2K`` job
                                          periodic: 	None
                   global: 	
                          print_level: 	low
-                         project: 	qmworks-cp2k
+                         project: 	qmflows-cp2k
                          run_type: 	energy_force
              dftb: 	
                   dftb: 	
@@ -582,7 +582,7 @@ keywords to generate the input for a ``CP2K`` job
 -------------
 
 The next component to carry out a simulation is a molecular geometry.
-*qmworks* offers a convinient way to read Molecular geometries using the
+*qmflows* offers a convinient way to read Molecular geometries using the
 `Plams <https://www.scm.com/doc/plams/molecule.html>`__ library in
 several formats like: *xyz* , *pdb*, *mol*, etc.
 
@@ -610,7 +610,7 @@ You can also create the molecule one atom at a time
 
 .. code:: ipython3
 
-    from qmworks.molkit import from_smiles
+    from qmflows.molkit import from_smiles
     
     # String representing the smile
     smile = 'C1CC2(CCCCC2)C=C1'
@@ -683,7 +683,7 @@ The Molecule class has an extensive functionally to carry out molecular
 manipulations, for a comprenhesive disccusion about it have a look at
 the `molecule
 documentation <https://www.scm.com/doc/plams/molecule.html>`__. Also the
-module ``qmworks.molkit`` contains an extensive functionality to apply
+module ``qmflows.molkit`` contains an extensive functionality to apply
 transformation over a molecule using the
 `RDKit <http://www.rdkit.org/>`__ library.
 
@@ -696,7 +696,7 @@ the computation,
 
 .. code:: ipython3
 
-    from qmworks import adf
+    from qmflows import adf
     optmized_mol_adf = adf(inp, acetonitrile, job_name='acetonitrile_opt')
 
 the previous code snippet *does not execute the code immediatly*,
@@ -706,7 +706,7 @@ function, as shown below
 .. code:: python
 
     from plams import Molecule
-    from qmworks import (adf, run, Settings, templates)
+    from qmflows import (adf, run, Settings, templates)
 
     # Settings
     s = templates.geometry
@@ -730,14 +730,14 @@ console:
 
 .. code:: bash
 
-    (qmworks)[user@int1 ~]$ python acetonitrile_opt.py
+    (qmflows)[user@int1 ~]$ python acetonitrile_opt.py
 
 you will then see in your ``current work directory`` something similar
 to the following
 
 .. code:: bash
 
-    (qmworks)[user@int1 ~]$ ls 
+    (qmflows)[user@int1 ~]$ ls 
     acetonitrile      acetonitrile_opt.py   cache.json   acetonitrile.xyz  
 
  acetonitrile is the folder containing the output from the quantum
@@ -746,9 +746,9 @@ all the information required to perform a restart, as we will explore
 below. Inside the acetonitrile you can find the input/output files
 resulting from the simulation
 
-``bash (qmworks)[user@int1 ~]$ ls acetonitrile   acetonitrile.log  acetonitrile_opt``
+``bash (qmflows)[user@int1 ~]$ ls acetonitrile   acetonitrile.log  acetonitrile_opt``
 
-``bash (qmworks)[user@int1 ~]$ ls acetonitrile/acetonitrile_opt  acetonitrile_opt.dill  acetonitrile_opt.out  logfile  t21.N  acetonitrile_opt.err   acetonitrile_opt.run  t21.C  acetonitrile_opt.in    acetonitrile_opt.t21  t21.H``
+``bash (qmflows)[user@int1 ~]$ ls acetonitrile/acetonitrile_opt  acetonitrile_opt.dill  acetonitrile_opt.out  logfile  t21.N  acetonitrile_opt.err   acetonitrile_opt.run  t21.C  acetonitrile_opt.in    acetonitrile_opt.t21  t21.H``
 
  Extracting Properties 
 -----------------------
@@ -792,7 +792,7 @@ calculation,
 
 .. code:: ipython3
 
-    from qmworks import orca
+    from qmflows import orca
     s2 = Settings()
     s2.specific.orca.main = "freq"
     s2.specific.orca.basis.basis = 'sto_sz'
@@ -807,7 +807,7 @@ The whole script is
 
 .. code:: python
 
-    from qmworks import (adf, orca, run, templates, Settings)
+    from qmflows import (adf, orca, run, templates, Settings)
     from plams import Molecule
     import plams
 
@@ -884,14 +884,14 @@ manager can be done using and script like
     module load orca
     module load adf/2016.102
 
-    source activate qmworks
+    source activate qmflows
     python optimization_ADF_freq_ORCA.py
 
 The Slurm output looks like:
 
 \`\`\` load orca/3.0.3 (PATH) discarding
-/home/user/anaconda3/envs/qmworks/bin from PATH prepending
-/home/user/anaconda3/envs/qmworks/bin to PATH [11:17:59] PLAMS working
+/home/user/anaconda3/envs/qmflows/bin from PATH prepending
+/home/user/anaconda3/envs/qmflows/bin to PATH [11:17:59] PLAMS working
 folder: /nfs/home/user/orca/Opt/example/plams.23412 +-(running jobs) \|
 Running adf ... [11:17:59] Job ADFjob started [11:18:18] Job ADFjob
 finished with status 'successful' [11:18:18] Job ORCAjob started
@@ -907,7 +907,7 @@ finished with status 'successful' [11:18:18] Job ORCAjob started
  A little discussion about graphs 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-*qmworks* is meant to be used for both workflow generation and
+*qmflows* is meant to be used for both workflow generation and
 execution. When you write a python script representing a workflow you
 are explicitly declaring set of computations and their dependencies. For
 instance the following workflow represent *ADF* and *Orca* computations
@@ -944,7 +944,7 @@ need to relaunch it**, that's it!
 .. code:: python
 
     from noodles import gather
-    from qmworks import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
+    from qmflows import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
 
     # This examples illustrates the possibility to use different packages interchangeably.
     # Analytical frequencies are not available for B3LYP in ADF
@@ -989,7 +989,7 @@ After running the above script you have a table like
  Non-adiabatic couplings 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-`qmworks-namd <https://github.com/SCM-NV/qmworks-namd>`__ is a package
+`qmflows-namd <https://github.com/SCM-NV/qmflows-namd>`__ is a package
 based on **QMWorks** to compute the Non-adiabatic couplings for large
 system involving thr use of **QMWorks**, `Cython <http://cython.org/>`__
 and `Numpy <http://www.numpy.org/>`__.

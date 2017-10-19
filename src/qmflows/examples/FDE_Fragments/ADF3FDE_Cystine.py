@@ -1,11 +1,11 @@
 __all__ = ['example_ADF3FDE_Cystine']
 
 # Default imports
-from qmworks import (templates, run, molkit, Settings)
-from qmworks.components import mfcc, adf3fde
+from qmflows import (templates, run, molkit, Settings)
+from qmflows.components import mfcc, adf3fde
 from noodles import gather
 # User Defined imports
-from qmworks.packages.SCM import adf
+from qmflows.packages.SCM import adf
 
 import io
 import sys

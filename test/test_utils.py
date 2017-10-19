@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
 from pymonad import curry
-from qmworks.utils import (chunksOf, concat, concatMap, zipWith, zipWith3)
+from qmflows.utils import (chunksOf, concat, concatMap, zipWith, zipWith3)
 
 
 @attr('fast')

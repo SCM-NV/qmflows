@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
-from qmworks.parsers import (manyXYZ, parse_string_xyz)
-from qmworks.utils import (chunksOf)
+from qmflows.parsers import (manyXYZ, parse_string_xyz)
+from qmflows.utils import (chunksOf)
 
 
 @attr('fast')
