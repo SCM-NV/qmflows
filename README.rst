@@ -8,9 +8,9 @@
    :target: https://www.codacy.com/app/tifonzafel/qmflows?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SCM-NV/qmflows&amp;utm_campaign=Badge_Grade	   
 .. image:: https://api.codacy.com/project/badge/Coverage/7e95b6d4d873458daf0de5e4b3110885
    :target: https://www.codacy.com/app/tifonzafel/qmflows?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SCM-NV/qmflows&amp;utm_campaign=Badge_Coverage	   
-================
+
 QMFlows
-================
+#######
 See http://scm-nv.github.io/qmflows/ for tutorials and documentation.
 
 Motivation
@@ -34,6 +34,7 @@ Description
 ===========
 This library consists of a set of modules written in Python 3.5 to
 automate the following tasks:
+
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
  3. Advanced molecular manipulation capabilities with (rdkit_).
@@ -104,7 +105,8 @@ Latest stable version
 ---------------------
 If you want to install the latest stable version directly from github
 you can use the following command:
- ``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
+
+``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
 
   **Notes:**
 
