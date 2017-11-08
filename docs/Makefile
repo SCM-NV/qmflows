@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = ../sphinxdoc
+BUILDDIR      = ../../qmflows-docs
 PDFBUILDER    = /tmp
 PDF           = ../manual.pdf
 
@@ -89,9 +89,9 @@ qthelp:
 	@echo
 	@echo "Build finished; now you can run "qcollectiongenerator" with the" \
 	      ".qhcp project file in $(BUILDDIR)/qthelp, like this:"
-	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/qmworks.qhcp"
+	@echo "# qcollectiongenerator $(BUILDDIR)/qthelp/qmflows.qhcp"
 	@echo "To view the help file:"
-	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/qmworks.qhc"
+	@echo "# assistant -collectionFile $(BUILDDIR)/qthelp/qmflows.qhc"
 
 applehelp:
 	$(SPHINXBUILD) -b applehelp $(ALLSPHINXOPTS) $(BUILDDIR)/applehelp
@@ -106,8 +106,8 @@ devhelp:
 	@echo
 	@echo "Build finished."
 	@echo "To view the help file:"
-	@echo "# mkdir -p $$HOME/.local/share/devhelp/qmworks"
-	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/qmworks"
+	@echo "# mkdir -p $$HOME/.local/share/devhelp/qmflows"
+	@echo "# ln -s $(BUILDDIR)/devhelp $$HOME/.local/share/devhelp/qmflows"
 	@echo "# devhelp"
 
 epub:

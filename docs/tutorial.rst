@@ -39,7 +39,7 @@
  Starting the environment 
 --------------------------
 
-Once *QMWORKS* has been installed the user should run the following
+Once *QMFLOWS* has been installed the user should run the following
 command to initialize the environment:
 
 .. code:: bash
@@ -57,10 +57,10 @@ To leave the environment the following command is used
     (qmflows)[user@int1 ~]$ source deactivate
     discarding /home/user/anaconda3/envs/qmflows/bin from PATH
 
- 2. What is QMworks? 
+ 2. What is QMflows? 
 ---------------------
 
-QMworks is a python library that enables executing complex workflows of
+QMflows is a python library that enables executing complex workflows of
 interdependent quantum chemical (QM) calculations in python. It aims at
 providing a common interface to multiple QM packages, enabling easy and
 systematic generation of the calculation inputs, as well as facilitating
@@ -73,7 +73,7 @@ the different QM simulation packages.
  Packages 
 ----------
 
-Currently ``QMWorks`` offers an interface with the following simulation
+Currently ``QMflows`` offers an interface with the following simulation
 softwares: \* `SCM <https://www.scm.com/>`__ (ADF and DTFB) \*
 `CP2K <https://www.cp2k.org/>`__ \*
 `ORCA <https://orcaforum.cec.mpg.de/>`__ \*
@@ -102,7 +102,7 @@ you to find back the "raw" data of the calculation later on.
 
 ``Also some simulation packages required that you configure a ``scratch`` folder. For instance *Orca* requires a ``SCR`` folder to be defined while *ADF*  called it ``SCM_TMPDIR``.``
 
- 3. QMWorks Settings 
+ 3. QMflows Settings 
 ---------------------
 
 *Settings* are a subclass of python
@@ -241,7 +241,7 @@ the same basis standard,
     s = Settings()
     s.basis = "DZP"
 
-Internally **QMWorks** will create a hierarchical structure representing
+Internally **QMflows** will create a hierarchical structure representing
 basis *DZP* for the packages that can handle that basis set. Other
 generic keyowrds like: ``functional``, ``inithess``, etc. have been
 implemented.
@@ -333,7 +333,7 @@ the Packages where the funcionality is implemented
 |                  |                  | tion     |
 +------------------+------------------+----------+
 
-Note: **QMworks** Does not have chemical intuition and if you provide a
+Note: **QMflows** Does not have chemical intuition and if you provide a
 meaningless keyword, like a wrong basis set it will not warm you.
 
  4. Templates 
@@ -603,7 +603,7 @@ You can also create the molecule one atom at a time
     m.add_atom(Atom(symbol='H',  coords=(3.6, 0.8, 0.0)))
     print(m)
 
-**QMWorks** Can also handle smiles as shown below
+**QMflows** Can also handle smiles as shown below
 
 .. code:: ipython3
 
@@ -777,7 +777,7 @@ Some of the available properties are shown in the following table,
 | runtime    | Double        | Time spent in the simulation            |
 +------------+---------------+-----------------------------------------+
 
-On the background *QMWorks* has a mechanism to read the properties from
+On the background *QMflows* has a mechanism to read the properties from
 the output files and make them available inside Python.
 
  Communicating different packages 
@@ -914,7 +914,7 @@ represent quantum simulation using a package, while the ovals represent
 both user input or data extracted from a simulation. Finally, the arrows
 (called edges) represent the dependencies between all these objects.
 
-**QMWorks** automatically identify the dependencies between computations
+**QMflows** automatically identify the dependencies between computations
 and run them in the correct order (if possible in parallel).
 
  Restarting a simulation 
@@ -924,10 +924,10 @@ If you are running many computationally expensive calculations in a
 supercomputer, it can happen that the computations take more time than
 that allowed by the resource manager in your supercomputer and the
 workflows gets cancel. But do not worry, you do not need to re-run all
-the computations. Fortunately, *QMWorks* offers a mechanism to restart
+the computations. Fortunately, *QMflows* offers a mechanism to restart
 the workflow computations.
 
-When running a workflow you will see that *QMWorks* creates a set of
+When running a workflow you will see that *QMflows* creates a set of
 files called ``cache``. These files contain the information about the
 workflow and its calculation. **In order to restart a workflow you only
 need to relaunch it**, that's it!
@@ -987,8 +987,8 @@ After running the above script you have a table like
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 `qmflows-namd <https://github.com/SCM-NV/qmflows-namd>`__ is a package
-based on **QMWorks** to compute the Non-adiabatic couplings for large
-system involving thr use of **QMWorks**, `Cython <http://cython.org/>`__
+based on **QMflows** to compute the Non-adiabatic couplings for large
+system involving thr use of **QMflows**, `Cython <http://cython.org/>`__
 and `Numpy <http://www.numpy.org/>`__.
 
  9. Exception Handling 
