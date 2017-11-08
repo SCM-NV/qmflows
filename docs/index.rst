@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    includeme
+   interactive_tutorial
    documentation
 
 
