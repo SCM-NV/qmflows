@@ -2,7 +2,7 @@
 HDF5
 ====
 
-.. currentmodule:: qmworks.hdf5.quantumHDF5
+.. currentmodule:: qmflows.hdf5.quantumHDF5
 
 HDF5_ is a data model to store and represent complex numerical data in a hierarchical way.
 HDF5_ is extremely optimized to perform fast I/O operations in large data set and it is

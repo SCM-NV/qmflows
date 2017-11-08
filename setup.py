@@ -34,7 +34,7 @@ setup(
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python',
                       'sphinx_rtd_theme'],
-    extras_require={'test': ['nose', 'coverage']},
+    extras_require={'test': ['nose', 'coverage', 'nbsphinx']},
     dependency_links=[
         "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
 )

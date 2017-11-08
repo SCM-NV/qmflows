@@ -3,16 +3,16 @@
 Packages
 ========
 
-.. currentmodule:: qmworks.packages
+.. currentmodule:: qmflows.packages
 
 The base class |Package| is the library core, it provides the general scaffold to call a quantum code. On top of this infrastructure it has been created several subclasses that contain the specific details for each quantum code. The available interfaces to quantum codes are:
 
-* :class:`~qmworks.packages.SCM.ADF`
-* :class:`~qmworks.packages.SCM.DFTB`
-* :class:`~qmworks.packages.cp2k_package.CP2K`
-* :class:`~qmworks.packages.dirac.DIRAC`
-* :class:`~qmworks.packages.gamess.GAMESS`
-* :class:`~qmworks.packages.orca.ORCA`
+* :class:`~qmflows.packages.SCM.ADF`
+* :class:`~qmflows.packages.SCM.DFTB`
+* :class:`~qmflows.packages.cp2k_package.CP2K`
+* :class:`~qmflows.packages.dirac.DIRAC`
+* :class:`~qmflows.packages.gamess.GAMESS`
+* :class:`~qmflows.packages.orca.ORCA`
 
 
 
@@ -42,51 +42,51 @@ API
 SCM
 ~~~
 
-.. autoclass:: qmworks.packages.SCM.ADF
-.. automethod::qmworks.packages.SCM.ADF.molecule
+.. autoclass:: qmflows.packages.SCM.ADF
+.. automethod::qmflows.packages.SCM.ADF.molecule
    :members:	      
 
-.. autoclass:: qmworks.packages.SCM.ADF_Result
+.. autoclass:: qmflows.packages.SCM.ADF_Result
    :members:	      
 
-.. autoclass:: qmworks.packages.SCM.DFTB
+.. autoclass:: qmflows.packages.SCM.DFTB
    :members:	      
 
-.. autoclass:: qmworks.packages.SCM.DFTB_Result
+.. autoclass:: qmflows.packages.SCM.DFTB_Result
    :members:	      
 
 CP2k
 ~~~~
 
-.. autoclass::  qmworks.packages.cp2k_package.CP2K
+.. autoclass::  qmflows.packages.cp2k_package.CP2K
    :members:
 
-.. autoclass:: qmworks.packages.cp2k_package.CP2K_Result
+.. autoclass:: qmflows.packages.cp2k_package.CP2K_Result
    :members:
 
 
 DIRAC
 ~~~~~
-.. autoclass:: qmworks.packages.dirac.DIRAC
+.. autoclass:: qmflows.packages.dirac.DIRAC
    :members:	      
 
-.. autoclass:: qmworks.packages.dirac.DIRAC_Result
+.. autoclass:: qmflows.packages.dirac.DIRAC_Result
    :members:	      
      
 
 GAMESS-US
 ~~~~~~~~~
-.. autoclass:: qmworks.packages.gamess.GAMESS
+.. autoclass:: qmflows.packages.gamess.GAMESS
    :members:	      
 
-.. autoclass:: qmworks.packages.gamess.Gamess_Result
+.. autoclass:: qmflows.packages.gamess.Gamess_Result
    :members:	      
 
       
 ORCA
 ~~~~
 
-.. autoclass:: qmworks.packages.orca.ORCA
+.. autoclass:: qmflows.packages.orca.ORCA
    :members:
 
 
