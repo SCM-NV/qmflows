@@ -182,6 +182,6 @@ texinfo_documents = [
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 rst_epilog = """
-.. |Package| replace:: :class:`~qmworks.packages.Package`
-.. |Settings| replace:: :class:`~qmworks.Settings`
+.. |Package| replace:: :class:`~qmflows.packages.Package`
+.. |Settings| replace:: :class:`~qmwflows.Settings`
 """
