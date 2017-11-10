@@ -43,7 +43,8 @@ def from_rdmol(rdkit_mol, confid=-1):
     for rd_atom in rdkit_mol.GetAtoms():
         pos = conf.GetAtomPosition(rd_atom.GetIdx())
         ch = rd_atom.GetFormalCharge()
-        pl_atom = Atom(rd_atom.GetAtomicNum(), coords=(pos.x, pos.y, pos.z), charge=ch)
+        pl_atom = Atom(
+            rd_atom.GetAtomicNum(), coords=(pos.x, pos.y, pos.z), charge=ch)
         if rd_atom.GetPDBResidueInfo():
             pl_atom.properties.pdb_info = get_PDBResidueInfo(rd_atom)
         plams_mol.add_atom(pl_atom)
@@ -94,6 +95,7 @@ def to_rdmol(plams_mol, sanitize=True):
     rdmol.AddConformer(conf)
     return rdmol
 
+
 pdb_residue_info_items = [
     'AltLoc', 'ChainId', 'InsertionCode', 'IsHeteroAtom', 'Name', 'Occupancy',
     'ResidueName', 'ResidueNumber', 'SecondaryStructure', 'SegmentNumber',
@@ -125,10 +127,10 @@ def from_smiles(smiles, nconfs=1, name=None, forcefield=None, rms=0.1):
     :parameter int nconfs: Number of conformers to be generated
     :parameter str name: A name for the molecule
     :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry optimization
-    and ranking of comformations. The default value None results in skipping of the
-    geometry optimization step.
+        and ranking of comformations. The default value None results in skipping of the
+        geometry optimization step.
     :parameter float rms: Root Mean Square deviation threshold for
-    removing similar/equivalent conformations
+        removing similar/equivalent conformations
     :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
     :rtype: plams.Molecule or list of plams Molecules
     """
@@ -148,10 +150,10 @@ def from_smarts(smarts, nconfs=1, name=None, forcefield=None, rms=0.1):
     :parameter int nconfs: Number of conformers to be generated
     :parameter str name: A name for the molecule
     :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry
-    optimization and ranking of comformations. The default value None results
-    in skipping of the geometry optimization step.
+        optimization and ranking of comformations. The default value None results
+        in skipping of the geometry optimization step.
     :parameter float rms: Root Mean Square deviation threshold for removing
-    similar/equivalent conformations.
+        similar/equivalent conformations.
     :return: A molecule with hydrogens and 3D coordinates or a list of molecules if nconfs > 1
     :rtype: plams.Molecule or list of plams Molecules
     """
@@ -245,12 +247,12 @@ def from_sequence(sequence, nconfs=1, name=None, forcefield=None, rms=0.1):
     :parameter int nconfs: Number of conformers to be generated
     :parameter str name: A name for the molecule
     :parameter str forcefield: Choose 'uff' or 'mmff' forcefield for geometry
-    optimization and ranking of comformations. The default value None results
-    in skipping of the geometry optimization step.
+        optimization and ranking of comformations. The default value None results
+        in skipping of the geometry optimization step.
     :parameter float rms: Root Mean Square deviation threshold for removing
-    similar/equivalent conformations.
+        similar/equivalent conformations.
     :return: A peptide molecule with hydrogens and 3D coordinates
-    or a list of molecules if nconfs > 1
+        or a list of molecules if nconfs > 1
     :rtype: plams.Molecule or list of plams Molecules
     """
     rdkit_mol = Chem.AddHs(Chem.MolFromSequence(sequence))
@@ -331,10 +333,10 @@ def apply_reaction_smarts(
     :type mol: plams.Molecule or rdkit.Chem.Mol
     :parameter str reactions_smarts: Reactions smarts to be applied to molecule
     :parameter complete: Apply reaction until no further changes occur or given
-    fraction of reaction centers have been modified
+        fraction of reaction centers have been modified
     :type complete: bool or float (value between 0 and 1)
     :parameter forcefield: Specify 'uff' or 'mmff' to apply forcefield based
-    geometry optimization of product structures.
+        geometry optimization of product structures.
     :type forcefield: str
     :param bool return_rdmol: return a RDKit molecule if true, otherwise a PLAMS molecule
     :return: (product molecule, list of unchanged atoms)
@@ -502,7 +504,7 @@ def add_Hs(mol, forcefield=None, return_rdmol=False):
     :param mol: Molecule to be protonated
     :type mol: plams.Molecule or rdkit.Chem.Mol
     :param str forcefield: Specify 'uff' or 'mmff' to apply forcefield based
-    geometry optimization on new atoms.
+        geometry optimization on new atoms.
     :param bool return_rdmol: return a RDKit molecule if true, otherwise a PLAMS molecule
     :return: A molecule with explicit hydrogens added
     :rtype: plams.Molecule or rdkit.Chem.Mol
@@ -597,9 +599,9 @@ def partition_protein(mol, residue_bonds=None, split_heteroatoms=True, return_rd
     :param mol: A protein molecule
     :type mol: plams.Molecule or rdkit.Chem.Mol
     :param tuple residue_bonds: a tuple of pairs of residue number indicating which
-    peptide bonds to split. If none, split all peptide bonds.
+        peptide bonds to split. If none, split all peptide bonds.
     :param bool split_heteroatoms: if True, all bonds between a heteroatom and
-    a non-heteroatom across residues are removed
+        a non-heteroatom across residues are removed
     :return: list of fragments, list of caps
     """
     mol = to_rdmol(mol)

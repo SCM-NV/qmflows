@@ -55,9 +55,7 @@ For Example, the default parameter for a geometry optimization using ADF are giv
 
 The templates in `JSON` format are translated to python dictionaries using the :func:`get_template`. This templates can be used by themselves in the calculations
 or more keywords can be attached to them modifying the default values. For example the default values to carry a single point calculation using the **ORCA** quantum
-package are:
-
-.. code::
+package are: ::
 
    from qmflows.templates import singlepoint
    print(singlepoint.specific.orca)
@@ -68,9 +66,8 @@ package are:
          functional: 	lda
           method: 	dft
 
-We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation:
+We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation: ::
 
-.. code::
    from qmflows.templates import singlepoint
    singlepoint.specific.orca.basis.basis = 'DZP'
 
@@ -84,12 +81,3 @@ We can easily replace the basis set just by updating the value in the |Settings|
 	  
 
 .. autofunction:: get_template
-
-
-
-
-
-
-
-
-
