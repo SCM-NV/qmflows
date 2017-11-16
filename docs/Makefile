@@ -5,7 +5,7 @@
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
-BUILDDIR      = ../../qmflows-docs
+BUILDDIR      = build
 PDFBUILDER    = /tmp
 PDF           = ../manual.pdf
 
