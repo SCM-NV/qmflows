@@ -3,14 +3,20 @@
 from setuptools import setup
 
 
+def readme():
+    with open('README.rst') as f:
+        return f.read()
+
+
 setup(
     name='qmflows',
     version='0.2',
     description='Automation of computations in quantum chemistry',
-    license='',
+    license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
-    author_email='',
+    author_email='f.zapata@esciencecenter.nl',
     keywords='chemistry workflows simulation materials',
+    long_description=readme(),
     package_dir={'': 'src'},
     packages=["qmflows", "qmflows.components",
               "qmflows.data",
@@ -34,7 +40,10 @@ setup(
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python',
                       'sphinx_rtd_theme'],
-    extras_require={'test': ['nose', 'coverage', 'nbsphinx']},
+    extras_require={
+        'test': ['nose', 'coverage', 'nbsphinx'],
+        'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
+    },
     dependency_links=[
         "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
 )

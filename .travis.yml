@@ -1,7 +1,10 @@
 sudo: false
-language: python
-python:
-  - "3.5"
+language: generic
+
+global:
+  env:
+    - COMMIT_AUTHOR_EMAIL: "f.zapata@esciencecenter.nl"
+
 install:
   # Install python
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -14,24 +17,22 @@ install:
   - conda info -a
 
   # Install virtual enviroment 
-  - conda create -q -n qmflows python=3.5
+  - conda create -q -n qmflows python=3.6
   - conda install --name qmflows -c anaconda hdf5
   - conda install --name qmflows -c rdkit rdkit
   - source activate qmflows
 
-  # Package dependencies
-  - pip install nose coverage
-  - source activate qmflows
-
   # Install qmflows package
   - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
-  - pip install .
+  - pip install .[test,doc]
   
 script:
   # Run the unitary tests excluding the expensive computations
   - nosetests --with-coverage --cover-erase --cover-package=qmflows -a 'fast' --exclude='test_using_plams' -v
+  - echo "building gh-pages documentation"
+    cd doc
+    bash ./deploy.sh
 
 branches:
   only:
    - master
-   - develop
