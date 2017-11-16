@@ -14,6 +14,7 @@ setup(
     description='Automation of computations in quantum chemistry',
     license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
+    author='felipe zapata',
     author_email='f.zapata@esciencecenter.nl',
     keywords='chemistry workflows simulation materials',
     long_description=readme(),

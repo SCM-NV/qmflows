@@ -6,8 +6,6 @@
 .. image:: https://img.shields.io/badge/python-3.5-blue.svg
 .. image:: https://api.codacy.com/project/badge/Grade/7e95b6d4d873458daf0de5e4b3110885
    :target: https://www.codacy.com/app/tifonzafel/qmflows?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SCM-NV/qmflows&amp;utm_campaign=Badge_Grade	   
-.. image:: https://api.codacy.com/project/badge/Coverage/7e95b6d4d873458daf0de5e4b3110885
-   :target: https://www.codacy.com/app/tifonzafel/qmflows?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SCM-NV/qmflows&amp;utm_campaign=Badge_Coverage	   
 
 QMFlows
 #######
