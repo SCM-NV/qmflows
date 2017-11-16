@@ -1,6 +1,10 @@
 sudo: false
 language: generic
 
+global:
+  env:
+    - COMMIT_AUTHOR_EMAIL: "f.zapata@esciencecenter.nl"
+
 install:
   # Install python
   - wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh
@@ -25,6 +29,9 @@ install:
 script:
   # Run the unitary tests excluding the expensive computations
   - nosetests --with-coverage --cover-erase --cover-package=qmflows -a 'fast' --exclude='test_using_plams' -v
+  - echo "building gh-pages documentation"
+    cd doc
+    bash ./deploy.sh
 
 branches:
   only:
