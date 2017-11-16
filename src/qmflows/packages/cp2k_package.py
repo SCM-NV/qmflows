@@ -41,7 +41,7 @@ class CP2K(Package):
 
     @staticmethod
     def run_job(settings, mol, job_name='cp2k_job',
-                work_dir=None, terminate_job_in_case_of_warnings=None, **kwargs):
+                work_dir=None, **kwargs):
         """
         Call the Cp2K binary using plams interface.
 

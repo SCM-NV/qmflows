@@ -2,12 +2,12 @@ __all__ = ['orca']
 
 from os.path import join
 from qmflows.settings import Settings
-from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
+from qmflows.packages.packages import (
+    Package, package_properties, Result, get_tmpfile_name)
 from qmflows.parsers.orca_parser import parse_molecule
 from scm import plams
 from warnings import warn
 
-import builtins
 import numpy as np
 # ============================= Orca ==========================================
 
@@ -27,7 +27,8 @@ class ORCA(Package):
         pass
 
     @staticmethod
-    def run_job(settings, mol, job_name="ORCAjob"):
+    def run_job(
+            settings, mol, job_name="ORCAjob", work_dir=None, **kwargs):
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca

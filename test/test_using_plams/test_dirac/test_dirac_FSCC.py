@@ -43,7 +43,7 @@ def create_job(name, mol, basis='dyall.cv2z'):
     s.specific.dirac.relccsd.CCFSPC.DOEA
     s.specific.dirac.relccsd.CCFSPC.NACTP = '6 6'
 
-    return  dirac(s, mol, job_name=name)
+    return dirac(s, mol, job_name=name)
 
 
 def create_molecule(name, r=2.25):

@@ -99,19 +99,22 @@ class Dihedral:
 
 @schedule
 class PES:
-    def __init__(self, molecule=None, constraints=None, offset=None, get_current_values=False,
-                 nsteps=0, stepsize=0.0, nested_PES=None):
+    def __init__(
+            self, molecule=None, constraints=None, offset=None,
+            get_current_values=False,
+            nsteps=0, stepsize=0.0, nested_PES=None):
+
         self.molecule = molkit.to_rdmol(molecule)
         self.constraints = constraints
         if isinstance(constraints, list):
             self.start = []
-            for i in range(len(constraints)):
+            for i, cs in enumerate(constraints):
                 if offset is None:
                     self.start.append(0.0)
                 else:
                     self.start.append(offset[i])
                 if get_current_values:
-                    self.start[i] += constraints[i].get_current_value(self.molecule)
+                    self.start[i] += cs.get_current_value(self.molecule)
         else:
             if offset is None:
                 self.start = 0.0

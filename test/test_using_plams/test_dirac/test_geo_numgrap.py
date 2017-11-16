@@ -36,7 +36,7 @@ def create_job(name, mol):
 
     s.specific.dirac.GRID.RADINT = "1.0D-9"
     s.specific.dirac.GRID.ANGINT = 15
-    
+
     s.specific.dirac.INTEGRALS.READIN["UNCONT"]
 
     s.specific.dirac['WAVE FUNCTION']["scf"]
@@ -45,7 +45,7 @@ def create_job(name, mol):
 
     s.specific.dirac.molecule.coordinates.units = "AU"
 
-    return  dirac(s, mol, job_name=name)
+    return dirac(s, mol, job_name=name)
 
 
 if __name__ == "__main__":

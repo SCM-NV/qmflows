@@ -29,8 +29,10 @@ def test_generic_constraints():
     """
     Test generic distance constraints on all packages
     """
-    names, test_energies = example_generic_constraints()
-    expected_energies = [-4.76019173, -0.28400262, -99.43865603, -4.74740691, -0.27647907,
-                         -99.43097285, -4.73227438, -0.25874316, -99.41561528]
+    test_energies = example_generic_constraints()[1]
+    expected_energies = [
+        -4.76019173, -0.28400262, -99.43865603, -4.74740691,
+        -0.27647907, -99.43097285, -4.73227438, -0.25874316,
+        -99.41561528]
 
     assert np.allclose(test_energies, expected_energies, rtol=1e-3)

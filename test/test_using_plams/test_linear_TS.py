@@ -27,7 +27,8 @@ def test_linear_ts():
 
     # scan input
     pes = PES(cnc, constraints=[constraint1, constraint2],
-              offset=[2.3, 2.3], get_current_values=False, nsteps=2, stepsize=[0.1, 0.1])
+              offset=[2.3, 2.3], get_current_values=False,
+              nsteps=2, stepsize=[0.1, 0.1])
 
     # returns a set of results object containing the output of
     # each point in the scan
