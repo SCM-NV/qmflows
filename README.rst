@@ -94,64 +94,15 @@ Package installation
 
 - Then
 
-  ``pip install qmflows --upgrade``
+  ``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
   
 Now you are ready to use *qmflows*. 
  
-
-Latest stable version
----------------------
-If you want to install the latest stable version directly from github
-you can use the following command:
-
-``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
 
   **Notes:**
 
   - Once the libraries and the virtual environment are installed, you only need to type
     ``source activate qmflows`` each time that you want to use the software.
-
-
-.. _remote_setup:
-
-Remote/Xenon setup
-------------------
-
-Qmflows supports running jobs over a variety of cluster computing schedulers
-like Slurm and Torque. You program and run your workflows from your laptop, but
-the jobs are run at the remote site. For this to work you need to setup Qmflows
-both locally and remotely. In addition you need to add a Bash script that loads
-the VirtualEnv and starts the Noodles remote worker. This remote worker acts as
-a pilot job, reading job descriptions from input and returning the results. If
-you defined the remote VirtualEnv with the name `qmflows`, the following Bash
-script gives an idea of what you need:
-
-.. code-block:: bash
-
-    #!/bin/bash
-    # comment/uncomment lines that you need
-
-    # If you need ADF, and it is available in a module
-    module load adf/2016.102
-    # or if you installed it yourself
-    # ADFHOME=${HOME}/.local/opt/adf
-    # source ${ADFHOME}/bin/adfrc.sh
-
-    # Point PLAMS to its place
-    export PLAMSDEFAULTS="${HOME}/.local/src/plams/utils/plams_defaults.py"
-
-    # Go to the directory that contains this script
-    cd "$(dirname "${BASH_SOURCE[0]}")"
-
-    # Activate the VirtualEnv
-    source activate qmflows
-
-    # Start the remote worker
-    python -m noodles.worker ${@:2}
-
-    # Bye!
-    source deactivate
-
 
 
 
