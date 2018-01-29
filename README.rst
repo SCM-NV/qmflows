@@ -30,7 +30,7 @@ procedures and manual data processing.
 
 Description
 ===========
-This library consists of a set of modules written in Python 3.5 to
+This library consists of a set of modules written in Python3 to
 automate the following tasks:
 
  1. Input generation.
@@ -49,7 +49,7 @@ also access direclty more advanced examples_.
 Installation
 ============
 
-- Download miniconda for python >= 3.5: miniconda_ (also you can install the complete anaconda_ version).
+- Download miniconda for python3: miniconda_ (also you can install the complete anaconda_ version).
 
 - Install according to: installConda_. 
 
@@ -57,7 +57,7 @@ Installation
 
 - Create a new virtual environment using the following commands:
 
-  - ``conda create -n qmflows python=3.5`` 
+  - ``conda create -n qmflows`` 
 
 - Activate the new virtual environment
   
