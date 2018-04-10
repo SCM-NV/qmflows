@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to qmworks's documentation!
+Welcome to qmflows' documentation!
 ===================================
 
 Contents:
@@ -13,7 +13,7 @@ Contents:
 
    includeme
    interactive_tutorial
-   tutorial
+   Further_reading
    documentation
 
 

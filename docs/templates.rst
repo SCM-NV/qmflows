@@ -9,9 +9,9 @@ keywords.
 
 JSON format
 ~~~~~~~~~~~
-.. currentmodule:: qmworks.templates.templates
+.. currentmodule:: qmflows.templates.templates
 
-The Java script object notation **JSON** is a widely used data format. This format is used together with the :mod:`json` module to implement the mechanism to load/unload the templates using the function :func:`~qmworks.templates.templates.get_template`.
+The Java script object notation **JSON** is a widely used data format. This format is used together with the :mod:`json` module to implement the mechanism to load/unload the templates using the function :func:`~qmflows.templates.templates.get_template`.
 
 For Example, the default parameter for a geometry optimization using ADF are given by: ::
   
@@ -55,11 +55,9 @@ For Example, the default parameter for a geometry optimization using ADF are giv
 
 The templates in `JSON` format are translated to python dictionaries using the :func:`get_template`. This templates can be used by themselves in the calculations
 or more keywords can be attached to them modifying the default values. For example the default values to carry a single point calculation using the **ORCA** quantum
-package are:
+package are: ::
 
-.. code::
-
-   from qmworks.templates import singlepoint
+   from qmflows.templates import singlepoint
    print(singlepoint.specific.orca)
 
    basis:
@@ -68,10 +66,9 @@ package are:
          functional: 	lda
           method: 	dft
 
-We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation:
+We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation: ::
 
-.. code::
-   from qmworks.templates import singlepoint
+   from qmflows.templates import singlepoint
    singlepoint.specific.orca.basis.basis = 'DZP'
 
     print(singlepoint.specific.orca)
@@ -84,12 +81,3 @@ We can easily replace the basis set just by updating the value in the |Settings|
 	  
 
 .. autofunction:: get_template
-
-
-
-
-
-
-
-
-

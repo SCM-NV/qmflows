@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
-from qmworks.common import InputKey
-from qmworks.hdf5.quantumHDF5 import turbomole2hdf5
+from qmflows.common import InputKey
+from qmflows.hdf5.quantumHDF5 import turbomole2hdf5
 
 import h5py
 import os

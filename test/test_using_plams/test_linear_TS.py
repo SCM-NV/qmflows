@@ -1,11 +1,11 @@
 # Default imports
 from nose.plugins.attrib import attr
 from scm.plams import Molecule
-from qmworks import (Settings, run)
+from qmflows import (Settings, run)
 
 # User Defined imports
-from qmworks.components import (PES, select_max, Distance)
-from qmworks.packages.SCM import (dftb, adf)
+from qmflows.components import (PES, select_max, Distance)
+from qmflows.packages.SCM import (dftb, adf)
 
 
 @attr('slow')
@@ -27,7 +27,8 @@ def test_linear_ts():
 
     # scan input
     pes = PES(cnc, constraints=[constraint1, constraint2],
-              offset=[2.3, 2.3], get_current_values=False, nsteps=2, stepsize=[0.1, 0.1])
+              offset=[2.3, 2.3], get_current_values=False,
+              nsteps=2, stepsize=[0.1, 0.1])
 
     # returns a set of results object containing the output of
     # each point in the scan

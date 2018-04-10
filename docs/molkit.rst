@@ -19,5 +19,5 @@ There is also a function to partition a protein into capped fragments for MFCC_ 
 API
 ---
 
-.. automodule:: qmworks.molkit
+.. automodule:: qmflows.molkit
     :members:

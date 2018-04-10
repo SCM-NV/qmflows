@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks import (dftb, run, templates)
+from qmflows import (dftb, run, templates)
 from scm.plams import Molecule
 
 

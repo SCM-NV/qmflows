@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks import (templates, run, molkit, dftb, adf)
+from qmflows import (templates, run, molkit, dftb, adf)
 
 
 @attr('slow')

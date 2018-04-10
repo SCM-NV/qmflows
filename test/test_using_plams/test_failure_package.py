@@ -1,9 +1,9 @@
 
 from scm.plams import Molecule
-from qmworks import (Settings, templates, run)
+from qmflows import (Settings, templates, run)
 
 # User Defined imports
-from qmworks.packages import (adf, dirac, dftb, gamess, orca)
+from qmflows.packages import (adf, dirac, dftb, gamess, orca)
 
 
 def isNone(x):
@@ -27,23 +27,6 @@ def test_fail_scm():
 
     print(result)
     assert isNone(result)
-
-
-# def test_fail_cp2k():
-#     """
-#     Test if a failed Cp2k calculation returns ``None``.
-#     """
-#     ethylene = Molecule("test/test_files/ethylene.xyz")
-
-#     cp2k_args = Settings()
-#     cp2k_args.basis = "Faked_Basis"  # Wrong name introduced on porpoise
-#     cp2k_args.potential = "GTH-PBE"
-#     cp2k_args.cell_parameters = [12] * 3
-
-#     job = cp2k(cp2k_args, ethylene, job_name="fail_cp2k")
-#     result = run(job.overlap)
-
-#     assert isNone(result)
 
 
 def test_fail_dirac():

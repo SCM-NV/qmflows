@@ -1,9 +1,9 @@
 Settings
 --------
 
-|Settings| is a :mod:`dict` subclass implemented in PLAMS_ and modified in *QMWorks*. This class represents the data in a hierarchical tree-like structure. for example ::
+|Settings| is a :mod:`dict` subclass implemented in PLAMS_ and modified in *Qmflows*. This class represents the data in a hierarchical tree-like structure. for example ::
 
-  from qmworks import Settings, templates
+  from qmflows import Settings, templates
 
   s = Settings()  # (1)
   # generic keyword 
@@ -37,9 +37,9 @@ of *ADF* as shown at **(3)**. Finally in line **(4)** the user's keywords are me
 
 API
 ~~~
-.. currentmodule:: qmworks.settings
+.. currentmodule:: qmflows.settings
 
-.. autoclass:: qmworks.Settings
+.. autoclass:: qmflows.Settings
    :members:	       
    :special-members:
    :exclude-members: __weakref__

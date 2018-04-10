@@ -1,5 +1,5 @@
 from nose.plugins.attrib import attr
-from qmworks.parsers.gamess_parser import (parse_frequencies, parse_hessian)
+from qmflows.parsers.gamess_parser import (parse_frequencies, parse_hessian)
 import numpy as np
 
 file_name = 'test/test_files/CNH_hess.dat'

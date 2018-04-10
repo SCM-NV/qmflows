@@ -1,4 +1,4 @@
-QMWorks is an Open Source project supported by the VU University Amsterdam, the Netherlands eScience Center (NLeSC) 
+QMFlows is an Open Source project supported by the VU University Amsterdam, the Netherlands eScience Center (NLeSC) 
 and Scientific Computing & Modelling NV (SCM). The terms of the [LGPL-3.0 license]* apply. As an exception to the LGPL-3.0 license, 
 you agree to grant SCM a [BSD 3-Clause license]** to the contributions you commit on this Github or provide to SCM in another manner.
 

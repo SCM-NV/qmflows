@@ -1,11 +1,11 @@
 
 from nose.plugins.attrib import attr
-from qmworks import (concat, Settings, templates, zipWith)
+from qmflows import (concat, Settings, templates, zipWith)
 from scm.plams import Molecule
 
 # User Defined imports
-from qmworks.packages.gamess import gamess
-from qmworks.packages import run
+from qmflows.packages.gamess import gamess
+from qmflows.packages import run
 
 import operator
 
@@ -45,6 +45,7 @@ def test_opt_gamess():
                        1.1454516521, -0.9993402516, 1.04943e-05]
 
     assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
+
 
 if __name__ == "__main__":
     test_opt_gamess()

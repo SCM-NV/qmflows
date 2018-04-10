@@ -1,0 +1,68 @@
+{
+    "specific": {
+        "adf": {
+        	"basis": {"type": "SZ"},
+            "xc": {"__block_replace": true, "lda": ""},
+            "integration": {"accint": 6.0},
+            "scf": {
+                "converge": 1e-6,
+                "iterations": 100},
+            "geometry": {"optim": "delocal"} },
+        "dftb": {
+            "task": {"runtype": "GO"},
+            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
+        "dirac": {},
+        "cp2k" : {
+	    "motion": {
+		"geo_opt" : {"type": "minimization", "optimizer": "bfgs", "max_iter": 500}
+	    }, 
+          "force_eval": {
+              "dft": {
+                  "basis_set_file_name": "",
+                  "mgrid": {
+                      "cutoff": 400,
+                      "ngrids": 4
+                  },
+                  "potential_file_name": "",
+                  "qs": {
+                      "method": "gpw"
+                  },
+                  "scf": {
+                      "eps_scf": 1e-06,
+                      "max_scf": 200,
+                      "scf_guess": "atomic",
+		      "OT": {
+			  "minimizer" : "DIIS",
+			  "N_DIIS" : 7,
+			  "preconditioner": "full_single_inverse"
+		      }
+                  },
+                  "xc": {
+                      "xc_functional": "pbe"
+                  }
+              },
+              "subsys": {
+                  "cell": {
+                      "periodic": "xyz"
+                  }
+              }
+          },
+          "global": {
+              "print_level": "low",
+              "project": "qmflows-cp2k",
+              "run_type": "geometry_optimization"
+          }
+        },
+        
+        "orca": {
+            "method": {
+                "method": "dft",
+                "functional": "lda",
+                "runtyp": "opt"},
+            "basis": {
+                "basis": "sto_sz"}},
+        "gamess": {
+            "basis": {"gbasis": "n21", "ngauss": 3},
+            "contrl": {"scftyp": "rhf", "dfttyp": "pbe", "runtyp": "optimize"}}
+    }
+}

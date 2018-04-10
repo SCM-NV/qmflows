@@ -4,9 +4,9 @@ from collections import namedtuple
 from nose.plugins.attrib import attr
 from os.path import join
 from scm.plams import Molecule
-from qmworks import (run, Settings, templates)
-from qmworks.hdf5 import dump_to_hdf5
-from qmworks.packages import cp2k
+from qmflows import (run, Settings, templates)
+from qmflows.hdf5 import dump_to_hdf5
+from qmflows.packages import cp2k
 
 import h5py
 import os
@@ -21,7 +21,7 @@ def test_ethylene():
     run a single point calculation using CP2K and store the MOs.
     """
     home = os.path.expanduser('~')  # HOME Path
-    scratch_path = join(home, '.test_qmworks')
+    scratch_path = join(home, '.test_qmflows')
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
     try:
@@ -70,14 +70,14 @@ def prepare_cp2k_settings(geometry, work_dir):
     :type files: nameTuple
     :parameter settings: Dictionary contaning the data to
     fill in the template
-    :type  settings: ~qmworks.Settings
+    :type  settings: ~qmflows.Settings
     :parameter work_dir: Name of the Working folder
     :type      work_dir: String
     :param wfn_restart_job: Path to *.wfn cp2k file use as restart file.
     :type wfn_restart_job: String
     :param cp2k_config:  Parameters required by cp2k.
     :type cp2k_config: Dict
-   :returns: ~qmworks.Settings
+   :returns: ~qmflows.Settings
     """
     # Input/Output Files
     file_MO = join(work_dir, 'mo_coeffs.out')

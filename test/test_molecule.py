@@ -1,6 +1,6 @@
 from nose.plugins.attrib import attr
-from qmworks import molkit
-from qmworks import packages
+from qmflows import molkit
+from qmflows import packages
 
 
 @attr('fast')
