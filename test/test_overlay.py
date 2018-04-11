@@ -43,7 +43,7 @@ def test_overlay_cp2k_singlepoint():
     g = s['specific']['cp2k']['global']
     g.print_level = 'low'
     g.project = "qmflows-cp2k"
-    g.run_type = "energy_force"
+    g.run_type = "energy"
 
     print(s.specific.cp2k.force_eval)
     print(r.specific.cp2k.force_eval)

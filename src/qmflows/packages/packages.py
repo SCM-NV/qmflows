@@ -25,6 +25,7 @@ from noodles import (schedule_hint, has_scheduled_methods, serial)
 from noodles.display import (DumbDisplay, NCDisplay)
 from noodles.files.path import (Path, SerPath)
 from noodles.run.run_with_prov import run_parallel_opt
+from noodles.run.runners import run_parallel_with_display
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.base import SerStorable
 # from noodles.run.xenon import (
@@ -131,11 +132,11 @@ class Result:
         elif (self.status in crash_status) and not is_private:
             warn("""
             It is not possible to retrieve property: '{}'
-            Because Job: '{}' has failed. Check the output.\n
+            Because Job: '{}' has {}. Check the output.\n
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """.format(prop, self.job_name))
+            """.format(prop, self.job_name, self.status))
             return None
 
     def get_property(self, prop):
@@ -379,12 +380,18 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 def call_default(job, n_processes=1, cache='cache.json'):
     """
     Run locally using several threads.
+    Caching can be turned off by specifying cache=None
     """
-    with DumbDisplay() as display:
-        return run_parallel_opt(
-            job, n_threads=n_processes,
-            registry=registry, jobdb_file=cache,
-            display=display)
+    with NCDisplay() as display:
+        if cache is None:
+            return run_parallel_with_display(
+                job, n_threads=n_processes,
+                display=display)
+        else:
+            return run_parallel_opt(
+                job, n_threads=n_processes,
+                registry=registry, jobdb_file=cache,
+                display=display)
 
 
 # def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
