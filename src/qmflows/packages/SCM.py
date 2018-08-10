@@ -8,7 +8,6 @@ from qmflows.settings import Settings
 from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from scm import plams
 
-import builtins
 import struct
 
 # ========================= ADF ============================
@@ -254,7 +253,7 @@ class DFTB(Package):
             print(msg.format(job_name))
 
         if job.status in ['failed', 'crashed']:
-            builtins.config.jm.remove_job(job)
+            plams.config.jm.remove_job(job)
 
         return DFTB_Result(dftb_settings, mol, name,
                            plams_dir=path, status=job.status)

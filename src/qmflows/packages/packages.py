@@ -12,7 +12,6 @@ from scm import plams
 from typing import (Any, Callable, Dict, List)
 
 import base64
-import builtins
 import fnmatch
 import importlib
 import inspect
@@ -354,7 +353,7 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 
     initialize = False
     try:
-        config = builtins.config
+        config = plams.config
         if path and os.path.abspath(path) != config.jm.path or \
                 folder and folder != config.jm.folder:
             msg = "Reinitializing Plams with new path and/or folder name.\n"
@@ -364,8 +363,8 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     except AttributeError:
         plams.init(path=path, folder=folder)
         initialize = True
-    builtins.config.log.stdout = 0
-    builtins.config.jobmanager.jobfolder_exists = 'rename'
+    plams.config.log.stdout = 0
+    plams.config.jobmanager.jobfolder_exists = 'rename'
     if runner is None:
         ret = call_default(job, **kwargs)
     # elif runner.lower() == 'xenon':
@@ -519,7 +518,7 @@ def find_file_pattern(pat, folder):
 
 
 def get_tmpfile_name():
-    tmpfolder = builtins.config.jm.workdir + '/tmpfiles'
+    tmpfolder = plams.config.jm.workdir + '/tmpfiles'
     if not os.path.exists(tmpfolder):
         os.mkdir(tmpfolder)
     return tmpfolder + '/' + str(uuid.uuid4())
