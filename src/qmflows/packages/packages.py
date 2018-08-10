@@ -364,7 +364,6 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
         plams.init(path=path, folder=folder)
         initialize = True
     plams.config.log.stdout = 0
-    plams.config.jobmanager.jobfolder_exists = 'rename'
     if runner is None:
         ret = call_default(job, **kwargs)
     # elif runner.lower() == 'xenon':
