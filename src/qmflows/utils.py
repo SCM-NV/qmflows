@@ -10,7 +10,6 @@ from itertools import chain
 from pymonad   import curry
 from scm import plams
 
-import builtins
 # ======================> List Functions <========================
 
 
@@ -110,11 +109,9 @@ def initialize(fun):
     """
     @wraps(fun)
     def wrapper(*args, **kwargs):
-        try:
-            builtins.config
-        except AttributeError:
+        if not plams.config:
             plams.init()
-        builtins.config.log.stdout = 0
+        plams.config.log.stdout = 0
         result = fun(*args, **kwargs)
         plams.finish()
         return result
