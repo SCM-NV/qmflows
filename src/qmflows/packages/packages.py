@@ -350,28 +350,18 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     :param runner: Type of runner to use
     :type runner: String
     """
-
-    initialize = False
-    try:
-        config = plams.config
-        if path and os.path.abspath(path) != config.jm.path or \
-                folder and folder != config.jm.folder:
-            msg = "Reinitializing Plams with new path and/or folder name.\n"
-            warn(msg)
-            plams.finish()
-            plams.init(path=path, folder=folder)
-    except AttributeError:
-        plams.init(path=path, folder=folder)
-        initialize = True
+    plams.init(path=path, folder=folder)
     plams.config.log.stdout = 0
+
     if runner is None:
         ret = call_default(job, **kwargs)
     # elif runner.lower() == 'xenon':
     #     ret = call_xenon(job, **kwargs)
     else:
         raise "Don't know runner: {}".format(runner)
-    if initialize:
-        plams.finish()
+
+    plams.finish()
+
     return ret
 
 
