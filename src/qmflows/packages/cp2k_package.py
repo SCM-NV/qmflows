@@ -70,9 +70,8 @@ class CP2K(Package):
         cp2k_settings.input.force_eval.subsys['&COORD'] = m
 
         # Create a Plams job
-        job = plams.interfaces.cp2k.Cp2kJob(name=job_name,
-                                            settings=cp2k_settings,
-                                            molecule=mol)
+        job = plams.interfaces.thirdparty.cp2k.Cp2kJob(
+            name=job_name, settings=cp2k_settings, molecule=mol)
         r = job.run()
 
         work_dir = work_dir if work_dir is not None else job.path

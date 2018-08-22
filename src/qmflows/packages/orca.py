@@ -34,9 +34,8 @@ class ORCA(Package):
         orca_settings.input = settings.specific.orca
 
         # Running Orca with Plams
-        job = plams.interfaces.orca.ORCAJob(molecule=mol,
-                                            settings=orca_settings,
-                                            name=job_name)
+        job = plams.interfaces.thirdparty.orca.ORCAJob(
+            molecule=mol, settings=orca_settings, name=job_name)
         result = job.run()
 
         # Relative job path
