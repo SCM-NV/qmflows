@@ -137,6 +137,9 @@ class CP2K(Package):
             PERIODIC NONE
             &END CELL
             """
+            def fun(xs):
+                return '{} {} {}'.format(*xs)
+
             if not isinstance(value, list):
                 abc = [value] * 3
                 abc_cell = ' [angstrom] {} {} {}'.format(*abc)
@@ -145,8 +148,7 @@ class CP2K(Package):
                 abc = ' [angstrom] {} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             elif isinstance(value[0], list):
-                a, b, c = value  #
-                fun = lambda xs: '{} {} {}'.format(*xs)
+                a, b, c = value
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
@@ -156,47 +158,7 @@ class CP2K(Package):
 
             return s
 
-        def expand_basis_set(s, prefix, mol, key):
-            """
-            CP2k has a sspecial format for the basis set, For more
-            information have a look at
-            `basis <https://www.cp2k.org/basis_sets?s[]=basis>`.
-            For a Molecule that contains only carbon and oxygen atoms,
-            the basis set declaration is given by,
-            >>> &FORCE_EVAL
-                    .......
-                    &SUBSYS
-                        &KIND  C
-                            BASIS_SET  DZVP-MOLOPT-SR-GTH-q4
-                            POTENTIAL  GTH-PBE-q4
-                        &END C
-                        &KIND  H
-                            BASIS_SET  DZVP-MOLOPT-SR-GTH-q1
-                            POTENTIAL  GTH-PBE-q1
-                        &END H
-                    &END SUBSYS
-                & END FORCE_EVALXS
-            Where DZVP-MOLOPT-SR-GTH is the name of the basis and q4, q1
-            correspond to the charge associated with that atom
-            (e.g. 4 for carbon, 1 for hydrogen).
-            """
-
-            def symbols2charge(s):
-                q = charge_dict[s]
-                return 'q{}'.format(q)
-
-            symbols = set([at.symbol for at in mol.atoms])
-            qs = list(map(symbols2charge, symbols))
-            for symb, q in zip(symbols, qs):
-                name = '{}-{}'.format(prefix, q)
-                if key == 'basis':
-                    s.specific.cp2k.force_eval.subsys.kind[symb]["basis_set"] = name
-                elif key == 'potential':
-                    s.specific.cp2k.force_eval.subsys.kind[symb]["potential"] = name
-            return s
-
-        funs = {'basis': expand_basis_set, 'potential': expand_basis_set,
-                'cell_parameters': write_cell_parameters,
+        funs = {'cell_parameters': write_cell_parameters,
                 'cell_angles': write_cell_angles}
 
         # Function that handles the special keyword
@@ -221,7 +183,8 @@ class CP2K_Result(Result):
                          status=status, warnings=warnings)
 
     @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
+    def from_dict(
+            cls, settings, molecule, job_name, archive, status, warnings):
         """
         Create a :class:`~CP2K_Result` instance using the data serialized in
         a dictionary.

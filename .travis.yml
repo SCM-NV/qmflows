@@ -23,7 +23,7 @@ install:
   - source activate qmflows
 
   # Install qmflows package
-  - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
+  - pip install https://github.com/SCM-NV/plams/tarball/devel#egg=plams --upgrade
   - pip install .[test,doc]
   
 script:
