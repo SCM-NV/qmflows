@@ -32,7 +32,7 @@ def fun_ethylene(scratch_path):
     """
     Test Ethylene single
     """
-    geometry = Molecule('ethylene.xyz')
+    geometry = Molecule('test_files/ethylene.xyz')
     job_settings = prepare_cp2k_settings(geometry, scratch_path)
 
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
@@ -102,7 +102,7 @@ def prepare_cp2k_settings(geometry, work_dir):
 
     # copy the basis and potential to a tmp file
     for f in ['BASIS_MOLOPT', 'GTH_POTENTIALS', 'BASIS_ADMM_MOLOPT']:
-        shutil.copy(f, work_dir)
+        shutil.copy(join('test_files', f), work_dir)
     # Cp2k configuration files
 
     force = cp2k_args.specific.cp2k.force_eval
