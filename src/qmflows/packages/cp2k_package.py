@@ -99,7 +99,6 @@ class CP2K(Package):
         :param mol: molecular Geometry
         :type mol: plams Molecule
         """
-
         def write_cell_angles(s, value, mol, key):
             """
             The angles of the cell is a 3-dimensional list ::
@@ -167,7 +166,7 @@ class CP2K(Package):
         if f is not None:
             return f(settings, value, mol, key)
         else:
-            msg = 'Keyword ' + key + ' doesn\'t exist'
+            msg = 'Keyword ' + '"' + key + '"' + ' doesn\'t include anything in the input!'
             warn(msg)
 
 
