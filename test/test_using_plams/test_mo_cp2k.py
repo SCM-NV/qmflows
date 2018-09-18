@@ -1,7 +1,6 @@
 
 # ================> Python Standard  and third-party <==========
 from collections import namedtuple
-from nose.plugins.attrib import attr
 from os.path import join
 from scm.plams import Molecule
 from qmflows import (run, Settings, templates)
@@ -15,13 +14,11 @@ import shutil
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
-@attr('slow')
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
     """
-    home = os.path.expanduser('~')  # HOME Path
-    scratch_path = join(home, '.test_qmflows')
+    scratch_path = '/tmp/test_qmflows'
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
     try:
@@ -35,7 +32,7 @@ def fun_ethylene(scratch_path):
     """
     Test Ethylene single
     """
-    geometry = Molecule('test/test_files/ethylene.xyz')
+    geometry = Molecule('ethylene.xyz')
     job_settings = prepare_cp2k_settings(geometry, scratch_path)
 
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
@@ -93,15 +90,30 @@ def prepare_cp2k_settings(geometry, work_dir):
     dft["print"]["mo"]["mo_index_range"] = "7 46"
     dft.scf.diagonalization.jacobi_threshold = 1e-5
 
-    # Copy the basis and potential to a tmp file
-    shutil.copy('test/test_files/BASIS_MOLOPT', work_dir)
-    shutil.copy('test/test_files/GTH_POTENTIALS', work_dir)
+    # Atom basis
+    cp2k_args.specific.cp2k.force_eval.subsys.kind["C"]["BASIS_SET"] = "DZVP-MOLOPT-SR-GTH-q4"
+    cp2k_args.specific.cp2k.force_eval.subsys.kind["C"]["POTENTIAL"] = "GTH-PBE-q4"
+    cp2k_args.specific.cp2k.force_eval.subsys.kind["H"]["BASIS_SET"] = "DZVP-MOLOPT-SR-GTH-q1"
+    cp2k_args.specific.cp2k.force_eval.subsys.kind["H"]["POTENTIAL"] = "GTH-PBE-q1"
+
+    # Functional
+    # cp2k_args.specific.cp2k.force_eval.dft.xc["xc_functional"]["pbe"]["scale_x"] = 0.75
+    # cp2k_args.specific.cp2k.force_eval.dft.xc["xc_functional"]["pbe"]["scale_c"] = 1.0
+
+    # copy the basis and potential to a tmp file
+    for f in ['BASIS_MOLOPT', 'GTH_POTENTIALS', 'BASIS_ADMM_MOLOPT']:
+        shutil.copy(f, work_dir)
     # Cp2k configuration files
 
     force = cp2k_args.specific.cp2k.force_eval
     force.dft.basis_set_file_name = join(work_dir, 'BASIS_MOLOPT')
+    force.dft.Basis_set_file_name = join(work_dir, 'BASIS_ADMM_MOLOPT')
     force.dft.potential_file_name = join(work_dir, 'GTH_POTENTIALS')
     force.dft['print']['mo']['filename'] = file_MO
     cp2k_args.specific.cp2k['global']['project'] = 'ethylene'
 
     return templates.singlepoint.overlay(cp2k_args)
+
+
+if __name__ == "__main__":
+    test_ethylene()
