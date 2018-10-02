@@ -10,7 +10,7 @@ import re
 
 
 def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand_database.txt'):
-    if os.path.exists(os.path.join(ligand_folder, database_name)) == False:
+    if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
                 database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
     
@@ -22,7 +22,7 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     index_database = database[0]
     pdb_opt_database = database[3]
     smiles_database = database[4]
-    mol_database = [Chem.MolFromSmiles(smiles) for i,smiles in enumerate(smiles_database) if i > 1]
+    mol_database = [Chem.MolFromSmiles(smiles) for smiles in smiles_database[2:]]
     mol_database = [Chem.AddHs(mol, addCoords=True) for mol in mol_database if mol]
     
     if type(index_database[-1]) is not int:
@@ -32,13 +32,13 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     matches = [[molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in mol_database] for ligand in ligand_list]
     
     for i,item in enumerate(matches):
-        if True in item:
+        if any(item):
             formula = ligand_list[i].get_formula()
             print('{0:12} present in '.format(formula) + database_name + ', appending ligand_' + formula + '.opt.pdb')
     
             index = np.where(smiles_database == smiles_list[i])[0]
             read_pdb = molkit.readpdb(os.path.join(ligand_folder, pdb_opt_database[index][0]))
-            if ligand_opt == True:
+            if ligand_opt:
                 ligand_list[i] = [read_pdb, False]
             else:
                 ligand_list[i] = read_pdb
@@ -153,7 +153,7 @@ def global_minimum(ligand, ligand_folder):
     n_scans = 1
     for i in range(n_scans):
         for item in dihedral_list:
-            if item[2] != 'skip' and item[1] == 1.0 and ligand.GetBondWithIdx(item[0]).IsInRing() == False:     
+            if item[2] != 'skip' and item[1] == 1.0 and not ligand.GetBondWithIdx(item[0]).IsInRing():     
                 ligand = dihedral_scan(ligand, item)
 
     ligand = Chem.AddHs(ligand, addCoords=True)
