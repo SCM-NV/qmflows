@@ -8,3 +8,6 @@ bond orders can get messed up upon converting between plams and rdkit molecules
 cis/trans information is lost upon converting between plams and rdkit molecules
 move the functional groups in find_substructure() to a seperate list
 automatically set formal atomic charges in prepare_pdb() depending on the element and the total molecular charge
+automatically run mopac + cosmo-rs with the help of plams
+replace rdkit uff with adf uff?
+process all feedback
