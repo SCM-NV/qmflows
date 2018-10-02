@@ -7,15 +7,13 @@ import os
 import QD_functions as QD
 
 
-
 def prep_core(core, ligand_list, ligand_folder, core_folder, core_ligand_folder, dummy=0, ligand_opt=True, core_opt=False, core_ligand_opt=True):
     """
     Identify the ligand anchoring sites on the core, optimize the ligands, find the anchoring sites on the ligand and finnally attach the ligands to the core
-    
-    Checks the if the dummy atom ligand placeholder is provided by its atomic number (int) or atomic symbol (string)
-    Returns an error if neither an integer nor string is provided
-    """
-    if type(dummy) is str:
+    """    
+    # Checks the if the dummy atom ligand placeholder is provided by its atomic number (int) or atomic symbol (string)
+    # Returns an error if neither an integer nor string is provided
+    if isinstance(dummy, str):
         dummy = Atom(symbol=dummy).atnum
     
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core 
@@ -50,15 +48,13 @@ def prep_core(core, ligand_list, ligand_folder, core_folder, core_ligand_folder,
     return core_ligand_list
 
 
-# 
 def prep_ligand(core, ligand, core_indices, core_ligand_folder, core_ligand_opt):
     """
     add all ligands to the core
-    
-    Rotate and translate all ligands to their position on the core
-    Returns a list with sublist [0] containing the rotated ligands (PLAMS Molecules) and [1] the heteroatoms (PLAMS Atoms) of the rotated ligands to be attached to the core
-    All core dummy atoms are deleted
     """
+    # Rotate and translate all ligands to their position on the core
+    # Returns a list with sublist [0] containing the rotated ligands (PLAMS Molecules) and [1] the heteroatoms (PLAMS Atoms) of the rotated ligands to be attached to the core
+    # All core dummy atoms are deleted
     core = copy.deepcopy(core)
     ligand[0].add_atom(Atom(atnum=0, coords=(ligand[0].get_center_of_mass())))
     ligand_list = [QD.rotate_ligand(core, ligand, index) for index in core_indices]
@@ -100,10 +96,10 @@ def prep_ligand(core, ligand, core_indices, core_ligand_folder, core_ligand_opt)
 
 
 
+
 # The start
 time_start = time.time()
 print('\n')
-
 
 dir_name_list = ['ligand', 'core', 'core_ligand']
 dir_path_list = [QD.create_dir(name) for name in dir_name_list]
@@ -118,7 +114,7 @@ core_list = QD.read_mol(dir_path_list[1], input_cores)
 
 # Copies of ligands are added to copies of core molecules; this process is repeated until all dummy atoms are substituted for ligands
 core_ligand_list = [prep_core(core, ligand_list, dir_path_list[0], dir_path_list[1], dir_path_list[2], dummy='Rb', ligand_opt=True, core_opt=False, core_ligand_opt=False) for core in core_list]
-core_ligand_list = [j for i in core_ligand_list for j in i]
+core_ligand_list = np.concatenate(core_ligand_list)
 [QD.run_ams_job(core_ligand) for core_ligand in core_ligand_list]
 
 # The End

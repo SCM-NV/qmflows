@@ -10,6 +10,11 @@ import re
 
 
 def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand_database.txt'):
+    """
+    Check if the input ligand is already in the database.
+    If yet: append the .pdb file.
+    If not: create a new entry in the database
+    """
     if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
                 database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
@@ -24,13 +29,13 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     smiles_database = database[4]
     mol_database = [Chem.MolFromSmiles(smiles) for smiles in smiles_database[2:]]
     mol_database = [Chem.AddHs(mol, addCoords=True) for mol in mol_database if mol]
-    
-    if type(index_database[-1]) is not int:
+
+    if not isinstance(index_database[-1], int):
         index_database = np.append(index_database, -1)
 
     smiles_list = [Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand))) for ligand in ligand_list]
     matches = [[molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in mol_database] for ligand in ligand_list]
-    
+
     for i,item in enumerate(matches):
         if any(item):
             formula = ligand_list[i].get_formula()
@@ -42,7 +47,7 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
                 ligand_list[i] = [read_pdb, False]
             else:
                 ligand_list[i] = read_pdb
-                
+
         else:
             a = str(int(index_database[-1]) + i + 1)
             b = molkit.from_rdmol(ligand_list[i]).get_formula()
@@ -54,7 +59,7 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
             with open(os.path.join(ligand_folder, database_name), 'a') as database:
                 database.write('\n' + entry)
 
-            if ligand_opt == True:
+            if ligand_opt:
                 ligand_list[i] = [ligand_list[i], True]
             else:
                 ligand_list[i] = ligand_list[i]
@@ -62,82 +67,84 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     return ligand_list
 
 
-# Creates a new directory if this directory does not yet exist
 def create_dir(dir_name, path=os.getcwd()):
+    """
+    Creates a new directory if this directory does not yet exist
+    """
     dir_path = os.path.join(path, str(dir_name))
-    if os.path.exists(dir_path) == False:
+    if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    
+
     return dir_path
 
 
-# first checks if the argument 'mol_name' is a string or a list
-# then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or .txt files containing SMILES strings
-# returns a list of PLAMS molecules
-def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
-    if type(file_name) == str:
-        input_mol = os.path.join(folder_path, file_name)
-        if file_name.find('.xyz') != -1:
-            mol_list = [Molecule(input_mol)]
-            mol_list[0].guess_bonds
-        elif file_name.find('.pdb') != -1:
-            mol_list = [molkit.readpdb(input_mol)]
-        elif file_name.find('.mol') != -1:
-            mol_list = molkit.from_rdmol(Chem.MolFromMolFile(input_mol))
-        elif file_name.find(smiles_extension) != -1:
-            with open(input_mol, 'r') as file_open:
-                mol_list = file_open.read()
-            mol_list = mol_list.splitlines()
-            mol_list = [line.split() for line in mol_list if bool(line) == True]
-            mol_list = [molkit.from_smiles(mol[smiles_column]) for mol in mol_list]
-        else:
-            mol_list = [molkit.from_smiles(file_name)]
-            
-    elif type(file_name) is list:
-        input_mol_list = [os.path.join(folder_path, name) for name in file_name]
-        for i,item in enumerate(input_mol_list):
-            if file_name[i].find('.xyz') != -1:
-                mol_list = [Molecule(mol) for mol in input_mol_list]
-                [mol.guess_bonds for mol in mol_list]
-            elif file_name[0].find('.pdb') != -1:
-                mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
-            elif file_name.find('.mol') != -1:
-                mol_list = [molkit.from_rdmol(Chem.MolFromMolFile(mol)) for mol in input_mol_list]
-            elif file_name[0].find(smiles_extension) != -1:
-                mol_list = []
-                for file in input_mol_list:
-                    with open(file, 'r') as file_open:
-                        mol_list.append(file_open.read())
-                mol_list = mol_list.splitlines()
-                mol_list = [line.split() for line in mol_list if bool(line) == True]
-                mol_list = [molkit.from_smiles(mol[smiles_column]) for mol in mol_list]    
-            else:
-                mol_list = [molkit.from_smiles(mol) for mol in file_name]
 
-    else:
+def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
+    """
+    first checks if the argument 'mol_name' is a string or a list
+    then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or .txt files containing SMILES strings
+    returns a list of PLAMS molecules
+    """
+    # check if filename is a string or a list, returns an error if it is neither
+    if isinstance(file_name, str):
+        file_name = [file_name]
+    if not isinstance(file_name, str) and not isinstance(file_name, list):
         raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) + " is not recognized as a <class 'str'> or <class 'list'>")
+
+    # determine the nature of filename
+    input_mol_list = [os.path.join(folder_path, name) for name in file_name]
+    for i,item in enumerate(input_mol_list):
+        # if file_name is an .xyz file 
+        if file_name[i].find('.xyz') != -1:
+            mol_list = [Molecule(mol) for mol in input_mol_list]
+            [mol.guess_bonds for mol in mol_list]
         
+        # if file_name is a .pdb file
+        elif file_name[0].find('.pdb') != -1:
+            mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
+
+        # if file_name is a .mol file
+        elif file_name.find('.mol') != -1:
+            mol_list = [molkit.from_rdmol(Chem.MolFromMolFile(mol)) for mol in input_mol_list]
+
+        # if file_name is a plain text file with smile strings
+        elif file_name[0].find(smiles_extension) != -1:
+            mol_list = []
+            for file in input_mol_list:
+                with open(file, 'r') as file_open:
+                    mol_list.append(file_open.read())
+            mol_list = mol_list.splitlines()
+            mol_list = [line.split() for line in mol_list if bool(line)]
+            mol_list = [molkit.from_smiles(mol[smiles_column]) for mol in mol_list]
+
+        # if file_name is none of the above it is assumed to be a smile string
+        else:
+            mol_list = [molkit.from_smiles(mol) for mol in file_name]
+
     return mol_list
 
 
-# Modified PLAMS function, returns all connected atom with the exception of 'exclude'
-# Exclude can be either an atom or list of atoms
-# No atoms are excluded by default
 @add_to_class(Molecule)
 def neighbors_mod(self, atom, exclude=[]):
-    if type(exclude) != list:
+    """
+    Modified PLAMS function, returns all connected atom with the exception of 'exclude'
+    Exclude can be either an atom or list of atoms
+    No atoms are excluded by default
+    """
+    if not isinstance(exclude, list):
         exclude = [exclude]
-    
     if atom.mol != self:
         raise MoleculeError('neighbors: passed atom should belong to the molecule')
-
     atom_list = [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
     
     return atom_list
 
 
-# optimized the geometry of the ligand with uff
+
 def global_minimum(ligand, ligand_folder):
+    """
+    optimize the geometry of the ligand with uff
+    """
     ligand_name = 'ligand_' + ligand.get_formula()
     molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
     print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
@@ -148,14 +155,15 @@ def global_minimum(ligand, ligand_folder):
 
     # find the global minimum by systematically varying a select number of dihedral angles in a serial manner; this process is carried out twice.
     # all bonds are scanned that meet the following four requirements: they are single bonds, non-terminal, not part of a ring and do not contain hydrogen.
-    # 4 dihedral angles are checked for all abovementioned bonds
+    # 3 dihedral angles are checked for all abovementioned bonds
     ligand = molkit.to_rdmol(ligand)
     n_scans = 1
     for i in range(n_scans):
         for item in dihedral_list:
             if item[2] != 'skip' and item[1] == 1.0 and not ligand.GetBondWithIdx(item[0]).IsInRing():     
                 ligand = dihedral_scan(ligand, item)
-
+    
+    # reatatch all hydrogens and optimize the resulting structure
     ligand = Chem.AddHs(ligand, addCoords=True)
     uff = AllChem.UFFGetMoleculeForceField
     uff(ligand).Minimize()
@@ -168,8 +176,10 @@ def global_minimum(ligand, ligand_folder):
     return ligand
 
 
-# create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 & 5]
 def dihedral_index(ligand, bond):
+    """
+    create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 & 5]
+    """
     # the two atoms associated with a given bond
     at1 = bond.atom1
     at2 = bond.atom2
@@ -188,8 +198,10 @@ def dihedral_index(ligand, bond):
     return dihedral_list
 
 
-# Scan a dihedral angle and find the lowest energy conformer
 def dihedral_scan(ligand, dihedral_list):
+    """
+    Scan a dihedral angle and find the lowest energy conformer
+    """
     # define a number of variables and create 4 copies of the ligand
     a = dihedral_list
     uff = AllChem.UFFGetMoleculeForceField
@@ -208,9 +220,13 @@ def dihedral_scan(ligand, dihedral_list):
     return ligand[minimum]
 
 
-# Identify the ligand functional groups
+
 def find_substructure(ligand):
+    """
+    Identify the ligand functional groups
+    """
     ligand_rdkit = molkit.to_rdmol(ligand)
+    
     # creates a list containing predefined functional groups, each saved as an rdkit molecule
     functional_group_list = []
     functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]CC'))    # ammonium halide
@@ -236,8 +252,10 @@ def find_substructure(ligand):
     return ligand_copies
 
 
-# Identify import atoms within a functional group and manipulate bond angles associated with aforementioned atoms
 def find_substructure_part2(ligand, matches):
+    """
+    Identify import atoms within a functional group and manipulate bond angles associated with aforementioned atoms
+    """
     # the indices of various import ligand atoms
     H = matches[0] + 1
     X = matches[1] + 1
@@ -257,12 +275,10 @@ def find_substructure_part2(ligand, matches):
     return [ligand] + matches
 
 
-# Connecting two molecules
 def rotate_ligand(core, ligand, index):
     """
-        Takes molecule coordinates as arguments.
-        Connects two molecules in place of first atom on the coordinate list. First atom should be hydrogen.
-        """
+    Connects two molecules by alligning the vectors of two bonds
+    """
     # Define the indices of important atoms
     H = ligand[1]
     X = ligand[2]
@@ -309,8 +325,10 @@ def rotation_matrix(vec1, vec2):
     return (np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b)))
 
 
-# combine the rotated ligands with the core, creating a bond bewteen the core and ligand in the process
 def combine_core_ligand(core, ligand_list):
+    """
+    combine the rotated ligands with the core, creating a bond bewteen the core and ligand in the process
+    """
     core_ligand = copy.deepcopy(core)
     
     # create a list of ligand atoms and intraligand bonds
@@ -324,13 +342,15 @@ def combine_core_ligand(core, ligand_list):
     return core_ligand
 
 
-# optimize the combined core and ligands with the core frozen
 def optimize_core_ligand(core_ligand, core_ligand_indices, maxiter=200):
+    """
+    optimize the combined core and ligands with the core frozen
+    """
     uff = AllChem.UFFGetMoleculeForceField(core_ligand, ignoreInterfragInteractions=False)
     [[uff.AddFixedPoint(index) for index in index_list] for index_list in core_ligand_indices]
     uff.Initialize()
     
-    if rdForceFieldHelpers.UFFHasAllMoleculeParams(core_ligand) == False:
+    if not rdForceFieldHelpers.UFFHasAllMoleculeParams(core_ligand):
         print('Warning: uff parameters unavailable for one or more atoms, possibly due to incorrect valency or formal atomic charges')
     
     print('\nCore + ligands optimization:')
@@ -341,8 +361,10 @@ def optimize_core_ligand(core_ligand, core_ligand_indices, maxiter=200):
     return core_ligand
 
 
-# add residues and formal atomic charges to the molecule
-def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):   
+def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):  
+    """
+    add residue names and formal atomic charges to the molecule
+    """
     # define the number of atoms in the core and the number of ligands
     len_core = len(core.atoms)
     len_ligand = len(ligand[0].atoms) - 1
@@ -373,8 +395,10 @@ def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):
     return core_ligand
 
 
-# converts PLAMS connectivity into adf .run script connectivity
 def run_ams_job(core_ligand):
+    """
+    converts PLAMS connectivity into adf .run script connectivity
+    """
     at1 = [core_ligand.atoms.index(bond.atom1) + 1 for bond in core_ligand.bonds]
     at2 = [core_ligand.atoms.index(bond.atom2) + 1 for bond in core_ligand.bonds]
     bonds = [bond.order for bond in core_ligand.bonds]
@@ -395,6 +419,9 @@ def run_ams_job(core_ligand):
 
 
 def update_adf_pdb(core_ligand):
+    """
+    update a .pdb file using coordinates provided by an .xyz file
+    """
     with open('core_ligand/ams.1258.xyz', 'r') as cube:
         xyz = cube.read().splitlines()
     xyz = [item.split() for i,item in enumerate(xyz) if i > 1]
