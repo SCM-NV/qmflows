@@ -15,27 +15,35 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     If yet: append the .pdb file.
     If not: create a new entry in the database
     """
+    # checks if database_name exists, if not creates database_name
     if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
                 database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
     
+    # import the content of database_name
     with open(os.path.join(ligand_folder, database_name), 'r') as database:
         database = database.read().splitlines()
     database = [line.split() for line in database if line]
     database = np.transpose(database)
 
+    # manipulate the content of database_name
     index_database = database[0]
     pdb_opt_database = database[3]
     smiles_database = database[4]
     mol_database = [Chem.MolFromSmiles(smiles) for smiles in smiles_database[2:]]
     mol_database = [Chem.AddHs(mol, addCoords=True) for mol in mol_database if mol]
 
+    # check if index_database contains any integers as previous entries
+    # if not, set the last entry to int(-1)
     if not isinstance(index_database[-1], int):
         index_database = np.append(index_database, -1)
 
+    # compare the structures provided in ligand_list with the ones in mol_database
     smiles_list = [Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand))) for ligand in ligand_list]
     matches = [[molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in mol_database] for ligand in ligand_list]
 
+    # if a structure in ligand list is already present in the database, append said structure
+    # if not: create a new entry in the database
     for i,item in enumerate(matches):
         if any(item):
             formula = ligand_list[i].get_formula()
