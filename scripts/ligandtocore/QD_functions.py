@@ -112,7 +112,7 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
             mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
 
         # if file_name is a .mol file
-        elif file_name.find('.mol') != -1:
+        elif file_name[0].find('.mol') != -1:
             mol_list = [molkit.from_rdmol(Chem.MolFromMolFile(mol)) for mol in input_mol_list]
 
         # if file_name is a plain text file with smile strings
@@ -121,7 +121,7 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
             for file in input_mol_list:
                 with open(file, 'r') as file_open:
                     mol_list.append(file_open.read())
-            mol_list = mol_list.splitlines()
+            mol_list = mol_list[0].splitlines()
             mol_list = [line.split() for line in mol_list if bool(line)]
             mol_list = [molkit.from_smiles(mol[smiles_column]) for mol in mol_list]
 

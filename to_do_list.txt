@@ -8,3 +8,4 @@ bond orders can get messed up upon converting between plams and rdkit molecules
 cis/trans information is lost upon converting between plams and rdkit molecules
 move the functional groups in find_substructure() to a seperate list
 automatically set formal atomic charges in prepare_pdb() depending on the element and the total molecular charge
+np.concatenate will turn sublists of plams molecules into a list of plams atoms IF a sublist contains a single plams molecule as entry

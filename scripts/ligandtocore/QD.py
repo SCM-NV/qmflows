@@ -23,6 +23,7 @@ def prep_core(core, ligand_list, ligand_folder, core_folder, core_ligand_folder,
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
 
     # checks if the ligand is already present in the database, either creating a new entry or appending an existing entry
+    ligand_list = copy.deepcopy(ligand_list)
     ligand_list = QD.check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand_database.txt')
 
     # Searches for the global minimum (using UFF) by systematically evaluating all dihedral angles
@@ -102,11 +103,11 @@ time_start = time.time()
 print('\n')
 
 dir_name_list = ['ligand', 'core', 'core_ligand']
-dir_path_list = [QD.create_dir(name) for name in dir_name_list]
+dir_path_list = [QD.create_dir(name, path=r'C:\Users\hardd\Documents\Computational\CdSe') for name in dir_name_list]
 
 # Accepted inputs: .xyz/.pdb file, SMILES string, plain text file with SMILES strings or a list of aforementioned objects
-input_ligands = 'CCCCCC[N](C)(C)CCCCCC.[Br-]'
-input_cores = 'cube.xyz'
+input_ligands = 'OC(C1=CC=CC=C1)=O'
+input_cores = ['cube.xyz', 'cube_Mg.xyz']
 
 # Imports the cores and ligands
 ligand_list = QD.read_mol(dir_path_list[0], input_ligands, smiles_column=0, smiles_extension='.txt')
