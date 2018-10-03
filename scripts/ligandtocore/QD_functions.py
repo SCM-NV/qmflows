@@ -9,7 +9,7 @@ import os
 import re
 
 
-def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand_database.txt'):
+def check_database(ligand_list, ligand_folder, opt, database_name='ligand_database.txt'):
     """
     Check if the input ligand is already in the database.
     If yet: append the .pdb file.
@@ -51,7 +51,7 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
     
             index = np.where(smiles_database == smiles_list[i])[0]
             read_pdb = molkit.readpdb(os.path.join(ligand_folder, pdb_opt_database[index][0]))
-            if ligand_opt:
+            if opt:
                 ligand_list[i] = [read_pdb, False]
             else:
                 ligand_list[i] = read_pdb
@@ -67,7 +67,7 @@ def check_database(ligand_list, ligand_folder, ligand_opt, database_name='ligand
             with open(os.path.join(ligand_folder, database_name), 'a') as database:
                 database.write('\n' + entry)
 
-            if ligand_opt:
+            if opt:
                 ligand_list[i] = [ligand_list[i], True]
             else:
                 ligand_list[i] = ligand_list[i]
