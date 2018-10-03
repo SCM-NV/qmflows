@@ -72,3 +72,5 @@ plams.*
 cache.json
 *.svg
 
+# MAC
+.ds_store
