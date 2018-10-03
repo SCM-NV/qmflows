@@ -249,7 +249,7 @@ def find_substructure(ligand):
     matches = [j for i in matches for j in i]
 
     # rotates the functional group hydrogen atom in addition to returning the indices of various important ligand atoms
-    ligand_list = [copy.deepcopy(ligand) for match in matches]
+    ligand_list = [copy.deepcopy(ligand) for i,match in enumerate(matches) if match[1] != matches[i - 1][1] or i == 0]
     [ligand.delete_atom(ligand[matches[i][0] + 1]) for i,ligand in enumerate(ligand_list)]
     matches = [item[1] for item in matches]
     
@@ -285,7 +285,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index):
     # Deletes atom in ligand
     ligand.delete_atom(lig_at2)
     
-    # Deletes atom in ligand
+    # Deletes atom in core
     core.delete_atom(core_at1)
 
     return ligand, lig_at1
@@ -317,25 +317,6 @@ def combine_core_ligand(core, ligand_list):
     # Combined the ligand bond and atom list with the core
     [core_ligand.add_atom(atom) for atom in ligand_atoms]
     [core_ligand.add_bond(bond) for bond in ligand_bonds]
-
-    return core_ligand
-
-
-def optimize_core_ligand(core_ligand, core_ligand_indices, maxiter=200):
-    """
-    optimize the combined core and ligands with the core frozen
-    """
-    uff = AllChem.UFFGetMoleculeForceField(core_ligand, ignoreInterfragInteractions=False)
-    [[uff.AddFixedPoint(index) for index in index_list] for index_list in core_ligand_indices]
-    uff.Initialize()
-    
-    if not rdForceFieldHelpers.UFFHasAllMoleculeParams(core_ligand):
-        print('Warning: uff parameters unavailable for one or more atoms, possibly due to incorrect valency or formal atomic charges')
-    
-    print('\nCore + ligands optimization:')
-    for i in range(int(maxiter / 10)):
-        uff.Minimize(maxIts = 10)
-        print(str((i + 1) * 10) + '/' + str(maxiter) + '\tEnergy:\t' + "{0:.4f}".format(uff.CalcEnergy()) + '\t|Grad|: ' + "{0:.4f}".format(np.linalg.norm(uff.CalcGrad())))   
 
     return core_ligand
 
@@ -374,7 +355,7 @@ def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):
     return core_ligand
 
 
-def run_ams_job(core_ligand, pdb_name, core_ligand_folder):
+def run_ams_job(core_ligand, pdb_name, core_ligand_folder, core_ligand_indices):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
@@ -382,16 +363,27 @@ def run_ams_job(core_ligand, pdb_name, core_ligand_folder):
     at2 = [core_ligand.atoms.index(bond.atom2) + 1 for bond in core_ligand.bonds]
     bonds = [bond.order for bond in core_ligand.bonds]
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
-
-    freeze = []
-
+    
+    neighbors = [len(core_ligand.neighbors(core_ligand[index])) / 2 for index in core_ligand_indices]
+    charge_list = [[1, 2, -3, -2, -1, 2],['Li', 'Na', 'K', 'Rb', 'Cs'],['Be', 'Mg', 'Ca', 'Sr', 'Ba'],['N', 'P', 'As', 'Sb', 'Bi'],['O', 'S', 'Se', 'Te', 'Po'],['F', 'Cl', 'Br', 'I', 'At'],['Cd', 'Pb']]
+    for i,index in enumerate(core_ligand_indices):
+        match = [core_ligand[index].symbol in sublist for sublist in charge_list]
+        if any(match):
+            charge = charge_list[0][match.index(True) - 1]
+            if charge > 0:
+                charge += -1 * int(neighbors[i])
+            elif charge < 0:
+                charge += 1 * int(neighbors[i])
+            core_ligand[index].properties.suffix = 'Charge=' + str(charge) + '.0'
+    
     init(path=core_ligand_folder, folder=pdb_name)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) + 1 for atom in core_ligand if atom.atnum == 8 or atom.atnum == 48 or atom.atnum == 34]
+    s.input.ams.Constraints.Atom = core_ligand_indices
     s.input.ams.System.BondOrders._1 = bonds
     s.input.ams.GeometryOptimization.MaxIterations = 1000
     s.input.ams.Properties.Gradients = 'Yes'
+    
     s.input.uff.Library = 'UFF'
     
     j = AMSJob(molecule=core_ligand, settings=s, name=pdb_name)

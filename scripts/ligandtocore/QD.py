@@ -27,7 +27,10 @@ def prep_core(core, core_folder, dummy=0, opt=True):
     core_indices.reverse()
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
 
-    return core_indices
+    if len(core_indices) == 0:
+        raise MoleculeError(Atom(atnum=dummy).symbol + ' was specified as dummy atom, yet no dummy atoms were found on the core')
+    else:
+        return core_indices
 
 
 def prep_ligand(ligand, ligand_folder, database, opt=True):
@@ -60,7 +63,7 @@ def prep_ligand(ligand, ligand_folder, database, opt=True):
     return ligand_list
 
 
-def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folder, opt=True):
+def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folder):
     """
     function that handles all core+ligand operations
     add all ligands to the core
@@ -88,8 +91,9 @@ def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folde
         if atom.atnum not in atnum_list:
             atnum_list.append(atom.atnum)
 
-    core_ligand_indices = [[core_ligand.atoms.index(atom) for atom in ligand_list[1]]]
-    core_ligand_indices += [[i for i,atom in enumerate(core) if atom.atnum == atnum] for atnum in atnum_list]
+    core_ligand_indices = [[core_ligand.atoms.index(atom) + 1 for atom in ligand_list[1]]]
+    core_ligand_indices += [[i + 1 for i,atom in enumerate(core) if atom.atnum == atnum] for atnum in atnum_list]
+    core_ligand_indices = [item for sublist in core_ligand_indices for item in sublist]
     
     # Assign residue names and formal atomic charges
     #core_ligand = molkit.to_rdmol(core_ligand)
@@ -99,12 +103,10 @@ def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folde
     molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.pdb'))
     print('core + ligands:\t\t\t' + pdb_name + '.pdb')
     #core_ligand = molkit.from_rdmol(core_ligand)
-    if opt:
-        core_ligand = QD.optimize_core_ligand(core_ligand, core_ligand_indices, maxiter=200)
-        molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.opt.pdb'))
-        print('\nOptimized core + ligands:\t' + pdb_name + '.opt.pdb')
+    #molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.opt.pdb'))
+    #print('\nOptimized core + ligands:\t' + pdb_name + '.opt.pdb')
 
-    return core_ligand, pdb_name
+    return core_ligand, pdb_name, core_ligand_indices
 
 
 
@@ -123,7 +125,7 @@ core_ligand_folder = dir_path_list[2]
 
 # Accepted inputs: .xyz/.pdb file, SMILES string, plain text file with SMILES strings or a list of aforementioned objects
 input_cores = ['Cd176Se147_Cl58.xyz']
-input_ligands = ['OCC1=C(C2=CC=CC=C2)C=CC=C1C3=CC=CC=C3']
+input_ligands = ['OC(CCC)C(CCCCCCC)CCCCCCC']
 
 # Imports the cores and ligands
 core_list = QD.read_mol(dir_path_list[0], input_cores)
@@ -147,14 +149,15 @@ ligand_list = list(itertools.chain(*ligand_list))
 QD.write_database(database_entries, ligand_folder, database)
 
 # combine the core with the ligands, yielding core_ligand
-core_ligand_list = [prep_core_ligand(core, ligand, core_indices[i], ligand_indices[j], core_ligand_folder, opt=False) for i,core in enumerate(core_list) for j,ligand in enumerate(ligand_list)]
+core_ligand_list = [prep_core_ligand(core, ligand, core_indices[i], ligand_indices[j], core_ligand_folder) for i,core in enumerate(core_list) for j,ligand in enumerate(ligand_list)]
 
 # formating of core_ligand_list
+core_ligand_indices = [item[2] for item in core_ligand_list]
 pdb_name_list = [item[1] for item in core_ligand_list]
 core_ligand_list = [item[0] for item in core_ligand_list]
 
 # optimize core_ligand with the core frozen
-[QD.run_ams_job(core_ligand, pdb_name_list[i], core_ligand_folder) for i,core_ligand in enumerate(core_ligand_list)]
+[QD.run_ams_job(core_ligand, pdb_name_list[i], core_ligand_folder, core_ligand_indices[i]) for i,core_ligand in enumerate(core_ligand_list)]
 
 # The End
 time_end = time.time()
