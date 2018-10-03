@@ -76,7 +76,7 @@ def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folde
     # Prepare the .pdb filename (string)
     core_name = core.get_formula()
     ligand_name = ligand_list[0][0].get_formula() + '_@_' + ligand[ligand_index + 1].symbol + str(ligand_index + 1)
-    pdb_name = str('core_' + core_name + '__&__ligand_' + ligand_name)
+    pdb_name = str('core_' + core_name + '__and__ligand_' + ligand_name)
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule)
     core_ligand = QD.combine_core_ligand(core, ligand_list[0])
@@ -103,7 +103,7 @@ def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folde
         molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.opt.pdb'))
         print('\nOptimized core + ligands:\t' + pdb_name + '.opt.pdb')
 
-    return core_ligand
+    return core_ligand, pdb_name
 
 
 
@@ -135,7 +135,7 @@ core_indices = [prep_core(core, core_folder, dummy='Rb', opt=False) for core in 
 database = QD.read_database(ligand_folder)
 ligand_list = [prep_ligand(ligand, ligand_folder, database, opt=True) for ligand in ligand_list]
 
-# the formating of ligand_list
+# formating of ligand_list
 database_entries = [item[2] for item in ligand_list]
 ligand_indices = [item[1] for item in ligand_list]
 ligand_indices = list(itertools.chain(*ligand_indices))
@@ -148,8 +148,12 @@ QD.write_database(database_entries, ligand_folder, database)
 # combine the core with the ligands, yielding core_ligand
 core_ligand_list = [prep_core_ligand(core, ligand, core_indices[i], ligand_indices[j], core_ligand_folder, opt=False) for i,core in enumerate(core_list) for j,ligand in enumerate(ligand_list)]
 
+# formating of core_ligand_list
+pdb_name_list = [item[1] for item in core_ligand_list]
+core_ligand_list = [item[0] for item in core_ligand_list]
+
 # optimize core_ligand with the core frozen
-#[QD.run_ams_job(core_ligand) for core_ligand in core_ligand_list]
+[QD.run_ams_job(core_ligand, pdb_name_list[i], core_ligand_folder) for i,core_ligand in enumerate(core_ligand_list)]
 
 # The End
 time_end = time.time()

@@ -155,7 +155,7 @@ def global_minimum(ligand, ligand_folder):
     molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
     print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
     
-    # delete all hydrogens and create a list of all bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 & 5](i.e. the indices of the four atoms defining a dihedral angle)
+    # delete all hydrogens and create a list of all bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
     [ligand.delete_atom(atom) for atom in ligand.atoms if atom.atnum == 1]
     dihedral_list = [dihedral_index(ligand, item) for item in ligand.bonds]
 
@@ -184,7 +184,7 @@ def global_minimum(ligand, ligand_folder):
 
 def dihedral_index(ligand, bond):
     """
-    create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 & 5]
+    create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5]
     """
     # the two atoms associated with a given bond
     at1 = bond.atom1
@@ -194,7 +194,7 @@ def dihedral_index(ligand, bond):
     at1_bonds = ligand.neighbors_mod(at1, exclude=at2)
     at2_bonds = ligand.neighbors_mod(at2, exclude=at1)
     
-    # a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 & 5](i.e. the indices of the four atoms defining a dihedral angle)
+    # a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
     # only the indices of non-terminal bonds are added to this list, the rest is skipped
     if len(at1_bonds) >= 1 and len(at2_bonds) >= 1:
         dihedral_list = [ligand.bonds.index(bond), bond.order, ligand.atoms.index(at1_bonds[0]), ligand.atoms.index(at1), ligand.atoms.index(at2), ligand.atoms.index(at2_bonds[0])]
@@ -314,7 +314,7 @@ def combine_core_ligand(core, ligand_list):
     ligand_bonds = np.concatenate([ligand.bonds for ligand in ligand_list])
     ligand_atoms = np.concatenate(ligand_list)
 
-    # Combined the ligand bond & atom list with the core
+    # Combined the ligand bond and atom list with the core
     [core_ligand.add_atom(atom) for atom in ligand_atoms]
     [core_ligand.add_bond(bond) for bond in ligand_bonds]
 
@@ -374,7 +374,7 @@ def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):
     return core_ligand
 
 
-def run_ams_job(core_ligand):
+def run_ams_job(core_ligand, pdb_name, core_ligand_folder):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
@@ -383,20 +383,16 @@ def run_ams_job(core_ligand):
     bonds = [bond.order for bond in core_ligand.bonds]
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
 
-    init()
+    init(path=core_ligand_folder, folder=pdb_name)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) for atom in core_ligand if atom.atnum == 8 or atom.atnum == 35 or atom.atnum == 82 or atom.atnum == 55]
+    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) + 1 for atom in core_ligand if atom.atnum == 8 or atom.atnum == 35 or atom.atnum == 82 or atom.atnum == 55]
     s.input.ams.System.BondOrders._1 = bonds
-    s.input.ams.GeometryOptimization.MaxIterations = 100
+    s.input.ams.GeometryOptimization.MaxIterations = 1000
     s.input.ams.Properties.Gradients = 'Yes'
     s.input.uff.Library = 'UFF'
     
-    config.log.stdout = 1
-    config.job.pickle = False
-    config.default_jobrunner = JobRunner(parallel=False, maxjobs=1)
-    
-    j = AMSJob(molecule=core_ligand, settings=s)
+    j = AMSJob(molecule=core_ligand, settings=s, name=pdb_name)
     results = j.run()
     finish()
 
@@ -411,9 +407,9 @@ def update_adf_pdb(core_ligand):
     xyz = [[(subitem)[:6] for i,subitem in enumerate(item) if i > 0] for item in xyz]
     xyz = ['     1      ' + item[0] + '  ' + item[1] + '  ' + item[2] + '  1.00  0.00           ' for item in xyz]
     
-    with open('core_Br450Cs157Pb125__&__ligand_C26H56N1_@_N13.pdb', 'r') as cube_read:
+    with open('core_Br450Cs157Pb125__and__ligand_C26H56N1_@_N13.pdb', 'r') as cube_read:
         cube_read = cube_read.read().splitlines()
         cube_read = [re.sub('     1      .*?  1.00  0.00           ', xyz[i], item) for i, item in enumerate(cube_read) if i < 4301]
-        with open('core_Br450Cs157Pb125__&__ligand_C26H56N1_@_N13.opt.pdb', 'w') as cube_write:
+        with open('core_Br450Cs157Pb125__and__ligand_C26H56N1_@_N13.opt.pdb', 'w') as cube_write:
             for item in cube_read:
                 cube_write.write("%s\n" % item)
