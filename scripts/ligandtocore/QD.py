@@ -71,6 +71,7 @@ def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folde
     core = copy.deepcopy(core)
     ligand_list = [QD.rotate_ligand(core, ligand, core_index, ligand_index) for core_index in core_indices]
     ligand_list = np.array(ligand_list).T.tolist()
+
     core.delete_atom(core[-1])
 
     # Prepare the .pdb filename (string)
@@ -121,15 +122,15 @@ ligand_folder = dir_path_list[1]
 core_ligand_folder = dir_path_list[2]
 
 # Accepted inputs: .xyz/.pdb file, SMILES string, plain text file with SMILES strings or a list of aforementioned objects
-input_cores = ['cube.xyz']
-input_ligands = ['OCCCCCC']
+input_cores = ['Cd176Se147_Cl58.xyz']
+input_ligands = ['OCC1=C(C2=CC=CC=C2)C=CC=C1C3=CC=CC=C3']
 
 # Imports the cores and ligands
 core_list = QD.read_mol(dir_path_list[0], input_cores)
 ligand_list = QD.read_mol(dir_path_list[1], input_ligands, smiles_column=0, smiles_extension='.txt')
 
 # Return the indices of the core dummy atoms
-core_indices = [prep_core(core, core_folder, dummy='Rb', opt=False) for core in core_list]
+core_indices = [prep_core(core, core_folder, dummy='Cl', opt=False) for core in core_list]
 
 # Open the ligand database and check if the specified ligand(s) is already present
 database = QD.read_database(ligand_folder)

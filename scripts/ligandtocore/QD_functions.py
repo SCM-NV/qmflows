@@ -235,14 +235,14 @@ def find_substructure(ligand):
     
     # creates a list containing predefined functional groups, each saved as an rdkit molecule
     functional_group_list = []
-    functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]CC'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[Cl-].[N+]CC'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[Br-].[N+]CC'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[I-].[N+]CC'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[H]OCC'))          # hydroxides
-    functional_group_list.append(Chem.MolFromSmarts('[H]OCc'))          # benzylic hydroxides
-    functional_group_list.append(Chem.MolFromSmarts('[H]SCC'))          # sulfides
-    functional_group_list.append(Chem.MolFromSmarts('[H]SCc'))          # benzylic sulfides
+    functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]'))     # ammonium halide
+    functional_group_list.append(Chem.MolFromSmarts('[Cl-].[N+]'))    # ammonium halide
+    functional_group_list.append(Chem.MolFromSmarts('[Br-].[N+]'))    # ammonium halide
+    functional_group_list.append(Chem.MolFromSmarts('[I-].[N+]'))     # ammonium halide
+    functional_group_list.append(Chem.MolFromSmarts('[H]O'))          # hydroxides
+    functional_group_list.append(Chem.MolFromSmarts('[H]S'))          # benzylic hydroxides
+    functional_group_list.append(Chem.MolFromSmarts('[H]N'))          # amine
+    functional_group_list.append(Chem.MolFromSmarts('[H]P'))          # phosphine
     
     # searches for functional groups (defined by functional_group_list) within the ligand; duplicates are removed 
     matches = [ligand_rdkit.GetSubstructMatches(mol) for mol in functional_group_list]
@@ -251,7 +251,7 @@ def find_substructure(ligand):
     # rotates the functional group hydrogen atom in addition to returning the indices of various important ligand atoms
     ligand_list = [copy.deepcopy(ligand) for match in matches]
     [ligand.delete_atom(ligand[matches[i][0] + 1]) for i,ligand in enumerate(ligand_list)]
-    matches = [item[1] for i,item in enumerate(matches) if item[1] != matches[i - 1][1] or i == 0]
+    matches = [item[1] for item in matches]
     
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
@@ -383,10 +383,12 @@ def run_ams_job(core_ligand, pdb_name, core_ligand_folder):
     bonds = [bond.order for bond in core_ligand.bonds]
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
 
+    freeze = []
+
     init(path=core_ligand_folder, folder=pdb_name)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) + 1 for atom in core_ligand if atom.atnum == 8 or atom.atnum == 35 or atom.atnum == 82 or atom.atnum == 55]
+    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) + 1 for atom in core_ligand if atom.atnum == 8 or atom.atnum == 48 or atom.atnum == 34]
     s.input.ams.System.BondOrders._1 = bonds
     s.input.ams.GeometryOptimization.MaxIterations = 1000
     s.input.ams.Properties.Gradients = 'Yes'
