@@ -1,5 +1,6 @@
 from scm.plams import *
 from qmflows import molkit
+import itertools
 import time
 import copy
 import numpy as np
@@ -29,33 +30,37 @@ def prep_core(core, core_folder, dummy=0, opt=True):
     return core_indices
 
 
-def prep_ligand(ligand_list, ligand_folder, opt=True):
+def prep_ligand(ligand, ligand_folder, database, opt=True):
     """
     function that handles are ligand operations
-    
     """
-    # checks if the ligand is already present in the database, either creating a new entry or appending an existing entry
-    ligand_list = QD.check_database(ligand_list, ligand_folder, opt, database_name='ligand_database.txt')
+    # checks if the database exists and if the ligand is already present
+    # returns a list of booleans
+    if database:
+        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
+    else:
+        matches = [False]
 
-    # Searches for the global minimum (using UFF) by systematically evaluating all dihedral angles
-    # Returns the optimized structure (PLAMS Molecule)
-    # Previously optimized structures are not reoptimized
-    if opt:
-        opt = [QD.global_minimum(ligand[0], ligand_folder) for ligand in ligand_list if ligand[1]]
-        no_opt = [ligand[0] for ligand in ligand_list if not ligand[1]] 
-        ligand_list = opt + no_opt
-    
-    # Identify the functional groups within the ligand that can bond with the core
-    # One additional copy of the ligand is added to ligand_list for each functional group beyond the first
-    # returns a list with sublist [0] containing the ligand (PLAMS Molecule) and [1, 2 & 3] the indices (integer) of the functional group hydrogen, heteroatom and beta carbon
-    # Returns an error if no functional groups are found for a specific ligand
-    ligand_list = [QD.find_substructure(ligand) for ligand in ligand_list if QD.find_substructure(ligand)]
-    ligand_list = np.concatenate(ligand_list)
+    # if the ligand is already present in the database: append the structure, else optimize the ligand and create a new entry for the database
+    if any(matches):
+        index = matches.index(True)
+        ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
+        database_entry = False
+    else:
+        if opt:
+            ligand = QD.global_minimum(ligand, ligand_folder)
+        database_entry = QD.create_entry(ligand, opt)
+        
+    # find functional groups
+    ligand.add_atom(Atom(atnum=0, coords=(ligand.get_center_of_mass())))
+    ligand_list = QD.find_substructure(ligand)
+    ligand_list = list(ligand_list)
+    ligand_list.append(database_entry)
     
     return ligand_list
 
 
-def prep_core_ligand(core, ligand, core_indices, core_ligand_folder, opt=True):
+def prep_core_ligand(core, ligand, core_indices, ligand_index, core_ligand_folder, opt=True):
     """
     function that handles all core+ligand operations
     add all ligands to the core
@@ -64,14 +69,13 @@ def prep_core_ligand(core, ligand, core_indices, core_ligand_folder, opt=True):
     # Returns a list with sublist [0] containing the rotated ligands (PLAMS Molecules) and [1] the heteroatoms (PLAMS Atoms) of the rotated ligands to be attached to the core
     # All core dummy atoms are deleted
     core = copy.deepcopy(core)
-    ligand[0].add_atom(Atom(atnum=0, coords=(ligand[0].get_center_of_mass())))
-    ligand_list = [QD.rotate_ligand(core, ligand, index) for index in core_indices]
+    ligand_list = [QD.rotate_ligand(core, ligand, core_index, ligand_index) for core_index in core_indices]
     ligand_list = np.array(ligand_list).T.tolist()
     core.delete_atom(core[-1])
 
     # Prepare the .pdb filename (string)
     core_name = core.get_formula()
-    ligand_name = ligand_list[0][0].get_formula() + '_@_' + ligand[0][ligand[2]].symbol + str(ligand[2])
+    ligand_name = ligand_list[0][0].get_formula() + '_@_' + ligand[ligand_index + 1].symbol + str(ligand_index + 1)
     pdb_name = str('core_' + core_name + '__&__ligand_' + ligand_name)
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule)
@@ -91,7 +95,7 @@ def prep_core_ligand(core, ligand, core_indices, core_ligand_folder, opt=True):
     #core_ligand = QD.prepare_pdb(core_ligand, core, ligand, core_ligand_indices)
     
     # Optimize the combined core and ligands, writing the results to a .pdb file
-    #molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.pdb'))
+    molkit.writepdb(core_ligand, os.path.join(core_ligand_folder, pdb_name + '.pdb'))
     print('core + ligands:\t\t\t' + pdb_name + '.pdb')
     #core_ligand = molkit.from_rdmol(core_ligand)
     if opt:
@@ -109,24 +113,43 @@ def prep_core_ligand(core, ligand, core_indices, core_ligand_folder, opt=True):
 time_start = time.time()
 print('\n')
 
+# managing the result directories
 dir_name_list = ['core', 'ligand', 'core_ligand']
-dir_path_list = [QD.create_dir(name, path=r'/Users/bvanbeek/Documents/CdSe/Week_4') for name in dir_name_list]
+dir_path_list = [QD.create_dir(name, path=r'/Users/basvanbeek/Documents/CdSe/Week_5') for name in dir_name_list]
+core_folder = dir_path_list[0]
+ligand_folder = dir_path_list[1]
+core_ligand_folder = dir_path_list[2]
 
 # Accepted inputs: .xyz/.pdb file, SMILES string, plain text file with SMILES strings or a list of aforementioned objects
-input_ligands = 'OC(C1=CC=CC=C1)=O'
 input_cores = ['cube.xyz']
+input_ligands = ['OCCCCCC']
 
 # Imports the cores and ligands
 core_list = QD.read_mol(dir_path_list[0], input_cores)
 ligand_list = QD.read_mol(dir_path_list[1], input_ligands, smiles_column=0, smiles_extension='.txt')
 
-# Copies of ligands are added to copies of core molecules; this process is repeated until all dummy atoms are substituted for ligands
-core_indices = [prep_core(core, dir_path_list[0], dummy='Rb', opt=False) for core in core_list]
-ligand_list = [prep_ligand(ligand, dir_path_list[1], opt=True) for ligand in ligand_list]
-core_ligand_list = [prep_core_ligand(core, ligand, core_indices, dir_path_list[2], opt=False) for core in core_list for ligand in ligand_list]
+# Return the indices of the core dummy atoms
+core_indices = [prep_core(core, core_folder, dummy='Rb', opt=False) for core in core_list]
 
-core_ligand_list = np.concatenate(core_ligand_list)
-[QD.run_ams_job(core_ligand) for core_ligand in core_ligand_list]
+# Open the ligand database and check if the specified ligand(s) is already present
+database = QD.read_database(ligand_folder)
+ligand_list = [prep_ligand(ligand, ligand_folder, database, opt=True) for ligand in ligand_list]
+
+# the formating of ligand_list
+database_entries = [item[2] for item in ligand_list]
+ligand_indices = [item[1] for item in ligand_list]
+ligand_indices = list(itertools.chain(*ligand_indices))
+ligand_list = [item[0] for item in ligand_list]
+ligand_list = list(itertools.chain(*ligand_list))
+
+# writing new entries to the ligand database
+QD.write_database(database_entries, ligand_folder, database)
+
+# combine the core with the ligands, yielding core_ligand
+core_ligand_list = [prep_core_ligand(core, ligand, core_indices[i], ligand_indices[j], core_ligand_folder, opt=False) for i,core in enumerate(core_list) for j,ligand in enumerate(ligand_list)]
+
+# optimize core_ligand with the core frozen
+#[QD.run_ams_job(core_ligand) for core_ligand in core_ligand_list]
 
 # The End
 time_end = time.time()

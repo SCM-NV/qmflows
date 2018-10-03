@@ -9,70 +9,70 @@ import os
 import re
 
 
-def check_database(ligand_list, ligand_folder, opt, database_name='ligand_database.txt'):
+def read_database(ligand_folder, database_name='ligand_database.txt'):
     """
-    Check if the input ligand is already in the database.
-    If yet: append the .pdb file.
-    If not: create a new entry in the database
+    open the database
+    if the database does not exist, create the database
     """
     # checks if database_name exists, if not creates database_name
     if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
-                database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
-    
-    # import the content of database_name
-    with open(os.path.join(ligand_folder, database_name), 'r') as database:
-        database = database.read().splitlines()
-    database = [line.split() for line in database if line]
-    database = np.transpose(database)
+            database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
+        database = [[],[],[],[],[]]
+        
+    # else opens the database
+    else:
+        with open(os.path.join(ligand_folder, database_name), 'r') as database:
+            database = database.read().splitlines()
+        database = [line.split() for line in database if line]
+        database = list(np.transpose(database[1:]))
+        database = [list(item) for item in database]
+        database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
+        database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
+        
+    return database
 
-    # manipulate the content of database_name
-    index_database = database[0]
-    pdb_opt_database = database[3]
-    smiles_database = database[4]
-    mol_database = [Chem.MolFromSmiles(smiles) for smiles in smiles_database[2:]]
-    mol_database = [Chem.AddHs(mol, addCoords=True) for mol in mol_database if mol]
 
-    # check if index_database contains any integers as previous entries
-    # if not, set the last entry to int(-1)
-    if not isinstance(index_database[-1], int):
-        index_database = np.append(index_database, -1)
-
+def create_entry(ligand, opt):
+    """
+    create a new entry for the database
+    """
     # compare the structures provided in ligand_list with the ones in mol_database
-    smiles_list = [Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand))) for ligand in ligand_list]
-    matches = [[molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in mol_database] for ligand in ligand_list]
+    ligand_smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand)))
 
-    # if a structure in ligand list is already present in the database, append said structure
-    # if not: create a new entry in the database
-    for i,item in enumerate(matches):
-        if any(item):
-            formula = ligand_list[i].get_formula()
-            print('{0:12} present in '.format(formula) + database_name + ', appending ligand_' + formula + '.opt.pdb')
+    # create the new database_entry
+    a = []
+    b = molkit.from_rdmol(ligand).get_formula()
+    c = 'ligand_' + b + '.pdb'
+    if opt:
+        d = 'ligand_' + b + '.opt.pdb'
+    else:
+        d = 'ligand optimization disabled'
+    e = ligand_smiles
+    database_entry = [a, b, c, d, e]
     
-            index = np.where(smiles_database == smiles_list[i])[0]
-            read_pdb = molkit.readpdb(os.path.join(ligand_folder, pdb_opt_database[index][0]))
-            if opt:
-                ligand_list[i] = [read_pdb, False]
-            else:
-                ligand_list[i] = read_pdb
+    return database_entry
 
-        else:
-            a = str(int(index_database[-1]) + i + 1)
-            b = molkit.from_rdmol(ligand_list[i]).get_formula()
-            c = 'ligand_' + b + '.pdb'
-            d = 'ligand_' + b + '.opt.pdb'
-            e = smiles_list[i]
-            entry = "{0:6} {1:19} {2:30} {3:34} {4:}".format(a, b, c, d, e)
 
-            with open(os.path.join(ligand_folder, database_name), 'a') as database:
-                database.write('\n' + entry)
+def write_database(database_entries, ligand_folder, database, database_name='ligand_database.txt'):
+    """
+    write the new database entries to the database
+    """
+    # check if any previous indices are present in database[0]  
+    if not database:
+        j = -1
+    else:
+        try:
+            j = int(database[0][-1])
+        except:
+            j = -1
 
-            if opt:
-                ligand_list[i] = [ligand_list[i], True]
-            else:
-                ligand_list[i] = ligand_list[i]
-
-    return ligand_list
+    # format the database entries
+    database_entries = ["{0:6} {1:19} {2:30} {3:34} {4:}".format(str(j + i + 1), item[1], item[2], item[3], item[4]) for i,item in enumerate(database_entries) if item]
+    
+    # write the database entries to the database
+    with open(os.path.join(ligand_folder, database_name), 'a') as database:
+        [database.write('\n' + entry) for entry in database_entries]
 
 
 def create_dir(dir_name, path=os.getcwd()):
@@ -84,7 +84,6 @@ def create_dir(dir_name, path=os.getcwd()):
         os.makedirs(dir_path)
 
     return dir_path
-
 
 
 def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
@@ -148,7 +147,6 @@ def neighbors_mod(self, atom, exclude=[]):
     return atom_list
 
 
-
 def global_minimum(ligand, ligand_folder):
     """
     optimize the geometry of the ligand with uff
@@ -165,7 +163,7 @@ def global_minimum(ligand, ligand_folder):
     # all bonds are scanned that meet the following four requirements: they are single bonds, non-terminal, not part of a ring and do not contain hydrogen.
     # 3 dihedral angles are checked for all abovementioned bonds
     ligand = molkit.to_rdmol(ligand)
-    n_scans = 1
+    n_scans = 2
     for i in range(n_scans):
         for item in dihedral_list:
             if item[2] != 'skip' and item[1] == 1.0 and not ligand.GetBondWithIdx(item[0]).IsInRing():     
@@ -247,77 +245,50 @@ def find_substructure(ligand):
     functional_group_list.append(Chem.MolFromSmarts('[H]SCc'))          # benzylic sulfides
     
     # searches for functional groups (defined by functional_group_list) within the ligand; duplicates are removed 
-    matches = [list(ligand_rdkit.GetSubstructMatches(item)) for item in functional_group_list]
+    matches = [ligand_rdkit.GetSubstructMatches(mol) for mol in functional_group_list]
     matches = [j for i in matches for j in i]
-    matches = [item for i,item in enumerate(matches) if item[1] != matches[i - 1][1] or i == 0]
-    
+
     # rotates the functional group hydrogen atom in addition to returning the indices of various important ligand atoms
-    ligand_copies = [find_substructure_part2(ligand, item) for item in matches if item]
+    ligand_list = [copy.deepcopy(ligand) for match in matches]
+    [ligand.delete_atom(ligand[matches[i][0] + 1]) for i,ligand in enumerate(ligand_list)]
+    matches = [item[1] for i,item in enumerate(matches) if item[1] != matches[i - 1][1] or i == 0]
     
-    if not ligand_copies:
+    if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
 
-    return ligand_copies
+    return ligand_list, matches
 
 
-def find_substructure_part2(ligand, matches):
-    """
-    Identify import atoms within a functional group and manipulate bond angles associated with aforementioned atoms
-    """
-    # the indices of various import ligand atoms
-    H = matches[0] + 1
-    X = matches[1] + 1
-    Cb = matches[3] + 1
-    
-    # various important ligand bond lengths
-    Cb_X = ligand[Cb].distance_to(ligand[X])
-    X_H = ligand[X].distance_to(ligand[H])
-
-    # orientation of the H atom: sets the angle between H, X and Cb to 180 degrees
-    vec = np.asarray(ligand[Cb].vector_to(ligand[X])) * ((Cb_X + X_H) / Cb_X)
-    ligand[H].move_to(ligand[Cb])
-    ligand[H].translate(vec)
-
-    matches = [index + 1 for index in matches]
-
-    return [ligand] + matches
-
-
-def rotate_ligand(core, ligand, index):
+def rotate_ligand(core, ligand, core_index, ligand_index):
     """
     Connects two molecules by alligning the vectors of two bonds
     """
-    # Define the indices of important atoms
-    H = ligand[1]
-    X = ligand[2]
-    Cb = ligand[4]
-    ligand = copy.deepcopy(ligand[0])
+    ligand = copy.deepcopy(ligand)
 
     # Defines first atom on coordinate list (hydrogen), atom connected to it and vector representing bond between them
-    core_h = core[index]
-    core_other = core[-1]
-    core_vector = core_h.vector_to(core_other)
-    lig_h = ligand[H]
-    lig_other = ligand[-1]
-    lig_vector = lig_other.vector_to(ligand[X])
+    core_at1 = core[core_index]         # core dummy atom
+    core_at2 = core[-1]                 # core center of mass
+    core_vector = core_at1.vector_to(core_at2)
+    lig_at1 = ligand[ligand_index + 1]  # ligand heteroatom
+    lig_at2 = ligand[-1]                # ligand center of mass
+    lig_vector = lig_at2.vector_to(lig_at1)
 
     # Rotation of ligand - aligning diresctions of two vectors
     rotmat = rotation_matrix(lig_vector, core_vector)
     ligand.rotate(rotmat)
-    ligand.translate(ligand[X].vector_to(core_h))
+    ligand.translate(lig_at1.vector_to(core_at1))
 
     # Translation of the ligand
-    hc_vec = ligand[X].vector_to(core_h)
+    hc_vec = lig_at1.vector_to(core_at1)
     ligand.translate(hc_vec)
 
     # Deletes atom in ligand
-    ligand.delete_atom(lig_other)
-    ligand.delete_atom(lig_h)
+    ligand.delete_atom(lig_at2)
     
     # Deletes atom in ligand
-    core.delete_atom(core_h)
+    core.delete_atom(core_at1)
 
-    return ligand, ligand[X]
+    return ligand, lig_at1
 
 
 # Function for matrix rotation
@@ -412,18 +383,22 @@ def run_ams_job(core_ligand):
     bonds = [bond.order for bond in core_ligand.bonds]
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
 
+    init()
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) for atom in core_ligand if atom.atnum == 7 or atom.atnum == 35 or atom.atnum == 82 or atom.atnum == 55]
+    s.input.ams.Constraints.Atom = [core_ligand.atoms.index(atom) for atom in core_ligand if atom.atnum == 8 or atom.atnum == 35 or atom.atnum == 82 or atom.atnum == 55]
     s.input.ams.System.BondOrders._1 = bonds
     s.input.ams.GeometryOptimization.MaxIterations = 100
     s.input.ams.Properties.Gradients = 'Yes'
     s.input.uff.Library = 'UFF'
     
-    j = AMSJob(molecule=core_ligand, settings=s)
+    config.log.stdout = 1
+    config.job.pickle = False
+    config.default_jobrunner = JobRunner(parallel=False, maxjobs=1)
     
-    with open('run.run', 'w') as run:
-        run.write(j.get_input())
+    j = AMSJob(molecule=core_ligand, settings=s)
+    results = j.run()
+    finish()
 
 
 def update_adf_pdb(core_ligand):
