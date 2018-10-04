@@ -332,7 +332,7 @@ def combine_QD(core, ligand_list):
     return QD
 
 
-def run_ams_job(QD, pdb_name, QD_folder, QD_indices, opt=True):
+def run_ams_job(QD, pdb_name, QD_folder, QD_indices, opt=False):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
