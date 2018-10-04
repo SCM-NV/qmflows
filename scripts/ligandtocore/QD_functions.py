@@ -1,12 +1,11 @@
 from scm.plams import *
 from qmflows import molkit
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolTransforms, rdForceFieldHelpers
-from rdkit.Chem import Atom as At
+from rdkit.Chem import AllChem, rdMolTransforms
 import numpy as np
 import copy
 import os
-import re
+import itertools
 
 
 def read_database(ligand_folder, database_name='ligand_database.txt'):
@@ -17,9 +16,11 @@ def read_database(ligand_folder, database_name='ligand_database.txt'):
     # checks if database_name exists, if not creates database_name
     if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
-            database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format('Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
+            database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format(
+            'Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
+
         database = [[],[],[],[],[]]
-        
+
     # else opens the database
     else:
         with open(os.path.join(ligand_folder, database_name), 'r') as database:
@@ -50,7 +51,7 @@ def create_entry(ligand, opt):
         d = 'ligand optimization disabled'
     e = ligand_smiles
     database_entry = [a, b, c, d, e]
-    
+
     return database_entry
 
 
@@ -68,7 +69,9 @@ def write_database(database_entries, ligand_folder, database, database_name='lig
             j = -1
 
     # format the database entries
-    database_entries = ["{0:6} {1:19} {2:30} {3:34} {4:}".format(str(j + i + 1), item[1], item[2], item[3], item[4]) for i,item in enumerate(database_entries) if item]
+    database_entries = ["{0:6} {1:19} {2:30} {3:34} {4:}".format(str(j + i + 1), 
+                        item[1], item[2], item[3], item[4]) for i,item in 
+                        enumerate(database_entries) if item]
     
     # write the database entries to the database
     with open(os.path.join(ligand_folder, database_name), 'a') as database:
@@ -96,7 +99,8 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
     if isinstance(file_name, str):
         file_name = [file_name]
     if not isinstance(file_name, str) and not isinstance(file_name, list):
-        raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) + " is not recognized as a <class 'str'> or <class 'list'>")
+        raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) + 
+                            " is not recognized as a <class 'str'> or <class 'list'>")
 
     # determine the nature of filename
     input_mol_list = [os.path.join(folder_path, name) for name in file_name]
@@ -143,7 +147,7 @@ def neighbors_mod(self, atom, exclude=[]):
     if atom.mol != self:
         raise MoleculeError('neighbors: passed atom should belong to the molecule')
     atom_list = [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
-    
+
     return atom_list
 
 
@@ -154,7 +158,7 @@ def global_minimum(ligand, ligand_folder):
     ligand_name = 'ligand_' + ligand.get_formula()
     molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
     print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
-    
+
     # delete all hydrogens and create a list of all bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
     [ligand.delete_atom(atom) for atom in ligand.atoms if atom.atnum == 1]
     dihedral_list = [dihedral_index(ligand, item) for item in ligand.bonds]
@@ -165,14 +169,12 @@ def global_minimum(ligand, ligand_folder):
     ligand = molkit.to_rdmol(ligand)
     n_scans = 2
     for i in range(n_scans):
+        if i > 0:
+            ligand = Chem.AddHs(ligand, addCoords=True)
         for item in dihedral_list:
-            if item[2] != 'skip' and item[1] == 1.0 and not ligand.GetBondWithIdx(item[0]).IsInRing():     
+            InRing = ligand.GetBondWithIdx(item[0]).IsInRing()
+            if item[2] != 'skip' and item[1] == 1.0 and not InRing:     
                 ligand = dihedral_scan(ligand, item)
-    
-    # reatatch all hydrogens and optimize the resulting structure
-    ligand = Chem.AddHs(ligand, addCoords=True)
-    uff = AllChem.UFFGetMoleculeForceField
-    uff(ligand).Minimize()
     
     # export the ligand to a .pdb and .xyz file
     ligand = molkit.from_rdmol(ligand)
@@ -189,18 +191,22 @@ def dihedral_index(ligand, bond):
     # the two atoms associated with a given bond
     at1 = bond.atom1
     at2 = bond.atom2
-    
+
     # the atoms bonded to at1 and at2
     at1_bonds = ligand.neighbors_mod(at1, exclude=at2)
     at2_bonds = ligand.neighbors_mod(at2, exclude=at1)
-    
+
     # a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
     # only the indices of non-terminal bonds are added to this list, the rest is skipped
     if len(at1_bonds) >= 1 and len(at2_bonds) >= 1:
-        dihedral_list = [ligand.bonds.index(bond), bond.order, ligand.atoms.index(at1_bonds[0]), ligand.atoms.index(at1), ligand.atoms.index(at2), ligand.atoms.index(at2_bonds[0])]
+        bond_idx = ligand.bonds.index
+        atom_idx = ligand.atoms.index
+        dihedral_list = [bond_idx(bond), bond.order, atom_idx(at1_bonds[0]), 
+                         atom_idx(at1), atom_idx(at2), atom_idx(at2_bonds[0])]
+
     else:
         dihedral_list = [ligand.bonds.index(bond), bond.order, 'skip']
-        
+
     return dihedral_list
 
 
@@ -211,18 +217,22 @@ def dihedral_scan(ligand, dihedral_list):
     # define a number of variables and create 4 copies of the ligand
     a = dihedral_list
     uff = AllChem.UFFGetMoleculeForceField
-    ligand = [copy.deepcopy(ligand), copy.deepcopy(ligand), copy.deepcopy(ligand)]
+    ligand = [copy.deepcopy(ligand) for i in range(3)]
 
     # create a list of all dihedral angles for which an uff geometry optimization will be carried out
-    angle = rdMolTransforms.GetDihedralDeg(ligand[0].GetConformer(), a[2], a[3], a[4], a[5])
+    get_dihed = rdMolTransforms.GetDihedralDeg
+    angle = get_dihed(ligand[0].GetConformer(), a[2], a[3], a[4], a[5])
     angle_list = [angle, angle + 120, angle - 120]
-    
+
     # optimized the geometry for all dihedral angles in angle_list; the one geometry that yields the lowest energy is returned
-    [rdMolTransforms.SetDihedralDeg(ligand[i].GetConformer(), a[2], a[3], a[4], a[5], item) for i,item in enumerate(angle_list)]
+    set_dihed = rdMolTransforms.SetDihedralDeg
+    [set_dihed(ligand[i].GetConformer(), a[2], a[3], a[4], a[5], item) for 
+     i,item in enumerate(angle_list)]
+
     [uff(item).Minimize() for item in ligand]
     energy_list = [uff(item).CalcEnergy() for item in ligand]
     minimum = energy_list.index(min(energy_list))
-    
+
     return ligand[minimum]
 
 
@@ -232,27 +242,30 @@ def find_substructure(ligand):
     Identify the ligand functional groups
     """
     ligand_rdkit = molkit.to_rdmol(ligand)
-    
+
     # creates a list containing predefined functional groups, each saved as an rdkit molecule
     functional_group_list = []
-    functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]'))     # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[Cl-].[N+]'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[Br-].[N+]'))    # ammonium halide
-    functional_group_list.append(Chem.MolFromSmarts('[I-].[N+]'))     # ammonium halide
+    functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]'))     # ammonium fluorides
+    functional_group_list.append(Chem.MolFromSmarts('[Cl-].[N+]'))    # ammonium chlorides
+    functional_group_list.append(Chem.MolFromSmarts('[Br-].[N+]'))    # ammonium bromides
+    functional_group_list.append(Chem.MolFromSmarts('[I-].[N+]'))     # ammonium iodides
     functional_group_list.append(Chem.MolFromSmarts('[H]O'))          # hydroxides
-    functional_group_list.append(Chem.MolFromSmarts('[H]S'))          # benzylic hydroxides
-    functional_group_list.append(Chem.MolFromSmarts('[H]N'))          # amine
-    functional_group_list.append(Chem.MolFromSmarts('[H]P'))          # phosphine
-    
-    # searches for functional groups (defined by functional_group_list) within the ligand; duplicates are removed 
-    matches = [ligand_rdkit.GetSubstructMatches(mol) for mol in functional_group_list]
-    matches = [j for i in matches for j in i]
+    functional_group_list.append(Chem.MolFromSmarts('[H]S'))          # sulfides
+    functional_group_list.append(Chem.MolFromSmarts('[H]N'))          # amines
+    functional_group_list.append(Chem.MolFromSmarts('[H]P'))          # phosphines
+
+    # searches for functional groups (defined by functional_group_list) within the ligand; duplicates are removed
+    get_match = ligand_rdkit.GetSubstructMatches
+    matches = [get_match(mol) for mol in functional_group_list]
+    matches = list(itertools.chain(*matches))
 
     # rotates the functional group hydrogen atom in addition to returning the indices of various important ligand atoms
-    ligand_list = [copy.deepcopy(ligand) for i,match in enumerate(matches) if match[1] != matches[i - 1][1] or i == 0]
+    ligand_list = [copy.deepcopy(ligand) for i,match in enumerate(matches) if 
+                   match[1] != matches[i - 1][1] or i == 0]
+
     [ligand.delete_atom(ligand[matches[i][0] + 1]) for i,ligand in enumerate(ligand_list)]
     matches = [item[1] for item in matches]
-    
+
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
 
@@ -273,7 +286,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index):
     lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
-    # Rotation of ligand - aligning diresctions of two vectors
+    # Rotation of ligand - aligning the ligand and core vectors
     rotmat = rotation_matrix(lig_vector, core_vector)
     ligand.rotate(rotmat)
     ligand.translate(lig_at1.vector_to(core_at1))
@@ -282,11 +295,9 @@ def rotate_ligand(core, ligand, core_index, ligand_index):
     hc_vec = lig_at1.vector_to(core_at1)
     ligand.translate(hc_vec)
 
-    # Deletes atom in ligand
+    # Deletes the core dummy atom and ligand center of mass
     ligand.delete_atom(lig_at2)
-    
-    # Deletes atom in core
-    core.delete_atom(core_at1)
+    core.delete_atom(core_at1)    
 
     return ligand, lig_at1
 
@@ -300,110 +311,46 @@ def rotation_matrix(vec1, vec2):
     b = np.array(vec2) / np.linalg.norm(vec2)
     v1, v2, v3 = np.cross(a, b)
     M = np.array([[0, -v3, v2], [v3, 0, -v1], [-v2, v1, 0]])
-    
+
     return (np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b)))
 
 
-def combine_core_ligand(core, ligand_list):
+def combine_QD(core, ligand_list):
     """
     combine the rotated ligands with the core, creating a bond bewteen the core and ligand in the process
     """
-    core_ligand = copy.deepcopy(core)
-    
+    QD = copy.deepcopy(core)
+
     # create a list of ligand atoms and intraligand bonds
     ligand_bonds = np.concatenate([ligand.bonds for ligand in ligand_list])
     ligand_atoms = np.concatenate(ligand_list)
 
     # Combined the ligand bond and atom list with the core
-    [core_ligand.add_atom(atom) for atom in ligand_atoms]
-    [core_ligand.add_bond(bond) for bond in ligand_bonds]
+    [QD.add_atom(atom) for atom in ligand_atoms]
+    [QD.add_bond(bond) for bond in ligand_bonds]
 
-    return core_ligand
-
-
-def prepare_pdb(core_ligand, core, ligand, core_ligand_indices):  
-    """
-    add residue names and formal atomic charges to the molecule
-    """
-    # define the number of atoms in the core and the number of ligands
-    len_core = len(core.atoms)
-    len_ligand = len(ligand[0].atoms) - 1
-    n_ligands = int((len(core_ligand.GetAtoms()) - len_core) / len_ligand)
-    
-    # add formal atomic charges to the carboxylate oxygens, Se and Cd 
-    charge_list = [[1, 'Li', 'Na', 'K', 'Rb', 'Cs'][2, 'Be', 'Mg', 'Ca', 'Sr', 'Ba'][-2, 'O', 'S', 'Se', 'Te', 'Po'][-1, 'F', 'Cl', 'Br', 'I', 'At']]
-    charge = [+1, +1, -1, +2]
-    [[At.SetFormalCharge(core_ligand.GetAtoms()[index], charge[i]) for index in index_list] for i,index_list in enumerate(core_ligand_indices)]
-    
-    # Assigns the core to the "QD " residual
-    pdb = Chem.MolToPDBBlock(core_ligand)
-    pdb = pdb.splitlines()
-    pdb_residue = [item.replace("UNL", "QD ") for i, item in enumerate(pdb) if i + 1 <= len_core]
-    
-    # assign the ligands to the "###" residues, where ### is an integer consisting of three numbers
-    offset = len_core
-    for i in range(n_ligands):
-        pdb_residue += [pdb[j + offset].replace("UNL", str(i).zfill(3)) for j in range(len_ligand)]
-        offset += len_ligand
-   
-    # export the new residue names back to the molecule
-    pdb_residue += pdb[offset:-1]
-    pdb_residue.append('END')
-    pdb_residue = '\n'.join(pdb_residue)
-    core_ligand = Chem.MolFromPDBBlock(pdb_residue, removeHs = False, proximityBonding = False)
-    
-    return core_ligand
+    return QD
 
 
-def run_ams_job(core_ligand, pdb_name, core_ligand_folder, core_ligand_indices):
+def run_ams_job(QD, pdb_name, QD_folder, QD_indices):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
-    at1 = [core_ligand.atoms.index(bond.atom1) + 1 for bond in core_ligand.bonds]
-    at2 = [core_ligand.atoms.index(bond.atom2) + 1 for bond in core_ligand.bonds]
-    bonds = [bond.order for bond in core_ligand.bonds]
+    at1 = [QD.atoms.index(bond.atom1) + 1 for bond in QD.bonds]
+    at2 = [QD.atoms.index(bond.atom2) + 1 for bond in QD.bonds]
+    bonds = [bond.order for bond in QD.bonds]
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
-    
-    neighbors = [len(core_ligand.neighbors(core_ligand[index])) / 2 for index in core_ligand_indices]
-    charge_list = [[1, 2, -3, -2, -1, 2],['Li', 'Na', 'K', 'Rb', 'Cs'],['Be', 'Mg', 'Ca', 'Sr', 'Ba'],['N', 'P', 'As', 'Sb', 'Bi'],['O', 'S', 'Se', 'Te', 'Po'],['F', 'Cl', 'Br', 'I', 'At'],['Cd', 'Pb']]
-    for i,index in enumerate(core_ligand_indices):
-        match = [core_ligand[index].symbol in sublist for sublist in charge_list]
-        if any(match):
-            charge = charge_list[0][match.index(True) - 1]
-            if charge > 0:
-                charge += -1 * int(neighbors[i])
-            elif charge < 0:
-                charge += 1 * int(neighbors[i])
-            core_ligand[index].properties.suffix = 'Charge=' + str(charge) + '.0'
-    
-    init(path=core_ligand_folder, folder=pdb_name)
+
+    init(path=QD_folder, folder=pdb_name)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = core_ligand_indices
+    s.input.ams.Constraints.Atom = QD_indices
     s.input.ams.System.BondOrders._1 = bonds
-    s.input.ams.GeometryOptimization.MaxIterations = 1000
+    s.input.ams.GeometryOptimization.MaxIterations = 100
     s.input.ams.Properties.Gradients = 'Yes'
-    
+
     s.input.uff.Library = 'UFF'
-    
-    j = AMSJob(molecule=core_ligand, settings=s, name=pdb_name)
+
+    j = AMSJob(molecule=QD, settings=s, name=pdb_name)
     results = j.run()
     finish()
-
-
-def update_adf_pdb(core_ligand):
-    """
-    update a .pdb file using coordinates provided by an .xyz file
-    """
-    with open('core_ligand/ams.1258.xyz', 'r') as cube:
-        xyz = cube.read().splitlines()
-    xyz = [item.split() for i,item in enumerate(xyz) if i > 1]
-    xyz = [[(subitem)[:6] for i,subitem in enumerate(item) if i > 0] for item in xyz]
-    xyz = ['     1      ' + item[0] + '  ' + item[1] + '  ' + item[2] + '  1.00  0.00           ' for item in xyz]
-    
-    with open('core_Br450Cs157Pb125__and__ligand_C26H56N1_@_N13.pdb', 'r') as cube_read:
-        cube_read = cube_read.read().splitlines()
-        cube_read = [re.sub('     1      .*?  1.00  0.00           ', xyz[i], item) for i, item in enumerate(cube_read) if i < 4301]
-        with open('core_Br450Cs157Pb125__and__ligand_C26H56N1_@_N13.opt.pdb', 'w') as cube_write:
-            for item in cube_read:
-                cube_write.write("%s\n" % item)
