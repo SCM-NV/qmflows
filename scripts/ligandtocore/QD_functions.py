@@ -1,11 +1,14 @@
+import copy
+import os
+import itertools
+
 from scm.plams import *
 from qmflows import molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdMolTransforms
+
 import numpy as np
-import copy
-import os
-import itertools
+
 
 
 def read_database(ligand_folder, database_name='ligand_database.txt'):
@@ -16,21 +19,24 @@ def read_database(ligand_folder, database_name='ligand_database.txt'):
     # checks if database_name exists, if not creates database_name
     if not os.path.exists(os.path.join(ligand_folder, database_name)):
         with open(os.path.join(ligand_folder, database_name), 'w') as database:
-            database.write("{0:6} {1:19} {2:30} {3:34} {4:}".format(
-            'Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
+            database.write('{0:6} {1:19} {2:30} {3:34} {4:}'.format(
+                'Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
 
-        database = [[],[],[],[],[]]
+        database = [[], [], [], [], []]
 
     # else opens the database
     else:
         with open(os.path.join(ligand_folder, database_name), 'r') as database:
             database = database.read().splitlines()
         database = [line.split() for line in database if line]
-        database = list(np.transpose(database[1:]))
-        database = [list(item) for item in database]
-        database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
-        database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
+        database = list(zip(*database[1:]))
         
+        if database:
+            database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
+            database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
+        else:
+            database = [[], [], [], [], []]
+
     return database
 
 
@@ -50,6 +56,7 @@ def create_entry(ligand, opt):
     else:
         d = 'ligand optimization disabled'
     e = ligand_smiles
+    
     database_entry = [a, b, c, d, e]
 
     return database_entry
@@ -59,23 +66,21 @@ def write_database(database_entries, ligand_folder, database, database_name='lig
     """
     write the new database entries to the database
     """
-    # check if any previous indices are present in database[0]  
-    if not database:
+    # check if any previous indices are present in database[0]
+    if not database or not database[0]:
         j = -1
     else:
-        try:
-            j = int(database[0][-1])
-        except:
-            j = -1
+        j = int(database[0][-1])
 
     # format the database entries
-    database_entries = ["{0:6} {1:19} {2:30} {3:34} {4:}".format(str(j + i + 1), 
-                        item[1], item[2], item[3], item[4]) for i,item in 
-                        enumerate(database_entries) if item]
-    
+    spacing = '{0:6} {1:19} {2:30} {3:34} {4:}'
+    database_entries = [spacing.format(str(j + i + 1), item[1], item[2], item[3], item[4]) for
+                        i, item in enumerate(database_entries) if item]
+
     # write the database entries to the database
     with open(os.path.join(ligand_folder, database_name), 'a') as database:
-        [database.write('\n' + entry) for entry in database_entries]
+        for entry in database_entries:
+            database.write('\n' + entry)
 
 
 def create_dir(dir_name, path=os.getcwd()):
@@ -92,24 +97,26 @@ def create_dir(dir_name, path=os.getcwd()):
 def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
     """
     first checks if the argument 'mol_name' is a string or a list
-    then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or .txt files containing SMILES strings
+    then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or
+    .txt files containing SMILES strings
     returns a list of PLAMS molecules
     """
     # check if filename is a string or a list, returns an error if it is neither
     if isinstance(file_name, str):
         file_name = [file_name]
     if not isinstance(file_name, str) and not isinstance(file_name, list):
-        raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) + 
+        raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) +
                             " is not recognized as a <class 'str'> or <class 'list'>")
 
     # determine the nature of filename
     input_mol_list = [os.path.join(folder_path, name) for name in file_name]
-    for i,item in enumerate(input_mol_list):
-        # if file_name is an .xyz file 
+    for i, item in enumerate(input_mol_list):
+        # if file_name is an .xyz file
         if file_name[i].find('.xyz') != -1:
             mol_list = [Molecule(mol) for mol in input_mol_list]
-            [mol.guess_bonds for mol in mol_list]
-        
+            for mol in mol_list:
+                mol.guess_bonds
+
         # if file_name is a .pdb file
         elif file_name[i].find('.pdb') != -1:
             mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
@@ -136,7 +143,7 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
 
 
 @add_to_class(Molecule)
-def neighbors_mod(self, atom, exclude=[]):
+def neighbors_mod(self, atom, exclude=''):
     """
     Modified PLAMS function, returns all connected atom with the exception of 'exclude'
     Exclude can be either an atom or list of atoms
@@ -159,12 +166,16 @@ def global_minimum(ligand, ligand_folder):
     molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
     print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
 
-    # delete all hydrogens and create a list of all bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
-    [ligand.delete_atom(atom) for atom in ligand.atoms if atom.atnum == 1]
+    # delete all hydrogens and create a list of all bond indices [0], bond orders [1]
+    # and dihedral indices [2, 3, 4 and 5](i.e. indices of four atoms defining a dihedral angle)
+    for atom in ligand:
+        if atom.atnum == 1:
+            ligand.delete_atom(atom)
     dihedral_list = [dihedral_index(ligand, item) for item in ligand.bonds]
 
-    # find the global minimum by systematically varying a select number of dihedral angles in a serial manner; this process is carried out twice.
-    # all bonds are scanned that meet the following four requirements: they are single bonds, non-terminal, not part of a ring and do not contain hydrogen.
+    # find the global minimum by systematically varying a select number of dihedral angles
+    # all bonds are scanned that meet the following four requirements:
+    # they are single bonds, non-terminal, not part of a ring and do not contain hydrogen.
     # 3 dihedral angles are checked for all abovementioned bonds
     ligand = molkit.to_rdmol(ligand)
     n_scans = 2
@@ -173,9 +184,9 @@ def global_minimum(ligand, ligand_folder):
             ligand = Chem.AddHs(ligand, addCoords=True)
         for item in dihedral_list:
             InRing = ligand.GetBondWithIdx(item[0]).IsInRing()
-            if item[2] != 'skip' and item[1] == 1.0 and not InRing:     
+            if item[2] != 'skip' and item[1] == 1.0 and not InRing:
                 ligand = dihedral_scan(ligand, item)
-    
+
     # export the ligand to a .pdb and .xyz file
     ligand = molkit.from_rdmol(ligand)
     molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.opt.pdb'))
@@ -196,12 +207,13 @@ def dihedral_index(ligand, bond):
     at1_bonds = ligand.neighbors_mod(at1, exclude=at2)
     at2_bonds = ligand.neighbors_mod(at2, exclude=at1)
 
-    # a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5](i.e. the indices of the four atoms defining a dihedral angle)
+    # a list of bond indices [0], bond orders [1]
+    # and dihedral indices [2, 3, 4 and 5](i.e. indices of four atoms defining a dihedral angle)
     # only the indices of non-terminal bonds are added to this list, the rest is skipped
     if len(at1_bonds) >= 1 and len(at2_bonds) >= 1:
         bond_idx = ligand.bonds.index
         atom_idx = ligand.atoms.index
-        dihedral_list = [bond_idx(bond), bond.order, atom_idx(at1_bonds[0]), 
+        dihedral_list = [bond_idx(bond), bond.order, atom_idx(at1_bonds[0]),
                          atom_idx(at1), atom_idx(at2), atom_idx(at2_bonds[0])]
 
     else:
@@ -219,22 +231,23 @@ def dihedral_scan(ligand, dihedral_list):
     uff = AllChem.UFFGetMoleculeForceField
     ligand = [copy.deepcopy(ligand) for i in range(3)]
 
-    # create a list of all dihedral angles for which an uff geometry optimization will be carried out
+    # create a list of all dihedral angles for which the geometry will be optimized (rdkit uff)
     get_dihed = rdMolTransforms.GetDihedralDeg
     angle = get_dihed(ligand[0].GetConformer(), a[2], a[3], a[4], a[5])
     angle_list = [angle, angle + 120, angle - 120]
 
-    # optimized the geometry for all dihedral angles in angle_list; the one geometry that yields the lowest energy is returned
+    # optimized the geometry for all dihedral angles in angle_list
+    # the geometry that yields the lowest energy is returned
     set_dihed = rdMolTransforms.SetDihedralDeg
-    [set_dihed(ligand[i].GetConformer(), a[2], a[3], a[4], a[5], item) for 
-     i,item in enumerate(angle_list)]
+    for i, item in enumerate(angle_list):
+        set_dihed(ligand[i].GetConformer(), a[2], a[3], a[4], a[5], item)
 
-    [uff(item).Minimize() for item in ligand]
+    for item in ligand:
+        uff(item).Minimize()
     energy_list = [uff(item).CalcEnergy() for item in ligand]
     minimum = energy_list.index(min(energy_list))
 
     return ligand[minimum]
-
 
 
 def find_substructure(ligand):
@@ -244,26 +257,23 @@ def find_substructure(ligand):
     ligand_rdkit = molkit.to_rdmol(ligand)
 
     # creates a list containing predefined functional groups, each saved as an rdkit molecule
-    functional_group_list = []
-    functional_group_list.append(Chem.MolFromSmarts('[F-].[N+]'))     # ammonium fluorides
-    functional_group_list.append(Chem.MolFromSmarts('[Cl-].[N+]'))    # ammonium chlorides
-    functional_group_list.append(Chem.MolFromSmarts('[Br-].[N+]'))    # ammonium bromides
-    functional_group_list.append(Chem.MolFromSmarts('[I-].[N+]'))     # ammonium iodides
-    functional_group_list.append(Chem.MolFromSmarts('[H]O'))          # hydroxides
-    functional_group_list.append(Chem.MolFromSmarts('[H]S'))          # sulfides
-    functional_group_list.append(Chem.MolFromSmarts('[H]N'))          # amines
-    functional_group_list.append(Chem.MolFromSmarts('[H]P'))          # phosphines
+    functional_group_list = ['[F-].[N+]', '[Cl-].[N+]', '[Br-].[N+]', '[I-].[N+]', '[H]O', '[H]S',
+                             '[H]N', '[H]P']
+    functional_group_list = [Chem.MolFromSmarts(smarts) for smarts in functional_group_list]
 
-    # searches for functional groups (defined by functional_group_list) within the ligand; duplicates are removed
+    # searches for functional groups (defined by functional_group_list) within the ligand
+    # duplicates are removed
     get_match = ligand_rdkit.GetSubstructMatches
     matches = [get_match(mol) for mol in functional_group_list]
     matches = list(itertools.chain(*matches))
 
-    # rotates the functional group hydrogen atom in addition to returning the indices of various important ligand atoms
-    ligand_list = [copy.deepcopy(ligand) for i,match in enumerate(matches) if 
+    # rotates the functional group hydrogen atom
+    # in addition to returning the indices of various important ligand atoms
+    ligand_list = [copy.deepcopy(ligand) for i, match in enumerate(matches) if
                    match[1] != matches[i - 1][1] or i == 0]
 
-    [ligand.delete_atom(ligand[matches[i][0] + 1]) for i,ligand in enumerate(ligand_list)]
+    for i, ligand in enumerate(ligand_list):
+        ligand.delete_atom(ligand[matches[i][0] + 1])
     matches = [item[1] for item in matches]
 
     if not ligand_list:
@@ -278,7 +288,8 @@ def rotate_ligand(core, ligand, core_index, ligand_index):
     """
     ligand = copy.deepcopy(ligand)
 
-    # Defines first atom on coordinate list (hydrogen), atom connected to it and vector representing bond between them
+    # Defines first atom on coordinate list (hydrogen),
+    # the atom connected to it and vector representing bond between them
     core_at1 = core[core_index]         # core dummy atom
     core_at2 = core[-1]                 # core center of mass
     core_vector = core_at1.vector_to(core_at2)
@@ -297,61 +308,65 @@ def rotate_ligand(core, ligand, core_index, ligand_index):
 
     # Deletes the core dummy atom and ligand center of mass
     ligand.delete_atom(lig_at2)
-    core.delete_atom(core_at1)    
+    core.delete_atom(core_at1)
 
     return ligand, lig_at1
 
 
-# Function for matrix rotation
 def rotation_matrix(vec1, vec2):
     """
-    Calculates the rotation matrix rotating *vec1* to *vec2*. Vectors can be any containers with 3 numerical values. They don't need to be normalized. Returns 3x3 numpy array.
+    Calculates the rotation matrix rotating *vec1* to *vec2*.
+    Vectors can be any containers with 3 numerical values. They don't need to be normalized.
+    Returns 3x3 numpy array.
     """
     a = np.array(vec1) / np.linalg.norm(vec1)
     b = np.array(vec2) / np.linalg.norm(vec2)
     v1, v2, v3 = np.cross(a, b)
     M = np.array([[0, -v3, v2], [v3, 0, -v1], [-v2, v1, 0]])
 
-    return (np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b)))
+    return np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b))
 
 
-def combine_QD(core, ligand_list):
+def combine_qd(core, ligand_list):
     """
-    combine the rotated ligands with the core, creating a bond bewteen the core and ligand in the process
+    combine the rotated ligands with the core,
+    creating a bond bewteen the core and ligand in the process
     """
-    QD = copy.deepcopy(core)
+    qd = copy.deepcopy(core)
 
     # create a list of ligand atoms and intraligand bonds
     ligand_bonds = np.concatenate([ligand.bonds for ligand in ligand_list])
     ligand_atoms = np.concatenate(ligand_list)
 
     # Combined the ligand bond and atom list with the core
-    [QD.add_atom(atom) for atom in ligand_atoms]
-    [QD.add_bond(bond) for bond in ligand_bonds]
+    for atom in ligand_atoms:
+        qd.add_atom(atom)
+    for bond in ligand_bonds:
+        qd.add_bond(bond)
 
-    return QD
+    return qd
 
 
-def run_ams_job(QD, pdb_name, QD_folder, QD_indices, opt=False):
+def run_ams_job(qd, pdb_name, qd_folder, qd_indices, opt=False):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
-    at1 = [QD.atoms.index(bond.atom1) + 1 for bond in QD.bonds]
-    at2 = [QD.atoms.index(bond.atom2) + 1 for bond in QD.bonds]
-    bonds = [bond.order for bond in QD.bonds]
-    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i,bond in enumerate(bonds)]
+    at1 = [qd.atoms.index(bond.atom1) + 1 for bond in qd.bonds]
+    at2 = [qd.atoms.index(bond.atom2) + 1 for bond in qd.bonds]
+    bonds = [bond.order for bond in qd.bonds]
+    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
-    init(path=QD_folder, folder=pdb_name)
+    init(path=qd_folder, folder=pdb_name)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = QD_indices
+    s.input.ams.Constraints.Atom = qd_indices
     s.input.ams.System.BondOrders._1 = bonds
     s.input.ams.GeometryOptimization.MaxIterations = 100
     s.input.ams.Properties.Gradients = 'Yes'
 
     s.input.uff.Library = 'UFF'
 
-    j = AMSJob(molecule=QD, settings=s, name=pdb_name)
+    j = AMSJob(molecule=qd, settings=s, name=pdb_name)
     if opt:
         results = j.run()
     finish()
