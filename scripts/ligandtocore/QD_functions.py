@@ -69,6 +69,44 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
     return mol_list
 
 
+def set_pdb(mol, residue_name, is_core=True):
+    """
+    Set a number of atomic properties
+    """
+    # Prepare a list of letters for pdb_info.Name
+    alphabet = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    alphabet = [i + j for i in alphabet for j in alphabet]
+
+    for i, atom in enumerate(mol):
+        symbol = atom.symbol + alphabet[i] + '  '
+
+        # Add a number of properties to atom
+        atom.properties.pdb_info.ResidueName = residue_name
+        atom.properties.pdb_info.Occupancy = 1.0
+        atom.properties.pdb_info.ResidueNumber = 1
+        atom.properties.pdb_info.Name = symbol[:4]
+        atom.properties.pdb_info.ChainId = 'A'
+
+        # Changes hydrogen and carbon from heteroatom to atom
+        if atom.symbol == 'H' or atom.symbol == 'C':
+            atom.properties.pdb_info.IsHeteroAtom = False
+
+        # Sets the formal atomic charge
+        if is_core:
+            if atom.symbol in ['Li', 'Na', 'K', 'Rb', 'Cs']:
+                atom.properties.charge = 1
+            elif atom.symbol in ['Be', 'Mg', 'Ca', 'Sr', 'Ba', 'Cd', 'Pb']:
+                atom.properties.charge = 2
+            elif atom.symbol in ['N', 'P', 'As', 'Sb', 'Bi']:
+                atom.properties.charge = -3
+            elif atom.symbol in ['O', 'S', 'Se', 'Te', 'Po']:
+                atom.properties.charge = -2
+            elif atom.symbol in ['H', 'F', 'Cl', 'Br', 'I', 'At']:
+                atom.properties.charge = -1
+
+    return mol
+
+
 def read_database(ligand_folder, database_name='ligand_database.txt'):
     """
     Open the database.
