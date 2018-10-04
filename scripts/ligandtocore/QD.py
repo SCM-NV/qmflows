@@ -70,21 +70,22 @@ def prep_QD(core, ligand, core_indices, ligand_index, QD_folder):
     # Returns a list with sublist [0] containing the rotated ligands (PLAMS Molecules) and [1] the heteroatoms (PLAMS Atoms) of the rotated ligands to be attached to the core
     # All core dummy atoms are deleted
     core = copy.deepcopy(core)
-    ligand_list = [QD_scripts.rotate_ligand(core, ligand, core_index, ligand_index) for core_index in core_indices]
-    ligand_list = np.array(ligand_list).T.tolist()
-
+    ligand_list = [QD_scripts.rotate_ligand(core, ligand, core_index, ligand_index) 
+                    for core_index in core_indices]
+    
+    ligand_list, ligand_indices = zip(*ligand_list)
     core.delete_atom(core[-1])
 
     # Prepare the .pdb filename (string)
     core_name = core.get_formula()
-    ligand_name = ligand_list[0][0].get_formula() + '_@_' + ligand[ligand_index + 1].symbol + str(ligand_index + 1)
+    ligand_name = ligand_list[0].get_formula() + '_@_' + ligand[ligand_index + 1].symbol + str(ligand_index + 1)
     pdb_name = str('core_' + core_name + '___ligand_' + ligand_name)
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule)
-    QD = QD_scripts.combine_QD(core, ligand_list[0])
+    QD = QD_scripts.combine_QD(core, ligand_list)
 
     # indices of all the atoms in the core and the ligand heteroatom anchor
-    QD_indices = [QD.atoms.index(atom) + 1 for atom in ligand_list[1]]
+    QD_indices = [QD.atoms.index(atom) + 1 for atom in ligand_indices]
     QD_indices += [i + 1 for i,atom in enumerate(core)]
 
     molkit.writepdb(QD, os.path.join(QD_folder, pdb_name + '.pdb'))
@@ -121,10 +122,8 @@ database = QD_scripts.read_database(ligand_folder)
 ligand_list = [prep_ligand(ligand, ligand_folder, database, opt=True) for ligand in ligand_list]
 
 # formating of ligand_list
-database_entries = [item[2] for item in ligand_list]
-ligand_indices = [item[1] for item in ligand_list]
+ligand_list, ligand_indices, database_entries = zip(*ligand_list)
 ligand_indices = list(itertools.chain(*ligand_indices))
-ligand_list = [item[0] for item in ligand_list]
 ligand_list = list(itertools.chain(*ligand_list))
 
 # writing new entries to the ligand database
@@ -135,12 +134,10 @@ QD_list = [prep_QD(core, ligand, core_indices[i], ligand_indices[j], QD_folder) 
            i,core in enumerate(core_list) for j,ligand in enumerate(ligand_list)]
 
 # formating of QD_list
-QD_indices = [item[2] for item in QD_list]
-pdb_name_list = [item[1] for item in QD_list]
-QD_list = [item[0] for item in QD_list]
+QD_list, pdb_name_list, QD_indices = zip(*QD_list)
 
 # optimize QD with the core frozen
-#[QD_scripts.run_ams_job(QD, pdb_name_list[i], QD_folder, QD_indices[i]) for i,QD in enumerate(QD_list)]
+[QD_scripts.run_ams_job(QD, pdb_name_list[i], QD_folder, QD_indices[i], opt=False) for i,QD in enumerate(QD_list)]
 
 # The End
 time_end = time.time()

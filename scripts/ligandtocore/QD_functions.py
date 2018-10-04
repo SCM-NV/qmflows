@@ -111,15 +111,15 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
             [mol.guess_bonds for mol in mol_list]
         
         # if file_name is a .pdb file
-        elif file_name[0].find('.pdb') != -1:
+        elif file_name[i].find('.pdb') != -1:
             mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
 
         # if file_name is a .mol file
-        elif file_name[0].find('.mol') != -1:
+        elif file_name[i].find('.mol') != -1:
             mol_list = [molkit.from_rdmol(Chem.MolFromMolFile(mol)) for mol in input_mol_list]
 
         # if file_name is a plain text file with smile strings
-        elif file_name[0].find(smiles_extension) != -1:
+        elif file_name[i].find(smiles_extension) != -1:
             mol_list = []
             for file in input_mol_list:
                 with open(file, 'r') as file_open:
@@ -332,7 +332,7 @@ def combine_QD(core, ligand_list):
     return QD
 
 
-def run_ams_job(QD, pdb_name, QD_folder, QD_indices):
+def run_ams_job(QD, pdb_name, QD_folder, QD_indices, opt=True):
     """
     converts PLAMS connectivity into adf .run script connectivity
     """
@@ -352,5 +352,6 @@ def run_ams_job(QD, pdb_name, QD_folder, QD_indices):
     s.input.uff.Library = 'UFF'
 
     j = AMSJob(molecule=QD, settings=s, name=pdb_name)
-    results = j.run()
+    if opt:
+        results = j.run()
     finish()
