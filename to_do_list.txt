@@ -6,3 +6,7 @@ bond orders can get messed up upon converting between plams and rdkit molecules
 cis/trans information is lost upon converting between plams and rdkit molecules
 
 automatically set formal atomic charges in prepare_pdb() depending on the element and the total molecular charge
+    plams atom properties?
+
+ligand name: ligand molecular formula
+    need a more unique ligand name
