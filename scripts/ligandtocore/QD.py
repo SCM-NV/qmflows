@@ -3,7 +3,7 @@ import os
 import itertools
 import time
 
-from scm.plams import *
+from scm.plams import (Atom, MoleculeError)
 from qmflows import molkit
 
 import QD_functions as qd_scripts
@@ -59,6 +59,7 @@ def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True):
         # Export the unoptimized ligand to a .pdb and .xyz file
         ligand_name = 'ligand_' + ligand.get_formula()
         molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
+        ligand.write(os.path.join(ligand_folder, ligand_name + '.xyz'))
         print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
 
         if opt:
@@ -70,6 +71,7 @@ def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True):
 
             # Export the optimized ligand to a .pdb and .xyz file
             molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.opt.pdb'))
+            ligand.write(os.path.join(ligand_folder, ligand_name + '.opt.xyz'))
             print('Optimized ligand:\t\t' + str(ligand_name) + '.opt.pdb')
 
         # Create an entry for in the database
@@ -111,13 +113,14 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_indices]
     qd_indices += [i + 1 for i, atom in enumerate(core)]
 
+    qd.write(os.path.join(qd_folder, pdb_name + '.xyz'))
     molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.pdb'))
     print('core + ligands:\t\t\t' + pdb_name + '.pdb')
 
     return qd, pdb_name, qd_indices
 
 
-def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, smiles_column,
+def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
               dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
@@ -131,8 +134,8 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
                                              for name in dir_name_list]
 
     # Imports the cores and ligands
-    core_list = qd_scripts.read_mol(core_folder, input_cores)
-    ligand_list = qd_scripts.read_mol(ligand_folder, input_ligands, smiles_column, smiles_extension)
+    core_list = qd_scripts.read_mol(core_folder, input_cores, column, row, smiles_extension)
+    ligand_list = qd_scripts.read_mol(ligand_folder, input_ligands, column, row, smiles_extension)
 
     # Return the indices of the core dummy atoms
     core_indices = [prep_core(core, core_folder, dummy, core_opt) for core in core_list]
@@ -182,8 +185,8 @@ input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string,
 input_ligands =     Same as input_cores, except for the ligand(s).
 smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file 
                     is chosen for input_cores or input_ligands.
-smiles_column =     The column containing the SMILES string in a plain text file. Relevant if such 
-                    a file is chosen for input_cores or input_ligands.
+column =            The column containing the SMILES string in a plain text file.
+row =               The amount of rows to be ignored in the SMILES string containing column.
 dummy =             The atomic number of atomic symbol of the atoms in the core that should be
                     should be replaced with ligands.
 database_name =     Name of the (to be) created ligand database
@@ -197,20 +200,21 @@ maxiter =           The maximum number of geometry iteration for qd_opt.
 """
 
 # Argument list
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 dir_name_list = ['core', 'ligand', 'QD']
 input_cores = 'Cd68Se55.xyz'
-input_ligands = 'OCCCCCCCCC'
+input_ligands = 'OC(C1=C(C2=CC=CC=C2)C=CC=C1C3=CC=CC=C3)=O'
 smiles_extension = '.txt'
-smiles_column = 0
+column = 0
+row = 0
 dummy = 'Cl'
 database_name = 'ligand_database.txt'
 use_database = True
 core_opt = False
 ligand_opt = True
-qd_opt = False
-maxiter = 100
+qd_opt = True
+maxiter = 10000
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, smiles_column, dummy,
+prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row, dummy,
           database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter)

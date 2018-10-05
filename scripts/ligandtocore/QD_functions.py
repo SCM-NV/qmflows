@@ -2,10 +2,10 @@ import copy
 import os
 import itertools
 
-from scm.plams import *
+from scm.plams import (Molecule, MoleculeError, add_to_class, Settings, AMSJob, init, finish)
 from qmflows import molkit
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolTransforms
+from rdkit.Chem import Bond, AllChem, rdMolTransforms
 
 import numpy as np
 
@@ -21,7 +21,7 @@ def create_dir(dir_name, path=os.getcwd()):
     return dir_path
 
 
-def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
+def read_mol(folder_path, file_name, column=0, row=0, smiles_extension='.txt'):
     """
     First checks if the argument 'mol_name' is a string or a list.
     Then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or .txt files containing
@@ -41,8 +41,6 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
         # If file_name is an .xyz file
         if file_name[i].find('.xyz') != -1:
             mol_list = [Molecule(mol) for mol in input_mol_list]
-            for mol in mol_list:
-                mol.guess_bonds
 
         # If file_name is a .pdb file
         elif file_name[i].find('.pdb') != -1:
@@ -57,10 +55,11 @@ def read_mol(folder_path, file_name, smiles_column=0, smiles_extension='.txt'):
             mol_list = []
             for file in input_mol_list:
                 with open(file, 'r') as file_open:
-                    mol_list.append(file_open.read())
-            mol_list = mol_list[0].splitlines()
+                    tmp_list = file_open.read().splitlines()
+                    mol_list.append(tmp_list[row:])
+            mol_list = list(itertools.chain(*mol_list))
             mol_list = [line.split() for line in mol_list if bool(line)]
-            mol_list = [molkit.from_smiles(mol[smiles_column]) for mol in mol_list]
+            mol_list = [molkit.from_smiles(mol[column]) for mol in mol_list]
 
         # If file_name is none of the above it is assumed to be a smile string
         else:
@@ -83,6 +82,7 @@ def set_pdb(mol, residue_name, is_core=True):
         # Add a number of properties to atom
         atom.properties.pdb_info.ResidueName = residue_name
         atom.properties.pdb_info.Occupancy = 1.0
+        atom.properties.pdb_info.TempFactor = 0.0
         atom.properties.pdb_info.ResidueNumber = 1
         atom.properties.pdb_info.Name = symbol[:4]
         atom.properties.pdb_info.ChainId = 'A'
@@ -145,7 +145,7 @@ def create_entry(ligand, opt):
 
     # Create the new database_entry
     a = []
-    b = molkit.from_rdmol(ligand).get_formula()
+    b = ligand.get_formula()
     c = 'ligand_' + b + '.pdb'
     if opt:
         d = 'ligand_' + b + '.opt.pdb'
@@ -293,19 +293,25 @@ def find_substructure(ligand):
     matches = [get_match(mol) for mol in functional_group_list]
     matches = list(itertools.chain(*matches))
 
+    # Remove all duplicate matches
+    unique_matches = []
+    for match in matches:
+        if not any(match[1] in item for item in unique_matches):
+            unique_matches.append(match)
+
     # Rotates the functional group hydrogen atom
     # In addition to returning the indices of various important ligand atoms
-    ligand_list = [copy.deepcopy(ligand) for i, match in enumerate(matches) if
-                   match[1] != matches[i - 1][1] or i == 0]
+    ligand_list = [copy.deepcopy(ligand) for match in unique_matches]
 
+    # Delete the hydrogen attached to the functional group and remove its index from unique_matches
     for i, ligand in enumerate(ligand_list):
-        ligand.delete_atom(ligand[matches[i][0] + 1])
-    matches = [item[1] for item in matches]
+        ligand.delete_atom(ligand[unique_matches[i][0] + 1])
+    unique_matches = [item[1] for item in unique_matches]
 
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
 
-    return ligand_list, matches
+    return ligand_list, unique_matches
 
 
 def rotate_ligand(core, ligand, core_index, ligand_index, i):
@@ -336,7 +342,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     ligand.delete_atom(lig_at2)
     core.delete_atom(core_at1)
 
-    # Assigns the residue number
+    # Update the residue numbers
     for atom in ligand:
         atom.properties.pdb_info.ResidueNumber = i + 2
 
@@ -384,10 +390,18 @@ def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
     """
     Converts PLAMS connectivity into adf .run script connectivity and optimizes the qd.
     """
-    # Create a connectivity list
+    # Create a list of aromatic bond indices
+    qd_rdkit = molkit.to_rdmol(qd)
+    aromatic = [Bond.GetIsAromatic(bond) for bond in qd_rdkit.GetBonds()]
+    aromatic = [i for i, item in enumerate(aromatic) if item]
+    
+    # Create a connectivity list; aromatic bonds get a bond order of 1.5
     at1 = [qd.atoms.index(bond.atom1) + 1 for bond in qd.bonds]
     at2 = [qd.atoms.index(bond.atom2) + 1 for bond in qd.bonds]
     bonds = [bond.order for bond in qd.bonds]
+    for i, bond in enumerate(qd.bonds):
+        if i in aromatic:
+            bonds[i] = 1.5
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
     # General AMS settings
@@ -405,5 +419,15 @@ def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
     init(path=qd_folder, folder=pdb_name)
     job = AMSJob(molecule=qd, settings=s, name=pdb_name)
     if opt:
-        job.run()
+        results = job.run()
+        output_mol = results.get_main_molecule()
+        for i, atom in enumerate(qd):
+            atom.move_to(output_mol[i + 1])
+
+        qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
+        molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
+        print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
+
+        return qd
+
     finish()
