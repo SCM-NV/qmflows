@@ -203,7 +203,7 @@ maxiter =           The maximum number of geometry iteration for qd_opt.
 path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 dir_name_list = ['core', 'ligand', 'QD']
 input_cores = 'Cd68Se55.xyz'
-input_ligands = 'OC(C1=C(C2=CC=CC=C2)C=CC=C1C3=CC=CC=C3)=O'
+input_ligands = 'OC(CCCCCCCC)=O'
 smiles_extension = '.txt'
 column = 0
 row = 0

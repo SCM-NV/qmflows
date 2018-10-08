@@ -283,8 +283,15 @@ def find_substructure(ligand):
     ligand_rdkit = molkit.to_rdmol(ligand)
 
     # Creates a list containing predefined functional groups, each saved as an rdkit molecule
-    functional_group_list = ['[F-].[N+]', '[Cl-].[N+]', '[Br-].[N+]', '[I-].[N+]', '[H]O', '[H]S',
-                             '[H]N', '[H]P']
+    functional_group_list = ['[-].[N+]',
+                             '[H]O',
+                             '[H]S',
+                             '[H]N',
+                             '[H]P',
+                             '[+].[O-]',
+                             '[+].[S-]',
+                             '[+].[N-]',
+                             '[+].[P-]']
     functional_group_list = [Chem.MolFromSmarts(smarts) for smarts in functional_group_list]
 
     # Searches for functional groups (defined by functional_group_list) within the ligand
@@ -338,10 +345,6 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     hc_vec = lig_at1.vector_to(core_at1)
     ligand.translate(hc_vec)
 
-    # Deletes the core dummy atom and ligand center of mass
-    ligand.delete_atom(lig_at2)
-    core.delete_atom(core_at1)
-
     # Update the residue numbers
     for atom in ligand:
         atom.properties.pdb_info.ResidueNumber = i + 2
@@ -349,6 +352,10 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     # Check if the ligand heteroatom has a charge assigned, assigns a charge if not
     if not lig_at1.properties.charge or lig_at1.properties.charge == 0:
         lig_at1.properties.charge = -1
+
+    # Deletes the core dummy atom and ligand center of mass
+    ligand.delete_atom(lig_at2)
+    core.delete_atom(core_at1)
 
     return ligand, lig_at1
 
@@ -417,6 +424,7 @@ def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
 
     # Run the job if opt = True
     init(path=qd_folder, folder=pdb_name)
+
     job = AMSJob(molecule=qd, settings=s, name=pdb_name)
     if opt:
         results = job.run()
