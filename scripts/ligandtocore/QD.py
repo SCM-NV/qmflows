@@ -38,7 +38,7 @@ def prep_core(core, core_folder, dummy=0, opt=True):
         return core_indices
 
 
-def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True):
+def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
@@ -78,12 +78,11 @@ def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True):
         database_entry = qd_scripts.create_entry(ligand, opt)
 
     # Identify functional groups within the ligand.
-    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
-    ligand_list = qd_scripts.find_substructure(ligand)
-    ligand_list = list(ligand_list)
-    ligand_list.append(database_entry)
+    ligand_list, ligand_indices = qd_scripts.find_substructure(ligand, split)
+    for ligand in ligand_list:
+        ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
 
-    return ligand_list
+    return ligand_list, ligand_indices, database_entry
 
 
 def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
@@ -102,8 +101,8 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     # Prepare the .pdb filename as a string.
     core_name = core.get_formula()
     ligand_formula = ligand_list[0].get_formula()
-    ligand_heteroatom = ligand[ligand_index + 1].symbol
-    ligand_name = ligand_formula + '_@_' + ligand_heteroatom + str(ligand_index + 1)
+    ligand_heteroatom = ligand[ligand_index].symbol
+    ligand_name = ligand_formula + '_@_' + ligand_heteroatom + str(ligand_index)
     pdb_name = str('core_' + core_name + '___ligand_' + ligand_name)
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule).
@@ -121,7 +120,7 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
 
 
 def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
-              dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter):
+              dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -146,7 +145,7 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
     else:
         database = [[], [], [], [], []]
 
-    ligand_list = [prep_ligand(ligand, ligand_folder, database, use_database, ligand_opt) for
+    ligand_list = [prep_ligand(ligand, ligand_folder, database, use_database, ligand_opt, split) for
                    ligand in ligand_list]
 
     # Formating of ligand_list
@@ -167,7 +166,7 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
 
     # Optimize qd with the core frozen
     for i, qd in enumerate(qd_list):
-        qd_scripts.run_ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], maxiter, qd_opt)
+        qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], maxiter, qd_opt)
 
     # The End
     time_end = time.time()
@@ -175,35 +174,11 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
 
 
 
-
-"""
-path =              The path where the input and output directories will be saved.
-dir_name_list =     Names of the to be created directories in path. Set to os.getcwd() to use the
-                    current directory.
-input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file 
-                    with SMILES string or a list containing any of the above objects.
-input_ligands =     Same as input_cores, except for the ligand(s).
-smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file 
-                    is chosen for input_cores or input_ligands.
-column =            The column containing the SMILES string in a plain text file.
-row =               The amount of rows to be ignored in the SMILES string containing column.
-dummy =             The atomic number of atomic symbol of the atoms in the core that should be
-                    should be replaced with ligands.
-database_name =     Name of the (to be) created ligand database
-use_database =      Export/import results from the (to be) created ligand database.
-core_opt =          Attempt to find the core global minimum using RDKit UFF. 
-                    WARNING: enabling this will probably ruin the core if care is not taken.
-                    Should work fine for organic cores.
-ligand_opt =        Attempt to find the ligand global minimum using RDKit UFF.
-qd_opt =            Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
-maxiter =           The maximum number of geometry iteration for qd_opt.
-"""
-
 # Argument list
 path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 dir_name_list = ['core', 'ligand', 'QD']
 input_cores = 'Cd68Se55.xyz'
-input_ligands = 'OC(CCCCCCCC)=O'
+input_ligands = ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC']
 smiles_extension = '.txt'
 column = 0
 row = 0
@@ -214,7 +189,35 @@ core_opt = False
 ligand_opt = True
 qd_opt = True
 maxiter = 10000
+split = True
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
 prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row, dummy,
-          database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter)
+          database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split)
+
+"""
+path =              The path where the input and output directories will be saved.
+dir_name_list =     Names of the to be created directories in path. Set to os.getcwd() to use the
+                    current directory.
+input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
+                    with SMILES string or a list containing any of the above objects.
+input_ligands =     Same as input_cores, except for the ligand(s).
+smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file
+                    is chosen for input_cores or input_ligands.
+column =            The column containing the SMILES string in a plain text file.
+row =               The amount of rows to be ignored in the SMILES string containing column.
+dummy =             The atomic number of atomic symbol of the atoms in the core that should be
+                    should be replaced with ligands.
+database_name =     Name of the (to be) created ligand database
+use_database =      Export/import results from the (to be) created ligand database.
+core_opt =          Attempt to find the core global minimum using RDKit UFF.
+                    WARNING: enabling this will probably ruin the core if care is not taken.
+                    Should work fine for organic cores.
+ligand_opt =        Attempt to find the ligand global minimum using RDKit UFF.
+qd_opt =            Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
+maxiter =           The maximum number of geometry iteration for qd_opt.
+split =             Should the ligand be attached to the core in its entirety or should a
+                    hydrogen atom/counterion first be removed?
+                    True:  RCO2H -> RCO2-, X-.NH4+ -> NH4+ & Na+.RCO2- -> RCO2-
+                    False: RCO2H -> RCO2H, NH4+ -> NH4+ & RCO2- -> RCO2-
+"""

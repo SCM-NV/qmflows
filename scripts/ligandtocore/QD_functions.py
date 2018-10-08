@@ -1,13 +1,15 @@
 import copy
 import os
 import itertools
+import shutil
+import numpy as np
 
 from scm.plams import (Molecule, MoleculeError, add_to_class, Settings, AMSJob, init, finish)
 from qmflows import molkit
 from rdkit import Chem
 from rdkit.Chem import Bond, AllChem, rdMolTransforms
 
-import numpy as np
+
 
 
 def create_dir(dir_name, path=os.getcwd()):
@@ -276,22 +278,35 @@ def dihedral_scan(ligand, dihedral_list):
     return ligand[minimum]
 
 
-def find_substructure(ligand):
+def find_substructure(ligand, split):
     """
     Identify the ligand functional groups.
     """
     ligand_rdkit = molkit.to_rdmol(ligand)
 
     # Creates a list containing predefined functional groups, each saved as an rdkit molecule
-    functional_group_list = ['[-].[N+]',
-                             '[H]O',
-                             '[H]S',
-                             '[H]N',
-                             '[H]P',
-                             '[+].[O-]',
-                             '[+].[S-]',
-                             '[+].[N-]',
-                             '[+].[P-]']
+    # IMPORTANT: The first atom should ALWAYS be the atom that should attach to the core
+    if split:
+        functional_group_list = ['[N+].[-]',
+                                 'O[H]',
+                                 'S[H]',
+                                 'N[H]',
+                                 'P[H]',
+                                 '[O-].[+]',
+                                 '[S-].[+]',
+                                 '[N-].[+]',
+                                 '[P-].[+]']
+    else:
+        functional_group_list = ['[N+]',
+                                 'O[H]',
+                                 'S[H]',
+                                 'N[H]',
+                                 'P[H]',
+                                 '[O-]',
+                                 '[S-]',
+                                 '[N-]',
+                                 '[P-]']
+
     functional_group_list = [Chem.MolFromSmarts(smarts) for smarts in functional_group_list]
 
     # Searches for functional groups (defined by functional_group_list) within the ligand
@@ -301,24 +316,33 @@ def find_substructure(ligand):
     matches = list(itertools.chain(*matches))
 
     # Remove all duplicate matches
-    unique_matches = []
+    ligand_indices = []
     for match in matches:
-        if not any(match[1] in item for item in unique_matches):
-            unique_matches.append(match)
+        if match[0] not in [item[0] for item in ligand_indices]:
+            ligand_indices.append(match)
+    ligand_list = [copy.deepcopy(ligand) for match in ligand_indices]
 
-    # Rotates the functional group hydrogen atom
-    # In addition to returning the indices of various important ligand atoms
-    ligand_list = [copy.deepcopy(ligand) for match in unique_matches]
-
-    # Delete the hydrogen attached to the functional group and remove its index from unique_matches
+    # Delete the hydrogen or mono-/polyatomic counterion attached to the functional group
     for i, ligand in enumerate(ligand_list):
-        ligand.delete_atom(ligand[unique_matches[i][0] + 1])
-    unique_matches = [item[1] for item in unique_matches]
-
+        at1 = ligand[ligand_indices[i][0] + 1]
+        at2 = ligand[ligand_indices[i][1] + 1]
+        if split:
+            if len(ligand.separate()) == 1:
+                ligand.delete_atom(at2)
+            else:
+                mol1, mol2 = ligand.separate()
+                if str(at1) in [str(atom) for atom in mol1]:
+                    ligand = mol1
+                else:
+                    ligand = mol2
+        ligand_atoms = [str(atom) for atom in ligand]
+        ligand_indices[i] = ligand_atoms.index(str(at1)) + 1
+        ligand_list[i] = ligand
+        
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
 
-    return ligand_list, unique_matches
+    return ligand_list, ligand_indices
 
 
 def rotate_ligand(core, ligand, core_index, ligand_index, i):
@@ -332,7 +356,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     core_at1 = core[core_index]         # core dummy atom
     core_at2 = core[-1]                 # core center of mass
     core_vector = core_at1.vector_to(core_at2)
-    lig_at1 = ligand[ligand_index + 1]  # ligand heteroatom
+    lig_at1 = ligand[ligand_index]  # ligand heteroatom
     lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
@@ -393,9 +417,9 @@ def combine_qd(core, ligand_list):
     return qd
 
 
-def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
+def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
     """
-    Converts PLAMS connectivity into adf .run script connectivity and optimizes the qd.
+    Converts PLAMS connectivity into adf .run script connectivity.
     """
     # Create a list of aromatic bond indices
     qd_rdkit = molkit.to_rdmol(qd)
@@ -411,6 +435,26 @@ def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
             bonds[i] = 1.5
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
+    if opt:
+         # Launch the AMS UFF constrained geometry optimization
+        output_mol = run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
+
+        # Update the atomic coordinates of qd
+        for i, atom in enumerate(qd):
+            atom.move_to(output_mol[i + 1])
+
+        # Write the reuslts to an .xyz and .pdb file
+        qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
+        molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
+        print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
+
+        return qd
+
+
+def run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter):
+    """
+    Runs the AMS UFF constrained geometry optimization.
+    """
     # General AMS settings
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
@@ -422,20 +466,16 @@ def run_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
     # Settings specific to UFF
     s.input.uff.Library = 'UFF'
 
-    # Run the job if opt = True
+    # Run the job
     init(path=qd_folder, folder=pdb_name)
-
     job = AMSJob(molecule=qd, settings=s, name=pdb_name)
-    if opt:
-        results = job.run()
-        output_mol = results.get_main_molecule()
-        for i, atom in enumerate(qd):
-            atom.move_to(output_mol[i + 1])
-
-        qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
-        molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
-        print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
-
-        return qd
-
+    results = job.run()
+    output_mol = results.get_main_molecule()
     finish()
+
+    # Copy the resulting .rkf and .out files and delete the PLAMS directory
+    shutil.copy2(results['ams.rkf'], os.path.join(qd_folder, pdb_name + '.opt.rkf'))
+    shutil.copy2(results[pdb_name + '.out'], os.path.join(qd_folder, pdb_name + '.opt.out'))
+    shutil.rmtree(os.path.join(qd_folder, pdb_name))
+
+    return output_mol
