@@ -179,6 +179,58 @@ def write_database(database_entries, ligand_folder, database, database_name='lig
             database.write('\n' + entry)
 
 
+def manage_ligand(ligand, ligand_folder, opt, database):
+    """
+    Search the database for any ligand matches.
+    Pull the structure if a match is found or alternatively optimize a new geometry.
+    """
+    # Checks if the database contains any entries and if the use of a database is enabled.
+    if database:
+        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
+    else:
+        matches = [False]
+
+    # If a ligand is present in the database check if the corresponding .pdb file exists
+    if any(matches):
+        index = matches.index(True)
+        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
+    else:
+        pdb_exists = False
+    
+    # Pull a geometry from the database if possible
+    if any(matches) and pdb_exists:
+        ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
+        database_entry = False
+    else:
+        # Export the unoptimized ligand to a .pdb and .xyz file
+        ligand_name = 'ligand_' + ligand.get_formula()
+        molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
+        ligand.write(os.path.join(ligand_folder, ligand_name + '.xyz'))
+        print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
+
+        # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
+        if opt:
+            # Optimize the ligand and set pdb_info 
+            ligand = global_minimum(ligand, ligand_folder)
+            set_pdb(ligand, 'LIG', is_core=False)
+
+            # Export the optimized ligand to a .pdb and .xyz file
+            molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.opt.pdb'))
+            ligand.write(os.path.join(ligand_folder, ligand_name + '.opt.xyz'))
+            print('Optimized ligand:\t\t' + str(ligand_name) + '.opt.pdb')
+
+        # Create an entry for in the database if no previous entries are present
+        # or prints a warning if a structure is present in the database but the .pdb file is missing
+        if not any(matches) and pdb_exists:
+            database_entry = create_entry(ligand, opt)
+        else:
+            database_entry = False
+            print('\ndatabase entry exists for ' + str(ligand.get_formula()) +
+              ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.\n')
+
+    return ligand, database_entry
+
+
 @add_to_class(Molecule)
 def neighbors_mod(self, atom, exclude=''):
     """
@@ -433,20 +485,19 @@ def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
             bonds[i] = 1.5
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
-    if opt:
-         # Launch the AMS UFF constrained geometry optimization
-        output_mol = run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
+    # Launch the AMS UFF constrained geometry optimization
+    output_mol = run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
 
-        # Update the atomic coordinates of qd
-        for i, atom in enumerate(qd):
-            atom.move_to(output_mol[i + 1])
+    # Update the atomic coordinates of qd
+    for i, atom in enumerate(qd):
+        atom.move_to(output_mol[i + 1])
 
-        # Write the reuslts to an .xyz and .pdb file
-        qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
-        molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
-        print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
+    # Write the reuslts to an .xyz and .pdb file
+    qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
+    molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
+    print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
 
-        return qd
+    return qd
 
 
 def run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter):

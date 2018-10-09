@@ -42,47 +42,8 @@ def prep_ligand(ligand, ligand_folder, database, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
-    # Checks if the database contains any entries and if the use of a database is enabled.
-    if database:
-        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
-    else:
-        matches = [False]
-
-    # If a ligand is present in the database check if the corresponding .pdb file exists
-    if any(matches):
-        index = matches.index(True)
-        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
-    else:
-        pdb_exists = False
-
-    # Append the database or optimize the ligand and create a new entry for the database.
-    # The geometry will also be optmized if a previous entry exists in the database 
-    # but the .pdb file is missing
-    if any(matches) and pdb_exists:
-        ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
-        database_entry = False
-    else:
-        # Export the unoptimized ligand to a .pdb and .xyz file
-        ligand_name = 'ligand_' + ligand.get_formula()
-        molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
-        ligand.write(os.path.join(ligand_folder, ligand_name + '.xyz'))
-        print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
-
-        if opt:
-            # Optimize the ligand
-            ligand = qd_scripts.global_minimum(ligand, ligand_folder)
-
-            # Set pdb_info
-            qd_scripts.set_pdb(ligand, 'LIG', is_core=False)
-
-            # Export the optimized ligand to a .pdb and .xyz file
-            molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.opt.pdb'))
-            ligand.write(os.path.join(ligand_folder, ligand_name + '.opt.xyz'))
-            print('Optimized ligand:\t\t' + str(ligand_name) + '.opt.pdb')
-
-        # Create an entry for in the database if no previous entries are present
-        if not any(matches):
-            database_entry = qd_scripts.create_entry(ligand, opt)
+    # Handles all interaction between the database, the ligand and the ligand optimization
+    ligand, database_entry = qd_scripts.manage_ligand(ligand, ligand_folder, opt, database)
 
     # Identify functional groups within the ligand and add a dummy atom to the center of mass.
     ligand_list, ligand_indices = qd_scripts.find_substructure(ligand, split)
@@ -164,15 +125,24 @@ def prep_prep(*arguments):
         qd_scripts.write_database(database_entries, ligand_folder, database)
 
     # Combine the core with the ligands, yielding qd
-    qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for i, core in 
+    qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for i, core in
                enumerate(core_list) for j, ligand in enumerate(ligand_list)]
 
     # Formating of qd_list
     qd_list, pdb_name_list, qd_indices = zip(*qd_list)
 
-    # Optimize qd with the core frozen
-    for i, qd in enumerate(qd_list):
-        qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], maxiter, qd_opt)
+    # Check if the ADF environment variables are set and optimize the qd with the core frozen
+    if qd_opt:
+        sys_var = ['ADFBIN', 'ADFHOME', 'ADFRESOURCES', 'SCMLICENSE']
+        sys_var_exists = [item in os.environ for item in sys_var]
+        for i, item in enumerate(sys_var_exists):
+            if not item:
+                print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
+        if False in sys_var_exists:
+            raise MoleculeError('One or more ADF environment variables have not been set,' +
+                                ' aborting geometry optimization.')
+        for i, qd in enumerate(qd_list):
+            qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], maxiter)
 
     # The End
     time_end = time.time()
@@ -181,7 +151,7 @@ def prep_prep(*arguments):
 
 
 # Argument list
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 dir_name_list = ['core', 'ligand', 'QD']
 input_cores = 'Cd68Se55.xyz'
 input_ligands = ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC']
@@ -197,16 +167,16 @@ qd_opt = False
 maxiter = 10000
 split = True
 
-arguments = [path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row, dummy,
-          database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split]
+prep_prep_args = [path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
+                  dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split]
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(*arguments)
+prep_prep(*prep_prep_args)
 
 """
-path =              The path where the input and output directories will be saved. Set to 
+path =              The path where the input and output directories will be saved. Set to
                     os.getcwd() to use the current directory.
-dir_name_list =     Names of the to be created directories in path. 
+dir_name_list =     Names of the to be created directories in path.
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
                     with SMILES string or a list containing any of the above objects.
 input_ligands =     Same as input_cores, except for the ligand(s).
