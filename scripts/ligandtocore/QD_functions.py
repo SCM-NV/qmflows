@@ -10,8 +10,6 @@ from rdkit import Chem
 from rdkit.Chem import Bond, AllChem, rdMolTransforms
 
 
-
-
 def create_dir(dir_name, path=os.getcwd()):
     """
     Creates a new directory if this directory does not yet exist.
@@ -120,20 +118,20 @@ def read_database(ligand_folder, database_name='ligand_database.txt'):
             database.write('{0:6} {1:19} {2:30} {3:34} {4:}'.format(
                 'Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
 
-        database = [[], [], [], [], []]
+    # Open database_name
+    with open(os.path.join(ligand_folder, database_name), 'r') as database:
+        database = database.read().splitlines()
+    database = [line.split() for line in database if line]
+    database = list(zip(*database[1:]))
 
-    # Else opens the database
+    # If the database is not emtpy
+    if database:
+        database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
+        database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
+        
+    # If the database is empty
     else:
-        with open(os.path.join(ligand_folder, database_name), 'r') as database:
-            database = database.read().splitlines()
-        database = [line.split() for line in database if line]
-        database = list(zip(*database[1:]))
-
-        if database:
-            database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
-            database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
-        else:
-            database = [[], [], [], [], []]
+        database = [[], [], [], [], []]
 
     return database
 

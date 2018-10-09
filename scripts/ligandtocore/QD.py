@@ -38,21 +38,27 @@ def prep_core(core, core_folder, dummy=0, opt=True):
         return core_indices
 
 
-def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True, split=True):
+def prep_ligand(ligand, ligand_folder, database, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
-    # Checks if the database exists and if the ligand is already present.
-    # Returns a list of booleans.
-    if database and use_database:
+    # Checks if the database contains any entries and if the use of a database is enabled.
+    if database:
         matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
     else:
         matches = [False]
 
-    # If the ligand is already present in the database: append the database.
-    # If not, optimize the ligand and create a new entry for the database.
+    # If a ligand is present in the database check if the corresponding .pdb file exists
     if any(matches):
         index = matches.index(True)
+        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
+    else:
+        pdb_exists = False
+
+    # Append the database or optimize the ligand and create a new entry for the database.
+    # The geometry will also be optmized if a previous entry exists in the database 
+    # but the .pdb file is missing
+    if any(matches) and pdb_exists:
         ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
         database_entry = False
     else:
@@ -74,10 +80,11 @@ def prep_ligand(ligand, ligand_folder, database, use_database=True, opt=True, sp
             ligand.write(os.path.join(ligand_folder, ligand_name + '.opt.xyz'))
             print('Optimized ligand:\t\t' + str(ligand_name) + '.opt.pdb')
 
-        # Create an entry for in the database
-        database_entry = qd_scripts.create_entry(ligand, opt)
+        # Create an entry for in the database if no previous entries are present
+        if not any(matches):
+            database_entry = qd_scripts.create_entry(ligand, opt)
 
-    # Identify functional groups within the ligand.
+    # Identify functional groups within the ligand and add a dummy atom to the center of mass.
     ligand_list, ligand_indices = qd_scripts.find_substructure(ligand, split)
     for ligand in ligand_list:
         ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
@@ -119,8 +126,7 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     return qd, pdb_name, qd_indices
 
 
-def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
-              dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split):
+def prep_prep(*arguments):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -145,7 +151,7 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
     else:
         database = [[], [], [], [], []]
 
-    ligand_list = [prep_ligand(ligand, ligand_folder, database, use_database, ligand_opt, split) for
+    ligand_list = [prep_ligand(ligand, ligand_folder, database, ligand_opt, split) for
                    ligand in ligand_list]
 
     # Formating of ligand_list
@@ -158,8 +164,8 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
         qd_scripts.write_database(database_entries, ligand_folder, database)
 
     # Combine the core with the ligands, yielding qd
-    qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for
-               i, core in enumerate(core_list) for j, ligand in enumerate(ligand_list)]
+    qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for i, core in 
+               enumerate(core_list) for j, ligand in enumerate(ligand_list)]
 
     # Formating of qd_list
     qd_list, pdb_name_list, qd_indices = zip(*qd_list)
@@ -175,7 +181,7 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
 
 
 # Argument list
-path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 dir_name_list = ['core', 'ligand', 'QD']
 input_cores = 'Cd68Se55.xyz'
 input_ligands = ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC']
@@ -187,37 +193,41 @@ database_name = 'ligand_database.txt'
 use_database = True
 core_opt = False
 ligand_opt = True
-qd_opt = True
+qd_opt = False
 maxiter = 10000
 split = True
 
+arguments = [path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row, dummy,
+          database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split]
+
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row, dummy,
-          database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split)
+prep_prep(*arguments)
 
 """
-path =              The path where the input and output directories will be saved.
-dir_name_list =     Names of the to be created directories in path. Set to os.getcwd() to use the
-                    current directory.
+path =              The path where the input and output directories will be saved. Set to 
+                    os.getcwd() to use the current directory.
+dir_name_list =     Names of the to be created directories in path. 
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
                     with SMILES string or a list containing any of the above objects.
 input_ligands =     Same as input_cores, except for the ligand(s).
 smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file
                     is chosen for input_cores or input_ligands.
-column =            The column containing the SMILES string in a plain text file.
+column =            The column containing the SMILES strings in the plain text file.
 row =               The amount of rows to be ignored in the SMILES string containing column.
+                    Should be used when e.g. the first row does not contain a SMILES string
 dummy =             The atomic number of atomic symbol of the atoms in the core that should be
                     should be replaced with ligands.
-database_name =     Name of the (to be) created ligand database
-use_database =      Export/import results from the (to be) created ligand database.
+database_name =     Name plus extension of the (to be) created ligand database.
+use_database =      Export/import results from the (to be) created ligand database. No database will
+                    be used and/or maintained when set to False.
 core_opt =          Attempt to find the core global minimum using RDKit UFF.
-                    WARNING: enabling this will probably ruin the core if care is not taken.
+                    WARNING: enabling this will probably ruin the core if care is not taken!
                     Should work fine for organic cores.
 ligand_opt =        Attempt to find the ligand global minimum using RDKit UFF.
-qd_opt =            Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
-maxiter =           The maximum number of geometry iteration for qd_opt.
+qd_opt =            Optimize the quantum dot (qd)(i.e core + all ligands) using ADF UFF.
+maxiter =           The maximum number of geometry iteration during qd_opt.
 split =             Should the ligand be attached to the core in its entirety or should a
-                    hydrogen atom/counterion first be removed?
-                    True:  RCO2H -> RCO2-, X-.NH4+ -> NH4+ & Na+.RCO2- -> RCO2-
-                    False: RCO2H -> RCO2H, NH4+ -> NH4+ & RCO2- -> RCO2-
+                    hydrogen atom/counterion first be removed? Examples are provided below:
+                    True:  HO2CR -> -O2CR,  X-.NH4+ -> NH4+  &  Na+.-O2CR -> -O2CR
+                    False: HO2CR -> HO2CR,  NH4+ -> NH4+  & -O2CR -> -O2CR
 """
