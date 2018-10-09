@@ -2,6 +2,7 @@ import copy
 import os
 import itertools
 import time
+import sys
 
 from scm.plams import (Atom, MoleculeError)
 from qmflows import molkit
@@ -87,11 +88,7 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     return qd, pdb_name, qd_indices
 
 
-
-
-
-def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
-              dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split):
+def prep_prep(**arg):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -99,54 +96,49 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
     time_start = time.time()
     print('\n')
 
-    # Managing the result directories
-    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=path) for name in
-                                             dir_name_list]
+    # Create the result directories
+    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=arg['path']) for
+                                             name in arg['dir_name_list']]
 
     # Imports the cores and ligands
-    core_list = qd_scripts.read_mol(core_folder, input_cores, column, row, smiles_extension)
-    ligand_list = qd_scripts.read_mol(ligand_folder, input_ligands, column, row, smiles_extension)
+    core_list = qd_scripts.read_mol(core_folder, arg['input_cores'], arg['column'], arg['row'],
+                                    arg['smiles_extension'])
+    ligand_list = qd_scripts.read_mol(ligand_folder, arg['input_ligands'], arg['column'],
+                                      arg['row'], arg['smiles_extension'])
 
     # Return the indices of the core dummy atoms
-    core_indices = [prep_core(core, core_folder, dummy, core_opt) for core in core_list]
+    core_indices = [prep_core(core, core_folder, arg['dummy'], arg['core_opt']) for
+                    core in core_list]
 
     # Open the ligand database and check if the specified ligand(s) is already present
-    if use_database:
-        database = qd_scripts.read_database(ligand_folder, database_name)
+    if arg['use_database']:
+        database = qd_scripts.read_database(ligand_folder, arg['database_name'])
     else:
         database = [[], [], [], [], []]
 
-    ligand_list = [prep_ligand(ligand, ligand_folder, database, ligand_opt, split) for ligand in
-                   ligand_list]
-
-    # Formating of ligand_list
+    # Rotate all the ligands and format the resulting list
+    ligand_list = [prep_ligand(ligand, ligand_folder, database, arg['ligand_opt'], arg['split'])
+                   for ligand in ligand_list]
     ligand_list, ligand_indices, database_entries = zip(*ligand_list)
     ligand_indices = list(itertools.chain(*ligand_indices))
     ligand_list = itertools.chain(*ligand_list)
 
     # Write new entries to the ligand database
-    if use_database:
+    if arg['use_database']:
         qd_scripts.write_database(database_entries, ligand_folder, database)
 
-    # Combine the core with the ligands, yielding qd
+    # Combine the core with the ligands, yielding qd, and format the resulting list
     qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for i, core in
                enumerate(core_list) for j, ligand in enumerate(ligand_list)]
-
-    # Formating of qd_list
     qd_list, pdb_name_list, qd_indices = zip(*qd_list)
 
     # Check if the ADF environment variables are set and optimize the qd with the core frozen
-    if qd_opt:
-        sys_var = ['ADFBIN', 'ADFHOME', 'ADFRESOURCES', 'SCMLICENSE']
-        sys_var_exists = [item in os.environ for item in sys_var]
-        for i, item in enumerate(sys_var_exists):
-            if not item:
-                print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
-        if False in sys_var_exists:
-            raise MoleculeError('One or more ADF environment variables have not been set,' +
-                                ' aborting geometry optimization.')
-        for i, qd in enumerate(qd_list):
-            qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], maxiter)
+    if arg['qd_opt']:
+        sys_var = qd_scripts.check_sys_var()
+        if sys_var:
+            for i, qd in enumerate(qd_list):
+                qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder,
+                                        qd_indices[i], arg['maxiter'])
 
     # The End
     time_end = time.time()
@@ -155,12 +147,11 @@ def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension,
 
 
 
-# Argument list
-prep_prep_args = {
+arguments = {
+    'input_cores': 'Cd68Se55.xyz',
+    'input_ligands': ['OCCCCCCCCC'],
     'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
     'dir_name_list': ['core', 'ligand', 'QD'],
-    'input_cores': 'Cd68Se55.xyz',
-    'input_ligands': ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC'],
     'smiles_extension': '.txt',
     'column': 0,
     'row': 0,
@@ -174,17 +165,23 @@ prep_prep_args = {
     'split': True
 }
 
+argv = [item for item in sys.argv[1:]]
+if argv:
+    argv = [item.split('=') for item in argv]
+    for item in argv:
+        arguments[item[0]] = item[1]
+
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(**prep_prep_args)
+prep_prep(**arguments)
 
 """
-path =              The path where the input and output directories will be saved. Set to
-                    os.getcwd() to use the current directory.
-dir_name_list =     Names of the to be created directories in path.
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
                     with SMILES string or a list containing any of the above objects.
 input_ligands =     Same as input_cores, except for the ligand(s).
+path =              The path where the input and output directories will be saved. Set to
+                    os.getcwd() to use the current directory.
+dir_name_list =     Names of the to be created directories in path.
 smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file
                     is chosen for input_cores or input_ligands.
 column =            The column containing the SMILES strings in the plain text file.

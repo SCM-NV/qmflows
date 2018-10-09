@@ -128,7 +128,7 @@ def read_database(ligand_folder, database_name='ligand_database.txt'):
     if database:
         database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
         database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
-        
+
     # If the database is empty
     else:
         database = [[], [], [], [], []]
@@ -181,23 +181,10 @@ def write_database(database_entries, ligand_folder, database, database_name='lig
 
 def manage_ligand(ligand, ligand_folder, opt, database):
     """
-    Search the database for any ligand matches.
-    Pull the structure if a match is found or alternatively optimize a new geometry.
+    Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
-    # If database usage is enabled: compare the ligand with previous entries.
-    if database:
-        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
-    else:
-        matches = [False]
+    matches, pdb_exists, index = find_match(ligand, ligand_folder, database)
 
-    # If a match has been found between the ligand and one of the database entries: check if the
-    # corresponding .pdb file actually exists.
-    if any(matches):
-        index = matches.index(True)
-        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
-    else:
-        pdb_exists = False
-    
     # Pull a geometry from the database if possible, or optimize a new structure
     if any(matches) and pdb_exists:
         ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
@@ -211,8 +198,8 @@ def manage_ligand(ligand, ligand_folder, opt, database):
 
         # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
         if opt:
-            # Optimize the ligand and set pdb_info 
-            ligand = global_minimum(ligand, ligand_folder)
+            # Optimize the ligand and set pdb_info
+            ligand = global_minimum(ligand)
             set_pdb(ligand, 'LIG', is_core=False)
 
             # Export the optimized ligand to a .pdb and .xyz file
@@ -227,9 +214,31 @@ def manage_ligand(ligand, ligand_folder, opt, database):
         else:
             database_entry = False
             print('\ndatabase entry exists for ' + str(ligand.get_formula()) +
-              ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.\n')
+                  ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
     return ligand, database_entry
+
+
+def find_match(ligand, ligand_folder, database):
+    """
+    Search the database for any ligand matches.
+    """
+    # If database usage is enabled: compare the ligand with previous entries.
+    if database:
+        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
+    else:
+        matches = [False]
+
+    # If a match has been found between the ligand and one of the database entries: check if the
+    # corresponding .pdb file actually exists.
+    if any(matches):
+        index = matches.index(True)
+        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
+    else:
+        index = ''
+        pdb_exists = False
+
+    return matches, pdb_exists, index
 
 
 @add_to_class(Molecule)
@@ -246,7 +255,7 @@ def neighbors_mod(self, atom, exclude=''):
     return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
 
 
-def global_minimum(ligand, ligand_folder):
+def global_minimum(ligand):
     """
     Find the glibal minimum of the ligand with RDKit UFF.
     """
@@ -389,7 +398,7 @@ def find_substructure(ligand, split):
         ligand_atoms = [str(atom) for atom in ligand]
         ligand_indices[i] = ligand_atoms.index(str(at1)) + 1
         ligand_list[i] = ligand
-        
+
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
 
@@ -468,7 +477,24 @@ def combine_qd(core, ligand_list):
     return qd
 
 
-def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
+def check_sys_var():
+    """
+    Check if all ADF environment variables are set.
+    """
+    sys_var = ['ADFBIN', 'ADFHOME', 'ADFRESOURCES', 'SCMLICENSE']
+    sys_var_exists = [item in os.environ for item in sys_var]
+    for i, item in enumerate(sys_var_exists):
+        if not item:
+            print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
+    if False in sys_var_exists:
+        print('One or more ADF environment variables have not been set, aborting ' +
+              'geometry optimization.')
+        return False
+    else:
+        return True
+
+
+def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
     """
     Converts PLAMS connectivity into adf .run script connectivity.
     """
@@ -476,7 +502,7 @@ def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000, opt=False):
     qd_rdkit = molkit.to_rdmol(qd)
     aromatic = [Bond.GetIsAromatic(bond) for bond in qd_rdkit.GetBonds()]
     aromatic = [i for i, item in enumerate(aromatic) if item]
-    
+
     # Create a connectivity list; aromatic bonds get a bond order of 1.5
     at1 = [qd.atoms.index(bond.atom1) + 1 for bond in qd.bonds]
     at2 = [qd.atoms.index(bond.atom2) + 1 for bond in qd.bonds]
