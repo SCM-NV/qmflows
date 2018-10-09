@@ -184,20 +184,21 @@ def manage_ligand(ligand, ligand_folder, opt, database):
     Search the database for any ligand matches.
     Pull the structure if a match is found or alternatively optimize a new geometry.
     """
-    # Checks if the database contains any entries and if the use of a database is enabled.
+    # If database usage is enabled: compare the ligand with previous entries.
     if database:
         matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
     else:
         matches = [False]
 
-    # If a ligand is present in the database check if the corresponding .pdb file exists
+    # If a match has been found between the ligand and one of the database entries: check if the
+    # corresponding .pdb file actually exists.
     if any(matches):
         index = matches.index(True)
         pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
     else:
         pdb_exists = False
     
-    # Pull a geometry from the database if possible
+    # Pull a geometry from the database if possible, or optimize a new structure
     if any(matches) and pdb_exists:
         ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
         database_entry = False
@@ -221,7 +222,7 @@ def manage_ligand(ligand, ligand_folder, opt, database):
 
         # Create an entry for in the database if no previous entries are present
         # or prints a warning if a structure is present in the database but the .pdb file is missing
-        if not any(matches) and pdb_exists:
+        if not any(matches) and not pdb_exists:
             database_entry = create_entry(ligand, opt)
         else:
             database_entry = False
