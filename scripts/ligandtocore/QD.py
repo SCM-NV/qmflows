@@ -87,7 +87,11 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     return qd, pdb_name, qd_indices
 
 
-def prep_prep(*arguments):
+
+
+
+def prep_prep(path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
+              dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -96,8 +100,8 @@ def prep_prep(*arguments):
     print('\n')
 
     # Managing the result directories
-    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=path)
-                                             for name in dir_name_list]
+    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=path) for name in
+                                             dir_name_list]
 
     # Imports the cores and ligands
     core_list = qd_scripts.read_mol(core_folder, input_cores, column, row, smiles_extension)
@@ -112,8 +116,8 @@ def prep_prep(*arguments):
     else:
         database = [[], [], [], [], []]
 
-    ligand_list = [prep_ligand(ligand, ligand_folder, database, ligand_opt, split) for
-                   ligand in ligand_list]
+    ligand_list = [prep_ligand(ligand, ligand_folder, database, ligand_opt, split) for ligand in
+                   ligand_list]
 
     # Formating of ligand_list
     ligand_list, ligand_indices, database_entries = zip(*ligand_list)
@@ -150,28 +154,29 @@ def prep_prep(*arguments):
 
 
 
-# Argument list
-path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
-dir_name_list = ['core', 'ligand', 'QD']
-input_cores = 'Cd68Se55.xyz'
-input_ligands = ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC']
-smiles_extension = '.txt'
-column = 0
-row = 0
-dummy = 'Cl'
-database_name = 'ligand_database.txt'
-use_database = True
-core_opt = False
-ligand_opt = True
-qd_opt = False
-maxiter = 10000
-split = True
 
-prep_prep_args = [path, dir_name_list, input_cores, input_ligands, smiles_extension, column, row,
-                  dummy, database_name, use_database, core_opt, ligand_opt, qd_opt, maxiter, split]
+# Argument list
+prep_prep_args = {
+    'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
+    'dir_name_list': ['core', 'ligand', 'QD'],
+    'input_cores': 'Cd68Se55.xyz',
+    'input_ligands': ['CCCCCCCCC([O-])=O.CC[N+](CC)(CC)CC', 'OCCCCCCCCC'],
+    'smiles_extension': '.txt',
+    'column': 0,
+    'row': 0,
+    'dummy': 'Cl',
+    'database_name': 'ligand_database.txt',
+    'use_database': True,
+    'core_opt': False,
+    'ligand_opt': True,
+    'qd_opt': False,
+    'maxiter': 10000,
+    'split': True
+}
+
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(*prep_prep_args)
+prep_prep(**prep_prep_args)
 
 """
 path =              The path where the input and output directories will be saved. Set to
