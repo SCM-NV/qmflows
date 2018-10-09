@@ -3,6 +3,7 @@ import os
 import itertools
 import time
 import sys
+import re
 
 from scm.plams import (Atom, MoleculeError)
 from qmflows import molkit
@@ -88,7 +89,7 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     return qd, pdb_name, qd_indices
 
 
-def prep_prep(**arg):
+def prep_prep(arg):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -137,8 +138,7 @@ def prep_prep(**arg):
         sys_var = qd_scripts.check_sys_var()
         if sys_var:
             for i, qd in enumerate(qd_list):
-                qd_scripts.prep_ams_job(qd, pdb_name_list[i], qd_folder,
-                                        qd_indices[i], arg['maxiter'])
+                qd_scripts.ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], arg['maxiter'])
 
     # The End
     time_end = time.time()
@@ -149,10 +149,10 @@ def prep_prep(**arg):
 
 arguments = {
     'input_cores': 'Cd68Se55.xyz',
-    'input_ligands': ['OCCCCCCCCC'],
+    'input_ligands': ['input_ligands_copy.txt'],
     'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
     'dir_name_list': ['core', 'ligand', 'QD'],
-    'smiles_extension': '.txt',
+    'smiles_extension': 'txt',
     'column': 0,
     'row': 0,
     'dummy': 'Cl',
@@ -165,15 +165,21 @@ arguments = {
     'split': True
 }
 
+# For running the script directly from the console
+# e.g. python /path_to_QD/QD.py keyword_1:arg_1 keyword_2:arg2 keyword_3:arg3
+# SMILES strings should be encapsulated by quatation marks.
+# Multiple SMILES string can be passed when seperated by commas, e.g. input_ligands:'OC, OOC, OCCC'
 argv = [item for item in sys.argv[1:]]
 if argv:
-    argv = [item.split('=') for item in argv]
-    for item in argv:
-        arguments[item[0]] = item[1]
-
+    argv = [item.split(':') for item in argv]
+    for string in argv:
+        keyword = string[0]
+        arg = string[1].replace('"', '')
+        arg = arg.replace("'", '')
+        arguments[keyword] = arg.split(',')
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(**arguments)
+prep_prep(arguments)
 
 """
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
@@ -182,8 +188,8 @@ input_ligands =     Same as input_cores, except for the ligand(s).
 path =              The path where the input and output directories will be saved. Set to
                     os.getcwd() to use the current directory.
 dir_name_list =     Names of the to be created directories in path.
-smiles_extension =  Extension of a SMILES string containg plain text file. Relevant if such a file
-                    is chosen for input_cores or input_ligands.
+smiles_extension =  Extension (without period) of a SMILES string containg plain text file. Relevant 
+                    if such a file is chosen for input_cores or input_ligands.
 column =            The column containing the SMILES strings in the plain text file.
 row =               The amount of rows to be ignored in the SMILES string containing column.
                     Should be used when e.g. the first row does not contain a SMILES string

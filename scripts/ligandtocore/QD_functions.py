@@ -2,6 +2,7 @@ import copy
 import os
 import itertools
 import shutil
+from functools import partial
 import numpy as np
 
 from scm.plams import (Molecule, MoleculeError, add_to_class, Settings, AMSJob, init, finish)
@@ -21,11 +22,9 @@ def create_dir(dir_name, path=os.getcwd()):
     return dir_path
 
 
-def read_mol(folder_path, file_name, column=0, row=0, smiles_extension='.txt'):
+def read_mol(folder_path, file_name, column=0, row=0, smiles_extension='txt'):
     """
-    First checks if the argument 'mol_name' is a string or a list.
-    Then checks if 'mol_name' consists of .xyz/.pdb files, SMILES strings or .txt files containing
-    SMILES strings.
+    Checks by which means the input is provided and converts it into a molecule.
     Returns a list of PLAMS molecules.
     """
     # Check if filename is a string or a list, returns an error if it is neither
@@ -35,37 +34,59 @@ def read_mol(folder_path, file_name, column=0, row=0, smiles_extension='.txt'):
         raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) +
                             " is not recognized as a <class 'str'> or <class 'list'>")
 
-    # Determine the nature of filename
-    input_mol_list = [os.path.join(folder_path, name) for name in file_name]
-    for i, item in enumerate(input_mol_list):
-        # If file_name is an .xyz file
-        if file_name[i].find('.xyz') != -1:
-            mol_list = [Molecule(mol) for mol in input_mol_list]
+    # Creates a dictionary of file extensions
+    extension_dict = {'xyz' : read_mol_xyz, 'pdb' : read_mol_pdb, 'mol' : read_mol_mol,
+                      'smiles' : read_mol_smiles,
+                      smiles_extension : partial(read_mol_txt, row=row, column=column)}
 
-        # If file_name is a .pdb file
-        elif file_name[i].find('.pdb') != -1:
-            mol_list = [molkit.readpdb(mol) for mol in input_mol_list]
-
-        # If file_name is a .mol file
-        elif file_name[i].find('.mol') != -1:
-            mol_list = [molkit.from_rdmol(Chem.MolFromMolFile(mol)) for mol in input_mol_list]
-
-        # If file_name is a plain text file with smile strings
-        elif file_name[i].find(smiles_extension) != -1:
-            mol_list = []
-            for file in input_mol_list:
-                with open(file, 'r') as file_open:
-                    tmp_list = file_open.read().splitlines()
-                    mol_list.append(tmp_list[row:])
-            mol_list = list(itertools.chain(*mol_list))
-            mol_list = [line.split() for line in mol_list if bool(line)]
-            mol_list = [molkit.from_smiles(mol[column]) for mol in mol_list]
-
-        # If file_name is none of the above it is assumed to be a smile string
+    # Creates a list of the file extensions used in the argument file_name
+    extension = []
+    for item in file_name:
+        item = item.split('.')[-1]
+        if item in extension_dict:
+            extension.append(item)
         else:
-            mol_list = [molkit.from_smiles(mol) for mol in file_name]
+            extension.append('smiles')
 
-    return mol_list
+    # Reads the input molecule(s), the method depending on the nature of the file extension
+    file_name = [os.path.join(folder_path, name) for name in file_name]
+    mol_list = [extension_dict[extension[i]](mol) for i, mol in enumerate(file_name)]
+
+    return list(itertools.chain(*mol_list))
+
+
+def read_mol_xyz(mol):
+    """
+    Read an .xyz file
+    """
+    return [Molecule(mol)]
+
+def read_mol_pdb(mol):
+    """
+    Read a .pdb file
+    """
+    return [molkit.readpdb(mol)]
+
+def read_mol_mol(mol):
+    """
+    Read a .mol file
+    """
+    return [molkit.from_rdmol(Chem.MolFromMolFile(mol))]
+
+def read_mol_smiles(mol):
+    """
+    Read a SMILES string
+    """
+    return [molkit.from_smiles(mol.split('/')[-1])]
+
+def read_mol_txt(mol, row, column):
+    """
+    Read a plain text file containing one or more SMILES strings
+    """
+    with open(mol, 'r') as file:
+        mol_list = file.read().splitlines()
+    mol_list = [line.split() for line in mol_list[row:] if line]
+    return [molkit.from_smiles(mol[column]) for mol in mol_list]
 
 
 def set_pdb(mol, residue_name, is_core=True):
@@ -76,6 +97,10 @@ def set_pdb(mol, residue_name, is_core=True):
     alphabet = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
     alphabet = [i + j for i in alphabet for j in alphabet]
 
+    # Create a dictionary of elements and their formal atomic charge
+    elements_dict = set_pdb_dict()
+
+    # Set the atomic properties
     for i, atom in enumerate(mol):
         symbol = atom.symbol + alphabet[i] + '  '
 
@@ -92,19 +117,31 @@ def set_pdb(mol, residue_name, is_core=True):
             atom.properties.pdb_info.IsHeteroAtom = False
 
         # Sets the formal atomic charge
-        if is_core:
-            if atom.symbol in ['Li', 'Na', 'K', 'Rb', 'Cs']:
-                atom.properties.charge = 1
-            elif atom.symbol in ['Be', 'Mg', 'Ca', 'Sr', 'Ba', 'Cd', 'Pb']:
-                atom.properties.charge = 2
-            elif atom.symbol in ['N', 'P', 'As', 'Sb', 'Bi']:
-                atom.properties.charge = -3
-            elif atom.symbol in ['O', 'S', 'Se', 'Te', 'Po']:
-                atom.properties.charge = -2
-            elif atom.symbol in ['H', 'F', 'Cl', 'Br', 'I', 'At']:
-                atom.properties.charge = -1
+        if is_core and atom.atnum != 0:
+            atom.properties.charge = elements_dict[atom.symbol]
 
     return mol
+
+
+def set_pdb_dict():
+    """
+    Create a dictionary of elements and their formal atomic charge
+    """
+    # Create a list of atomic charges and elements
+    charges = [1, 2, -3, -2, -1, 2]
+    a = ['Li', 'Na', 'K', 'Rb', 'Cs']       # Alkaline metals
+    b = ['Be', 'Mg', 'Ca', 'Sr', 'Ba']      # Alkaline earth metals
+    c = ['N', 'P', 'As', 'Sb', 'Bi']        # Pnictogens
+    d = ['O', 'S', 'Se', 'Te', 'Po']        # Chalcogens
+    e = ['H', 'F', 'Cl', 'Br', 'I', 'At']   # Halogens
+    f = ['Cd', 'Pb']                        # Misc
+
+    # Combine the elements and atomic charges into a dictionary
+    elements = [a, b, c, d, e, f]
+    charges = [charges[i] for i, column in enumerate(elements) for element in column]
+    elements = list(itertools.chain(*elements))
+
+    return dict(zip(elements, charges))
 
 
 def read_database(ligand_folder, database_name='ligand_database.txt'):
@@ -183,7 +220,9 @@ def manage_ligand(ligand, ligand_folder, opt, database):
     """
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
-    matches, pdb_exists, index = find_match(ligand, ligand_folder, database)
+
+    # Searches for matches between the input ligand and the database
+    matches, pdb_exists, index = manage_ligand_match(ligand, ligand_folder, database)
 
     # Pull a geometry from the database if possible, or optimize a new structure
     if any(matches) and pdb_exists:
@@ -219,7 +258,7 @@ def manage_ligand(ligand, ligand_folder, opt, database):
     return ligand, database_entry
 
 
-def find_match(ligand, ligand_folder, database):
+def manage_ligand_match(ligand, ligand_folder, database):
     """
     Search the database for any ligand matches.
     """
@@ -241,20 +280,6 @@ def find_match(ligand, ligand_folder, database):
     return matches, pdb_exists, index
 
 
-@add_to_class(Molecule)
-def neighbors_mod(self, atom, exclude=''):
-    """
-    Modified PLAMS function, returns all connected atom with the exception of 'exclude'.
-    Exclude can be either an atom or list of atoms.
-    No atoms are excluded by default.
-    """
-    if not isinstance(exclude, list):
-        exclude = [exclude]
-    if atom.mol != self:
-        raise MoleculeError('neighbors: passed atom should belong to the molecule')
-    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
-
-
 def global_minimum(ligand):
     """
     Find the glibal minimum of the ligand with RDKit UFF.
@@ -264,7 +289,7 @@ def global_minimum(ligand):
     for atom in ligand:
         if atom.atnum == 1:
             ligand.delete_atom(atom)
-    dihedral_list = [dihedral_index(ligand, item) for item in ligand.bonds]
+    dihedral_list = [global_minimum_index(ligand, item) for item in ligand.bonds]
 
     # Find the global minimum by systematically varying a select number of dihedral angles
     # All bonds are scanned that meet the following four requirements:
@@ -278,12 +303,12 @@ def global_minimum(ligand):
         for item in dihedral_list:
             InRing = ligand.GetBondWithIdx(item[0]).IsInRing()
             if item[2] != 'skip' and item[1] == 1.0 and not InRing:
-                ligand = dihedral_scan(ligand, item)
+                ligand = global_minimum_scan(ligand, item)
 
     return molkit.from_rdmol(ligand)
 
 
-def dihedral_index(ligand, bond):
+def global_minimum_index(ligand, bond):
     """
     Create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5].
     """
@@ -310,7 +335,21 @@ def dihedral_index(ligand, bond):
     return dihedral_list
 
 
-def dihedral_scan(ligand, dihedral_list):
+@add_to_class(Molecule)
+def neighbors_mod(self, atom, exclude=''):
+    """
+    Modified PLAMS function, returns all connected atom with the exception of 'exclude'.
+    Exclude can be either an atom or list of atoms.
+    No atoms are excluded by default.
+    """
+    if not isinstance(exclude, list):
+        exclude = [exclude]
+    if atom.mol != self:
+        raise MoleculeError('neighbors: passed atom should belong to the molecule')
+    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
+
+
+def global_minimum_scan(ligand, dihedral_list):
     """
     Scan a dihedral angle and find the lowest energy conformer.
     """
@@ -421,7 +460,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     lig_vector = lig_at2.vector_to(lig_at1)
 
     # Rotation of ligand - aligning the ligand and core vectors
-    rotmat = rotation_matrix(lig_vector, core_vector)
+    rotmat = rotate_ligand_rotation(lig_vector, core_vector)
     ligand.rotate(rotmat)
     ligand.translate(lig_at1.vector_to(core_at1))
 
@@ -444,7 +483,7 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     return ligand, lig_at1
 
 
-def rotation_matrix(vec1, vec2):
+def rotate_ligand_rotation(vec1, vec2):
     """
     Calculates the rotation matrix rotating *vec1* to *vec2*.
     Vectors can be any containers with 3 numerical values. They don't need to be normalized.
@@ -494,7 +533,7 @@ def check_sys_var():
         return True
 
 
-def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
+def ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
     """
     Converts PLAMS connectivity into adf .run script connectivity.
     """
@@ -513,7 +552,7 @@ def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
     # Launch the AMS UFF constrained geometry optimization
-    output_mol = run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
+    output_mol = ams_job_run(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
 
     # Update the atomic coordinates of qd
     for i, atom in enumerate(qd):
@@ -527,7 +566,7 @@ def prep_ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
     return qd
 
 
-def run_ams_job(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter):
+def ams_job_run(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter):
     """
     Runs the AMS UFF constrained geometry optimization.
     """
