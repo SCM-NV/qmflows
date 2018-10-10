@@ -66,11 +66,12 @@ class Result:
                            load the parser on the fly.
         :type properties: str
         """
+        plams_dir = None if plams_dir is None else Path(plams_dir)
         self.settings = settings
         self._molecule = molecule
         xs = pkg.resource_string("qmflows", properties)
         self.prop_dict = json2Settings(xs)
-        self.archive = {"plams_dir": Path(plams_dir),
+        self.archive = {"plams_dir": plams_dir,
                         'work_dir': work_dir}
         self.job_name = job_name
         self.status = status

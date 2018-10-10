@@ -3,6 +3,7 @@ from qmflows import (Settings, templates, run)
 
 # User Defined imports
 from qmflows.packages import (adf, dirac, dftb, gamess, orca)
+import pytest
 
 
 def isNone(x):
@@ -21,13 +22,13 @@ def test_fail_scm():
     # Calculate the DFTB hessian
     opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
                     job_name="failed_DFTB")
-    # fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
-    # result = run(fail_adf.molecule)
-    result = run(opt_dftb.molecule)
+    fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
+    result = run(fail_adf.molecule)
     print(result)
     assert isNone(result)
 
 
+@pytest.mark.xfail
 def test_fail_dirac():
     """ Dirac package should return ``None`` if it fails """
     mol = Molecule("test/test_files/h2.xyz")
