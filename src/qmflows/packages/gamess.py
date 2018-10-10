@@ -1,7 +1,7 @@
 __all__ = ['gamess']
 
-from qmflows.packages.packages import (Package, package_properties, Result)
-from qmflows.settings import Settings
+from .packages import (Package, package_properties, Result)
+from ..settings import Settings
 from scm import plams
 from warnings import warn
 

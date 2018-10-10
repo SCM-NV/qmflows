@@ -28,8 +28,8 @@ import uuid
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
-from ..settings import Settings
 from qmflows import molkit
+from ..settings import Settings
 from ..fileFunctions import json2Settings
 from ..utils import concatMap
 

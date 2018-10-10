@@ -4,9 +4,9 @@ __all__ = ['adf', 'dftb']
 
 from os.path import join
 from warnings import warn
-from qmflows.settings import Settings
-from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from scm import plams
+from ..settings import Settings
+from .packages import (Package, package_properties, Result, get_tmpfile_name)
 
 import struct
 

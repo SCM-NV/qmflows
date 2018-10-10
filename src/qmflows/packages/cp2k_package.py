@@ -1,12 +1,12 @@
 __all__ = ['cp2k']
 
-from qmflows.data.dictionaries.warningsCP2K import cp2k_warnings
-from qmflows.packages.packages import (
+from ..data.dictionaries.warningsCP2K import cp2k_warnings
+from .packages import (
     Package, package_properties, parse_output_warnings, Result)
-from qmflows.parsers.cp2KParser import parse_cp2k_warnings
-from qmflows.settings import Settings
+from ..parsers.cp2KParser import parse_cp2k_warnings
+from ..settings import Settings
 from scm import plams
-from warnings import warn
+from warnings import war
 
 
 # ====================================<>=======================================
