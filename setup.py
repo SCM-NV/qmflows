@@ -42,7 +42,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.3.0', 'plams>=1.1.1',
+    install_requires=['h5py', 'numpy', 'noodles==0.3.0', 'plams>=1.2',
                       'pymonad', 'pyparsing', 'filelock'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'nbsphinx'],
