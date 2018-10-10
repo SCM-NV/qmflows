@@ -6,7 +6,7 @@ from .packages import (
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from scm import plams
-from warnings import war
+from warnings import warn
 
 
 # ====================================<>=======================================
