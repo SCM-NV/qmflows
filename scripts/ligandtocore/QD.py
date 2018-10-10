@@ -75,7 +75,7 @@ def prep_core(core, core_folder, dummy=0, opt=True):
 
     # Optimize the core with RDKit UFF if opt = True. Returns a RDKit molecule
     if opt:
-        core = qd_scripts.global_minimum(core, core_folder)
+        core = molkit.global_minimum(core)
 
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
@@ -149,7 +149,7 @@ argument_dict = {
     # Mandatory arguments: these will have to be manually specified by the user
     'input_cores': 'Cd68Se55.xyz',
     'input_ligands': 'OCCCCCCC',
-    'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
+    'path': r'/Users/bvanbeek/Documents/CdSe/Week_5',
 
     # Optional arguments: these can be left to their default values
     'dir_name_list': ['core', 'ligand', 'QD'],
@@ -158,7 +158,7 @@ argument_dict = {
     'row': 0,
     'dummy': 'Cl',
     'database_name': 'ligand_database.txt',
-    'use_database': True,
+    'use_database': False,
     'core_opt': False,
     'ligand_opt': True,
     'qd_opt': False,

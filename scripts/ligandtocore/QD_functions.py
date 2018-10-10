@@ -238,7 +238,7 @@ def manage_ligand(ligand, ligand_folder, opt, database):
         # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
         if opt:
             # Optimize the ligand and set pdb_info
-            ligand = global_minimum(ligand)
+            ligand = molkit.global_minimum(ligand, n_scans=2, no_h=True)
             set_pdb(ligand, 'LIG', is_core=False)
 
             # Export the optimized ligand to a .pdb and .xyz file
@@ -278,103 +278,6 @@ def manage_ligand_match(ligand, ligand_folder, database):
         pdb_exists = False
 
     return matches, pdb_exists, index
-
-
-def global_minimum(ligand):
-    """
-    Find the glibal minimum of the ligand with RDKit UFF.
-    """
-    # Delete all hydrogens and create a list of all bond indices [0], bond orders [1]
-    # and dihedral indices [2, 3, 4 and 5](i.e. indices of four atoms defining a dihedral angle)
-    for atom in ligand:
-        if atom.atnum == 1:
-            ligand.delete_atom(atom)
-    dihedral_list = [global_minimum_index(ligand, item) for item in ligand.bonds]
-
-    # Find the global minimum by systematically varying a select number of dihedral angles
-    # All bonds are scanned that meet the following four requirements:
-    # They are single bonds, non-terminal, not part of a ring and do not contain hydrogen.
-    # 3 dihedral angles are checked for all abovementioned bonds
-    ligand = molkit.to_rdmol(ligand)
-    n_scans = 2
-    for i in range(n_scans):
-        if i > 0:
-            ligand = Chem.AddHs(ligand, addCoords=True)
-        for item in dihedral_list:
-            InRing = ligand.GetBondWithIdx(item[0]).IsInRing()
-            if item[2] != 'skip' and item[1] == 1.0 and not InRing:
-                ligand = global_minimum_scan(ligand, item)
-
-    return molkit.from_rdmol(ligand)
-
-
-def global_minimum_index(ligand, bond):
-    """
-    Create a list of bond indices [0], bond orders [1] and dihedral indices [2, 3, 4 and 5].
-    """
-    # The two atoms associated with a given bond
-    at1 = bond.atom1
-    at2 = bond.atom2
-
-    # The atoms bonded to at1 and at2
-    at1_bonds = ligand.neighbors_mod(at1, exclude=at2)
-    at2_bonds = ligand.neighbors_mod(at2, exclude=at1)
-
-    # A list of bond indices [0], bond orders [1]
-    # and dihedral indices [2, 3, 4 and 5](i.e. indices of four atoms defining a dihedral angle)
-    # Only the indices of non-terminal bonds are added to this list, the rest is skipped
-    if len(at1_bonds) >= 1 and len(at2_bonds) >= 1:
-        bond_idx = ligand.bonds.index
-        atom_idx = ligand.atoms.index
-        dihedral_list = [bond_idx(bond), bond.order, atom_idx(at1_bonds[0]),
-                         atom_idx(at1), atom_idx(at2), atom_idx(at2_bonds[0])]
-
-    else:
-        dihedral_list = [ligand.bonds.index(bond), bond.order, 'skip']
-
-    return dihedral_list
-
-
-def global_minimum_scan(ligand, dihedral_list):
-    """
-    Scan a dihedral angle and find the lowest energy conformer.
-    """
-    # Define a number of variables and create 4 copies of the ligand
-    a = dihedral_list
-    uff = AllChem.UFFGetMoleculeForceField
-    ligand = [copy.deepcopy(ligand) for i in range(3)]
-
-    # Create a list of all dihedral angles for which the geometry will be optimized (rdkit uff)
-    get_dihed = rdMolTransforms.GetDihedralDeg
-    angle = get_dihed(ligand[0].GetConformer(), a[2], a[3], a[4], a[5])
-    angle_list = [angle, angle + 120, angle - 120]
-
-    # Optimized the geometry for all dihedral angles in angle_list
-    # The geometry that yields the lowest energy is returned
-    set_dihed = rdMolTransforms.SetDihedralDeg
-    for i, item in enumerate(angle_list):
-        set_dihed(ligand[i].GetConformer(), a[2], a[3], a[4], a[5], item)
-
-    for item in ligand:
-        uff(item).Minimize()
-    energy_list = [uff(item).CalcEnergy() for item in ligand]
-    minimum = energy_list.index(min(energy_list))
-
-    return ligand[minimum]
-
-
-@add_to_class(Molecule)
-def neighbors_mod(self, atom, exclude=''):
-    """
-    Modified PLAMS function, returns all connected atom with the exception of 'exclude'.
-    Exclude can be either an atom or list of atoms.
-    No atoms are excluded by default.
-    """
-    if not isinstance(exclude, list):
-        exclude = [exclude]
-    if atom.mol != self:
-        raise MoleculeError('neighbors: passed atom should belong to the molecule')
-    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
 
 
 def find_substructure(ligand, split):

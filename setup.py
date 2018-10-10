@@ -36,7 +36,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.2.4', 'plams>=1.1.1',
+    install_requires=['h5py', 'numpy', 'noodles==0.2.4', 'plams>=1.2',
                       'pymonad', 'pyparsing', 'six', 'tinydb',
                       'noodles[prov, xenon, numpy]', 'pyxenon',
                       'filelock', 'msgpack-python',
