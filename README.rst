@@ -3,9 +3,7 @@
    :target: https://github.com/SCM-NV/qmflows/blob/master/LICENSE.md
 .. image:: https://travis-ci.org/SCM-NV/qmflows.svg?branch=master
    :target: https://travis-ci.org/SCM-NV/qmflows 
-.. image:: https://img.shields.io/badge/python-3.5-blue.svg
-.. image:: https://api.codacy.com/project/badge/Grade/7e95b6d4d873458daf0de5e4b3110885
-   :target: https://www.codacy.com/app/tifonzafel/qmflows?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=SCM-NV/qmflows&amp;utm_campaign=Badge_Grade	   
+.. image:: https://img.shields.io/badge/python-3-blue.svg
 
 QMFlows
 #######
@@ -76,7 +74,7 @@ Using the conda environment the following packages should be installed:
 
 - install rdkit_ using the following command:
 
-  - ``conda install -y -q --name qmflows -c https://conda.anaconda.org/rdkit rdkit``
+  - ``conda install -y -q --name qmflows -c rdkit rdkit``
 
 - install HDF5_ using conda:
 
@@ -92,10 +90,6 @@ Package installation
 
   ``source activate qmflows``  
 
-- Then
-
-  ``pip install https://github.com/SCM-NV/qmflows/tarball/master#egg=qmflows``
-  
 Now you are ready to use *qmflows*. 
  
 
@@ -113,7 +107,6 @@ Now you are ready to use *qmflows*.
 .. _HDF5: http://www.h5py.org/ 
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
-.. _Plams: https://www.scm.com/documentation/Tutorials/Scripting/first_steps_with_plams/
 .. _jupyter-notebook: http://jupyter.org/
 .. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
 .. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
