@@ -6,10 +6,18 @@ __all__ = ['package_properties',
 
 # ========>  Standard and third party Python Libraries <======
 from functools import partial
+from noodles import (schedule_hint, has_scheduled_methods, serial)
+from noodles.serial.path import SerPath
+from noodles.run.threading.sqlite3 import run_parallel
+from noodles.serial import (Serialiser, Registry, AsDict)
+from noodles.serial.reasonable import SerReasonableObject
+from noodles.serial.numpy import arrays_to_hdf5
 from os.path import join
+from pathlib import Path
 from rdkit import Chem
 from scm import plams
 from typing import (Any, Callable, Dict, List)
+from warnings import warn
 
 import base64
 import fnmatch
@@ -20,19 +28,11 @@ import uuid
 import pkg_resources as pkg
 
 # ==================> Internal modules <====================
-from noodles import (schedule_hint, has_scheduled_methods, serial)
-# from noodles.display import NCDisplay
-from noodles.serial.path import SerPath
-from noodles.run.threading.sqlite3 import run_parallel
-from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.reasonable import SerReasonableObject
-from noodles.serial.numpy import arrays_to_hdf5
-from pathlib import Path
-from qmflows.settings import Settings
+from ..settings import Settings
 from qmflows import molkit
-from qmflows.fileFunctions import json2Settings
-from qmflows.utils import concatMap
-from warnings import warn
+from ..fileFunctions import json2Settings
+from ..utils import concatMap
+
 
 package_properties = {
     'adf': 'data/dictionaries/propertiesADF.json',
