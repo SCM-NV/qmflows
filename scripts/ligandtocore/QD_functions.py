@@ -144,7 +144,7 @@ def set_pdb_dict():
     return dict(zip(elements, charges))
 
 
-def read_database(ligand_folder, database_name='ligand_database.txt'):
+def database_read(ligand_folder, database_name='ligand_database.txt'):
     """
     Open the database.
     If the database does not exist, create the database.
@@ -173,7 +173,7 @@ def read_database(ligand_folder, database_name='ligand_database.txt'):
     return database
 
 
-def create_entry(ligand, opt):
+def database_entry(ligand, opt):
     """
     Create a new entry for the database.
     """
@@ -195,7 +195,7 @@ def create_entry(ligand, opt):
     return database_entry
 
 
-def write_database(database_entries, ligand_folder, database, database_name='ligand_database.txt'):
+def database_write(database_entries, ligand_folder, database, database_name='ligand_database.txt'):
     """
     Write the new database entries to the database.
     """
@@ -227,7 +227,7 @@ def manage_ligand(ligand, ligand_folder, opt, database):
     # Pull a geometry from the database if possible, or optimize a new structure
     if any(matches) and pdb_exists:
         ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
-        database_entry = False
+        entry = False
     else:
         # Export the unoptimized ligand to a .pdb and .xyz file
         ligand_name = 'ligand_' + ligand.get_formula()
@@ -249,13 +249,13 @@ def manage_ligand(ligand, ligand_folder, opt, database):
         # Create an entry for in the database if no previous entries are present
         # or prints a warning if a structure is present in the database but the .pdb file is missing
         if not any(matches) and not pdb_exists:
-            database_entry = create_entry(ligand, opt)
+            entry = database_entry(ligand, opt)
         else:
-            database_entry = False
+            entry = False
             print('\ndatabase entry exists for ' + str(ligand.get_formula()) +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
-    return ligand, database_entry
+    return ligand, entry
 
 
 def manage_ligand_match(ligand, ligand_folder, database):
@@ -335,20 +335,6 @@ def global_minimum_index(ligand, bond):
     return dihedral_list
 
 
-@add_to_class(Molecule)
-def neighbors_mod(self, atom, exclude=''):
-    """
-    Modified PLAMS function, returns all connected atom with the exception of 'exclude'.
-    Exclude can be either an atom or list of atoms.
-    No atoms are excluded by default.
-    """
-    if not isinstance(exclude, list):
-        exclude = [exclude]
-    if atom.mol != self:
-        raise MoleculeError('neighbors: passed atom should belong to the molecule')
-    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
-
-
 def global_minimum_scan(ligand, dihedral_list):
     """
     Scan a dihedral angle and find the lowest energy conformer.
@@ -375,6 +361,20 @@ def global_minimum_scan(ligand, dihedral_list):
     minimum = energy_list.index(min(energy_list))
 
     return ligand[minimum]
+
+
+@add_to_class(Molecule)
+def neighbors_mod(self, atom, exclude=''):
+    """
+    Modified PLAMS function, returns all connected atom with the exception of 'exclude'.
+    Exclude can be either an atom or list of atoms.
+    No atoms are excluded by default.
+    """
+    if not isinstance(exclude, list):
+        exclude = [exclude]
+    if atom.mol != self:
+        raise MoleculeError('neighbors: passed atom should belong to the molecule')
+    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom) not in exclude]
 
 
 def find_substructure(ligand, split):
@@ -422,6 +422,7 @@ def find_substructure(ligand, split):
     ligand_list = [copy.deepcopy(ligand) for match in ligand_indices]
 
     # Delete the hydrogen or mono-/polyatomic counterion attached to the functional group
+    # Sets the charge of the remaining heteroatom to -1 if split=True
     for i, ligand in enumerate(ligand_list):
         at1 = ligand[ligand_indices[i][0] + 1]
         at2 = ligand[ligand_indices[i][1] + 1]
@@ -434,9 +435,14 @@ def find_substructure(ligand, split):
                     ligand = mol1
                 else:
                     ligand = mol2
+            if not at1.properties.charge or at1.properties.charge == 0:
+                at1.properties.charge = -1
         ligand_atoms = [str(atom) for atom in ligand]
         ligand_indices[i] = ligand_atoms.index(str(at1)) + 1
         ligand_list[i] = ligand
+
+    # Check if the ligand heteroatom has a charge assigned, assigns a charge if not
+
 
     if not ligand_list:
         print('No functional groups were found for ' + str(ligand.get_formula()))
@@ -471,10 +477,6 @@ def rotate_ligand(core, ligand, core_index, ligand_index, i):
     # Update the residue numbers
     for atom in ligand:
         atom.properties.pdb_info.ResidueNumber = i + 2
-
-    # Check if the ligand heteroatom has a charge assigned, assigns a charge if not
-    if not lig_at1.properties.charge or lig_at1.properties.charge == 0:
-        lig_at1.properties.charge = -1
 
     # Deletes the core dummy atom and ligand center of mass
     ligand.delete_atom(lig_at2)

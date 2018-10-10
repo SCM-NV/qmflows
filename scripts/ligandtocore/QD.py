@@ -3,12 +3,66 @@ import os
 import itertools
 import time
 import sys
-import re
 
 from scm.plams import (Atom, MoleculeError)
 from qmflows import molkit
 
 import QD_functions as qd_scripts
+
+def prep(arg):
+    """
+    function that handles all tasks related to prep_core, prep_ligand and prep_qd.
+    """
+    # The start
+    time_start = time.time()
+    print('\n')
+
+    # Create the result directories
+    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=arg['path']) for
+                                             name in arg['dir_name_list']]
+
+    # Imports the cores and ligands
+    core_list = qd_scripts.read_mol(core_folder, arg['input_cores'], arg['column'], arg['row'],
+                                    arg['smiles_extension'])
+    ligand_list = qd_scripts.read_mol(ligand_folder, arg['input_ligands'], arg['column'],
+                                      arg['row'], arg['smiles_extension'])
+
+    # Return the indices of the core dummy atoms
+    core_indices = list(prep_core(core, core_folder, arg['dummy'], arg['core_opt']) for
+                        core in core_list)
+
+    # Open the ligand database and check if the specified ligand(s) is already present
+    if arg['use_database']:
+        database = qd_scripts.database_read(ligand_folder, arg['database_name'])
+    else:
+        database = [[], [], [], [], []]
+
+    # Rotate all the ligands and format the resulting list
+    ligand_list = list(prep_ligand(ligand, ligand_folder, database, arg['ligand_opt'], arg['split'])
+                       for ligand in ligand_list)
+    ligand_list, ligand_indices, database_entries = zip(*ligand_list)
+    ligand_indices = list(itertools.chain(*ligand_indices))
+    ligand_list = itertools.chain(*ligand_list)
+
+    # Write new entries to the ligand database
+    if arg['use_database']:
+        qd_scripts.database_write(database_entries, ligand_folder, database)
+
+    # Combine the core with the ligands, yielding qd, and format the resulting list
+    qd_list = list(prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for
+                   i, core in enumerate(core_list) for j, ligand in enumerate(ligand_list))
+    qd_list, pdb_name_list, qd_indices = zip(*qd_list)
+
+    # Check if the ADF environment variables are set and optimize the qd with the core frozen
+    if arg['qd_opt']:
+        sys_var = qd_scripts.check_sys_var()
+        if sys_var:
+            for i, qd in enumerate(qd_list):
+                qd_scripts.ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], arg['maxiter'])
+
+    # The End
+    time_end = time.time()
+    print('\nTotal elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
 
 def prep_core(core, core_folder, dummy=0, opt=True):
@@ -89,68 +143,15 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     return qd, pdb_name, qd_indices
 
 
-def prep_prep(arg):
-    """
-    function that handles all tasks related to prep_core, prep_ligand and prep_qd.
-    """
-    # The start
-    time_start = time.time()
-    print('\n')
-
-    # Create the result directories
-    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=arg['path']) for
-                                             name in arg['dir_name_list']]
-
-    # Imports the cores and ligands
-    core_list = qd_scripts.read_mol(core_folder, arg['input_cores'], arg['column'], arg['row'],
-                                    arg['smiles_extension'])
-    ligand_list = qd_scripts.read_mol(ligand_folder, arg['input_ligands'], arg['column'],
-                                      arg['row'], arg['smiles_extension'])
-
-    # Return the indices of the core dummy atoms
-    core_indices = [prep_core(core, core_folder, arg['dummy'], arg['core_opt']) for
-                    core in core_list]
-
-    # Open the ligand database and check if the specified ligand(s) is already present
-    if arg['use_database']:
-        database = qd_scripts.read_database(ligand_folder, arg['database_name'])
-    else:
-        database = [[], [], [], [], []]
-
-    # Rotate all the ligands and format the resulting list
-    ligand_list = [prep_ligand(ligand, ligand_folder, database, arg['ligand_opt'], arg['split'])
-                   for ligand in ligand_list]
-    ligand_list, ligand_indices, database_entries = zip(*ligand_list)
-    ligand_indices = list(itertools.chain(*ligand_indices))
-    ligand_list = itertools.chain(*ligand_list)
-
-    # Write new entries to the ligand database
-    if arg['use_database']:
-        qd_scripts.write_database(database_entries, ligand_folder, database)
-
-    # Combine the core with the ligands, yielding qd, and format the resulting list
-    qd_list = [prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for i, core in
-               enumerate(core_list) for j, ligand in enumerate(ligand_list)]
-    qd_list, pdb_name_list, qd_indices = zip(*qd_list)
-
-    # Check if the ADF environment variables are set and optimize the qd with the core frozen
-    if arg['qd_opt']:
-        sys_var = qd_scripts.check_sys_var()
-        if sys_var:
-            for i, qd in enumerate(qd_list):
-                qd_scripts.ams_job(qd, pdb_name_list[i], qd_folder, qd_indices[i], arg['maxiter'])
-
-    # The End
-    time_end = time.time()
-    print('\nTotal elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
 
-
-
-arguments = {
+argument_dict = {
+    # Mandatory arguments: these will have to be manually specified by the user
     'input_cores': 'Cd68Se55.xyz',
-    'input_ligands': ['input_ligands_copy.txt'],
+    'input_ligands': 'OCCCCCCC',
     'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
+
+    # Optional arguments: these can be left to their default values
     'dir_name_list': ['core', 'ligand', 'QD'],
     'smiles_extension': 'txt',
     'column': 0,
@@ -167,19 +168,20 @@ arguments = {
 
 # For running the script directly from the console
 # e.g. python /path_to_QD/QD.py keyword_1:arg_1 keyword_2:arg2 keyword_3:arg3
-# SMILES strings should be encapsulated by quatation marks.
+# SMILES strings should be encapsulated by quotation marks.
 # Multiple SMILES string can be passed when seperated by commas, e.g. input_ligands:'OC, OOC, OCCC'
 argv = [item for item in sys.argv[1:]]
 if argv:
     argv = [item.split(':') for item in argv]
-    for string in argv:
-        keyword = string[0]
-        arg = string[1].replace('"', '')
-        arg = arg.replace("'", '')
-        arguments[keyword] = arg.split(',')
+    for item in argv:
+        keyword = item[0]
+        argument = item[1]
+        argument = argument.replace('"', '')
+        argument = argument.replace("'", '')
+        argument_dict[keyword] = argument.split(',')
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep_prep(arguments)
+prep(argument_dict)
 
 """
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
@@ -188,7 +190,7 @@ input_ligands =     Same as input_cores, except for the ligand(s).
 path =              The path where the input and output directories will be saved. Set to
                     os.getcwd() to use the current directory.
 dir_name_list =     Names of the to be created directories in path.
-smiles_extension =  Extension (without period) of a SMILES string containg plain text file. Relevant 
+smiles_extension =  Extension (without period) of a SMILES string containg plain text file. Relevant
                     if such a file is chosen for input_cores or input_ligands.
 column =            The column containing the SMILES strings in the plain text file.
 row =               The amount of rows to be ignored in the SMILES string containing column.
