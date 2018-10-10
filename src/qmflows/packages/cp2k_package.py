@@ -1,6 +1,6 @@
 __all__ = ['cp2k']
 
-from ..data.dictionaries.warningsCP2K import cp2k_warnings
+from ..warnings_qmflows import cp2k_warnings
 from .packages import (
     Package, package_properties, parse_output_warnings, Result)
 from ..parsers.cp2KParser import parse_cp2k_warnings
