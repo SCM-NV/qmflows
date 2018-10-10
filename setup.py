@@ -36,13 +36,10 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.2.4', 'plams>=1.1.1',
-                      'pymonad', 'pyparsing', 'six', 'tinydb',
-                      'noodles[prov, xenon, numpy]', 'pyxenon',
-                      'filelock', 'msgpack-python',
-                      'sphinx_rtd_theme'],
+    install_requires=['h5py', 'numpy', 'noodles==0.3.0', 'plams>=1.1.1',
+                      'pymonad', 'pyparsing', 'filelock'],
     extras_require={
-        'test': ['pytest', 'coverage', 'nbsphinx'],
+        'test': ['pytest', 'pytest-cov', 'nbsphinx'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
     },
     dependency_links=[

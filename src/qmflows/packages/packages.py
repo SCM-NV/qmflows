@@ -21,16 +21,13 @@ import pkg_resources as pkg
 
 # ==================> Internal modules <====================
 from noodles import (schedule_hint, has_scheduled_methods, serial)
-from noodles.display import (DumbDisplay, NCDisplay)
-from noodles.files.path import (Path, SerPath)
-from noodles.run.run_with_prov import run_parallel_opt
-from noodles.run.runners import run_parallel_with_display
+# from noodles.display import NCDisplay
+from noodles.serial.path import SerPath
+from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.base import SerStorable
-# from noodles.run.xenon import (
-#     XenonKeeper, XenonConfig, RemoteJobConfig, run_xenon_prov)
+from noodles.serial.base import SerAuto
 from noodles.serial.numpy import arrays_to_hdf5
-
+from pathlib import Path
 from qmflows.settings import Settings
 from qmflows import molkit
 from qmflows.fileFunctions import json2Settings
@@ -365,63 +362,14 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     return ret
 
 
-def call_default(job, n_processes=1, cache='cache.json'):
+def call_default(wf, n_processes=1, cache='cache.db'):
     """
     Run locally using several threads.
     Caching can be turned off by specifying cache=None
     """
-    with NCDisplay() as display:
-        if cache is None:
-            return run_parallel_with_display(
-                job, n_threads=n_processes,
-                display=display)
-        else:
-            return run_parallel_opt(
-                job, n_threads=n_processes,
-                registry=registry, jobdb_file=cache,
-                display=display)
-
-
-# def call_xenon(job, n_processes=1, cache='cache.json', user_name=None, adapter='slurm',
-#                queue_name=None, host_name=None, workdir=None, timeout=60000, **kwargs):
-#     """
-#     See :
-#         https://github.com/NLeSC/Xenon-examples/raw/master/doc/tutorial/xenon-tutorial.pdf
-#     """
-#     dict_properties = {
-#         'slurm': {'xenon.adaptors.slurm.ignore.version': 'true'},
-#         'pbs': {'xenon.adaptors.pbs.ignore.version': 'true'}
-#     }
-#     with XenonKeeper(log_level='DEBUG') as Xe:
-#         certificate = Xe.credentials.newCertificateCredential(
-#             'ssh', os.environ["HOME"] + '/.ssh/id_rsa', user_name, '', None)
-
-#         xenon_config = XenonConfig(
-#             jobs_scheme=adapter,
-#             location=host_name,
-#             credential=certificate,
-#             jobs_properties=dict_properties[adapter]
-#         )
-#         print(xenon_config.__dict__)
-
-#         if workdir is None:
-#             workdir = '/home/' + user_name
-
-#         job_config = RemoteJobConfig(
-#             registry=registry,
-#             init=plams.init,
-#             finish=plams.finish,
-#             queue=queue_name,
-#             time_out=timeout,
-#             working_dir=workdir
-#         )
-
-#         with NCDisplay() as display:
-#             result = run_xenon_prov(
-#                 job, Xe, cache, n_processes,
-#                 xenon_config, job_config, display=display)
-
-#     return result
+    return run_parallel(
+        wf, n_threads=n_processes, registry=registry,
+        db_file=cache, always_cache=True)
 
 
 class SerMolecule(Serialiser):
@@ -484,7 +432,7 @@ def registry():
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Chem.Mol: SerMol(),
-            Result: SerStorable(Result),
+            Result: SerAuto(Result),
             Settings: SerSettings()})
 
 

@@ -1,12 +1,10 @@
 
 __all__ = ['Settings']
 
-
-from noodles import Storable
 from scm import plams
 
 
-class Settings(plams.core.settings.Settings, Storable):
+class Settings(plams.core.settings.Settings):
     """
     This is a subclass of the :class:`plams.core.settings.Settings`.
     The difference with respect to plams' Settings are:
