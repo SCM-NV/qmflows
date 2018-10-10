@@ -254,7 +254,7 @@ def create_parser_element():
         pa.Word(pa.alphas) + skipLine
 
     parseCGF = pa.Group(
-        pa.Word(pa.alphas, exact=1)  + natural +
+        pa.Word(pa.alphas, exact=1) + natural +
         pa.Group(pa.OneOrMore(pa.Suppress(natural) + floatNumber * 2)))
 
     return pa.Group(header + pa.OneOrMore(parseCGF) + pa.Suppress(pa.Literal('end;')))

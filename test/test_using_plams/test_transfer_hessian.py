@@ -1,4 +1,3 @@
-from nose.plugins.attrib import attr
 from qmflows import Settings, templates, molkit
 from noodles import gather
 
@@ -6,9 +5,10 @@ from noodles import gather
 from qmflows.packages.SCM import dftb
 from qmflows.packages.orca import orca
 from qmflows.packages import run
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_hessian_transfer():
     """
     Test DFTB -> Orca hessian transfer

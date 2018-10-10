@@ -17,18 +17,16 @@ install:
   - conda info -a
 
   # Install virtual enviroment 
-  - conda create -q -n qmflows python=3.6
-  - conda install --name qmflows -c anaconda hdf5
-  - conda install --name qmflows -c rdkit rdkit
-  - source activate qmflows
+  - conda install -c anaconda hdf5
+  - conda install -c rdkit rdkit
 
   # Install qmflows package
-  - pip install https://github.com/SCM-NV/plams/tarball/devel#egg=plams --upgrade
+  - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
   - pip install .[test,doc]
   
 script:
   # Run the unitary tests excluding the expensive computations
-  - nosetests --with-coverage --cover-erase --cover-package=qmflows -a 'fast' --exclude='test_using_plams' -v
+  - py.test -m "not (slow or long)" --cov=qmflows test
   - echo "building gh-pages documentation"
     cd doc
     bash ./deploy.sh

@@ -1,8 +1,8 @@
-from nose.plugins.attrib import attr
 from qmflows import (templates, run, molkit, dftb, adf)
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_dftb_props():
     """
     Get properties from DFTB freq calc
@@ -19,7 +19,7 @@ def test_dftb_props():
     assert abs(result.charges[0] + result.charges[1]) < 1e-6
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_adf_props():
     """
     Get properties from ADF freq calc

@@ -1,10 +1,10 @@
 __all__ = ['orca']
 
 from os.path import join
-from qmflows.settings import Settings
-from qmflows.packages.packages import (
+from ..settings import Settings
+from .packages import (
     Package, package_properties, Result, get_tmpfile_name)
-from qmflows.parsers.orca_parser import parse_molecule
+from ..parsers.orca_parser import parse_molecule
 from scm import plams
 from warnings import warn
 
@@ -191,5 +191,6 @@ class ORCA_Result(Result):
             return parse_molecule(file_name, self._molecule)
         else:
             return None
+
 
 orca = ORCA()

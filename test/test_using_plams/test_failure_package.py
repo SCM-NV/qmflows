@@ -1,9 +1,9 @@
-
 from scm.plams import Molecule
 from qmflows import (Settings, templates, run)
 
 # User Defined imports
 from qmflows.packages import (adf, dirac, dftb, gamess, orca)
+import pytest
 
 
 def isNone(x):
@@ -24,11 +24,11 @@ def test_fail_scm():
                     job_name="failed_DFTB")
     fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
     result = run(fail_adf.molecule)
-
     print(result)
     assert isNone(result)
 
 
+@pytest.mark.xfail
 def test_fail_dirac():
     """ Dirac package should return ``None`` if it fails """
     mol = Molecule("test/test_files/h2.xyz")

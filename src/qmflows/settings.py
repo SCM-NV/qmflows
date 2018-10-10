@@ -1,12 +1,10 @@
 
 __all__ = ['Settings']
 
-
-from noodles import Storable
 from scm import plams
 
 
-class Settings(plams.core.settings.Settings, Storable):
+class Settings(plams.core.settings.Settings, ):
     """
     This is a subclass of the :class:`plams.core.settings.Settings`.
     The difference with respect to plams' Settings are:
@@ -22,9 +20,6 @@ class Settings(plams.core.settings.Settings, Storable):
         Like plams Settings.__getitem__, but
         "settings['a.b'] == 'c'" is equivalent to "settings['a']['b'] == 'c'"
         """
-#         if isinstance(name, string_types) and name.find('.') > -1:
-#             names = name.split('.')
-#             return dict.__getitem__(self, names[0]).__getitem__('.'.join(names[1:]))
         return dict.__getitem__(self, name)
 
     def __setitem__(self, name, value):
@@ -34,11 +29,6 @@ class Settings(plams.core.settings.Settings, Storable):
         """
         if isinstance(value, dict):
             value = Settings(value)
-#         if isinstance(name, string_types) and name.find('.') > -1:
-#             names = name.split('.')
-#             dict.__getitem__(self, names[0]).__setitem__('.'.join(names[1:]), value)
-#         else:
-#             dict.__setitem__(self, name, value)
         dict.__setitem__(self, name, value)
 
     def __delitem__(self, name):
@@ -46,11 +36,6 @@ class Settings(plams.core.settings.Settings, Storable):
         Like plams Settings.__setitem__, but
         "del settings['a.b']" is equivalent to "del settings['a']['b'] = 'c'"
         """
-#         if isinstance(name, string_types) and name.find('.') > -1:
-#             names = name.split('.')
-#             dict.__getitem__(self, names[0]).__delitem__('.'.join(names[1:]))
-#         else:
-#             dict.__delitem__(self, name)
         dict.__delitem__(self, name)
 
     def copy(self):
@@ -108,9 +93,12 @@ class Settings(plams.core.settings.Settings, Storable):
                 if name not in self or not isinstance(self[name], Settings):
                     self[name] = other[name].copy()
                 else:
-                    # _block_replace can be used to remove all existing key value pairs in an input block
-                    if ('__block_replace' in other[name] and other[name]['__block_replace'] == True) or \
-                        ('__block_replace' in self[name] and self[name]['__block_replace'] == True):
+                    # _block_replace can be used to remove all existing key value pairs
+                    # in an input block
+                    br = '__block_replace'
+                    pred1 = (br in other[name] and other[name][br])
+                    pred2 = (br in self[name] and self[name][br])
+                    if pred1 or pred2:
                         self[name] = Settings()
                     self[name].update(other[name])
             else:

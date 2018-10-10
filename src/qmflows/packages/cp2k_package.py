@@ -1,10 +1,10 @@
 __all__ = ['cp2k']
 
-from qmflows.data.dictionaries.warningsCP2K import cp2k_warnings
-from qmflows.packages.packages import (
+from ..warnings_qmflows import cp2k_warnings
+from .packages import (
     Package, package_properties, parse_output_warnings, Result)
-from qmflows.parsers.cp2KParser import parse_cp2k_warnings
-from qmflows.settings import Settings
+from ..parsers.cp2KParser import parse_cp2k_warnings
+from ..settings import Settings
 from scm import plams
 from warnings import warn
 
@@ -212,5 +212,6 @@ def format_coord_xyz(mol):
                   for at in mol)
 
     return '\n' + xs
+
 
 cp2k = CP2K()

@@ -4,9 +4,9 @@ __all__ = ['adf', 'dftb']
 
 from os.path import join
 from warnings import warn
-from qmflows.settings import Settings
-from qmflows.packages.packages import (Package, package_properties, Result, get_tmpfile_name)
 from scm import plams
+from ..settings import Settings
+from .packages import (Package, package_properties, Result, get_tmpfile_name)
 
 import struct
 
@@ -49,7 +49,7 @@ class ADF(Package):
             adf_settings.runscript.nproc = nproc
         adf_settings.input = settings.specific.adf
         job = plams.ADFJob(name=job_name, molecule=mol,
-                                               settings=adf_settings)
+                           settings=adf_settings)
         result = job.run()
         # Path to the tape 21 file
         path_t21 = result._kf.path
@@ -167,9 +167,9 @@ class ADF_Result(Result):
                           self._molecule,
                           self.job_name,
                           self.kf.path,
-                          plams_dir = self.archive['plams_dir'].path,
-                          status = self.status,
-                          warnings = self.warnings
+                          plams_dir=self.archive['plams_dir'].path,
+                          status=self.status,
+                          warnings=self.warnings
                           )
 
     @classmethod
@@ -237,8 +237,7 @@ class DFTB(Package):
         if nproc:
             dftb_settings.runscript.nproc = nproc
         dftb_settings.input = settings.specific.dftb
-        job = plams.DFTBJob(name=job_name, molecule=mol,
-                                                settings=dftb_settings)
+        job = plams.DFTBJob(name=job_name, molecule=mol, settings=dftb_settings)
 
         # Check RKF status
         try:
@@ -253,7 +252,7 @@ class DFTB(Package):
             print(msg.format(job_name))
 
         if job.status in ['failed', 'crashed']:
-            plams.config.jm.remove_job(job)
+            plams.config.default_jobmanager.remove_job(job)
 
         return DFTB_Result(dftb_settings, mol, name,
                            plams_dir=path, status=job.status)
@@ -340,18 +339,13 @@ class DFTB_Result(Result):
         if plams_dir is not None:
             kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
             # create a kf reader instance
+            print("Here!!!: ", plams.KFFile(kf_filename))
             self.kf = plams.KFFile(kf_filename)
         else:
             self.kf = None
 
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        return DFTB_Result(settings, molecule, job_name,
-                           archive["plams_dir"].path, status, warnings)
-
     @property
     def molecule(self, unit='bohr', internal=False, n=1):
-        """WARNING: Cheap copy from PLAMS, do not keep this!!!"""
         m = self._molecule.copy()
         natoms = len(m)
         coords = self.kf.read('Molecule', 'Coords')
@@ -366,6 +360,7 @@ class DFTB_Result(Result):
             at.move_to(coord, 'bohr')
 
         return m
+
 
 adf = ADF()
 dftb = DFTB()

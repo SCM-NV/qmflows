@@ -1,8 +1,6 @@
-from .adf_parser import *
-from .cp2KParser import *
-from .dirac_xml_parser import *
-from .gamess_parser import *
-from  .generic_parsers import *
-from .orca_parser import *
-from .turbomoleParser import *
-from .xyzParser import *
+from .generic_parsers import (awk_file, extract_line_value)
+from .xyzParser import (parse_string_xyz, readXYZ, manyXYZ, string_to_plams_Molecule)
+
+__all__ = [
+    'awk_file', 'extract_line_value', 'parse_string_xyz', 'readXYZ', 'manyXYZ',
+    "string_to_plams_Molecule"]

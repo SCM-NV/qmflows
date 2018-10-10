@@ -1,9 +1,9 @@
-from nose.plugins.attrib import attr
 from qmflows.parsers import (manyXYZ, parse_string_xyz)
-from qmflows.utils import (chunksOf)
+from qmflows.utils import chunksOf
+import pytest
 
 
-@attr('fast')
+@pytest.mark.slow
 def test_multiple_geometries():
     """
     Test the reading of multiples molecular geometries from a file.

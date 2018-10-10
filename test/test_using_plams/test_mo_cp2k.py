@@ -9,11 +9,13 @@ from qmflows.packages import cp2k
 
 import h5py
 import os
+import pytest
 import shutil
-# ===================================<>========================================
+
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
+@pytest.mark.slow
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.

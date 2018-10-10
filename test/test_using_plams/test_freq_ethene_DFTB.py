@@ -1,9 +1,9 @@
-from nose.plugins.attrib import attr
 from qmflows import (dftb, run, templates)
 from scm.plams import Molecule
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_freq():
     """
     Do some constraint optimizations then launch a freq calc.
