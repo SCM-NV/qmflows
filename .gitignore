@@ -71,6 +71,7 @@ target/
 plams_workdir*
 cache.db
 *.svg
+pytest*
 
 # MAC
 .ds_store

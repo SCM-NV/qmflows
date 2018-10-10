@@ -17,13 +17,11 @@ install:
   - conda info -a
 
   # Install virtual enviroment 
-  - conda create -q -n qmflows python=3.6
-  - conda install --name qmflows -c anaconda hdf5
-  - conda install --name qmflows -c rdkit rdkit
-  - source activate qmflows
+  - conda install -c anaconda hdf5
+  - conda install -c rdkit rdkit
 
   # Install qmflows package
-  - pip install https://github.com/SCM-NV/plams/tarball/devel#egg=plams --upgrade
+  - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
   - pip install .[test,doc]
   
 script:

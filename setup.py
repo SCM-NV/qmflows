@@ -43,5 +43,5 @@ setup(
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
     },
     dependency_links=[
-        "https://github.com/SCM-NV/plams/tarball/devel#egg=plams"]
+        "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
 )
