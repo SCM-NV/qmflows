@@ -1,5 +1,5 @@
 
-__all__ = ['import_parser', 'package_properties',
+__all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
