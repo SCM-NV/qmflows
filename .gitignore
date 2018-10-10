@@ -68,8 +68,8 @@ target/
 #.jupyter
 .ipynb_checkpoints
 
-plams.*
-cache.json
+plams_workdir*
+cache.db
 *.svg
 
 # MAC

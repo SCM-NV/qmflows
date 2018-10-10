@@ -4,7 +4,7 @@ __all__ = ['Settings']
 from scm import plams
 
 
-class Settings(plams.core.settings.Settings):
+class Settings(plams.core.settings.Settings, ):
     """
     This is a subclass of the :class:`plams.core.settings.Settings`.
     The difference with respect to plams' Settings are:

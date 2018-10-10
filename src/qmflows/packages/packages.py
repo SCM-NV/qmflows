@@ -25,7 +25,7 @@ from noodles import (schedule_hint, has_scheduled_methods, serial)
 from noodles.serial.path import SerPath
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.base import SerAuto
+from noodles.serial.reasonable import SerReasonableObject
 from noodles.serial.numpy import arrays_to_hdf5
 from pathlib import Path
 from qmflows.settings import Settings
@@ -77,7 +77,6 @@ class Result:
         self.warnings = warnings
 
     def __deepcopy__(self, memo):
-        print(dir(self))
         return Result(self.settings,
                       self._molecule,
                       self.job_name,
@@ -86,26 +85,6 @@ class Result:
                       status=self.status,
                       warnings=self.warnings
                       )
-
-    def as_dict(self):
-        """
-        Method to serialize as a JSON dictionary the results given
-        by an ``Package`` computation.
-        """
-        return {
-            "settings": self.settings,
-            "molecule": self._molecule,
-            "job_name": self.job_name,
-            "archive": self.archive,
-            "status": self.status,
-            "warnings": self.warnings}
-
-    def from_dict(cls, settings, molecule, job_name, archive,
-                  status, warnings):
-        """
-        Methods to deserialize an `Result`` object.
-        """
-        raise NotImplementedError()
 
     def __getattr__(self, prop):
         """Returns a section of the results.
@@ -352,8 +331,6 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 
     if runner is None:
         ret = call_default(job, **kwargs)
-    # elif runner.lower() == 'xenon':
-    #     ret = call_xenon(job, **kwargs)
     else:
         raise "Don't know runner: {}".format(runner)
 
@@ -432,8 +409,10 @@ def registry():
             Path: SerPath(),
             plams.Molecule: SerMolecule(),
             Chem.Mol: SerMol(),
-            Result: SerAuto(Result),
-            Settings: SerSettings()})
+            Result: AsDict(Result),
+            Settings: SerSettings(),
+            plams.KFFile: SerReasonableObject(plams.KFFile)}
+    )
 
 
 def import_parser(ds, module_root="qmflows.parsers"):
@@ -491,3 +470,4 @@ def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
         return None
     else:
         return parser(output_files[0], package_warnings)
+

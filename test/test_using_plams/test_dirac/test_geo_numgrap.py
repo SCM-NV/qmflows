@@ -1,9 +1,10 @@
-
 from noodles import gather
 from scm.plams import Molecule
 from qmflows import (dirac, run, Settings)
+import pytest
 
 
+@pytest.mark.slow
 def test_numgrad():
     """
     Test Dirac numerical opt.

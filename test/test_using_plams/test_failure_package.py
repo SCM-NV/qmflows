@@ -1,4 +1,3 @@
-
 from scm.plams import Molecule
 from qmflows import (Settings, templates, run)
 
@@ -22,9 +21,9 @@ def test_fail_scm():
     # Calculate the DFTB hessian
     opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
                     job_name="failed_DFTB")
-    fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
-    result = run(fail_adf.molecule)
-
+    # fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
+    # result = run(fail_adf.molecule)
+    result = run(opt_dftb.molecule)
     print(result)
     assert isNone(result)
 
