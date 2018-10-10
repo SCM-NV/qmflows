@@ -1,6 +1,7 @@
 # Default imports
 from math import sqrt
-from qmflows import (concat, Settings, templates, zipWith)
+from qmflows import (Settings, templates)
+from qmflows.utils import (concat, zipWith)
 from scm.plams import Molecule
 
 # User Defined imports

@@ -20,7 +20,8 @@ setup(
     long_description=readme(),
     package_dir={'': 'src'},
     # packages=find_packages(),
-    packages=["qmflows", "qmflows.components",
+    packages=["qmflows",
+              "qmflows.components",
               "qmflows.data",
               "qmflows.data.dictionaries",
               "qmflows.examples",
@@ -28,7 +29,8 @@ setup(
               "qmflows.examples.Constrained_and_TS_optimizations",
               "qmflows.examples.FDE_Fragments",
               "qmflows.hdf5",
-              "qmflows.packages", "qmflows.parsers",
+              "qmflows.packages",
+              "qmflows.parsers",
               "qmflows.templates"],
     package_data={
         "qmflows": ['data/templates/*json', 'data/dictionaries/*json']
