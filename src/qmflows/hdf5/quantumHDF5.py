@@ -1,33 +1,12 @@
 
-__all__ = ['StoreasHDF5', 'cp2k2hdf5', 'read_from_hdf5',
-           'turbomole2hdf5']
+__all__ = ['StoreasHDF5', 'cp2k2hdf5', 'turbomole2hdf5']
 
-# ==========> Standard libraries and third-party <===============
 from functools import partial
 from os.path import join
-
-import h5py
-import numpy as np
-# ==================> Internal modules <==========
 from qmflows.parsers.cp2KParser import readCp2KBasis
 from qmflows.parsers.turbomoleParser import readTurbomoleBasis
 
-# ====================><==============================
-
-
-def read_from_hdf5(path_hdf5, path_to_properties):
-    try:
-        with h5py.File(path_hdf5, 'r') as f5:
-            if isinstance(path_to_properties, list):
-                return [f5[path].value for path in path_to_properties]
-            else:
-                return f5[path_to_properties].value
-    except KeyError:
-        msg = "There is not {} stored in the HDF5\n".format(path_to_properties)
-        raise KeyError(msg)
-    except FileNotFoundError:
-        msg = "there is not HDF5 file containing the numerical results"
-        raise RuntimeError(msg)
+import numpy as np
 
 
 class StoreasHDF5:
