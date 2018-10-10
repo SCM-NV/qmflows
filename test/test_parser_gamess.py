@@ -1,11 +1,9 @@
-from nose.plugins.attrib import attr
 from qmflows.parsers.gamess_parser import (parse_frequencies, parse_hessian)
 import numpy as np
 
 file_name = 'test/test_files/CNH_hess.dat'
 
 
-@attr('fast')
 def test_hess_gamess():
     """
     Test if the hessian is read properly.
@@ -20,7 +18,6 @@ def test_hess_gamess():
     assert abs(np.sum(hess.diagonal() - expected)) < 1.0e-7
 
 
-@attr('fast')
 def test_frequencies_gamess():
     """
     Read if the frequencies are read from the *.dat file

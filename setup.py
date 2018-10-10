@@ -42,7 +42,7 @@ setup(
                       'filelock', 'msgpack-python',
                       'sphinx_rtd_theme'],
     extras_require={
-        'test': ['nose', 'coverage', 'nbsphinx'],
+        'test': ['pytest', 'coverage', 'nbsphinx'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
     },
     dependency_links=[

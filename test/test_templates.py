@@ -1,14 +1,20 @@
-from nose.plugins.attrib import attr
 from qmflows.templates import (freq, geometry, singlepoint, ts)
 from qmflows.utils import (dict2Setting, settings2Dict)
+import pytest
 
 
-@attr('fast')
+def fun(x):
+    """
+    Assert that the functions are the inverse of each other
+    """
+    return dict2Setting(settings2Dict(x))
+
+
+@pytest.mark.slow
 def test_templates():
     """
     Test that the JSON files are read properly.
     """
-    fun = lambda x: dict2Setting(settings2Dict(x))
     b1 = freq == fun(freq)
     b2 = geometry == fun(geometry)
     b3 = singlepoint == fun(singlepoint)

@@ -1,14 +1,14 @@
 # Default imports
-from nose.plugins.attrib import attr
 from scm.plams import Molecule
 from qmflows import (Settings, run)
 
 # User Defined imports
 from qmflows.components import (PES, select_max, Distance)
 from qmflows.packages.SCM import (dftb, adf)
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_linear_ts():
     """
     compute a first approximation to the TS.

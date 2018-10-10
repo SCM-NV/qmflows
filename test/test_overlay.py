@@ -1,8 +1,6 @@
-from nose.plugins.attrib import attr
 from qmflows import (Settings, templates)
 
 
-@attr('fast')
 def test_overlay_cp2k_singlepoint():
     """
     Test if the merging with the CP2K templates produces the same Settings that
@@ -51,7 +49,6 @@ def test_overlay_cp2k_singlepoint():
     assert s.specific.cp2k == r.specific.cp2k
 
 
-@attr('fast')
 def test_overlay_adf_freq():
     """
     Test if the overlay function produces the same Settings that a user would

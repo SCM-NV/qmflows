@@ -1,5 +1,3 @@
-
-from nose.plugins.attrib import attr
 from qmflows import (concat, Settings, templates, zipWith)
 from scm.plams import Molecule
 
@@ -8,9 +6,10 @@ from qmflows.packages.gamess import gamess
 from qmflows.packages import run
 
 import operator
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_opt_gamess():
     """
     Test Optimization in Gamess using methanol in water.
