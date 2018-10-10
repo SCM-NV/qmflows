@@ -43,6 +43,7 @@ def select_max_dict(dictionary, prop):
     print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
     return dictionary[selected_key]
 
+
 @schedule_hint()
 def select_min(results, prop='energy'):
     """
@@ -61,6 +62,7 @@ def select_min(results, prop='energy'):
     else:
         return None
 
+
 @schedule_hint()
 def select_min_dict(dictionary, prop):
     def key(k):
@@ -72,4 +74,3 @@ def select_min_dict(dictionary, prop):
     selected_key = min(dictionary, key=key)
     print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
     return dictionary[selected_key]
-
