@@ -167,6 +167,7 @@ def readCp2KCoeff(path, nOrbitals, nOrbFuns):
 
 # =====================> Orbital Parsers <===================
 
+
 xyz = oneOf(['x', 'y', 'z'])
 
 orbS = Literal("s")
@@ -259,10 +260,11 @@ def read_cp2k_number_of_orbitals(file_name):
     """
     Look for the line ' Number of molecular orbitals:'
     """
+    def fun_split(l):
+        return l.split()[-1]
+
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
                   "Number of orbital functions"]
-
-    fun_split = lambda l: l.split()[-1]
 
     xs = [fun_split(try_search_pattern(x, file_name)) for x in properties]
 

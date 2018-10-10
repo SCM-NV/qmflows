@@ -47,8 +47,8 @@ def parse_dipole(file_name):
     """
     Parse dipole moment from the output.dat file.
     """
-    l = Literal('DIPOLE')
-    p = skipSupress(l) + OneOrMore(floatNumber)
+    lit = Literal('DIPOLE')
+    p = skipSupress(lit) + OneOrMore(floatNumber)
     rs = parse_file(p, file_name).asList()
     return string_array_to_float(rs)
 
