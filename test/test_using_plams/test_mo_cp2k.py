@@ -34,7 +34,7 @@ def fun_ethylene(scratch_path):
     """
     Test Ethylene single
     """
-    geometry = Molecule('test_files/ethylene.xyz')
+    geometry = Molecule('test/test_files/ethylene.xyz')
     job_settings = prepare_cp2k_settings(geometry, scratch_path)
 
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
