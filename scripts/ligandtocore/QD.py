@@ -3,6 +3,7 @@ import os
 import itertools
 import time
 import sys
+import pandas as pd
 
 from scm.plams import (Atom, MoleculeError)
 from qmflows import molkit
@@ -35,7 +36,7 @@ def prep(arg):
     if arg['use_database']:
         database = qd_scripts.database_read(ligand_folder, arg['database_name'])
     else:
-        database = [[], [], [], [], []]
+        database = False
 
     # Rotate all the ligands and format the resulting list
     ligand_list = list(prep_ligand(ligand, ligand_folder, database, arg['ligand_opt'], arg['split'])
@@ -46,7 +47,7 @@ def prep(arg):
 
     # Write new entries to the ligand database
     if arg['use_database']:
-        qd_scripts.database_write(database_entries, ligand_folder, database)
+        qd_scripts.database_write(database_entries, database, ligand_folder)
 
     # Combine the core with the ligands, yielding qd, and format the resulting list
     qd_list = list(prep_qd(core, ligand, core_indices[i], ligand_indices[j], qd_folder) for
@@ -136,9 +137,7 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
     qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_indices]
     qd_indices += [i + 1 for i, atom in enumerate(core)]
 
-    qd.write(os.path.join(qd_folder, pdb_name + '.xyz'))
-    molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.pdb'))
-    print('core + ligands:\t\t\t' + pdb_name + '.pdb')
+    qd_scripts.export_mol(qd, qd_folder, pdb_name, message='core + ligands:\t\t\t')
 
     return qd, pdb_name, qd_indices
 
@@ -148,8 +147,8 @@ def prep_qd(core, ligand, core_indices, ligand_index, qd_folder):
 argument_dict = {
     # Mandatory arguments: these will have to be manually specified by the user
     'input_cores': 'Cd68Se55.xyz',
-    'input_ligands': 'OCCCCCCC',
-    'path': r'/Users/bvanbeek/Documents/CdSe/Week_5',
+    'input_ligands': ['OCCCCCCC', 'OCC'],
+    'path': r'/Users/basvanbeek/Documents/CdSe/Week_5',
 
     # Optional arguments: these can be left to their default values
     'dir_name_list': ['core', 'ligand', 'QD'],
@@ -158,7 +157,7 @@ argument_dict = {
     'row': 0,
     'dummy': 'Cl',
     'database_name': 'ligand_database.txt',
-    'use_database': False,
+    'use_database': True,
     'core_opt': False,
     'ligand_opt': True,
     'qd_opt': False,

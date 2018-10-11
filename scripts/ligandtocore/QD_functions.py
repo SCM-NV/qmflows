@@ -4,11 +4,12 @@ import itertools
 import shutil
 from functools import partial
 import numpy as np
+import pandas as pd
 
-from scm.plams import (Molecule, MoleculeError, add_to_class, Settings, AMSJob, init, finish)
+from scm.plams import (Molecule, MoleculeError, Settings, AMSJob, init, finish)
 from qmflows import molkit
 from rdkit import Chem
-from rdkit.Chem import Bond, AllChem, rdMolTransforms
+from rdkit.Chem import Bond
 
 
 def create_dir(dir_name, path=os.getcwd()):
@@ -89,7 +90,7 @@ def read_mol_txt(mol, row, column):
     return [molkit.from_smiles(mol[column]) for mol in mol_list]
 
 
-def set_pdb(mol, residue_name, is_core=True):
+def set_pdb(mol, residue_name='RES', is_core=True):
     """
     Set a number of atomic properties
     """
@@ -144,31 +145,18 @@ def set_pdb_dict():
     return dict(zip(elements, charges))
 
 
-def database_read(ligand_folder, database_name='ligand_database.txt'):
+def database_read(ligand_folder, database_name='ligand_database.xlsx'):
     """
     Open the database.
     If the database does not exist, create the database.
     """
-    # Checks if database_name exists, if not creates database_name
-    if not os.path.exists(os.path.join(ligand_folder, database_name)):
-        with open(os.path.join(ligand_folder, database_name), 'w') as database:
-            database.write('{0:6} {1:19} {2:30} {3:34} {4:}'.format(
-                'Index', 'Molecular_formula', 'pdb_filename', 'pdb_opt_filename', 'SMILES_string'))
-
-    # Open database_name
-    with open(os.path.join(ligand_folder, database_name), 'r') as database:
-        database = database.read().splitlines()
-    database = [line.split() for line in database if line]
-    database = list(zip(*database[1:]))
-
-    # If the database is not emtpy
-    if database:
-        database[4] = [Chem.MolFromSmiles(smiles) for smiles in database[4]]
-        database[4] = [Chem.AddHs(mol, addCoords=True) for mol in database[4]]
-
-    # If the database is empty
+    database_path = os.path.join(ligand_folder, database_name)
+    if os.path.exists(database_path):
+        database = pd.read_excel(database_path, sheet_name='Ligand')
+        database = [molkit.readpdb(os.path.join(ligand_folder, pdb), return_rdmol=True) for 
+                    pdb in database['Ligand_opt_pdb']]
     else:
-        database = [[], [], [], [], []]
+        database = False
 
     return database
 
@@ -177,83 +165,69 @@ def database_entry(ligand, opt):
     """
     Create a new entry for the database.
     """
-    # compare the structures provided in ligand_list with the ones in mol_database
+    # Create a SMILES string representing the ligand
     ligand_smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand)))
 
     # Create the new database_entry
-    a = []
-    b = ligand.get_formula()
-    c = 'ligand_' + b + '.pdb'
+    a = ligand.get_formula()
+    b = 'ligand_' + a + '.pdb'
     if opt:
-        d = 'ligand_' + b + '.opt.pdb'
+        c = 'ligand_' + b + '.opt.pdb'
     else:
-        d = 'ligand optimization disabled'
-    e = ligand_smiles
+        c = 'ligand_optimization_disabled'
+    d = ligand_smiles
 
-    database_entry = [a, b, c, d, e]
-
-    return database_entry
+    return [a, b, c, d]
 
 
-def database_write(database_entries, ligand_folder, database, database_name='ligand_database.txt'):
+def database_write(database_entries, database, ligand_folder, database_name='ligand_database.xlsx'):
     """
     Write the new database entries to the database.
     """
-    # Check if any previous indices are present in database[0]
-    if not database or not database[0]:
-        j = -1
+    database_entries = list(zip(*list(database_entries)))
+    database_path = os.path.join(ligand_folder, database_name)
+    new = pd.DataFrame({'Ligand_formula' : database_entries[0],
+                        'Ligand_pdb' : database_entries[1],
+                        'Ligand_opt_pdb' : database_entries[2],
+                        'Ligand_SMILES' : database_entries[3]})
+
+    if database:    
+        new = new.append(database, ignore_index=True)
     else:
-        j = int(database[0][-1])
-
-    # Format the database entries
-    spacing = '{0:6} {1:19} {2:30} {3:34} {4:}'
-    database_entries = [spacing.format(str(j + i + 1), item[1], item[2], item[3], item[4]) for
-                        i, item in enumerate(database_entries) if item]
-
-    # Write the database entries to the database
-    with open(os.path.join(ligand_folder, database_name), 'a') as database:
-        for entry in database_entries:
-            database.write('\n' + entry)
+        database = new
+    new.to_excel(database_path, sheet_name='Ligand')
 
 
 def manage_ligand(ligand, ligand_folder, opt, database):
     """
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
+    # Searches for matches between the input ligand and the database; imports the structure
+    ligand, match, pdb = manage_ligand_match(ligand, ligand_folder, database)
 
-    # Searches for matches between the input ligand and the database
-    matches, pdb_exists, index = manage_ligand_match(ligand, ligand_folder, database)
-
-    # Pull a geometry from the database if possible, or optimize a new structure
-    if any(matches) and pdb_exists:
-        ligand = molkit.readpdb(os.path.join(ligand_folder, str(database[3][index])))
-        entry = False
-    else:
+    # Optimize the ligand if no match has been found with the database
+    if not match or not pdb:
         # Export the unoptimized ligand to a .pdb and .xyz file
         ligand_name = 'ligand_' + ligand.get_formula()
-        molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.pdb'))
-        ligand.write(os.path.join(ligand_folder, ligand_name + '.xyz'))
-        print('Ligand:\t\t\t\t' + str(ligand_name) + '.pdb')
+        export_mol(ligand, ligand_folder, ligand_name, message='Ligand:\t\t\t\t')
 
         # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
         if opt:
-            # Optimize the ligand and set pdb_info
             ligand = molkit.global_minimum(ligand, n_scans=2, no_h=True)
-            set_pdb(ligand, 'LIG', is_core=False)
-
-            # Export the optimized ligand to a .pdb and .xyz file
-            molkit.writepdb(ligand, os.path.join(ligand_folder, ligand_name + '.opt.pdb'))
-            ligand.write(os.path.join(ligand_folder, ligand_name + '.opt.xyz'))
-            print('Optimized ligand:\t\t' + str(ligand_name) + '.opt.pdb')
+            set_pdb(ligand, residue_name='LIG', is_core=False)
+            ligand_name += '.opt'
+            export_mol(ligand, ligand_folder, ligand_name, message='Optimized ligand:\t\t')
 
         # Create an entry for in the database if no previous entries are present
         # or prints a warning if a structure is present in the database but the .pdb file is missing
-        if not any(matches) and not pdb_exists:
+        if not match and not pdb:
             entry = database_entry(ligand, opt)
         else:
             entry = False
             print('\ndatabase entry exists for ' + str(ligand.get_formula()) +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
+    else:
+        entry = False
 
     return ligand, entry
 
@@ -264,21 +238,35 @@ def manage_ligand_match(ligand, ligand_folder, database):
     """
     # If database usage is enabled: compare the ligand with previous entries.
     if database:
-        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database[4]]
+        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database]
     else:
         matches = [False]
 
-    # If a match has been found between the ligand and one of the database entries: check if the
-    # corresponding .pdb file actually exists.
+    # Searches for matches between ligand and the database and Check if the ligand .pdb exists 
+    # Import the .pdb file
     if any(matches):
         index = matches.index(True)
-        pdb_exists = os.path.exists(os.path.join(ligand_folder, str(database[3][index])))
+        ligand_path = os.path.join(ligand_folder, str(database[index]))
+        match = True
+        if os.path.exists(ligand_path):
+            ligand = molkit.readpdb(ligand_path)
+            pdb = True
+        else:
+            pdb = False
     else:
-        index = ''
-        pdb_exists = False
+        match = False
+        pdb = False
 
-    return matches, pdb_exists, index
+    return ligand, match, pdb
 
+
+def export_mol(mol, mol_folder, mol_name, message='Mol:\t\t\t\t'):
+        """
+        Write results to a .pdb and .xyz file
+        """
+        molkit.writepdb(mol, os.path.join(mol_folder, mol_name + '.pdb'))
+        mol.write(os.path.join(mol_folder, mol_name + '.xyz'))
+        print(str(message) + str(mol_name) + '.pdb')
 
 def find_substructure(ligand, split):
     """
@@ -464,9 +452,7 @@ def ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
         atom.move_to(output_mol[i + 1])
 
     # Write the reuslts to an .xyz and .pdb file
-    qd.write(os.path.join(qd_folder, pdb_name + '.opt.xyz'))
-    molkit.writepdb(qd, os.path.join(qd_folder, pdb_name + '.opt.pdb'))
-    print('Optimized core + ligands:\t\t' + pdb_name + '.opt.pdb')
+    export_mol(qd, qd_folder, pdb_name, message='Optimized core + ligands:\t\t')
 
     return qd
 
