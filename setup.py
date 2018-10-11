@@ -45,7 +45,7 @@ setup(
     install_requires=['h5py', 'numpy', 'noodles==0.3.0', 'plams>=1.2',
                       'pymonad', 'pyparsing', 'filelock'],
     extras_require={
-        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx'],
+        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
     },
     dependency_links=[
