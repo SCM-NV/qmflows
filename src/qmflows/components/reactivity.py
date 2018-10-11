@@ -9,93 +9,72 @@ from rdkit.Chem import AllChem
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 
-class Distance:
+class Coordinate:
+    def __init__(self, *args):
+        self.atoms = args
+        self.fmt = "{}"
+        self.fun = None
+
+    def get_current_value(self, mol):
+        """
+        Value of the coordinate
+        """
+        if isinstance(mol, Molecule):
+            mol = molkit.to_rdmol(mol)
+        conf = mol.GetConformer()
+
+        # list of indices
+        xs = [i - 1 for i in self.atoms]
+        return self.fun(conf, *xs)
+
+    def get_settings(self, value=None, mol=None):
+        s = Settings()
+        if value is None and mol is None:
+            msg = 'coordinate constraint settings requires a value or molecule'
+            raise RuntimeError(msg)
+        elif value is None:
+            value = self.get_current_value(mol)
+
+        # create settings entry
+        data = self.fmt.format(*self.atoms)
+        s[data] = value
+        return s
+
+
+class Distance(Coordinate):
     """
     Class defining an atomic distance
     """
     def __init__(self, atom1, atom2):
-        self.atom1 = atom1
-        self.atom2 = atom2
-
-    def get_current_value(self, mol):
-        if isinstance(mol, Molecule):
-            mol = molkit.to_rdmol(mol)
-        conf = mol.GetConformer()
-        return AllChem.GetBondLength(conf, self.atom1 - 1, self.atom2 - 1)
-
-    def get_settings(self, value=None, mol=None):
-        s = Settings()
-        if value is None:
-            if mol is None:
-                msg = 'Distance constraint settings requires a value or molecule'
-                raise RuntimeError(msg)
-            else:
-                value = self.get_current_value(mol)
-        s["dist {:d} {:d}".format(self.atom1, self.atom2)] = value
-        return s
+        super().__init__(atom1, atom2)
+        self.fmt = "dist {:d} {:d}"
+        self.fun = AllChem.GetBondLength
 
 
-class Angle:
+class Angle(Coordinate):
     """
     Class defining an atomic angle
     """
     def __init__(self, atom1, atom2, atom3):
-        self.atom1 = atom1
-        self.atom2 = atom2
-        self.atom3 = atom3
+        super().__init__(atom1, atom2, atom3)
+        self.fmt = "angle {:d} {:d} {:d}"
 
     def get_current_value(self, mol, rad=False):
-        if isinstance(mol, Molecule):
-            mol = molkit.to_rdmol(mol)
-        conf = mol.GetConformer()
-        if rad:
-            return AllChem.GetAngleRad(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1)
-        else:
-            return AllChem.GetAngleDeg(conf, self.atom1 - 1, self.atom2 - 1, self.atom3 - 1)
-
-    def get_settings(self, value=None, mol=None):
-        s = Settings()
-        if value is None:
-            if mol is None:
-                msg = 'Angle constraint settings requires a value or molecule'
-                raise RuntimeError(msg)
-            else:
-                value = self.get_current_value(mol)
-        s["angle {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3)] = value
-        return s
+        self.fun = AllChem.GetAngleRad if rad else AllChem.GetAngleDeg
+        return super().get_current_value(mol)
 
 
-class Dihedral:
+class Dihedral(Coordinate):
     """
     Class defining an atomic dihedral angle
     """
     def __init__(self, atom1, atom2, atom3, atom4):
-        self.atom1 = atom1
-        self.atom2 = atom2
-        self.atom3 = atom3
-        self.atom4 = atom4
+        super().__init__(atom1, atom2, atom3, atom4)
+        self.fmt = "dihed {:d} {:d} {:d} {:d}"
 
     def get_current_value(self, mol, rad=False):
-        if isinstance(mol, Molecule):
-            mol = molkit.to_rdmol(mol)
-        conf = mol.GetConformer()
-        xs = [self.atom1 - 1, self.atom2 - 1, self.atom3 - 1, self.atom4 - 1]
-        if rad:
-            return AllChem.GetDihedralRad(conf, *xs)
-        else:
-            return AllChem.GetDihedralDeg(conf, *xs)
-
-    def get_settings(self, value=None, mol=None):
-        s = Settings()
-        if value is None:
-            if mol is None:
-                msg = 'Dihedral constraint settings requires a value or molecule'
-                raise RuntimeError(msg)
-            else:
-                value = self.get_current_value(mol)
-        key = "dihed {:d} {:d} {:d} {:d}".format(self.atom1, self.atom2, self.atom3, self.atom4)
-        s[key] = value
-        return s
+        self.fun = AllChem.GetDihedralRad if rad else AllChem.GetDihedralDeg
+        return super().get_current_value(mol)
 
 
 @schedule
