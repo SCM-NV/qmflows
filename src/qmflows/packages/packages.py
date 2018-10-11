@@ -26,9 +26,9 @@ import inspect
 import os
 import uuid
 import pkg_resources as pkg
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 # ==================> Internal modules <====================
-from qmflows import molkit
 from ..settings import Settings
 from ..fileFunctions import json2Settings
 from ..utils import concatMap

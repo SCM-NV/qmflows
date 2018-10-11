@@ -1,5 +1,6 @@
-from qmflows import (templates, run, molkit, dftb, adf)
+from qmflows import (templates, run, dftb, adf)
 import pytest
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 @pytest.mark.slow

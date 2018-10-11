@@ -1,11 +1,12 @@
 
 __all__ = ['Distance', 'Angle', 'Dihedral', 'PES']
 
-from qmflows import templates, molkit
+from qmflows import templates
 from qmflows.settings import Settings
 from noodles import gather, schedule
 from scm.plams import Molecule
 from rdkit.Chem import AllChem
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 class Distance:
