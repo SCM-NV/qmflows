@@ -1,9 +1,12 @@
-run uff automatically with the help of PLAMS
-    export the results back into a .pdb file
-
-bond orders can get messed up upon converting between plams and rdkit molecules
-
 cis/trans information is lost upon converting between plams and rdkit molecules
 
 ligand name: ligand molecular formula
     need a more unique ligand name
+
+use pandas for database management
+
+use argparse for passing arguments
+
+use pyyaml for creating input
+
+create tests
