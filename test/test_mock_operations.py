@@ -1,28 +1,47 @@
-# from noodles import (gather, run_single)
-# from pytest_mock import mocker
-# from qmflows.packages.SCM import ADF_Result
-# import numpy as np
-# from qmflows.components.operations import (
-#     find_first_job, select_max, select_min, select_max_dict, select_min_dict)
+from noodles import (run_single)
+from pytest_mock import mocker
+from qmflows.components.operations import (select_max, select_min)
+import numpy as np
 
 
-# def test_mock(mocker):
-#     """
-#     Mock an ADF call.
-#     """
-#     n = 9
-#     results = [mocker.patch('qmflows.packages.SCM.ADF_Result') for _ in range(n + 1)]
-#     results[n].prop = 1e3
+def generate_mocked_results(mocker, target, instances=10, expected=None):
+    """
+    Generate a list of mocked results with property `prop`. One of the results is
+    set to `expected`  and the rest are random values.
+    """
 
-#     rs = np.random.uniform(high=5.0, size=n)
+    results = [mocker.patch(target) for _ in range(10)]
 
-#     for (i,), x in np.ndenumerate(rs):
-#         setattr(results[i], 'prop', x)
+    # Set the last Results with the expected value
+    results[9].prop = expected
 
-#     wf = select_max(gather(*results), prop='prop')
+    # Initialize the other results with random numbers
+    rs = np.random.uniform(high=5.0, size=9)
 
-#     xs = run_single(wf)
+    for (i,), x in np.ndenumerate(rs):
+        setattr(results[i], 'prop', x)
 
-#     print(xs)
+    return results
 
-#     assert False
+
+def test_select_max_list(mocker):
+    """
+    Test select_max using mocked results
+    """
+    results = generate_mocked_results(mocker, 'qmflows.packages.SCM.ADF_Result', expected=1e3)
+    wf = select_max(results, prop='prop')
+    xs = run_single(wf)
+
+    assert xs.prop == 1e3
+
+
+def test_select_min(mocker):
+    """
+    Test select_min using mocked results
+    """
+    results = generate_mocked_results(mocker, 'qmflows.packages.SCM.DFTB_Result', expected=-1e3)
+    wf = select_min(results, prop='prop')
+
+    xs = run_single(wf)
+
+    assert xs.prop == -1e3

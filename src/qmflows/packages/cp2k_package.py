@@ -1,4 +1,4 @@
-__all__ = ['cp2k']
+__all__ = ['CP2K_Result', 'cp2k']
 
 from ..warnings_qmflows import cp2k_warnings
 from .packages import (
