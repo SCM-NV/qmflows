@@ -412,7 +412,8 @@ def registry():
             Chem.Mol: SerMol(),
             Result: AsDict(Result),
             Settings: SerSettings(),
-            plams.KFFile: SerReasonableObject(plams.KFFile)}
+            plams.KFFile: SerReasonableObject(plams.KFFile),
+            plams.KFReader: SerReasonableObject(plams.KFReader)}
     )
 
 
