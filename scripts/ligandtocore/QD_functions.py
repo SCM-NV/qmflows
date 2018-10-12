@@ -4,12 +4,42 @@ import itertools
 import shutil
 from functools import partial
 import numpy as np
-import pandas as pd
 
-from scm.plams import (Molecule, MoleculeError, Settings, AMSJob, init, finish)
+from scm.plams import (Molecule, Settings, AMSJob, init, finish)
 from qmflows import molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
+
+import QD_database as qd_database
+
+def remove_h(mol):
+    """
+    Remove all hydrogen atoms
+    """
+    for atom in mol:
+        if atom.atnum == 1:
+            mol.delete_atom(atom)
+
+    return mol
+
+
+def add_h(mol):
+    """
+    Add hydrogen atoms
+    """
+    mol = Chem.AddHs(molkit.to_rdmol(mol), addCoords=True)
+
+    return molkit.from_rdmol(mol)
+
+
+def concatenate_dict(dic):
+    """
+    Concatenates a list of dictionaries.
+    """
+    concact_dic = {}
+    for item in dic:
+        concact_dic.update(item)
+    return concact_dic
 
 
 def create_dir(dir_name, path=os.getcwd()):
@@ -23,71 +53,74 @@ def create_dir(dir_name, path=os.getcwd()):
     return dir_path
 
 
-def read_mol(folder_path, file_name, column=0, row=0, smiles_extension='txt'):
+def read_mol(input_mol, folder_path, column=0, row=0):
     """
     Checks by which means the input is provided and converts it into a molecule.
-    Returns a list of PLAMS molecules.
+    Returns a dictionary of PLAMS molecules.
     """
-    # Check if filename is a string or a list, returns an error if it is neither
-    if isinstance(file_name, str):
-        file_name = [file_name]
-    if not isinstance(file_name, str) and not isinstance(file_name, list):
-        raise MoleculeError("the argument 'mol_name' " + str(type(file_name)) +
-                            " is not recognized as a <class 'str'> or <class 'list'>")
-
     # Creates a dictionary of file extensions
     extension_dict = {'xyz' : read_mol_xyz, 'pdb' : read_mol_pdb, 'mol' : read_mol_mol,
-                      'smiles' : read_mol_smiles,
-                      smiles_extension : partial(read_mol_txt, row=row, column=column)}
-
-    # Creates a list of the file extensions used in the argument file_name
-    extension = []
-    for item in file_name:
-        item = item.split('.')[-1]
-        if item in extension_dict:
-            extension.append(item)
-        else:
-            extension.append('smiles')
+                      'smiles' : read_mol_smiles, 'folder' : read_mol_folder,
+                      'txt' : partial(read_mol_txt, row=row, column=column)}
 
     # Reads the input molecule(s), the method depending on the nature of the file extension
-    file_name = [os.path.join(folder_path, name) for name in file_name]
-    mol_list = [extension_dict[extension[i]](mol) for i, mol in enumerate(file_name)]
+    # Returns a list of dictionaries
+    mol_list = [extension_dict[input_mol[mol]](mol, folder_path) for mol in input_mol if
+                input_mol[mol] in extension_dict]
 
-    return list(itertools.chain(*mol_list))
+    return concatenate_dict(mol_list)
 
 
-def read_mol_xyz(mol):
+def read_mol_xyz(mol, folder_path):
     """
     Read an .xyz file
     """
-    return [Molecule(mol)]
+    folder_path = os.path.join(folder_path, mol)
+    return {mol.rsplit('.', 1)[0]: Molecule(folder_path)}
 
-def read_mol_pdb(mol):
+def read_mol_pdb(mol, folder_path):
     """
     Read a .pdb file
     """
-    return [molkit.readpdb(mol)]
+    folder_path = os.path.join(folder_path, mol)
+    return {mol.rsplit('.', 1)[0]: molkit.readpdb(folder_path)}
 
-def read_mol_mol(mol):
+def read_mol_mol(mol, folder_path):
     """
     Read a .mol file
     """
-    return [molkit.from_rdmol(Chem.MolFromMolFile(mol))]
+    folder_path = os.path.join(folder_path, mol)
+    return {mol.rsplit('.', 1)[0]: molkit.from_rdmol(Chem.MolFromMolFile(folder_path))}
 
-def read_mol_smiles(mol):
+def read_mol_smiles(mol, folder_path):
     """
     Read a SMILES string
     """
-    return [molkit.from_smiles(mol.split('/')[-1])]
+    return {mol: molkit.from_smiles(mol)}
 
-def read_mol_txt(mol, row, column):
+def read_mol_folder(mol, folder_path):
+    """
+    Read all files (.xyz, .pdb, .mol, .txt or further subfolders) within a folder
+    """
+    folder_path = os.path.join(folder_path, mol)
+    file_dict = [{file.rsplit('.', 1)[0]: file.rsplit('.', 1)[1]} for
+                  file in os.listdir(folder_path)]
+    file_dict = concatenate_dict(file_dict)
+    return read_mol(file_dict, folder_path)
+
+def read_mol_txt(mol, folder_path, row, column):
     """
     Read a plain text file containing one or more SMILES strings
     """
-    with open(mol, 'r') as file:
-        mol_list = file.read().splitlines()
-    mol_list = [line.split() for line in mol_list[row:] if line]
-    return [molkit.from_smiles(mol[column]) for mol in mol_list]
+    folder_path = os.path.join(folder_path, mol)
+    with open(folder_path, 'r') as file:
+        smiles_list = file.read().splitlines()
+    smiles_list = [smiles.split()[column] for smiles in smiles_list[row:] if smiles]
+    mol_list = [molkit.from_smiles(mol) for mol in smiles_list]
+    smiles_list = [smile.replace('/', '') for smile in smiles_list]
+    smiles_list = [smile.replace('\\', '') for smile in smiles_list]
+    mol_dict = dict(zip(smiles_list, mol_list))
+    return mol_dict
 
 
 def set_pdb(mol, residue_name='RES', is_core=True):
@@ -145,119 +178,46 @@ def set_pdb_dict():
     return dict(zip(elements, charges))
 
 
-def database_read(ligand_folder, database_name='ligand_database.xlsx'):
-    """
-    Open the database.
-    If the database does not exist, create the database.
-    """
-    database_path = os.path.join(ligand_folder, database_name)
-    if os.path.exists(database_path):
-        database = pd.read_excel(database_path, sheet_name='Ligand')
-        database = [molkit.readpdb(os.path.join(ligand_folder, pdb), return_rdmol=True) for 
-                    pdb in database['Ligand_opt_pdb']]
-    else:
-        database = False
-
-    return database
-
-
-def database_entry(ligand, opt):
-    """
-    Create a new entry for the database.
-    """
-    # Create a SMILES string representing the ligand
-    ligand_smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand)))
-
-    # Create the new database_entry
-    a = ligand.get_formula()
-    b = 'ligand_' + a + '.pdb'
-    if opt:
-        c = 'ligand_' + b + '.opt.pdb'
-    else:
-        c = 'ligand_optimization_disabled'
-    d = ligand_smiles
-
-    return [a, b, c, d]
-
-
-def database_write(database_entries, database, ligand_folder, database_name='ligand_database.xlsx'):
-    """
-    Write the new database entries to the database.
-    """
-    database_entries = list(zip(*list(database_entries)))
-    database_path = os.path.join(ligand_folder, database_name)
-    new = pd.DataFrame({'Ligand_formula' : database_entries[0],
-                        'Ligand_pdb' : database_entries[1],
-                        'Ligand_opt_pdb' : database_entries[2],
-                        'Ligand_SMILES' : database_entries[3]})
-
-    if database:    
-        new = new.append(database, ignore_index=True)
-    else:
-        database = new
-    new.to_excel(database_path, sheet_name='Ligand')
-
-
-def manage_ligand(ligand, ligand_folder, opt, database):
+def manage_ligand(ligand, ligand_name, ligand_folder, opt, database):
     """
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
     # Searches for matches between the input ligand and the database; imports the structure
-    ligand, match, pdb = manage_ligand_match(ligand, ligand_folder, database)
+
+    ligand, match, pdb = qd_database.compare(ligand, ligand_name, ligand_folder, database)
+    ligand_name = 'Ligand_' + ligand_name
+
+    if ligand.properties.smiles:
+        ligand_smiles = ligand.properties.smiles
+    else:
+        ligand_smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(ligand)))
 
     # Optimize the ligand if no match has been found with the database
     if not match or not pdb:
         # Export the unoptimized ligand to a .pdb and .xyz file
-        ligand_name = 'ligand_' + ligand.get_formula()
         export_mol(ligand, ligand_folder, ligand_name, message='Ligand:\t\t\t\t')
 
         # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
         if opt:
-            ligand = molkit.global_minimum(ligand, n_scans=2, no_h=True)
+            ligand = remove_h(ligand)
+            ligand = molkit.global_minimum(ligand, n_scans=1, no_h=True)
+            ligand = add_h(ligand)
+            ligand = molkit.global_minimum(ligand, n_scans=1, no_h=True)
             set_pdb(ligand, residue_name='LIG', is_core=False)
-            ligand_name += '.opt'
-            export_mol(ligand, ligand_folder, ligand_name, message='Optimized ligand:\t\t')
+            export_mol(ligand, ligand_folder, ligand_name + '.opt', message='Optimized ligand:\t\t')
 
         # Create an entry for in the database if no previous entries are present
         # or prints a warning if a structure is present in the database but the .pdb file is missing
         if not match and not pdb:
-            entry = database_entry(ligand, opt)
+            entry = qd_database.entry(ligand, ligand_name, ligand_smiles, opt)
         else:
             entry = False
-            print('\ndatabase entry exists for ' + str(ligand.get_formula()) +
+            print('\ndatabase entry exists for ' + ligand_name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
     else:
         entry = False
 
     return ligand, entry
-
-
-def manage_ligand_match(ligand, ligand_folder, database):
-    """
-    Search the database for any ligand matches.
-    """
-    # If database usage is enabled: compare the ligand with previous entries.
-    if database:
-        matches = [molkit.to_rdmol(ligand).HasSubstructMatch(mol) for mol in database]
-    else:
-        matches = [False]
-
-    # Searches for matches between ligand and the database and Check if the ligand .pdb exists 
-    # Import the .pdb file
-    if any(matches):
-        index = matches.index(True)
-        ligand_path = os.path.join(ligand_folder, str(database[index]))
-        match = True
-        if os.path.exists(ligand_path):
-            ligand = molkit.readpdb(ligand_path)
-            pdb = True
-        else:
-            pdb = False
-    else:
-        match = False
-        pdb = False
-
-    return ligand, match, pdb
 
 
 def export_mol(mol, mol_folder, mol_name, message='Mol:\t\t\t\t'):
@@ -268,7 +228,8 @@ def export_mol(mol, mol_folder, mol_name, message='Mol:\t\t\t\t'):
         mol.write(os.path.join(mol_folder, mol_name + '.xyz'))
         print(str(message) + str(mol_name) + '.pdb')
 
-def find_substructure(ligand, split):
+
+def find_substructure(ligand, ligand_name, split=True):
     """
     Identify the ligand functional groups.
     """
@@ -310,35 +271,49 @@ def find_substructure(ligand, split):
     for match in matches:
         if match[0] not in [item[0] for item in ligand_indices]:
             ligand_indices.append(match)
-    ligand_list = [copy.deepcopy(ligand) for match in ligand_indices]
 
-    # Delete the hydrogen or mono-/polyatomic counterion attached to the functional group
-    # Sets the charge of the remaining heteroatom to -1 if split=True
-    for i, ligand in enumerate(ligand_list):
-        at1 = ligand[ligand_indices[i][0] + 1]
-        at2 = ligand[ligand_indices[i][1] + 1]
-        if split:
-            if len(ligand.separate()) == 1:
-                ligand.delete_atom(at2)
-            else:
-                mol1, mol2 = ligand.separate()
-                if str(at1) in [str(atom) for atom in mol1]:
-                    ligand = mol1
-                else:
-                    ligand = mol2
-            if not at1.properties.charge or at1.properties.charge == 0:
-                at1.properties.charge = -1
-        ligand_atoms = [str(atom) for atom in ligand]
-        ligand_indices[i] = ligand_atoms.index(str(at1)) + 1
-        ligand_list[i] = ligand
-
-    # Check if the ligand heteroatom has a charge assigned, assigns a charge if not
-
-
-    if not ligand_list:
+    if ligand_indices:
+        ligand_list = [copy.deepcopy(ligand) for match in ligand_indices]
+        ligand_list = [find_substructure_split(ligand, ligand_name, ligand_indices[i], split) for
+                       i, ligand in enumerate(ligand_list)]
+        ligand_list, ligand_names, ligand_indices = zip(*ligand_list)
+        ligand_dict = dict(zip(ligand_names, ligand_list))
+    else:
         print('No functional groups were found for ' + str(ligand.get_formula()))
+        ligand_dict = {}
+        ligand_indices = []
 
-    return ligand_list, ligand_indices
+    return ligand_dict, ligand_indices
+
+
+def find_substructure_split(ligand, ligand_name, ligand_index, split=True):
+    """
+    Delete the hydrogen or mono-/polyatomic counterion attached to the functional group
+    Sets the charge of the remaining heteroatom to -1 if split=True
+    """
+    at1 = ligand[ligand_index[0] + 1]
+    at2 = ligand[ligand_index[1] + 1]
+    ligand_name = 'Ligand_' + ligand_name + '@' + at1.symbol + str(ligand_index[0] + 1)
+    
+    if split:
+        if len(ligand.separate()) == 1:
+            ligand.delete_atom(at2)
+        else:
+            mol1, mol2 = ligand.separate()
+            if str(at1) in [str(atom) for atom in mol1]:
+                ligand = mol1
+            else:
+                ligand = mol2
+                
+        # Check if the ligand heteroatom has a charge assigned, assigns a charge if not
+        if not at1.properties.charge or at1.properties.charge == 0:
+            at1.properties.charge = -1
+
+    # Update the index of the ligand heteroatom
+    ligand_atoms = [str(atom) for atom in ligand]
+    ligand_index = ligand_atoms.index(str(at1)) + 1
+    
+    return ligand, ligand_name, ligand_index
 
 
 def rotate_ligand(core, ligand, core_index, ligand_index, i):
@@ -426,7 +401,7 @@ def check_sys_var():
         return True
 
 
-def ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
+def ams_job(qd, qd_name, qd_folder, qd_indices, maxiter=1000):
     """
     Converts PLAMS connectivity into adf .run script connectivity.
     """
@@ -445,14 +420,14 @@ def ams_job(qd, pdb_name, qd_folder, qd_indices, maxiter=1000):
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
     # Launch the AMS UFF constrained geometry optimization
-    output_mol = ams_job_run(qd, pdb_name, qd_folder, qd_indices, bonds, maxiter)
+    output_mol = ams_job_run(qd, qd_name, qd_folder, qd_indices, bonds, maxiter)
 
     # Update the atomic coordinates of qd
     for i, atom in enumerate(qd):
         atom.move_to(output_mol[i + 1])
 
     # Write the reuslts to an .xyz and .pdb file
-    export_mol(qd, qd_folder, pdb_name, message='Optimized core + ligands:\t\t')
+    export_mol(qd, qd_folder, qd_name, message='Optimized core + ligands:\t\t')
 
     return qd
 
