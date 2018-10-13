@@ -1,10 +1,3 @@
-cis/trans information is lost upon converting between plams and rdkit molecules
-
-ligand name: ligand molecular formula
-    need a more unique ligand name
-
-use pandas for database management
-
 use argparse for passing arguments
 
 use pyyaml for creating input
