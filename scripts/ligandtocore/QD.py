@@ -3,13 +3,15 @@ import itertools
 import time
 import sys
 
-from scm.plams import (Atom, MoleculeError)
+from scm.plams import (Atom, MoleculeError, Settings)
 from qmflows import molkit
 
-import QD_functions as qd_scripts
-import QD_database as qd_database
+import QD_functions as QD_scripts
+import QD_database
+import QD_import_export as QD_inout
 
-def prep(arg):
+
+def prep(input_ligands, input_cores, path, arg):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
     """
@@ -17,56 +19,49 @@ def prep(arg):
     time_start = time.time()
     print('\n')
 
-    # Create the result directories
-    core_folder, ligand_folder, qd_folder = [qd_scripts.create_dir(name, path=arg['path']) for
-                                             name in arg['dir_name_list']]
+    # Create the result directories (if they do not exist), ligands and cores
+    folder_list = [QD_inout.create_dir(name, path) for name in arg['dir_name_list']]
+    ligand_list = QD_inout.read_mol(input_ligands, folder_list[1], arg['column'], arg['row'])
+    core_list = QD_inout.read_mol(input_cores, folder_list[0], arg['column'], arg['row'],
+                                  is_core=True)
 
-    # Imports the cores and ligands
-    core_dict = qd_scripts.read_mol(arg['input_cores'], core_folder, arg['column'], arg['row'])
-    ligand_dict = qd_scripts.read_mol(arg['input_ligands'], ligand_folder, arg['column'],
-                                      arg['row'])
-   
-    # Return the indices of the core dummy atoms
-    core_indices = list(prep_core(core_dict[core], core_folder, arg['core_indices'], arg['dummy'], 
-                                            arg['core_opt']) for core in core_dict)
+    # Adds the indices of the core dummy atoms to core.properties.core
+    for core in core_list:
+        prep_core(core, arg['core_indices'], arg['dummy'], arg['core_opt'])
 
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
-        database = qd_database.read(ligand_folder, arg['database_name'])
+        database = QD_database.read(folder_list[1], arg['database_name'])
     else:
         database = False
 
-    # Rotate all the ligands and format the resulting list
-    ligand_dict = list(prep_ligand(ligand_dict[ligand], ligand, ligand_folder, database, 
-                                   arg['ligand_opt'], arg['split']) for ligand in ligand_dict)
-    ligand_dict, ligand_indices, database_entries = zip(*ligand_dict)
-    ligand_dict = qd_scripts.concatenate_dict(ligand_dict)
-    ligand_indices = list(itertools.chain(*ligand_indices))
+    # Optimize all ligands and find their functional groups
+    ligand_list = list(prep_ligand(ligand, database, arg['ligand_opt'], arg['split']) for
+                       ligand in ligand_list)
+    ligand_list = list(itertools.chain(*ligand_list))
 
     # Write new entries to the ligand database
     if arg['use_database']:
-        qd_database.write(database_entries, database, ligand_folder)
+        QD_database.write(ligand_list, database)
 
     # Combine the core with the ligands, yielding qd, and format the resulting list
-    qd_dict = list(prep_qd(core_dict[core], core, ligand_dict[ligand], ligand, core_indices[i], 
-                           ligand_indices[j], qd_folder) for i, core in enumerate(core_dict) for
-                           j, ligand in enumerate(ligand_dict))
-    qd_dict, qd_indices = zip(*qd_dict)
-    qd_dict = qd_scripts.concatenate_dict(qd_dict)
+    qd_list = list(prep_qd(core, ligand, folder_list[2]) for core in core_list for
+                   ligand in ligand_list)
 
     # Check if the ADF environment variables are set and optimize the qd with the core frozen
     if arg['qd_opt']:
-        sys_var = qd_scripts.check_sys_var()
-        if sys_var:
-            for i, qd in enumerate(qd_dict):
-                qd_scripts.ams_job(qd_dict[qd], qd, qd_folder, qd_indices[i], arg['maxiter'])
+        if QD_scripts.check_sys_var():
+            for qd in qd_list:
+                QD_scripts.ams_job(qd, arg['maxiter'])
 
     # The End
     time_end = time.time()
     print('\nTotal elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
+    return qd_list
 
-def prep_core(core, core_folder, core_indices=[], dummy=0, opt=False):
+
+def prep_core(core, core_indices, dummy=0, opt=False):
     """
     Function that handles all core operations.
     """
@@ -82,74 +77,75 @@ def prep_core(core, core_folder, core_indices=[], dummy=0, opt=False):
     # An additional dummy atom is added at the core center of mass for orientating the ligands
     if not core_indices:
         core_indices = [(i + 1) for i, atom in enumerate(core.atoms) if atom.atnum == dummy]
-        core_indices.reverse()
-    else:
-        core_indices.sort(reverse=True)
+    core_indices.sort(reverse=True)
+    core.properties.core_indices = core_indices
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
-
-    # Set a number of atomic properties
-    qd_scripts.set_pdb(core, 'COR', is_core=True)
 
     # Returns an error if no dummy atoms were found
     if not core_indices:
         raise MoleculeError(Atom(atnum=dummy).symbol +
                             ' was specified as dummy atom, yet no dummy atoms were found')
-    else:
-        return core_indices
 
 
-def prep_ligand(ligand, ligand_name, ligand_folder, database, opt=True, split=True):
+def prep_ligand(ligand, database, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
     # Handles all interaction between the database, the ligand and the ligand optimization
-    ligand, database_entry = qd_scripts.manage_ligand(ligand, ligand_name, ligand_folder, opt, database)
+    ligand = QD_scripts.optimize_ligand(ligand, opt, database)
 
     # Identify functional groups within the ligand and add a dummy atom to the center of mass.
-    ligand_dict, ligand_indices = qd_scripts.find_substructure(ligand, ligand_name, split)
-    for ligand in ligand_dict:
-        ligand_dict[ligand].add_atom(Atom(atnum=0, coords=ligand_dict[ligand].get_center_of_mass()))
+    ligand_list = QD_scripts.find_substructure(ligand, split)
 
-    return ligand_dict, ligand_indices, database_entry
+    return ligand_list
 
 
-def prep_qd(core, core_name, ligand, ligand_name, core_indices, ligand_index, qd_folder):
+def prep_qd(core, ligand, qd_folder):
     """
     Function that handles all quantum dot (qd, i.e. core + all ligands) operations.
     """
     # Rotate and translate all ligands to their position on the core.
     # Returns a list of PLAMS molecules and atomic indices.
     core = copy.deepcopy(core)
-    ligand_list = [qd_scripts.rotate_ligand(core, ligand, core_index, ligand_index, i)
-                   for i, core_index in enumerate(core_indices)]
-
+    ligand_list = [QD_scripts.rotate_ligand(core, ligand, i, index) for i, index in
+                   enumerate(core.properties.core_indices)]
     ligand_list, ligand_indices = zip(*ligand_list)
     core.delete_atom(core[-1])
 
-    # Prepare the .pdb filename as a string.
-    qd_name = 'Core_' + core_name + '__' + ligand_name
-
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule).
-    qd = qd_scripts.combine_qd(core, ligand_list)
+    qd = QD_scripts.combine_qd(core, ligand_list)
 
     # indices of all the atoms in the core and the ligand heteroatom anchor.
     qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_indices]
     qd_indices += [i + 1 for i, atom in enumerate(core)]
 
-    qd_scripts.export_mol(qd, qd_folder, qd_name, message='core + ligands:\t\t\t')
+    qd.properties = Settings()
+    qd.properties.qd_indices = qd_indices
+    qd.properties.name = core.properties.name + '__' + ligand.properties.name
+    qd.properties.source_folder = qd_folder
+    QD_inout.export_mol(qd, message='core + ligands:\t\t\t')
 
-    return {qd_name: qd}, qd_indices
+    return qd
 
 
+# Mandatory arguments: these will have to be manually specified by the user
+# Key: filename
+# Argument: string containing the filetype (i.e. 'xyz', 'pdb', 'mol', 'smiles', 'folder', 'txt')
+# Or argument: list containing [0] the filetype (see above) and [1] if bonds should be guessed used (Bool)
+# By default guess_bonds() is only enabled for .xyz files
 
+input_cores = {
+        'Cd16Se13.xyz': ['xyz', False]
+        }
 
+input_ligands = {
+        'input_ligands.txt': 'txt'
+        }
+
+path = r'D:\QMFlows_DATA'
+
+# Optional arguments: these can be left to their default values
 argument_dict = {
-    # Mandatory arguments: these will have to be manually specified by the user
-    'input_cores': {'Cd16Se13.xyz': 'xyz'},
-    'input_ligands': {'input_ligands.txt': 'txt'},
-    'path': r'D:\QMFlows_DATA',
-
-    # Optional arguments: these can be left to their default values
     'dir_name_list': ['core', 'ligand', 'QD'],
     'smiles_extension': 'txt',
     'column': 0,
@@ -181,7 +177,7 @@ if argv:
         argument_dict[keyword] = argument.split(',')
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-prep(argument_dict)
+qd_list = prep(input_ligands, input_cores, path, argument_dict)
 
 """
 input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
@@ -197,7 +193,7 @@ row =               The amount of rows to be ignored in the SMILES string contai
                     Should be used when e.g. the first row does not contain a SMILES string
 dummy =             The atomic number of atomic symbol of the atoms in the core that should be
                     should be replaced with ligands.
-core_indices =      Manually specify the indices of the core dummy atoms instead of utilizing the 
+core_indices =      Manually specify the indices of the core dummy atoms instead of utilizing the
                     'dummy' argument.
 ligand_indices =    Manually specifiy the indices of ligand dummy atoms instead of utilizing the
                     find_substructure() function.

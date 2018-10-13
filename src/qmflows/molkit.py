@@ -42,9 +42,12 @@ def global_minimum(plams_mol, n_scans=1, no_h=True):
     rdmol = to_rdmol(plams_mol)
     for i in range(n_scans):
         for item in dihedral_list:
-            InRing = rdmol.GetBondWithIdx(item[0]).IsInRing()
-            if item[2] and item[1] == 1.0 and not InRing:
-                rdmol = global_minimum_scan(rdmol, item)
+            if item[1] == 1.0 and item[2]:
+                InRing_at1 = rdmol.GetAtomWithIdx(item[2]).IsInRing()
+                InRing_at2 = rdmol.GetAtomWithIdx(item[5]).IsInRing()
+                if not InRing_at1 and not InRing_at2:
+                    rdmol = global_minimum_scan(rdmol, item)
+    AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
     return from_rdmol(rdmol)
 
 
