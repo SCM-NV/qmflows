@@ -3,8 +3,23 @@ import itertools
 import pandas as pd
 
 from scm.plams import Molecule
+from scm.plams.core import errors
 from qmflows import molkit
 from rdkit import Chem
+
+
+def print_exception(func, ex, mol_path, kwargs):
+    extension_dict = {'read_mol_xyz': '.xyz file', 'read_mol_pdb': '.pdb file',
+                      'read_mol_mol': '.mol file', 'read_mol_smiles': 'SMILES string',
+                      'read_mol_folder': 'folder', 'read_mol_txt': '.txt file',
+                      'read_mol_excel': '.xlsx file', 'read_mol_plams': 'PLAMS molecule',
+                      'read_mol_rdkit': 'RDKit molecule'}
+    print(str(type(ex).__name__), str(ex))
+    print('\tfunction:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
+    for i, item in enumerate(func.co_varnames[:func.co_argcount]):
+        print('\t\targ' + str(i) + '(' + func.co_varnames[i] + ')' + ':', type(kwargs[i]), kwargs[i])
+    print('Warning:', mol_path, 'is not recognize as a valid', extension_dict[func.co_name], '\n')
+    return []
 
 
 def dict_concatenate(dic):
@@ -49,21 +64,26 @@ def read_mol(input_mol, folder_path, is_core=False):
     input_mol = [read_mol_extension(mol, folder_path, is_core) for mol in input_mol]
     input_mol = dict_concatenate(input_mol)
 
+    # Turns input_mol into a list if it is a string
+    if isinstance(input_mol, str):
+        input_mol = [input_mol]
+
+    # Create a list of PLAMS molecules
     mol_list = []
     for mol in input_mol:
         try:
             read = extension_dict[input_mol[mol][0]]
             mol_list.append(read(mol, input_mol[mol][1]))
-        except KeyError:
-            print('Warning: ' + input_mol[mol][0] + ' is not supported a supported file type,' +
-                  ' extension or object')
+        except KeyError as ex:
+            print(str(type(ex).__name__) + ':\t' + str(ex) + '\n')
     mol_list = list(itertools.chain(*mol_list))
 
+    # Raises an error if mol_list is empty
     if mol_list:
         return mol_list
     else:
         core_ligand = {True: 'cores', False: 'ligands'}
-        raise('No valid input ' + core_ligand[is_core] + 'were found, aborting run')
+        raise IndexError('No valid input ' + core_ligand[is_core] + ' were found, aborting run')
 
 
 def read_mol_extension(mol_name, folder_path, is_core=False):
@@ -71,14 +91,15 @@ def read_mol_extension(mol_name, folder_path, is_core=False):
     Identifies the filetypes used in the input molecules.
     Returns the input molecule (key), the filetype (arg1) and optional arguments (arg2)
     """
+    # Check if mol_name contains optional keyword arguments
     if isinstance(mol_name, list) or isinstance(mol_name, tuple):
         kwarg = mol_name[1]
         mol_name = mol_name[0]
     else:
         kwarg = {}
-
     kwarg.update({'folder_path': folder_path, 'is_core': is_core})
 
+    # Identify the filetype of mol_name
     mol_path = os.path.join(folder_path, mol_name)
     if os.path.isfile(mol_path):
         return {mol_name: [mol_name.rsplit('.', 1)[-1], kwarg]}
@@ -104,9 +125,8 @@ def read_mol_xyz(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except:
-        print('Warning: ' + mol_path + ' is not recognized as a valid .xyz file')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_xyz.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def read_mol_pdb(mol_name, kwarg):
@@ -121,12 +141,8 @@ def read_mol_pdb(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except FileNotFoundError:
-        print('Warning: ' + mol_path + ' was not found')
-        return []
-    except:
-        print('Warning: ' + mol_path + ' is not recognized as a valid .pdb file')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_pdb.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def read_mol_mol(mol_name, kwarg):
@@ -141,12 +157,8 @@ def read_mol_mol(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except FileNotFoundError:
-        print('Warning: ' + mol_path + ' was not found')
-        return []
-    except:
-        print('Warning: ' + mol_path + ' is not recognized as a valid .mol file')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_mol.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def read_mol_smiles(mol_name, kwarg):
@@ -160,9 +172,8 @@ def read_mol_smiles(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid SMILES string')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_smiles.__code__, ex, mol_name, [mol_name, kwarg])
 
 
 def read_mol_plams(mol_name, kwarg):
@@ -179,9 +190,8 @@ def read_mol_plams(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid PLAMS molecule')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_plams.__code__, ex, mol_name, [mol_name, kwarg])
 
 
 def read_mol_rdkit(mol_name, kwarg):
@@ -198,9 +208,8 @@ def read_mol_rdkit(mol_name, kwarg):
             mol.guess_bonds()
         set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
         return [mol]
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid RDKit molecule')
-        return []
+    except (Exception) as ex:
+        return print_exception(read_mol_rdkit.__code__, ex, mol_name, [mol_name, kwarg])
 
 
 def read_mol_folder(mol_name, kwarg):
@@ -211,12 +220,8 @@ def read_mol_folder(mol_name, kwarg):
     try:
         file_list = [[file, kwarg] for file in os.listdir(mol_path)]
         return read_mol(file_list, kwarg['folder_path'], kwarg['is_core'])
-    except FileNotFoundError:
-        print('Warning: ' + mol_path + ' was not found')
-        return []
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid folder')
-        return []
+    except (Exception, errors.PlamsError) as ex:
+        return print_exception(read_mol_folder.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def read_mol_txt(mol_name, kwarg):
@@ -231,12 +236,8 @@ def read_mol_txt(mol_name, kwarg):
         mol_list = [mol.split()[kwarg['column']] for mol in mol_list[kwarg['row']:] if mol]
         mol_list = [[mol, kwarg] for mol in mol_list]
         return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
-    except FileNotFoundError:
-        print('Warning: ' + mol_path + ' was not found')
-        return []
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid .txt file')
-        return []
+    except (Exception) as ex:
+        return print_exception(read_mol_txt.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def read_mol_excel(mol_name, kwarg):
@@ -249,12 +250,8 @@ def read_mol_excel(mol_name, kwarg):
         mol_list = pd.read_excel(mol_path, sheet_name=kwarg['sheet_name'])
         mol_list = [[mol, kwarg] for mol in mol_list[kwarg['column']][kwarg['row']:]]
         return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
-    except FileNotFoundError:
-        print('Warning: ' + mol_path + ' was not found')
-        return []
-    except:
-        print('Warning: ' + mol_name + ' is not recognized as a valid .xlsx file')
-        return []
+    except (Exception) as ex:
+        return print_exception(read_mol_excel.__code__, ex, mol_path, [mol_name, kwarg])
 
 
 def set_prop(mol, mol_name, folder_path, is_core=False):
