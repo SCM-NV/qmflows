@@ -21,9 +21,8 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Create the result directories (if they do not exist), ligands and cores
     folder_list = [QD_inout.create_dir(name, path) for name in arg['dir_name_list']]
-    ligand_list = QD_inout.read_mol(input_ligands, folder_list[1], arg['column'], arg['row'])
-    core_list = QD_inout.read_mol(input_cores, folder_list[0], arg['column'], arg['row'],
-                                  is_core=True)
+    ligand_list = QD_inout.read_mol(input_ligands, folder_list[1])
+    core_list = QD_inout.read_mol(input_cores, folder_list[0], is_core=True)
 
     # Adds the indices of the core dummy atoms to core.properties.core
     for core in core_list:
@@ -134,22 +133,19 @@ def prep_qd(core, ligand, qd_folder):
 # Or argument: list containing [0] the filetype (see above) and [1] if bonds should be guessed used (Bool)
 # By default guess_bonds() is only enabled for .xyz files
 
-input_cores = {
-        'Cd16Se13.xyz': ['xyz', False]
-        }
+input_cores = [
+        ['Cd68Se55.xyz', {'guess_bonds': False}]
+        ]
 
-input_ligands = {
-        'input_ligands.txt': 'txt'
-        }
+input_ligands = [
+        'OCCCCCC'
+        ]
 
-path = r'D:\QMFlows_DATA'
+path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 
 # Optional arguments: these can be left to their default values
 argument_dict = {
     'dir_name_list': ['core', 'ligand', 'QD'],
-    'smiles_extension': 'txt',
-    'column': 0,
-    'row': 0,
     'dummy': 'Cl',
     'core_indices': [],
     'ligand_indices': [],
@@ -186,11 +182,6 @@ input_ligands =     Same as input_cores, except for the ligand(s).
 path =              The path where the input and output directories will be saved. Set to
                     os.getcwd() to use the current directory.
 dir_name_list =     Names of the to be created directories in path.
-smiles_extension =  Extension (without period) of a SMILES string containg plain text file. Relevant
-                    if such a file is chosen for input_cores or input_ligands.
-column =            The column containing the SMILES strings in the plain text file.
-row =               The amount of rows to be ignored in the SMILES string containing column.
-                    Should be used when e.g. the first row does not contain a SMILES string
 dummy =             The atomic number of atomic symbol of the atoms in the core that should be
                     should be replaced with ligands.
 core_indices =      Manually specify the indices of the core dummy atoms instead of utilizing the

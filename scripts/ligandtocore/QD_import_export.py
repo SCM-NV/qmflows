@@ -1,13 +1,13 @@
 import os
 import itertools
+import pandas as pd
 
-from functools import partial
 from scm.plams import Molecule
 from qmflows import molkit
 from rdkit import Chem
 
 
-def concatenate_dict(dic):
+def dict_concatenate(dic):
     """
     Concatenates a list of dictionaries.
     """
@@ -17,6 +17,13 @@ def concatenate_dict(dic):
     return concact_dic
 
 
+def dict_defaults(dic, dic_ref):
+    for item in dic_ref:
+        if not dic.get(item):
+            dic.update({item: dic_ref[item]})
+    return dic
+
+
 def create_dir(dir_name, path=os.getcwd()):
     """
     Creates a new directory if this directory does not yet exist.
@@ -24,110 +31,230 @@ def create_dir(dir_name, path=os.getcwd()):
     dir_path = os.path.join(path, str(dir_name))
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-
     return dir_path
 
 
-def read_mol(input_mol, folder_path, column=0, row=0, is_core=False):
+def read_mol(input_mol, folder_path, is_core=False):
     """
     Checks by which means the input is provided and converts it into a molecule.
     Returns a list of PLAMS molecules.
     """
     # Creates a dictionary of file extensions
     extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb, 'mol': read_mol_mol,
-                      'smiles': read_mol_smiles, 'folder': read_mol_folder,
-                      'txt': partial(read_mol_txt, row=row, column=column)}
+                      'smiles': read_mol_smiles, 'folder': read_mol_folder, 'txt': read_mol_txt,
+                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams, 'rdmol': read_mol_plams}
 
     # Reads the input molecule(s), the method depending on the nature of the file extension
     # Returns a list of dictionaries
+    input_mol = [read_mol_extension(mol, folder_path, is_core) for mol in input_mol]
+    input_mol = dict_concatenate(input_mol)
+
     mol_list = []
     for mol in input_mol:
-        if isinstance(input_mol[mol], str):
-            if input_mol[mol] in extension_dict:
-                read = extension_dict[input_mol[mol]]
-                mol_list.append(read(mol, folder_path, is_core))
-        elif isinstance(input_mol[mol], list):
-            if input_mol[mol][0] in extension_dict:
-                read = extension_dict[input_mol[mol][0]]
-                guess_bonds = input_mol[mol][1]
-                mol_list.append(read(mol, folder_path, is_core, guess_bonds))
-    return list(itertools.chain(*mol_list))
+        try:
+            read = extension_dict[input_mol[mol][0]]
+            mol_list.append(read(mol, input_mol[mol][1]))
+        except KeyError:
+            print('Warning: ' + input_mol[mol][0] + ' is not supported a supported file type,' +
+                  ' extension or object')
+    mol_list = list(itertools.chain(*mol_list))
+
+    if mol_list:
+        return mol_list
+    else:
+        core_ligand = {True: 'cores', False: 'ligands'}
+        raise('No valid input ' + core_ligand[is_core] + 'were found, aborting run')
 
 
-def read_mol_xyz(mol_name, folder_path, is_core=False, guess_bonds=True):
+def read_mol_extension(mol_name, folder_path, is_core=False):
+    """
+    Identifies the filetypes used in the input molecules.
+    Returns the input molecule (key), the filetype (arg1) and optional arguments (arg2)
+    """
+    if isinstance(mol_name, list) or isinstance(mol_name, tuple):
+        kwarg = mol_name[1]
+        mol_name = mol_name[0]
+    else:
+        kwarg = {}
+
+    kwarg.update({'folder_path': folder_path, 'is_core': is_core})
+
+    mol_path = os.path.join(folder_path, mol_name)
+    if os.path.isfile(mol_path):
+        return {mol_name: [mol_name.rsplit('.', 1)[-1], kwarg]}
+    elif os.path.isdir(mol_path):
+        return {mol_name: ['folder', kwarg]}
+    elif isinstance(mol_name, Molecule):
+        return {mol_name: ['plams_mol', kwarg]}
+    elif isinstance(mol_name, Chem.rdchem.Mol):
+        return {mol_name: ['rdmol', kwarg]}
+    else:
+        return {mol_name: ['smiles', kwarg]}
+
+
+def read_mol_xyz(mol_name, kwarg):
     """
     Read an .xyz file
     """
-    mol_path = os.path.join(folder_path, mol_name)
-    mol = Molecule(mol_path)
-    mol_name = mol_name.rsplit('.', 1)[0]
-    if guess_bonds:
-        mol.guess_bonds()
-    set_prop(mol, mol_name, folder_path, is_core)
-    return [mol]
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        mol = Molecule(mol_path)
+        mol_name = mol_name.rsplit('.', 1)[0]
+        if kwarg.get('guess_bonds') is None or kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except:
+        print('Warning: ' + mol_path + ' is not recognized as a valid .xyz file')
+        return []
 
 
-def read_mol_pdb(mol_name, folder_path, is_core=False, guess_bonds=False):
+def read_mol_pdb(mol_name, kwarg):
     """
     Read a .pdb file
     """
-    mol_path = os.path.join(folder_path, mol_name)
-    mol = molkit.readpdb(mol_path)
-    mol_name = mol_name.rsplit('.', 1)[0]
-    if guess_bonds:
-        mol.guess_bonds()
-    set_prop(mol, mol_name, folder_path, is_core)
-    return [mol]
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        mol = molkit.readpdb(mol_path)
+        mol_name = mol_name.rsplit('.', 1)[0]
+        if kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except FileNotFoundError:
+        print('Warning: ' + mol_path + ' was not found')
+        return []
+    except:
+        print('Warning: ' + mol_path + ' is not recognized as a valid .pdb file')
+        return []
 
 
-def read_mol_mol(mol_name, folder_path, is_core=False, guess_bonds=False):
+def read_mol_mol(mol_name, kwarg):
     """
     Read a .mol file
     """
-    mol_path = os.path.join(folder_path, mol_name)
-    mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path))
-    mol_name = mol_name.rsplit('.', 1)[0]
-    if guess_bonds:
-        mol.guess_bonds()
-    set_prop(mol, mol_name, folder_path, is_core)
-    return [mol]
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path))
+        mol_name = mol_name.rsplit('.', 1)[0]
+        if kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except FileNotFoundError:
+        print('Warning: ' + mol_path + ' was not found')
+        return []
+    except:
+        print('Warning: ' + mol_path + ' is not recognized as a valid .mol file')
+        return []
 
 
-def read_mol_smiles(mol_name, folder_path, is_core=False, guess_bonds=False):
+def read_mol_smiles(mol_name, kwarg):
     """
     Read a SMILES string
     """
-    mol = molkit.from_smiles(mol_name)
-    mol_name = mol_name.replace('/', '').replace('\\', '')
-    if guess_bonds:
-        mol.guess_bonds()
-    set_prop(mol, mol_name, folder_path, is_core)
-    return [mol]
+    try:
+        mol = molkit.from_smiles(mol_name)
+        mol_name = mol_name.replace('/', '').replace('\\', '')
+        if kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid SMILES string')
+        return []
 
 
-def read_mol_folder(mol, folder_path, is_core=False):
+def read_mol_plams(mol_name, kwarg):
+    """
+    Read a PLAMS molecule
+    """
+    try:
+        mol = mol_name
+        if mol.properties.name:
+            mol_name = mol.properties.name
+        else:
+            mol_name = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
+        if kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid PLAMS molecule')
+        return []
+
+
+def read_mol_rdkit(mol_name, kwarg):
+    """
+    Read a RDKit molecule
+    """
+    try:
+        mol = molkit.from_rdmol(mol_name)
+        if mol.properties.name:
+            mol_name = mol.properties.name
+        else:
+            mol_name = Chem.MolToSmiles(Chem.RemoveHs(mol_name))
+        if kwarg.get('guess_bonds'):
+            mol.guess_bonds()
+        set_prop(mol, mol_name, kwarg['folder_path'], kwarg['is_core'])
+        return [mol]
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid RDKit molecule')
+        return []
+
+
+def read_mol_folder(mol_name, kwarg):
     """
     Read all files (.xyz, .pdb, .mol, .txt or further subfolders) within a folder
-    Will search in folder_path/mol/ if it exists or alternatively just in folder_path/
     """
-    if os.path.isfile(os.path.join(folder_path, mol)):
-        folder_path = os.path.join(folder_path, mol)
-    file_dict = [{file: file.rsplit('.', 1)[1]} for file in os.listdir(folder_path)]
-    file_dict = concatenate_dict(file_dict)
-    return read_mol(file_dict, folder_path, is_core)
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        file_list = [[file, kwarg] for file in os.listdir(mol_path)]
+        return read_mol(file_list, kwarg['folder_path'], kwarg['is_core'])
+    except FileNotFoundError:
+        print('Warning: ' + mol_path + ' was not found')
+        return []
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid folder')
+        return []
 
 
-def read_mol_txt(mol, folder_path, is_core=False, row=0, column=0):
+def read_mol_txt(mol_name, kwarg):
     """
     Read a plain text file containing one or more SMILES strings
     """
-    mol_path = os.path.join(folder_path, mol)
-    with open(mol_path, 'r') as file:
-        smiles_list = file.read().splitlines()
-    smiles_list = [smiles.split()[column] for smiles in smiles_list[row:] if smiles]
-    mol_dict = [{mol: 'smiles'} for mol in smiles_list]
-    mol_dict = concatenate_dict(mol_dict)
-    return read_mol(mol_dict, folder_path, is_core)
+    kwarg = dict_defaults(kwarg, {'row': 0, 'column': 0})
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        with open(mol_path, 'r') as file:
+            mol_list = file.read().splitlines()
+        mol_list = [mol.split()[kwarg['column']] for mol in mol_list[kwarg['row']:] if mol]
+        mol_list = [[mol, kwarg] for mol in mol_list]
+        return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
+    except FileNotFoundError:
+        print('Warning: ' + mol_path + ' was not found')
+        return []
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid .txt file')
+        return []
+
+
+def read_mol_excel(mol_name, kwarg):
+    """
+    Read a plain text file containing one or more SMILES strings
+    """
+    kwarg = dict_defaults(kwarg, {'row': 0, 'column': 0, 'sheet_name': 'Sheet1'})
+    mol_path = os.path.join(kwarg['folder_path'], mol_name)
+    try:
+        mol_list = pd.read_excel(mol_path, sheet_name=kwarg['sheet_name'])
+        mol_list = [[mol, kwarg] for mol in mol_list[kwarg['column']][kwarg['row']:]]
+        return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
+    except FileNotFoundError:
+        print('Warning: ' + mol_path + ' was not found')
+        return []
+    except:
+        print('Warning: ' + mol_name + ' is not recognized as a valid .xlsx file')
+        return []
 
 
 def set_prop(mol, mol_name, folder_path, is_core=False):
