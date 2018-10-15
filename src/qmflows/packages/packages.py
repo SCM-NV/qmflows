@@ -26,9 +26,9 @@ import inspect
 import os
 import uuid
 import pkg_resources as pkg
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 # ==================> Internal modules <====================
-from qmflows import molkit
 from ..settings import Settings
 from ..fileFunctions import json2Settings
 from ..utils import concatMap
@@ -81,7 +81,7 @@ class Result:
         return Result(self.settings,
                       self._molecule,
                       self.job_name,
-                      plams_dir=self.archive['plams_dir'].path,
+                      plams_dir=self.archive['plams_dir'],
                       work_dir=self.archive['work_dir'],
                       status=self.status,
                       warnings=self.warnings
@@ -130,7 +130,7 @@ class Result:
         work_dir = self.archive.get('work_dir')
 
         # Plams dir
-        plams_dir = self.archive['plams_dir'].path
+        plams_dir = self.archive['plams_dir']
 
         # Search for the specified output file in the folders
         file_pattern = ds.get('file_pattern')
@@ -412,7 +412,8 @@ def registry():
             Chem.Mol: SerMol(),
             Result: AsDict(Result),
             Settings: SerSettings(),
-            plams.KFFile: SerReasonableObject(plams.KFFile)}
+            plams.KFFile: SerReasonableObject(plams.KFFile),
+            plams.KFReader: SerReasonableObject(plams.KFReader)}
     )
 
 

@@ -1,4 +1,4 @@
-from qmflows import Settings, templates, molkit
+from qmflows import (Settings, templates)
 from noodles import gather
 
 # User Defined imports
@@ -6,6 +6,7 @@ from qmflows.packages.SCM import dftb
 from qmflows.packages.orca import orca
 from qmflows.packages import run
 import pytest
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 @pytest.mark.slow
@@ -27,6 +28,5 @@ def test_hessian_transfer():
     dipole = h2o_opt.dipole
 
     wf = gather(energy, dipole)
-    # draw_workflow('wf.svg', wf._workflow)
 
     print(run(wf))

@@ -1,4 +1,4 @@
-__all__ = ['adf', 'dftb']
+__all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 
 # =======>  Standard and third party Python Libraries <======
 

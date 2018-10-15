@@ -1,7 +1,8 @@
 __all__ = ['example_generic_constraints']
 
 from noodles import gather
-from qmflows import dftb, adf, orca, run, Settings, templates, molkit
+from qmflows import (dftb, adf, orca, run, Settings, templates)
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 def example_generic_constraints():
