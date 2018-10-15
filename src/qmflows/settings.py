@@ -47,15 +47,8 @@ class Settings(plams.core.settings.Settings, ):
                 ret[name] = self[name]
         return ret
 
-    def as_dict(self):
-        return dict(self)
-
     def __deepcopy__(self, _):
         return self.copy()
-
-    @classmethod
-    def from_dict(cls, **kwargs):
-        return cls(**kwargs)
 
     def overlay(self, other):
         """
