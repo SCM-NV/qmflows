@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 
-from qmflows import molkit
+import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 import QD_import_export as QD_inout
 

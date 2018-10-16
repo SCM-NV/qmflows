@@ -4,7 +4,7 @@ import time
 import sys
 
 from scm.plams import (Atom, MoleculeError, Settings)
-from qmflows import molkit
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 import QD_functions as QD_scripts
 import QD_database

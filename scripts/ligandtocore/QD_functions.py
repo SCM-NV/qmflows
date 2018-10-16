@@ -5,7 +5,7 @@ import shutil
 import numpy as np
 
 from scm.plams import (Atom, Settings, AMSJob, init, finish)
-from qmflows import molkit
+import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
 
