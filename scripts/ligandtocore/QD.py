@@ -2,6 +2,7 @@ import copy
 import itertools
 import time
 import sys
+import yaml
 
 from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
@@ -38,6 +39,8 @@ def prep(input_ligands, input_cores, path, arg):
     ligand_list = list(prep_ligand(ligand, database, arg['ligand_opt'], arg['split']) for
                        ligand in ligand_list)
     ligand_list = list(itertools.chain(*ligand_list))
+    if not ligand_list:
+        raise IndexError('No valid ligand functional groups were found, aborting run')
 
     # Write new entries to the ligand database
     if arg['use_database']:
@@ -49,9 +52,11 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Check if the ADF environment variables are set and optimize the qd with the core frozen
     if arg['qd_opt']:
-        if QD_scripts.check_sys_var():
-            for qd in qd_list:
-                QD_scripts.ams_job(qd, arg['maxiter'])
+        QD_scripts.check_sys_var()
+        if not qd_list:
+            raise IndexError('No valid quantum dots were found, aborting geometry optimization')
+        for qd in qd_list:
+            QD_scripts.ams_job(qd, arg['maxiter'])
 
     # The End
     time_end = time.time()
@@ -132,31 +137,39 @@ def prep_qd(core, ligand, qd_folder):
 # Argument: string containing the filetype (i.e. 'xyz', 'pdb', 'mol', 'smiles', 'folder', 'txt')
 # Or argument: list containing [0] the filetype (see above) and [1] if bonds should be guessed used (Bool)
 # By default guess_bonds() is only enabled for .xyz files
+input_cores = """
+-   - Cd68Se55.xyz
+    - guess_bonds: False
+"""
 
-input_cores = [
-        ['Cd68Se55.xyz', {'guess_bonds': False}]
-        ]
+input_ligands = """
+- OC
+- OCC
+- OCCC
+- OCCCC
+- OCCCC
+"""
 
-input_ligands = [
-        'OCCCCCC'
-        ]
-
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 
 # Optional arguments: these can be left to their default values
-argument_dict = {
-    'dir_name_list': ['core', 'ligand', 'QD'],
-    'dummy': 'Cl',
-    'core_indices': [],
-    'ligand_indices': [],
-    'database_name': 'ligand_database.xlsx',
-    'use_database': True,
-    'core_opt': False,
-    'ligand_opt': True,
-    'qd_opt': False,
-    'maxiter': 10000,
-    'split': True
-}
+argument_dict = """
+dir_name_list: [core, ligand, QD]
+dummy: Cl
+core_indices: []
+ligand_indices: []
+database_name: ligand_database.xlsx
+use_database: True
+core_opt: False
+ligand_opt: True
+qd_opt: False
+maxiter: 10000
+split: True
+"""
+
+input_cores = yaml.load(input_cores)
+input_ligands = yaml.load(input_ligands)
+argument_dict = yaml.load(argument_dict)
 
 # For running the script directly from the console
 # e.g. python /path_to_QD/QD.py keyword_1:arg_1 keyword_2:arg2 keyword_3:arg3
