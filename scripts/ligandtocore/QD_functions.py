@@ -5,7 +5,7 @@ import shutil
 import numpy as np
 
 from scm.plams import (Atom, Settings, AMSJob, init, finish)
-from qmflows import molkit
+import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
 
@@ -126,14 +126,13 @@ def find_substructure_split(ligand, ligand_index, split=True):
             at1.properties.charge = -1
 
     # Update the index of the ligand heteroatom
-    ligand_atoms = [str(atom) for atom in ligand]
-    ligand.properties.ligand_index = ligand_atoms.index(str(at1)) + 1
+    ligand.properties.ligand_dummy = at1
     ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
 
     return ligand
 
 
-def rotate_ligand(core, ligand, i, index):
+def rotate_ligand(core, ligand, i, core_dummy):
     """
     Connects two molecules by alligning the vectors of two bonds.
     """
@@ -141,10 +140,10 @@ def rotate_ligand(core, ligand, i, index):
 
     # Defines first atom on coordinate list (hydrogen),
     # The atom connected to it and vector representing bond between them
-    core_at1 = core[index]         # core dummy atom
+    core_at1 = core_dummy         # core dummy atom
     core_at2 = core[-1]                 # core center of mass
     core_vector = core_at1.vector_to(core_at2)
-    lig_at1 = ligand[ligand.properties.ligand_index]  	# ligand heteroatom
+    lig_at1 = ligand[ligand.properties.ligand_dummy]  	# ligand heteroatom
     lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
@@ -211,11 +210,8 @@ def check_sys_var():
         if not item:
             print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
     if False in sys_var_exists:
-        print('One or more ADF environment variables have not been set, aborting ' +
-              'geometry optimization.')
-        return False
-    else:
-        return True
+        raise EnvironmentError('One or more ADF environment variables have not been set, aborting '
+                               'geometry optimization.')
 
 
 def ams_job(qd, maxiter=1000):

@@ -1,10 +1,10 @@
 import copy
 import itertools
 import time
-import sys
+import yaml
 
 from scm.plams import (Atom, MoleculeError, Settings)
-from qmflows import molkit
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 import QD_functions as QD_scripts
 import QD_database
@@ -26,7 +26,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Adds the indices of the core dummy atoms to core.properties.core
     for core in core_list:
-        prep_core(core, arg['core_indices'], arg['dummy'], arg['core_opt'])
+        prep_core(core, arg['core_dummies'], arg['dummy'], arg['core_opt'])
 
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
@@ -38,6 +38,8 @@ def prep(input_ligands, input_cores, path, arg):
     ligand_list = list(prep_ligand(ligand, database, arg['ligand_opt'], arg['split']) for
                        ligand in ligand_list)
     ligand_list = list(itertools.chain(*ligand_list))
+    if not ligand_list:
+        raise IndexError('No valid ligand functional groups were found, aborting run')
 
     # Write new entries to the ligand database
     if arg['use_database']:
@@ -49,9 +51,11 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Check if the ADF environment variables are set and optimize the qd with the core frozen
     if arg['qd_opt']:
-        if QD_scripts.check_sys_var():
-            for qd in qd_list:
-                QD_scripts.ams_job(qd, arg['maxiter'])
+        QD_scripts.check_sys_var()
+        if not qd_list:
+            raise IndexError('No valid quantum dots were found, aborting geometry optimization')
+        for qd in qd_list:
+            QD_scripts.ams_job(qd, arg['maxiter'])
 
     # The End
     time_end = time.time()
@@ -60,7 +64,7 @@ def prep(input_ligands, input_cores, path, arg):
     return qd_list
 
 
-def prep_core(core, core_indices, dummy=0, opt=False):
+def prep_core(core, core_dummies, dummy=0, opt=False):
     """
     Function that handles all core operations.
     """
@@ -74,19 +78,20 @@ def prep_core(core, core_indices, dummy=0, opt=False):
 
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
-    if not core_indices:
-        core_indices = [(i + 1) for i, atom in enumerate(core.atoms) if atom.atnum == dummy]
-    core_indices.sort(reverse=True)
-    core.properties.core_indices = core_indices
+    if not core_dummies:
+        core_dummies = [atom for atom in core.atoms if atom.atnum == dummy]
+    else:
+        core_dummies = [core[index] for index in core_dummies]
+    core.properties.core_dummies = core_dummies
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
 
     # Returns an error if no dummy atoms were found
-    if not core_indices:
+    if not core_dummies:
         raise MoleculeError(Atom(atnum=dummy).symbol +
                             ' was specified as dummy atom, yet no dummy atoms were found')
 
 
-def prep_ligand(ligand, database, opt=True, split=True):
+def prep_ligand(ligand, database, ligand_dummies, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
@@ -94,7 +99,18 @@ def prep_ligand(ligand, database, opt=True, split=True):
     ligand = QD_scripts.optimize_ligand(ligand, opt, database)
 
     # Identify functional groups within the ligand and add a dummy atom to the center of mass.
-    ligand_list = QD_scripts.find_substructure(ligand, split)
+    if not ligand_dummies:
+        ligand_list = QD_scripts.find_substructure(ligand, split)
+    else:
+        ligand_list = [copy.deepcopy(ligand) for dummy in ligand_dummies]
+        for i, ligand in enumerate(ligand_list):
+            if isinstance(ligand_dummies[i], list) or isinstance(ligand_dummies[i], tuple):
+                ligand_index = ligand_dummies[i]
+            else:
+                neighbors = ligand.neighbors(ligand_dummies[i])[0]
+                neighbors = [atom for atom in neighbors if atom.atnum != 1]
+                ligand_index = [ligand_dummies[i], ligand.atoms.index(neighbors)]
+            ligand[i] = QD_scripts.find_substructure_split(ligand, ligand_index, split)
 
     return ligand_list
 
@@ -104,10 +120,9 @@ def prep_qd(core, ligand, qd_folder):
     Function that handles all quantum dot (qd, i.e. core + all ligands) operations.
     """
     # Rotate and translate all ligands to their position on the core.
-    # Returns a list of PLAMS molecules and atomic indices.
     core = copy.deepcopy(core)
-    ligand_list = [QD_scripts.rotate_ligand(core, ligand, i, index) for i, index in
-                   enumerate(core.properties.core_indices)]
+    ligand_list = [QD_scripts.rotate_ligand(core, ligand, i, core_dummy) for i, core_dummy in
+                   enumerate(core.properties.core_dummies)]
     ligand_list, ligand_indices = zip(*ligand_list)
     core.delete_atom(core[-1])
 
@@ -125,6 +140,7 @@ def prep_qd(core, ligand, qd_folder):
     QD_inout.export_mol(qd, message='core + ligands:\t\t\t')
 
     return qd
+<<<<<<< HEAD
 
 
 # Mandatory arguments: these will have to be manually specified by the user
@@ -138,7 +154,7 @@ input_cores = [
         ]
 
 input_ligands = [
-        'OCCCCCC'
+        'OCCCCCCC'
         ]
 
 path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
@@ -147,8 +163,8 @@ path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 argument_dict = {
     'dir_name_list': ['core', 'ligand', 'QD'],
     'dummy': 'Cl',
-    'core_indices': [],
-    'ligand_indices': [],
+    'core_dummies': [],
+    'ligand_dummies': [],
     'database_name': 'ligand_database.xlsx',
     'use_database': True,
     'core_opt': False,
@@ -184,7 +200,7 @@ path =              The path where the input and output directories will be save
 dir_name_list =     Names of the to be created directories in path.
 dummy =             The atomic number of atomic symbol of the atoms in the core that should be
                     should be replaced with ligands.
-core_indices =      Manually specify the indices of the core dummy atoms instead of utilizing the
+core_dummies =      Manually specify the indices of the core dummy atoms instead of utilizing the
                     'dummy' argument.
 ligand_indices =    Manually specifiy the indices of ligand dummy atoms instead of utilizing the
                     find_substructure() function.
@@ -202,3 +218,5 @@ split =             Should the ligand be attached to the core in its entirety or
                     True:  HO2CR -> -O2CR,  X-.NH4+ -> NH4+  &  Na+.-O2CR -> -O2CR
                     False: HO2CR -> HO2CR,  NH4+ -> NH4+  & -O2CR -> -O2CR
 """
+=======
+>>>>>>> 7d7870fee978daa99270d1133d4335122bc409bd
