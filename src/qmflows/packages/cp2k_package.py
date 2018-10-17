@@ -181,35 +181,14 @@ class CP2K_Result(Result):
                          work_dir=work_dir, properties=properties,
                          status=status, warnings=warnings)
 
-    @classmethod
-    def from_dict(
-            cls, settings, molecule, job_name, archive, status, warnings):
-        """
-        Create a :class:`~CP2K_Result` instance using the data serialized in
-        a dictionary.
-
-        :param cls:
-        :param settings: Job Settings.
-        :param molecule: molecular Geometry.
-        :param job_name: Name of the job.
-        :param plams_dir: Absolute path to plams output folder
-        :param archive: dictionary containing the paths to the input/output
-        folders.
-        :param path_hdf5: Path to the HDF5 file that contains the numerical
-        results.
-        """
-        plams_dir, work_dir = list(map(archive.get, ["plams_dir", "work_dir"]))
-        return CP2K_Result(settings, molecule, job_name, plams_dir.path,
-                           work_dir=work_dir,
-                           properties=package_properties['cp2k'],
-                           status=status, warnings=warnings)
-
 
 def format_coord_xyz(mol):
     """
+    Write xyz coordinates in the input file
     """
-    xs  = ''.join('{}  {: 12.8e}  {: 12.8e}  {: 12.8e}\n'.format(at.symbol, *at.coords)
-                  for at in mol)
+    xs = ''.join(
+        '{}  {: 12.8e}  {: 12.8e}  {: 12.8e}\n'.format(at.symbol, *at.coords)
+        for at in mol)
 
     return '\n' + xs
 

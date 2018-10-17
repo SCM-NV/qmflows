@@ -20,7 +20,7 @@ def test_h2o2_ts():
     with ORCA using init hessian from DFTB.
     """
     ts_dihe, n_optcycles = example_H2O2_TS()
-    assert (n_optcycles < 7)
+    assert (n_optcycles < 10)
     assert ts_dihe == 0.0
 
 

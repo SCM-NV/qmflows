@@ -177,16 +177,11 @@ class ORCA_Result(Result):
                          plams_dir=plams_dir, properties=properties,
                          status=status, warnings=warnings)
 
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        plams_dir = archive["plams_dir"].path
-        return ORCA_Result(settings, molecule, job_name, plams_dir, status, warnings)
-
     @property
     def molecule(self):
         """ Retrieve the molecule from the output file"""
         if self.status not in ['crashed', 'failed']:
-            plams_dir = self.archive["plams_dir"].path
+            plams_dir = self.archive["plams_dir"]
             file_name = join(plams_dir, '{}.out'.format(self.job_name))
             return parse_molecule(file_name, self._molecule)
         else:

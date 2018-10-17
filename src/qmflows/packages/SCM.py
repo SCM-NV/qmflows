@@ -167,20 +167,10 @@ class ADF_Result(Result):
                           self._molecule,
                           self.job_name,
                           self.kf.path,
-                          plams_dir=self.archive['plams_dir'].path,
+                          plams_dir=self.archive['plams_dir'],
                           status=self.status,
                           warnings=self.warnings
                           )
-
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        """
-        Methods to deserialize an `ADF_Result` object.
-        """
-        plams_dir = archive["plams_dir"].path
-        path_t21 = join(plams_dir, '{}.t21'.format(job_name))
-        return ADF_Result(settings, molecule, job_name, path_t21, plams_dir,
-                          status, warnings)
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
