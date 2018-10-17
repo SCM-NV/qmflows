@@ -211,11 +211,8 @@ def check_sys_var():
         if not item:
             print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
     if False in sys_var_exists:
-        print('One or more ADF environment variables have not been set, aborting ' +
-              'geometry optimization.')
-        return False
-    else:
-        return True
+        raise EnvironmentError('One or more ADF environment variables have not been set, aborting '
+                               'geometry optimization.')
 
 
 def ams_job(qd, maxiter=1000):
