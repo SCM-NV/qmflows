@@ -5,10 +5,12 @@ from ..settings import Settings
 from .packages import (
     Package, package_properties, Result, get_tmpfile_name)
 from ..parsers.orca_parser import parse_molecule
+from noodles import schedule
 from scm import plams
 from warnings import warn
 
 import numpy as np
+
 # ============================= Orca ==========================================
 
 
@@ -52,7 +54,7 @@ class ORCA(Package):
         """
         Translate generic keywords to their corresponding Orca keywords.
         """
-
+        @schedule
         def inithess(value):
             """
             Generate an seperate file containing the initial Hessian matrix used as
