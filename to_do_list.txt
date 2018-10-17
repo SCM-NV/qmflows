@@ -1,7 +1,5 @@
 use argparse for passing arguments
 
-use pyyaml for creating input
-
 create tests
     WiP
     
