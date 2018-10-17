@@ -141,6 +141,7 @@ def prep_qd(core, ligand, qd_folder):
 
     return qd
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 
 # Mandatory arguments: these will have to be manually specified by the user
@@ -218,5 +219,7 @@ split =             Should the ligand be attached to the core in its entirety or
                     True:  HO2CR -> -O2CR,  X-.NH4+ -> NH4+  &  Na+.-O2CR -> -O2CR
                     False: HO2CR -> HO2CR,  NH4+ -> NH4+  & -O2CR -> -O2CR
 """
+=======
+>>>>>>> 7d7870fee978daa99270d1133d4335122bc409bd
 =======
 >>>>>>> 7d7870fee978daa99270d1133d4335122bc409bd
