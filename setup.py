@@ -42,8 +42,8 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2',
-                      'pymonad', 'pyparsing', 'filelock'],
+    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams',
+                      'pymonad', 'pyparsing', 'filelock', 'openpyxl', 'pyyaml'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
