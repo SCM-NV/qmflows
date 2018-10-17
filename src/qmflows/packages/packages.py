@@ -347,7 +347,7 @@ def call_default(wf, n_processes=1, cache='cache.db'):
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
-        db_file=cache, always_cache=True)
+        db_file=cache, always_cache=True, echo_log=False)
 
 
 class SerMolecule(Serialiser):
