@@ -57,7 +57,7 @@ def read_mol(input_mol, folder_path, is_core=False):
     # Creates a dictionary of file extensions
     extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb, 'mol': read_mol_mol,
                       'smiles': read_mol_smiles, 'folder': read_mol_folder, 'txt': read_mol_txt,
-                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams, 'rdmol': read_mol_plams}
+                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams, 'rdmol': read_mol_rdkit}
 
     # Reads the input molecule(s), the method depending on the nature of the file extension
     # Returns a list of dictionaries
@@ -119,7 +119,7 @@ def read_mol_xyz(mol_name, kwarg):
     """
     mol_path = os.path.join(kwarg['folder_path'], mol_name)
     try:
-        mol = Molecule(mol_path)
+        mol = Molecule(mol_path, inputformat='xyz')
         mol_name = mol_name.rsplit('.', 1)[0]
         if kwarg.get('guess_bonds') is None or kwarg.get('guess_bonds'):
             mol.guess_bonds()
@@ -234,7 +234,7 @@ def read_mol_txt(mol_name, kwarg):
         with open(mol_path, 'r') as file:
             mol_list = file.read().splitlines()
         mol_list = [mol.split()[kwarg['column']] for mol in mol_list[kwarg['row']:] if mol]
-        mol_list = [[mol, kwarg] for mol in mol_list]
+        mol_list = [[mol, kwarg] for mol in mol_list if len(mol) >= 2]
         return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
     except (Exception) as ex:
         return print_exception(read_mol_txt.__code__, ex, mol_path, [mol_name, kwarg])
