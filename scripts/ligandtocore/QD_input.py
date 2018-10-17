@@ -4,7 +4,7 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz

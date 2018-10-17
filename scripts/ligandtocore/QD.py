@@ -1,7 +1,6 @@
 import copy
 import itertools
 import time
-import yaml
 
 from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
@@ -26,7 +25,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Adds the indices of the core dummy atoms to core.properties.core
     for core in core_list:
-        prep_core(core, arg['core_dummies'], arg['dummy'], arg['core_opt'])
+        prep_core(core, arg['core_indices'], arg['dummy'], arg['core_opt'])
 
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
@@ -35,8 +34,8 @@ def prep(input_ligands, input_cores, path, arg):
         database = False
 
     # Optimize all ligands and find their functional groups
-    ligand_list = list(prep_ligand(ligand, database, arg['ligand_opt'], arg['split']) for
-                       ligand in ligand_list)
+    ligand_list = list(prep_ligand(ligand, database, arg['ligand_indices'], arg['ligand_opt'],
+                                   arg['split']) for ligand in ligand_list)
     ligand_list = list(itertools.chain(*ligand_list))
     if not ligand_list:
         raise IndexError('No valid ligand functional groups were found, aborting run')
@@ -140,86 +139,3 @@ def prep_qd(core, ligand, qd_folder):
     QD_inout.export_mol(qd, message='core + ligands:\t\t\t')
 
     return qd
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-# Mandatory arguments: these will have to be manually specified by the user
-# Key: filename
-# Argument: string containing the filetype (i.e. 'xyz', 'pdb', 'mol', 'smiles', 'folder', 'txt')
-# Or argument: list containing [0] the filetype (see above) and [1] if bonds should be guessed used (Bool)
-# By default guess_bonds() is only enabled for .xyz files
-
-input_cores = [
-        ['Cd68Se55.xyz', {'guess_bonds': False}]
-        ]
-
-input_ligands = [
-        'OCCCCCCC'
-        ]
-
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
-
-# Optional arguments: these can be left to their default values
-argument_dict = {
-    'dir_name_list': ['core', 'ligand', 'QD'],
-    'dummy': 'Cl',
-    'core_dummies': [],
-    'ligand_dummies': [],
-    'database_name': 'ligand_database.xlsx',
-    'use_database': True,
-    'core_opt': False,
-    'ligand_opt': True,
-    'qd_opt': False,
-    'maxiter': 10000,
-    'split': True
-}
-
-# For running the script directly from the console
-# e.g. python /path_to_QD/QD.py keyword_1:arg_1 keyword_2:arg2 keyword_3:arg3
-# SMILES strings should be encapsulated by quotation marks.
-# Multiple SMILES string can be passed when seperated by commas, e.g. input_ligands:'OC, OOC, OCCC'
-argv = [item for item in sys.argv[1:]]
-if argv:
-    argv = [item.split(':') for item in argv]
-    for item in argv:
-        keyword = item[0]
-        argument = item[1]
-        argument = argument.replace('"', '')
-        argument = argument.replace("'", '')
-        argument_dict[keyword] = argument.split(',')
-
-# Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-qd_list = prep(input_ligands, input_cores, path, argument_dict)
-
-"""
-input_cores =       The input core(s) as either .xyz, .pdb, .mol, SMILES string, plain text file
-                    with SMILES string or a list containing any of the above objects.
-input_ligands =     Same as input_cores, except for the ligand(s).
-path =              The path where the input and output directories will be saved. Set to
-                    os.getcwd() to use the current directory.
-dir_name_list =     Names of the to be created directories in path.
-dummy =             The atomic number of atomic symbol of the atoms in the core that should be
-                    should be replaced with ligands.
-core_dummies =      Manually specify the indices of the core dummy atoms instead of utilizing the
-                    'dummy' argument.
-ligand_indices =    Manually specifiy the indices of ligand dummy atoms instead of utilizing the
-                    find_substructure() function.
-database_name =     Name plus extension of the (to be) created ligand database.
-use_database =      Export/import results from the (to be) created ligand database. No database will
-                    be used and/or maintained when set to False.
-core_opt =          Attempt to find the core global minimum using RDKit UFF.
-                    WARNING: enabling this will probably ruin the core if care is not taken!
-                    Should work fine for organic cores.
-ligand_opt =        Attempt to find the ligand global minimum using RDKit UFF.
-qd_opt =            Optimize the quantum dot (qd)(i.e core + all ligands) using ADF UFF.
-maxiter =           The maximum number of geometry iteration during qd_opt.
-split =             Should the ligand be attached to the core in its entirety or should a
-                    hydrogen atom/counterion first be removed? Examples are provided below:
-                    True:  HO2CR -> -O2CR,  X-.NH4+ -> NH4+  &  Na+.-O2CR -> -O2CR
-                    False: HO2CR -> HO2CR,  NH4+ -> NH4+  & -O2CR -> -O2CR
-"""
-=======
->>>>>>> 7d7870fee978daa99270d1133d4335122bc409bd
-=======
->>>>>>> 7d7870fee978daa99270d1133d4335122bc409bd

@@ -143,7 +143,7 @@ def rotate_ligand(core, ligand, i, core_dummy):
     core_at1 = core_dummy         # core dummy atom
     core_at2 = core[-1]                 # core center of mass
     core_vector = core_at1.vector_to(core_at2)
-    lig_at1 = ligand[ligand.properties.ligand_dummy]  	# ligand heteroatom
+    lig_at1 = ligand.properties.ligand_dummy  	# ligand heteroatom
     lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
