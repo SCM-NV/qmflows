@@ -71,11 +71,11 @@ def write(ligand_list, database, database_name='ligand_database.xlsx'):
 
     if database_entries:
         database_entries = list(zip(*database_entries))
-        new = pd.DataFrame({'Ligand_name' : database_entries[0],
-                            'Ligand_formula' : database_entries[1],
-                            'Ligand_pdb' : database_entries[2],
-                            'Ligand_opt_pdb' : database_entries[3],
-                            'Ligand_SMILES' : database_entries[4]})
+        new = pd.DataFrame({'Ligand_name': database_entries[0],
+                            'Ligand_formula': database_entries[1],
+                            'Ligand_pdb': database_entries[2],
+                            'Ligand_opt_pdb': database_entries[3],
+                            'Ligand_SMILES': database_entries[4]})
 
         if not database.empty:
             new = database.append(new, ignore_index=True)
