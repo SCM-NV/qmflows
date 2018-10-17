@@ -43,6 +43,8 @@ def create_dir(dir_name, path=os.getcwd()):
     """
     Creates a new directory if this directory does not yet exist.
     """
+    if not os.path.exists(path):
+        raise FileNotFoundError(path, 'not found, aborting run')
     dir_path = os.path.join(path, str(dir_name))
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
@@ -57,7 +59,7 @@ def read_mol(input_mol, folder_path, is_core=False):
     # Creates a dictionary of file extensions
     extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb, 'mol': read_mol_mol,
                       'smiles': read_mol_smiles, 'folder': read_mol_folder, 'txt': read_mol_txt,
-                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams, 'rdmol': read_mol_plams}
+                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams, 'rdmol': read_mol_rdkit}
 
     # Reads the input molecule(s), the method depending on the nature of the file extension
     # Returns a list of dictionaries
@@ -100,6 +102,8 @@ def read_mol_extension(mol_name, folder_path, is_core=False):
     kwarg.update({'folder_path': folder_path, 'is_core': is_core})
 
     # Identify the filetype of mol_name
+    if mol_name is None:
+        mol_name = ''
     mol_path = os.path.join(folder_path, mol_name)
     if os.path.isfile(mol_path):
         return {mol_name: [mol_name.rsplit('.', 1)[-1], kwarg]}
@@ -119,7 +123,7 @@ def read_mol_xyz(mol_name, kwarg):
     """
     mol_path = os.path.join(kwarg['folder_path'], mol_name)
     try:
-        mol = Molecule(mol_path)
+        mol = Molecule(mol_path, inputformat='xyz')
         mol_name = mol_name.rsplit('.', 1)[0]
         if kwarg.get('guess_bonds') is None or kwarg.get('guess_bonds'):
             mol.guess_bonds()
@@ -151,7 +155,7 @@ def read_mol_mol(mol_name, kwarg):
     """
     mol_path = os.path.join(kwarg['folder_path'], mol_name)
     try:
-        mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path))
+        mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path, removeHs=False))
         mol_name = mol_name.rsplit('.', 1)[0]
         if kwarg.get('guess_bonds'):
             mol.guess_bonds()
@@ -234,7 +238,7 @@ def read_mol_txt(mol_name, kwarg):
         with open(mol_path, 'r') as file:
             mol_list = file.read().splitlines()
         mol_list = [mol.split()[kwarg['column']] for mol in mol_list[kwarg['row']:] if mol]
-        mol_list = [[mol, kwarg] for mol in mol_list]
+        mol_list = [[mol, kwarg] for mol in mol_list if len(mol) >= 2]
         return read_mol(mol_list, kwarg['folder_path'], kwarg['is_core'])
     except (Exception) as ex:
         return print_exception(read_mol_txt.__code__, ex, mol_path, [mol_name, kwarg])
@@ -268,7 +272,7 @@ def set_prop(mol, mol_name, folder_path, is_core=False):
     mol.properties.formula = mol.get_formula()
     mol.properties.source_folder = folder_path
     if not mol.properties.smiles:
-        Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
+        mol.properties.smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
 
     # Prepare a list of letters for pdb_info.Name
     alphabet = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
