@@ -13,8 +13,7 @@ def test_read_mol_1():
     i.e. are all internal coordinates identical?
     """
     mol_name = 'AcOH'
-    kwarg = {'is_core': False, 'folder_path': '/Users/basvanbeek/Documents/GitHub/' +
-                                              'qmflows/scripts/ligandtocore/test_mol'}
+    kwarg = {'is_core': False, 'folder_path': 'test/test_QD/test_QD_files'}
 
     xyz = QD_inout.read_mol_xyz(mol_name + '.xyz', kwarg)[0]
     pdb = QD_inout.read_mol_pdb(mol_name + '.pdb', kwarg)[0]
@@ -50,8 +49,8 @@ def test_read_mol_2():
         3. if that entry is a plams molecule
     """
     mol_name = 'AcOH'
-    kwarg = {'is_core': False, 'folder_path': '/Users/basvanbeek/Documents/GitHub/' +
-                                              'qmflows/scripts/ligandtocore/test_mol'}
+    kwarg = {'is_core': False, 'folder_path': 'test/test_QD/test_QD_files'}
+
     extension_dict = {'xyz': QD_inout.read_mol_xyz, 'pdb': QD_inout.read_mol_pdb,
                       'mol': QD_inout.read_mol_mol, 'smiles': QD_inout.read_mol_smiles,
                       'folder': QD_inout.read_mol_folder, 'txt': QD_inout.read_mol_txt,
@@ -75,7 +74,7 @@ def test_read_mol_3():
     Check if 5 valid SMILES strings return 5 plams molecules
     """
     input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
-    folder_path = '/Users/basvanbeek/Documents/GitHub/qmflows/scripts/ligandtocore/test_mol'
+    folder_path = 'test/test_QD/test_QD_files'
     mol_list = QD_inout.read_mol(input_mol, folder_path=folder_path)
 
     assert isinstance(mol_list, list)
@@ -90,6 +89,6 @@ def test_read_mol_4():
     Check if 2 invalid SMILES strings return an IndexError
     """
     input_mol = ['dwefwefqe', 'fqwdwq']
-    folder_path = '/Users/basvanbeek/Documents/GitHub/qmflows/scripts/ligandtocore/test_mol'
+    folder_path = 'test/test_QD/test_QD_files'
     with pytest.raises(IndexError):
         assert QD_inout.read_mol(input_mol, folder_path=folder_path)
