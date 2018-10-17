@@ -43,6 +43,8 @@ def create_dir(dir_name, path=os.getcwd()):
     """
     Creates a new directory if this directory does not yet exist.
     """
+    if not os.path.exists(path):
+        raise FileNotFoundError(path, 'not found, aborting run')
     dir_path = os.path.join(path, str(dir_name))
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
