@@ -3,3 +3,6 @@ use argparse for passing arguments
 use pyyaml for creating input
 
 create tests
+    WiP
+    
+Make QD_import_export.py more compact
