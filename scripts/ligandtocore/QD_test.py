@@ -1,7 +1,9 @@
-import QD_import_export as QD_inout
-from scm.plams import Molecule
 import itertools
 import os
+import pytest
+
+from scm.plams import Molecule
+import QD_import_export as QD_inout
 
 
 def test_read_mol_1():
@@ -33,10 +35,11 @@ def test_read_mol_1():
     assert len(mol_list) == 3
     for mol in mol_list:
         assert isinstance(mol, Molecule)
+        assert len(mol.properties) >= 4
 
-    assert [formula_list[1] == formula for formula in formula_list[2:]]
-    assert [distance_list[1] == distance for distance in distance_list[2:]]
-    assert [angle_list[1] == angle for angle in angle_list[2:]]
+    assert [formula_list[0] is formula for formula in formula_list[1:]]
+    assert [distance_list[0] is distance for distance in distance_list[1:]]
+    assert [angle_list[0] is angle for angle in angle_list[1:]]
 
 
 def test_read_mol_2():
@@ -64,3 +67,29 @@ def test_read_mol_2():
             assert isinstance(xyz, list)
             assert len(xyz) == 1
             assert isinstance(xyz[0], Molecule)
+            assert len(xyz[0].properties) >= 4
+
+
+def test_read_mol_3():
+    """
+    Check if 5 valid SMILES strings return 5 plams molecules
+    """
+    input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
+    folder_path = '/Users/basvanbeek/Documents/GitHub/qmflows/scripts/ligandtocore/test_mol'
+    mol_list = QD_inout.read_mol(input_mol, folder_path=folder_path)
+
+    assert isinstance(mol_list, list)
+    assert len(mol_list) is len(input_mol)
+    for mol in mol_list:
+        assert isinstance(mol, Molecule)
+        assert len(mol.properties) >= 4
+
+
+def test_read_mol_4():
+    """
+    Check if 2 invalid SMILES strings return an IndexError
+    """
+    input_mol = ['dwefwefqe', 'fqwdwq']
+    folder_path = '/Users/basvanbeek/Documents/GitHub/qmflows/scripts/ligandtocore/test_mol'
+    with pytest.raises(IndexError):
+        assert QD_inout.read_mol(input_mol, folder_path=folder_path)
