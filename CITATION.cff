@@ -7,11 +7,18 @@ doi: 10.5281/zenodo.1045523
 authors:
 - given-names: Felipe
   family-names: Zapata
+  orcid:  "https://orcid.org/0000-0001-8286-677X"
 - given-names: Lars
   family-names: Ridder
+  orcid: "https://orcid.org/0000-0002-7635-9533"
 - given-names: Johan
   family-names: Hidding
-version: '0.2'
-date-released: 2017-11-12
+keywords:
+ - computational-chemistry
+ - materials-science
+ - python
+ - Workflows
+version: '0.3.0'
+date-released: 2018-10-10
 repository-code: https://github.com/SCM-NV/qmflows
-license: LGPL-3.0-only
+license: "LGPL-3.0"

@@ -1,9 +1,9 @@
-from nose.plugins.attrib import attr
 from qmflows.examples import example_freqs
 import numpy as np
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_calc_freqs():
     """
     Test conditional workflow for freq calculation.

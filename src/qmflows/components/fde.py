@@ -4,7 +4,7 @@ from qmflows import templates
 from qmflows.settings import Settings
 from qmflows.packages import Result
 from qmflows.packages.SCM import adf
-from noodles import gather, schedule, Storable
+from noodles import (gather, schedule)
 from scm.plams import Molecule
 
 import numpy as np
@@ -52,12 +52,11 @@ def mfcc(package, frags, caps, settings=None):
     return MFCC_Result(gather(*frag_jobs), gather(*cap_jobs))
 
 
-class Fragment(Storable):
+class Fragment:
     def __init__(self, result, mol, isfrozen=True, pack_tape=False):
         self.result = result
         if pack_tape:
             pack_t21(self.result.kf.path)
-        #self.mol_list = gather(*mol_list)
         self.mol = mol
         self.isfrozen = isfrozen
 

@@ -1,14 +1,16 @@
 __all__ = ['orca']
 
 from os.path import join
-from qmflows.settings import Settings
-from qmflows.packages.packages import (
+from ..settings import Settings
+from .packages import (
     Package, package_properties, Result, get_tmpfile_name)
-from qmflows.parsers.orca_parser import parse_molecule
+from ..parsers.orca_parser import parse_molecule
+from noodles import schedule
 from scm import plams
 from warnings import warn
 
 import numpy as np
+
 # ============================= Orca ==========================================
 
 
@@ -52,7 +54,7 @@ class ORCA(Package):
         """
         Translate generic keywords to their corresponding Orca keywords.
         """
-
+        @schedule
         def inithess(value):
             """
             Generate an seperate file containing the initial Hessian matrix used as
@@ -177,19 +179,15 @@ class ORCA_Result(Result):
                          plams_dir=plams_dir, properties=properties,
                          status=status, warnings=warnings)
 
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        plams_dir = archive["plams_dir"].path
-        return ORCA_Result(settings, molecule, job_name, plams_dir, status, warnings)
-
     @property
     def molecule(self):
         """ Retrieve the molecule from the output file"""
         if self.status not in ['crashed', 'failed']:
-            plams_dir = self.archive["plams_dir"].path
+            plams_dir = self.archive["plams_dir"]
             file_name = join(plams_dir, '{}.out'.format(self.job_name))
             return parse_molecule(file_name, self._molecule)
         else:
             return None
+
 
 orca = ORCA()

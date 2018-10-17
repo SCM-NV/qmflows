@@ -1,9 +1,9 @@
-from nose.plugins.attrib import attr
-from qmflows import molkit
 from qmflows import packages
+import pytest
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
-@attr('fast')
+@pytest.mark.slow
 def test_SerMolecule():
     mol = molkit.from_smiles("c1ccccc1CC")
     registry = packages.registry()

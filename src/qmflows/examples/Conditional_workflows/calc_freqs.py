@@ -1,7 +1,8 @@
 __all__ = ['example_freqs']
 
 from noodles import gather
-from qmflows import dftb, adf, orca, run, Settings, templates, molkit, find_first_job
+from qmflows import (dftb, adf, orca, run, Settings, templates, find_first_job)
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 def is_successful(result):
@@ -48,6 +49,7 @@ def example_freqs():
     print(table)
 
     return freqs
+
 
 if __name__ == "__main__":
     example_freqs()

@@ -1,7 +1,7 @@
 __all__ = ['gamess']
 
-from qmflows.packages.packages import (Package, package_properties, Result)
-from qmflows.settings import Settings
+from .packages import (Package, package_properties, Result)
+from ..settings import Settings
 from scm import plams
 from warnings import warn
 
@@ -165,26 +165,6 @@ class Gamess_Result(Result):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, properties=properties,
                          status=status, warnings=warnings)
-
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        """
-        Create a :class:`~CP2K_Result` instance using the data serialized in
-        a dictionary.
-
-        :param cls:
-        :param settings: Job Settings.
-        :param molecule: molecular Geometry.
-        :param job_name: Name of the job.
-        :param plams_dir: Absolute path to plams output folder
-        :param archive: dictionary containing the paths to the input/output
-        folders.
-        """
-        plams_dir = archive.get("plams_dir").path
-        work_dir = archive.get("work_dir")
-        return Gamess_Result(settings, molecule, job_name,
-                             plams_dir=plams_dir, work_dir=work_dir,
-                             status=status, warnings=warnings)
 
     def __getattr__(self, prop):
         """Returns a section of the results.

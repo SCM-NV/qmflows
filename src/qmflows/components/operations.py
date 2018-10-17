@@ -1,5 +1,5 @@
 
-__all__ = ['find_first_job', 'select_max', 'select_min', 'select_max_dict', 'select_min_dict']
+__all__ = ['find_first_job', 'select_max', 'select_min']
 
 from noodles import schedule_hint, find_first
 
@@ -24,24 +24,11 @@ def select_max(results, prop='energy'):
     """
     filtered_results = [result for result in results if result and result.__getattr__(prop)]
     if len(filtered_results) > 0:
-        selected = max(filtered_results, key=lambda item: item.__getattr__(prop))
-        print("Selected {:s}: {:s}".format(selected.job_name, str(selected.__getattr__(prop))))
+        selected = max(filtered_results, key=lambda item: getattr(item, prop))
         return selected
     else:
         return None
 
-
-@schedule_hint()
-def select_max_dict(dictionary, prop):
-    def key(k):
-        ret = getattr(dictionary[k], prop)
-        if isinstance(ret, (float, int)):
-            return ret
-        else:
-            return float("-inf")
-    selected_key = max(dictionary, key=key)
-    print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
-    return dictionary[selected_key]
 
 @schedule_hint()
 def select_min(results, prop='energy'):
@@ -55,21 +42,7 @@ def select_min(results, prop='energy'):
     """
     filtered_results = [result for result in results if result and result.__getattr__(prop)]
     if len(filtered_results) > 0:
-        selected = min(filtered_results, key=lambda item: item.__getattr__(prop))
-        print("Selected {:s}: {:s}".format(selected.job_name, str(selected.__getattr__(prop))))
+        selected = min(filtered_results, key=lambda item: getattr(item, prop))
         return selected
     else:
         return None
-
-@schedule_hint()
-def select_min_dict(dictionary, prop):
-    def key(k):
-        ret = getattr(dictionary[k], prop)
-        if isinstance(ret, (float, int)):
-            return ret
-        else:
-            return float("inf")
-    selected_key = min(dictionary, key=key)
-    print("Selected " + str(selected_key) + ": " + str(getattr(dictionary[selected_key], prop)))
-    return dictionary[selected_key]
-

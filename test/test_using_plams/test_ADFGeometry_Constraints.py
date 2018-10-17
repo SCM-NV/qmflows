@@ -1,10 +1,10 @@
-from nose.plugins.attrib import attr
 from qmflows.examples import (
     example_generic_constraints, example_H2O2_TS, example_partial_geometry_opt)
 import numpy as np
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_partial_geometry_opt():
     """
     Test partial geometry optimization.
@@ -13,18 +13,18 @@ def test_partial_geometry_opt():
     assert str(geom1) == str(geom2)
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_h2o2_ts():
     """
     Test TS optimization of a rotational barrier in hydrogen peroxide
     with ORCA using init hessian from DFTB.
     """
     ts_dihe, n_optcycles = example_H2O2_TS()
-    assert (n_optcycles < 7)
+    assert (n_optcycles < 10)
     assert ts_dihe == 0.0
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_generic_constraints():
     """
     Test generic distance constraints on all packages

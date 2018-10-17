@@ -1,7 +1,7 @@
 __all__ = ['dirac']
 
-from qmflows.packages.packages import (Package, package_properties, Result)
-from qmflows.settings import Settings
+from .packages import (Package, package_properties, Result)
+from ..settings import Settings
 from scm import plams
 from warnings import warn
 
@@ -42,6 +42,7 @@ class DIRAC(Package):
         """
         warn('Keyword ' + key + ' doesn\'t exist')
 
+
 # Instance
 dirac = DIRAC()
 
@@ -56,9 +57,3 @@ class DIRAC_Result(Result):
         super().__init__(settings, molecule, job_name=job_name,
                          plams_dir=plams_dir, properties=properties,
                          status=status, warnings=warnings)
-
-    @classmethod
-    def from_dict(cls, settings, molecule, job_name, archive, status, warnings):
-        plams_dir = archive["plams_dir"].path
-        return DIRAC_Result(settings, molecule, job_name, plams_dir,
-                            status, warnings)

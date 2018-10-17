@@ -1,7 +1,7 @@
 # Default imports
 from math import sqrt
-from nose.plugins.attrib import attr
-from qmflows import (concat, Settings, templates, zipWith)
+from qmflows import (Settings, templates)
+from qmflows.utils import (concat, zipWith)
 from scm.plams import Molecule
 
 # User Defined imports
@@ -9,9 +9,10 @@ from qmflows.packages.SCM import dftb
 from qmflows.packages.orca import orca
 from qmflows.packages import run
 import operator
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_opt_orca():
     """
     Test Orca input generation and run functions.
@@ -43,7 +44,7 @@ def test_opt_orca():
     assert diff < 1e-2
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_methanol_opt_orca():
     """
     Run a methanol optimization and retrieve the optimized geom.

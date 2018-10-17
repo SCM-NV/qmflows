@@ -1,10 +1,10 @@
-from nose.plugins.attrib import attr
 from qmflows.examples import (
     example_ADF3FDE_Cystine, example_ADF3FDE_Dialanine, example_FDE_fragments)
 import numpy as np
+import pytest
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_ADF3FDE_Dialanine():
     """
     Test MFCC partitioning of dialanine
@@ -14,7 +14,7 @@ def test_ADF3FDE_Dialanine():
     assert_dipoles(expected_dipoles, example_ADF3FDE_Dialanine())
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_ADF3FDE_Cystine():
     """
     Test MFCC partitioning of cystine
@@ -27,7 +27,7 @@ def test_ADF3FDE_Cystine():
     assert_dipoles(expected_dipoles, example_ADF3FDE_Cystine())
 
 
-@attr('slow')
+@pytest.mark.slow
 def test_FDE_Fragments():
     """
     Test FDE Fragments

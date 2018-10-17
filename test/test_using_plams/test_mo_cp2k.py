@@ -9,16 +9,18 @@ from qmflows.packages import cp2k
 
 import h5py
 import os
+import pytest
 import shutil
-# ===================================<>========================================
+
 JobFiles = namedtuple("JobFiles", ("get_xyz", "get_inp", "get_out", "get_MO"))
 
 
+@pytest.mark.slow
 def test_ethylene():
     """
     run a single point calculation using CP2K and store the MOs.
     """
-    scratch_path = '/tmp/test_qmflows'
+    scratch_path = os.environ.get('TMPDIR', '/tmp/test_qmflows')
     if not os.path.exists(scratch_path):
         os.makedirs(scratch_path)
     try:
@@ -32,7 +34,7 @@ def fun_ethylene(scratch_path):
     """
     Test Ethylene single
     """
-    geometry = Molecule('test_files/ethylene.xyz')
+    geometry = Molecule('test/test_files/ethylene.xyz')
     job_settings = prepare_cp2k_settings(geometry, scratch_path)
 
     cp2k_result = run(cp2k(job_settings, geometry, work_dir=scratch_path))
@@ -102,7 +104,7 @@ def prepare_cp2k_settings(geometry, work_dir):
 
     # copy the basis and potential to a tmp file
     for f in ['BASIS_MOLOPT', 'GTH_POTENTIALS', 'BASIS_ADMM_MOLOPT']:
-        shutil.copy(join('test_files', f), work_dir)
+        shutil.copy(join('test/test_files', f), work_dir)
     # Cp2k configuration files
 
     force = cp2k_args.specific.cp2k.force_eval

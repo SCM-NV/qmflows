@@ -22,15 +22,19 @@ floatNumber = Regex(r'(\-)?\d+(\.)(\d*)?([eE][\-\+]\d+)?')
 
 floatNumberDot = Regex(r'(\-)?(\d+)?(\.)(\d*)?([eE][\-\+]\d+)?')
 
-
 # Parse Utilities
+
+
+def skipSupress(z):
+    return Suppress(SkipTo(z))
+
+
 anyChar = Regex('.')
 skipAnyChar = Suppress(anyChar)
-skipSupress = lambda z: Suppress(SkipTo(z))
 skipLine = Suppress(skipSupress('\n'))
 
-
 # Generic Functions
+
 
 def parse_file(p, file_name):
     """

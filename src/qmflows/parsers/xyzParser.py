@@ -4,19 +4,19 @@ __all__ = ['parse_string_xyz', 'readXYZ', 'manyXYZ', "string_to_plams_Molecule"]
 
 # ===================> Standard libraries and third-party <====================
 from scm.plams import (Atom, Molecule)
-from pyparsing   import (alphas, Group, LineEnd, OneOrMore, restOfLine,
-                         Suppress, Word)
+from pyparsing import (
+    alphas, Group, LineEnd, OneOrMore, restOfLine, Suppress, Word)
 
 from qmflows.common import AtomXYZ
 from qmflows.parsers.parser import (floatNumber, natural)
 from qmflows.utils import zipWith
 # =============================================================================
 
-header  = natural + LineEnd() + restOfLine
+header = natural + LineEnd() + restOfLine
 
-label   = Word(alphas, max=2)
+label = Word(alphas, max=2)
 
-xyz     = floatNumber * 3
+xyz = floatNumber * 3
 
 atomParser = label.setResultsName("label") + xyz.setResultsName("xyz")
 
@@ -58,7 +58,7 @@ def manyXYZ(pathXYZ):
     :return: [[AtomXYZ]]
     """
     manyMol = OneOrMore(Group(parser_xyz))
-    xss     = manyMol.parseFile(pathXYZ)
+    xss = manyMol.parseFile(pathXYZ)
     return list(map(createAtoms, xss))
 
 
@@ -84,4 +84,4 @@ def tuplesXYZ_to_plams(xs):
 
 def string_to_plams_Molecule(xs):
     """Convert a molecule stored in a string to a plams Molecule"""
-    return  tuplesXYZ_to_plams(parse_string_xyz(xs))
+    return tuplesXYZ_to_plams(parse_string_xyz(xs))

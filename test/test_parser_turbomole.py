@@ -1,14 +1,14 @@
-from nose.plugins.attrib import attr
 from qmflows.common import InputKey
 from qmflows.hdf5.quantumHDF5 import turbomole2hdf5
 
 import h5py
 import os
-# ====================================<>=======================================
+import pytest
+
 path_hdf5 = 'test/test_files/test.hdf5'
 
 
-@attr('fast')
+@pytest.mark.slow
 def test_store_basisSet():
     """
     Check if the turbomole basis set are read

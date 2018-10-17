@@ -1,6 +1,7 @@
 __all__ = ['example_H2O2_TS']
 
-from qmflows import orca, dftb, templates, molkit, Dihedral, run, Settings
+from qmflows import (orca, dftb, templates, Dihedral, run, Settings)
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 def example_H2O2_TS():
