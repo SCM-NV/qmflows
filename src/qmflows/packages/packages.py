@@ -11,7 +11,7 @@ from noodles.serial.path import SerPath
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
 from noodles.serial.reasonable import SerReasonableObject
-from noodles.serial.numpy import arrays_to_hdf5
+from noodles.serial.numpy import (SerNumpyScalar, arrays_to_hdf5)
 from os.path import join
 from pathlib import Path
 from rdkit import Chem
@@ -25,6 +25,7 @@ import importlib
 import inspect
 import os
 import uuid
+import numpy as np
 import pkg_resources as pkg
 import scm.plams.interfaces.molecule.rdkit as molkit
 
@@ -347,7 +348,7 @@ def call_default(wf, n_processes=1, cache='cache.db'):
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
-        db_file=cache, always_cache=True, echo_log=False)
+        db_file=cache, always_cache=False, echo_log=False)
 
 
 class SerMolecule(Serialiser):
@@ -413,7 +414,10 @@ def registry():
             Result: AsDict(Result),
             Settings: SerSettings(),
             plams.KFFile: SerReasonableObject(plams.KFFile),
-            plams.KFReader: SerReasonableObject(plams.KFReader)}
+            plams.KFReader: SerReasonableObject(plams.KFReader),
+            np.floating: SerNumpyScalar(),
+            np.integer: SerNumpyScalar()
+        }
     )
 
 
@@ -472,4 +476,3 @@ def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
         return None
     else:
         return parser(output_files[0], package_warnings)
-
