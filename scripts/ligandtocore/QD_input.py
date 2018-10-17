@@ -1,19 +1,16 @@
 import yaml
 import QD
+import os
 
 
-# Mandatory arguments: input_cores, input ligands & parhwill have to be specified by the user
-
-# The location of the (to be created) working folder
+# Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
 path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 
-# The input cores
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz
     - guess_bonds: False
 """)
 
-# The input ligands
 input_ligands = yaml.load("""
 - OC
 - OCC
@@ -23,38 +20,46 @@ input_ligands = yaml.load("""
 """)
 
 """
-Input_cores & input_ligands:
-A list of input cores and ligands.
-Supported file types: .xyz, .pdb, .mol, folders, .txt, .xlsx, PLAMS molecules, RDKit molecules.
-    .xyz:       Import an .xyz file. Guesses connectivity by default.
-    .pdb:       Import a .pdb file.
-    .mol:       Import a .mol file.
-    folder:     Import all supported files from path/ligand/folder/. If None or '' is provided as.
-                argument, all supported files from path/ligand/ will be imported.
-    .txt:       Import all supported files from a .txt file (i.e. SMILES strings or
-                                                             paths to .xyz files).
-    .xlsx:      Import all supported files from an .xlsx file (i.e. SMILES strings or
-                                                               paths to .xyz files).
-    PLAMS mol:  Import a PLAMS Molecule object.
-    RDKit mol:  Import a RDKit Chem.rdchem.Mol object.
+path <str>:
+    The location of the (to be created) working folders <str>.
+    Set to os.getcwd() to use the current directory.
 
-Optional arguments:
-    guess_bonds: bool
-        Try to guess bonds in the molecule based on types and positions of atoms.
-        By default this option is only enabled for .xyz files, as it is assumed that e.g. .pdb files
-        already contain information about connectivity.
+<mol> = <str>, <scm.plams.core.basemol.Molecule> or <rdkit.Chem.rdchem.Mol>
+Input_cores <list>[<mol>] or <list>[<list>[<mol>, <dict>]]:
+Input_ligands <list>[<mol>] or <list>[<list>[<mol>, <dict>]]:
+    A list of all input molecules <mol>.
+    The script will automatically determine the supplied file type.
+    Supported file types:
+        .xyz:       Import an .xyz file. Guesses connectivity by default.
+        .pdb:       Import a .pdb file.
+        .mol:       Import a .mol file.
+        folder:     Import all supported files from path/ligand/folder/.
+                    If None or '' is provided as argument,
+                    all supported files from path/ligand/ will be imported instead.
+        .txt:       Import all supported files from a .txt file (e.g. SMILES strings or
+                                                                 paths to .xyz files).
+        .xlsx:      Import all supported files from an .xlsx file (e.g. SMILES strings or
+                                                                   paths to .xyz files).
+        PLAMS mol:  Import a PLAMS Molecule object.
+        RDKit mol:  Import a RDKit Chem.rdchem.Mol object.
 
-    column: int
-        The column containing the to be imported molecules.
-        Relevant for .txt and .xlsx files.
+    To supply optional arguments <dict>, <mol> has to be exchanged for <list>[<mol>, <dict>].
+    Optional arguments:
+        guess_bonds <bool>: False
+            Try to guess bonds in the molecule based on types and positions of atoms.
+            Is set to False by default, with the exception of .xyz files.
 
-    row: int
-        Ignore the first i rows within a column of to be imported molecules.
-        Relevant for .txt and .xlsx files.
+        column <int>: 0
+            The column containing the to be imported molecules.
+            Relevant for .txt and .xlsx files.
 
-    sheet_name: str
-        The name of the sheet containing the to be imported molecules
-        Relevant for .xlsx files.
+        row <int>: 0
+            Ignore the first i rows within a column of to be imported molecules.
+            Relevant for .txt and .xlsx files.
+
+        sheet_name <str>: Sheet1
+            The name of the sheet containing the to be imported molecules
+            Relevant for .xlsx files.
 """
 
 
@@ -75,26 +80,32 @@ split: True
 
 """
 Optional arguments:
-    dir_name_list <list>: [core, ligand, QD]
+    dir_name_list <list>[<str>]: [core, ligand, QD]
         A list containing the names of the be created directories.
 
     dummy <int> or <str>: Cl
-        The atomic number (int) of atomic symbol (str) of the atoms in the core that should be
+        The atomic number <int> of atomic symbol <str> of the atoms in the core that should be
         replaced with ligands. Alternatively, dummy atoms can be manually specified with
         the core_indices argument.
 
     core_indices <list>[<int>]: []
-        Specify the indices (int) of the core dummy atoms that should be replaced with ligands.
+        Specify the indices <int> of the core dummy atoms that should be replaced with ligands.
         Alternatively, all atoms of a given element can be identified as dummy atoms with the
         dummy argument.
 
-    ligand_indices <list>[<int>] or <list>[<list>[<int>, <int>]] = []
-        Specify the indices (int) of the ligand atoms that should be attached to the core.
+    ligand_indices <list>[<int>] or <list>[<list>[<int>, <int>]]: []
+        Specify the indices <int> of the ligand atoms that should be attached to the core.
+        If index <int> instead belongs to hydrogen, said hydrogen will be removed and
+        the remaining anion will be attached to the core instead.
+        If two integers are supplied (<list>[<int>, <int>] instead of <int>):
+            The bond between <list>[0] and <list>[1] is broken.
+            The resulting molecule containing <list>[1] is disgarded
+            The resulting molecule containing <list>[0] is returned and attached to the core.
         Alternatively, all atoms of a given element can be identified as dummy atoms with the
         dummy argument.
 
     database_name <str>: ligand_database.xlsx
-        Name plus extension (str) of the (to be) created database where all results will be stored.
+        Name plus extension <str> of the (to be) created database where all results will be stored.
         When possible, ligands will be pulled from this database instead of
             reoptimizing their geometry.
 
@@ -102,31 +113,30 @@ Optional arguments:
         Enables or disables the use of database_name.
 
     ligand_opt <False>: True
-        Approach the global minimum (RDKit UFF) by systematically scanning dihedral angles.
-        Requires well-defined bonds.
-
     core_opt <bool>: False
         Approach the global minimum (RDKit UFF) by systematically scanning dihedral angles.
         Requires well-defined bonds.
+        WARNING: No well-defined bonds are present in the cores be default, enable at your own risk!
 
     qd_opt <bool>: False
         Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
 
-    maxiter <int>:
-        The maximum number of geometry iterations (int) used in qd_opt.
+    maxiter <int>: 10000
+        The maximum number of geometry iterations <int> used in qd_opt.
 
     split <bool>: True
-        False: The ligand is the be attached to the core in its entirety.
+        False: The ligand is to be attached to the core in its entirety.
             Examples:
-                HO2CR -> HO2CR
-                NH4+ -> NH4+
-                -O2CR -> -O2CR
-        True: A proton, counterion or functional group is to be removed from the ligand first.
+                NR4+      -> NR4+
+                -O2CR     -> -O2CR
+                HO2CR     -> HO2CR
+                PhO2CR    -> PhO2CR
+        True: A proton, counterion or functional group first has to be removed from the ligand.
             Examples:
-                HO2CR -> -O2CR
-                X-.NH4+ -> NH4+
+                X-.NR4+   -> NR4+
+                HO2CR     -> -O2CR
                 Na+.-O2CR -> -O2CR
-                PhO2CR -> -O2CR
+                PhO2CR    -> -O2CR
 """
 
 
