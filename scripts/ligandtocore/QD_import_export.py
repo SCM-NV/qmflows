@@ -102,6 +102,8 @@ def read_mol_extension(mol_name, folder_path, is_core=False):
     kwarg.update({'folder_path': folder_path, 'is_core': is_core})
 
     # Identify the filetype of mol_name
+    if mol_name is None:
+        mol_name = ''
     mol_path = os.path.join(folder_path, mol_name)
     if os.path.isfile(mol_path):
         return {mol_name: [mol_name.rsplit('.', 1)[-1], kwarg]}
