@@ -339,7 +339,6 @@ class DFTB_Result(Result):
         if plams_dir is not None:
             kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
             # create a kf reader instance
-            print("Here!!!: ", plams.KFFile(kf_filename))
             self.kf = plams.KFFile(kf_filename)
         else:
             self.kf = None
