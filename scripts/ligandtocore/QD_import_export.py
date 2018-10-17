@@ -151,7 +151,7 @@ def read_mol_mol(mol_name, kwarg):
     """
     mol_path = os.path.join(kwarg['folder_path'], mol_name)
     try:
-        mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path))
+        mol = molkit.from_rdmol(Chem.MolFromMolFile(mol_path, removeHs=False))
         mol_name = mol_name.rsplit('.', 1)[0]
         if kwarg.get('guess_bonds'):
             mol.guess_bonds()
@@ -268,7 +268,7 @@ def set_prop(mol, mol_name, folder_path, is_core=False):
     mol.properties.formula = mol.get_formula()
     mol.properties.source_folder = folder_path
     if not mol.properties.smiles:
-        Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
+        mol.properties.smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
 
     # Prepare a list of letters for pdb_info.Name
     alphabet = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
