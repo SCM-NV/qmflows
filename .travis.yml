@@ -21,7 +21,7 @@ install:
   - conda install -c rdkit rdkit
 
   # Install qmflows package
-  # - pip install https://github.com/SCM-NV/plams/tarball/master#egg=plams --upgrade
+  - pip install git+https://github.com/SCM-NV/plams@master#egg=plams-1.2 --upgrade
   - pip install .[test,doc]
   
 script:
