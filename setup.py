@@ -42,7 +42,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2', 'pymonad',
+    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams', 'pymonad',
                       'pyparsing', 'filelock', 'openpyxl', 'pyyaml', 'xlrd'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
