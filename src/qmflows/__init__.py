@@ -1,5 +1,5 @@
 from .components import (
-    Angle, Dihedral, Distance, PES,
+    Angle, Dihedral, Distance,
     find_first_job, select_max, select_min)
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -11,7 +11,7 @@ from .examples import (
     example_H2O2_TS, example_freqs, example_generic_constraints, example_partial_geometry_opt)
 
 __all__ = [
-    'Angle', 'Dihedral', 'Distance', 'PES', 'Settings',
+    'Angle', 'Dihedral', 'Distance', 'Settings',
     'adf', 'cp2k', 'dftb', 'dirac', 'gamess', 'orca', 'run',
     'example_ADF3FDE_Cystine', 'example_ADF3FDE_Dialanine', 'example_FDE_fragments',
     'example_H2O2_TS', 'example_freqs', 'example_generic_constraints',
