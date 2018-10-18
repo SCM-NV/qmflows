@@ -27,9 +27,6 @@ class MFCC_Result(Result):
             dipole -= cap.result.dipole
         return dipole
 
-    def __deepcopy__(self, _):
-        return MFCC_Result(self.frags, self.caps)
-
 
 def mfcc(package, frags, caps, settings=None):
     mfcc_settings = templates.singlepoint
