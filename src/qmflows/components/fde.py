@@ -52,12 +52,13 @@ def mfcc(package, frags, caps, settings=None):
     return MFCC_Result(gather(*frag_jobs), gather(*cap_jobs))
 
 
-@schedule
-def Fragment(result, mol, isfrozen=True, pack_tape=False):
-    if pack_tape:
-        pack_t21(result.kf.path)
-
-    return {'result': result, 'mol': mol, 'isfrozen': isfrozen}
+class Fragment:
+    def __init__(self, result, mol, isfrozen=True, pack_tape=False):
+        self.result = result
+        if pack_tape:
+            pack_t21(self.result.kf.path)
+        self.mol = mol
+        self.isfrozen = isfrozen
 
 
 @schedule
@@ -75,15 +76,14 @@ def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_nam
             frag_settings.specific.adf.fragments[key] = fragment_settings
     for i, frag in enumerate(frags):
         frag_id = 'frag' + str(i + 1)
-        if frag['result']:
-            for a in frag['mol']:
+        if frag.result:
+            for a in frag.mol:
                 a.properties.adf.fragment = frag_id
                 if a.coords in cap_ids:
                     a.properties.adf.fragment += '  fs=' + cap_ids[a.coords]
-            result = frag['result']
-            path = result.kf.path
+            path = frag.result.kf.path
             key = frag_id + ' ' + path + ' subfrag=active'
-            if frag['isfrozen']:
+            if frag.isfrozen:
                 key += ' type=FDE'
                 if fragment_settings:
                     key += ' &'
@@ -92,7 +92,7 @@ def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_nam
                     frag_settings.specific.adf.fragments[key] = ""
             else:
                 frag_settings.specific.adf.fragments[key] = ""
-        mol_tot += frag['mol']
+        mol_tot += frag.mol
     frag_settings.specific.adf.fde.PW91k = ""
     return adf(settings.overlay(frag_settings), mol_tot, job_name=job_name)
 
@@ -132,7 +132,7 @@ def adf3fde_cycle(frags, caps, adf3fde_settings, fragment_settings, job_name='fd
     new_frags = []
     for i, frag in enumerate(frags):
         frag.isfrozen = False
-        new_frags.append(Fragment(adf_fragmentsjob(
+        new_frags.append(schedule(Fragment)(adf_fragmentsjob(
             adf3fde_settings, frags, caps, fragment_settings,
             job_name=job_name + '_' + str(i)), frag.mol, pack_tape=True))
         frag.isfrozen = True
