@@ -19,7 +19,6 @@ setup(
     keywords='chemistry workflows simulation materials',
     long_description=readme(),
     package_dir={'': 'src'},
-    # packages=find_packages(),
     packages=["qmflows",
               "qmflows.components",
               "qmflows.data",
@@ -49,5 +48,5 @@ setup(
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
     },
     dependency_links=[
-        "https://github.com/SCM-NV/plams/tarball/master#egg=plams"]
+        "git+https://github.com/SCM-NV/plams@master#egg=plams1.2"]
 )
