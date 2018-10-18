@@ -4,7 +4,7 @@ from qmflows import templates
 from qmflows.settings import Settings
 from qmflows.packages import Result
 from qmflows.packages.SCM import adf
-from noodles import (gather, has_scheduled_methods, schedule)
+from noodles import (gather, schedule)
 from scm.plams import Molecule
 
 import numpy as np
@@ -26,6 +26,9 @@ class MFCC_Result(Result):
         for cap in self.caps:
             dipole -= cap.result.dipole
         return dipole
+
+    def __deepcopy__(self, _):
+        return MFCC_Result(self.frags, self.caps)
 
 
 def mfcc(package, frags, caps, settings=None):
@@ -132,7 +135,7 @@ def adf3fde_cycle(frags, caps, adf3fde_settings, fragment_settings, job_name='fd
     new_frags = []
     for i, frag in enumerate(frags):
         frag.isfrozen = False
-        new_frags.append(schedule(Fragment)(adf_fragmentsjob(
+        new_frags.append(Fragment(adf_fragmentsjob(
             adf3fde_settings, frags, caps, fragment_settings,
             job_name=job_name + '_' + str(i)), frag.mol, pack_tape=True))
         frag.isfrozen = True
