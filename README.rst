@@ -92,7 +92,7 @@ Package installation
   
 - Update PLAMS using pip:
 
-  - ``pip install https://github.com/SCM-NV/PLAMS.git@rdkit --upgrade``
+  - ``pip install git+https://github.com/SCM-NV/PLAMS.git@rdkit --upgrade``
 
 - Type in your terminal:
 
