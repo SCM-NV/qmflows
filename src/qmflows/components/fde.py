@@ -4,7 +4,7 @@ from qmflows import templates
 from qmflows.settings import Settings
 from qmflows.packages import Result
 from qmflows.packages.SCM import adf
-from noodles import (gather, schedule)
+from noodles import (gather, has_scheduled_methods, schedule)
 from scm.plams import Molecule
 
 import numpy as np
@@ -52,13 +52,12 @@ def mfcc(package, frags, caps, settings=None):
     return MFCC_Result(gather(*frag_jobs), gather(*cap_jobs))
 
 
-class Fragment:
-    def __init__(self, result, mol, isfrozen=True, pack_tape=False):
-        self.result = result
-        if pack_tape:
-            pack_t21(self.result.kf.path)
-        self.mol = mol
-        self.isfrozen = isfrozen
+@schedule
+def Fragment(result, mol, isfrozen=True, pack_tape=False):
+    if pack_tape:
+        pack_t21(result.kf.path)
+
+    return {'result': result, 'mol':mol, 'isfrozen': isfrozen}
 
 
 @schedule
@@ -76,14 +75,15 @@ def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_nam
             frag_settings.specific.adf.fragments[key] = fragment_settings
     for i, frag in enumerate(frags):
         frag_id = 'frag' + str(i + 1)
-        if frag.result:
-            for a in frag.mol:
+        if frag['result']:
+            for a in frag['mol']:
                 a.properties.adf.fragment = frag_id
                 if a.coords in cap_ids:
                     a.properties.adf.fragment += '  fs=' + cap_ids[a.coords]
-            path = frag.result.kf.path
+            result = frag['result']
+            path = result.kf.path
             key = frag_id + ' ' + path + ' subfrag=active'
-            if frag.isfrozen:
+            if frag['isfrozen']:
                 key += ' type=FDE'
                 if fragment_settings:
                     key += ' &'
@@ -92,7 +92,7 @@ def adf_fragmentsjob(settings, frags, caps=None, fragment_settings=None, job_nam
                     frag_settings.specific.adf.fragments[key] = ""
             else:
                 frag_settings.specific.adf.fragments[key] = ""
-        mol_tot += frag.mol
+        mol_tot += frag['mol']
     frag_settings.specific.adf.fde.PW91k = ""
     return adf(settings.overlay(frag_settings), mol_tot, job_name=job_name)
 
