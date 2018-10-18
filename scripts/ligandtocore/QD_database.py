@@ -3,7 +3,7 @@ import pandas as pd
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-import QD_import_export as QD_inout
+import qd_import_export as QD_inout
 
 
 def read(mol_folder, database_name='ligand_database.xlsx'):
@@ -41,8 +41,9 @@ def compare(plams_mol, database):
         match = True
         if os.path.exists(mol_path):
             plams_mol_new = molkit.readpdb(mol_path)
-            QD_inout.set_prop(plams_mol_new, plams_mol.properties.name.replace('Ligand_', ''),
-                              plams_mol.properties.source_folder)
+            prop_dict = {'mol_name': plams_mol.properties.name.replace('Ligand_', ''),
+                         'folder_path': plams_mol.properties.source_folder}
+            QD_inout.set_prop(plams_mol_new, prop_dict)
             plams_mol = plams_mol_new
             pdb = True
         else:

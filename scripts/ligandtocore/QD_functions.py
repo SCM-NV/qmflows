@@ -9,8 +9,8 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
 
-import QD_database
-import QD_import_export as QD_inout
+import qd_database as QD_database
+import qd_import_export as QD_inout
 
 
 def optimize_ligand(ligand, opt, database):

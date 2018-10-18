@@ -5,9 +5,9 @@ import time
 from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
-import QD_functions as QD_scripts
-import QD_database
-import QD_import_export as QD_inout
+import qd_functions as QD_scripts
+import qd_database as QD_database
+import qd_import_export as QD_inout
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -90,7 +90,7 @@ def prep_core(core, core_dummies, dummy=0, opt=False):
                             ' was specified as dummy atom, yet no dummy atoms were found')
 
 
-def prep_ligand(ligand, database, ligand_dummies, opt=True, split=True):
+def prep_ligand(ligand, database, ligand_indices, opt=True, split=True):
     """
     Function that handles all ligand operations,
     """
@@ -98,18 +98,16 @@ def prep_ligand(ligand, database, ligand_dummies, opt=True, split=True):
     ligand = QD_scripts.optimize_ligand(ligand, opt, database)
 
     # Identify functional groups within the ligand and add a dummy atom to the center of mass.
-    if not ligand_dummies:
+    if not ligand_indices:
         ligand_list = QD_scripts.find_substructure(ligand, split)
     else:
-        ligand_list = [copy.deepcopy(ligand) for dummy in ligand_dummies]
-        for i, ligand in enumerate(ligand_list):
-            if isinstance(ligand_dummies[i], list) or isinstance(ligand_dummies[i], tuple):
-                ligand_index = ligand_dummies[i]
-            else:
-                neighbors = ligand.neighbors(ligand_dummies[i])[0]
-                neighbors = [atom for atom in neighbors if atom.atnum != 1]
-                ligand_index = [ligand_dummies[i], ligand.atoms.index(neighbors)]
-            ligand[i] = QD_scripts.find_substructure_split(ligand, ligand_index, split)
+        if isinstance(ligand_indices, int):
+            ligand_indices += -1
+            split = False
+        elif isinstance(ligand_indices, list):
+            ligand_indices = [i - 1 for i in ligand_indices]
+            split = True
+        ligand_list = [QD_scripts.find_substructure_split(ligand, ligand_indices, split)]
 
     return ligand_list
 

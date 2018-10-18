@@ -1,10 +1,10 @@
 import yaml
-import QD
+import qd as QD
 import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz
@@ -95,12 +95,10 @@ Optional arguments:
 
     ligand_indices <list>[<int>] or <list>[<list>[<int>, <int>]]: []
         Specify the indices <int> of the ligand atoms that should be attached to the core.
-        If index <int> instead belongs to hydrogen, said hydrogen will be removed and
-        the remaining anion will be attached to the core instead.
-        If two integers are supplied (<list>[<int>, <int>] instead of <int>):
+        Or supply two atomic indices (<list>[<int>, <int>] instead of <int>):
             The bond between <list>[0] and <list>[1] is broken.
-            The resulting molecule containing <list>[1] is disgarded
-            The resulting molecule containing <list>[0] is returned and attached to the core.
+            The resulting molecule containing atom <list>[1] is disgarded
+            The resulting molecule containing atom <list>[0] is returned and attached to the core.
         Alternatively, all atoms of a given element can be identified as dummy atoms with the
         dummy argument.
 
