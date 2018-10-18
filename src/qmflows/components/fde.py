@@ -57,7 +57,7 @@ def Fragment(result, mol, isfrozen=True, pack_tape=False):
     if pack_tape:
         pack_t21(result.kf.path)
 
-    return {'result': result, 'mol':mol, 'isfrozen': isfrozen}
+    return {'result': result, 'mol': mol, 'isfrozen': isfrozen}
 
 
 @schedule
