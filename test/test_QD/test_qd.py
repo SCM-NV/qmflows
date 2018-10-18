@@ -1,4 +1,3 @@
-import itertools
 import os
 import pytest
 
@@ -12,12 +11,9 @@ def test_read_mol_1():
     distances and angles.
     i.e. are all internal coordinates identical?
     """
-    mol_name = 'AcOH'
-    kwarg = {'is_core': False, 'folder_path': 'test/test_QD/test_QD_files'}
-
-    xyz = QD_inout.read_mol_xyz(mol_name + '.xyz', kwarg)[0]
-    pdb = QD_inout.read_mol_pdb(mol_name + '.pdb', kwarg)[0]
-    mol = QD_inout.read_mol_mol(mol_name + '.mol', kwarg)[0]
+    xyz = QD_inout.read_mol_xyz('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.xyz'})
+    pdb = QD_inout.read_mol_pdb('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.pdb'})
+    mol = QD_inout.read_mol_mol('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.mol'})
     mol_list = [xyz, pdb, mol]
 
     atom_list = [[[at1, at2] for at1 in mol for at2 in mol if at1 != mol[1] and at2 != mol[1]] for
@@ -34,7 +30,6 @@ def test_read_mol_1():
     assert len(mol_list) == 3
     for mol in mol_list:
         assert isinstance(mol, Molecule)
-        assert len(mol.properties) >= 4
 
     assert [formula_list[0] is formula for formula in formula_list[1:]]
     assert [distance_list[0] is distance for distance in distance_list[1:]]
@@ -49,7 +44,7 @@ def test_read_mol_2():
         3. if that entry is a plams molecule
     """
     mol_name = 'AcOH'
-    kwarg = {'is_core': False, 'folder_path': 'test/test_QD/test_QD_files'}
+    folder_path = '/test/test_qd/test_qd_files'
 
     extension_dict = {'xyz': QD_inout.read_mol_xyz, 'pdb': QD_inout.read_mol_pdb,
                       'mol': QD_inout.read_mol_mol, 'smiles': QD_inout.read_mol_smiles,
@@ -58,15 +53,20 @@ def test_read_mol_2():
                       'rdmol': QD_inout.read_mol_rdkit}
     key_list = list(extension_dict.keys())
     for item in key_list:
-        path = os.path.join(kwarg['folder_path'], mol_name + '.' + item)
-        if os.path.exists(path):
-            xyz = [extension_dict[key](mol_name + '.' + item, kwarg) for key in key_list]
-            xyz = list(itertools.chain(*xyz))
-
+        mol_path = os.path.join(folder_path, mol_name + '.' + item)
+        mol_dict = {'mol_name': mol_name, 'mol_path': mol_path, 'folder_path': mol_path,
+                    'row': 0, 'column': 0, 'sheet_name': 'Sheet1', 'is_core': False}
+        if os.path.exists(mol_path):
+            xyz = [extension_dict[key](mol_name + '.' + item, mol_dict) for key in key_list]
             assert isinstance(xyz, list)
-            assert len(xyz) == 1
-            assert isinstance(xyz[0], Molecule)
-            assert len(xyz[0].properties) >= 4
+            mol = [item for item in xyz if isinstance(item, (Molecule, list))]
+            assert len(mol) == 1
+            if isinstance(mol[0], list):
+                mol = mol[0][0]
+            else:
+                mol = mol[0]
+            assert len(mol) == 8
+            assert isinstance(mol, Molecule)
 
 
 def test_read_mol_3():
@@ -74,14 +74,13 @@ def test_read_mol_3():
     Check if 5 valid SMILES strings return 5 plams molecules
     """
     input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
-    folder_path = 'test/test_QD/test_QD_files'
-    mol_list = QD_inout.read_mol(input_mol, folder_path=folder_path)
+    folder_path = '/test/test_qd/test_qd_files'
+    mol_list = QD_inout.read_mol(input_mol, folder_path)
 
     assert isinstance(mol_list, list)
     assert len(mol_list) is len(input_mol)
     for mol in mol_list:
         assert isinstance(mol, Molecule)
-        assert len(mol.properties) >= 4
 
 
 def test_read_mol_4():
@@ -89,6 +88,6 @@ def test_read_mol_4():
     Check if 2 invalid SMILES strings return an IndexError
     """
     input_mol = ['dwefwefqe', 'fqwdwq']
-    folder_path = 'test/test_QD/test_QD_files'
+    folder_path = '/test/test_qd/test_qd_files'
     with pytest.raises(IndexError):
         assert QD_inout.read_mol(input_mol, folder_path=folder_path)
