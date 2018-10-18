@@ -1,4 +1,3 @@
-import copy
 import itertools
 import time
 
@@ -117,7 +116,10 @@ def prep_qd(core, ligand, qd_folder):
     Function that handles all quantum dot (qd, i.e. core + all ligands) operations.
     """
     # Rotate and translate all ligands to their position on the core.
-    core = copy.deepcopy(core)
+    core = core.copy()
+    core_dummies = core.properties.core_dummies
+    core.properties.core_dummies = [core.closest_atom(dummy.coords) for dummy in core_dummies]
+
     ligand_list = [QD_scripts.rotate_ligand(core, ligand, i, core_dummy) for i, core_dummy in
                    enumerate(core.properties.core_dummies)]
     ligand_list, ligand_indices = zip(*ligand_list)

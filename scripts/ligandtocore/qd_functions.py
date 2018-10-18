@@ -1,4 +1,3 @@
-import copy
 import os
 import itertools
 import shutil
@@ -92,7 +91,7 @@ def find_substructure(ligand, split=True):
             ligand_indices.append(match)
 
     if ligand_indices:
-        ligand_list = [copy.deepcopy(ligand) for match in ligand_indices]
+        ligand_list = [ligand.copy() for match in ligand_indices]
         ligand_list = [find_substructure_split(ligand, ligand_indices[i], split) for i, ligand in
                        enumerate(ligand_list)]
     else:
@@ -136,7 +135,8 @@ def rotate_ligand(core, ligand, i, core_dummy):
     """
     Connects two molecules by alligning the vectors of two bonds.
     """
-    ligand = copy.deepcopy(ligand)
+    ligand = ligand.copy()
+    ligand.properties.ligand_dummy = ligand.closest_atom(ligand.properties.ligand_dummy.coords)
 
     # Defines first atom on coordinate list (hydrogen),
     # The atom connected to it and vector representing bond between them
@@ -185,7 +185,7 @@ def combine_qd(core, ligand_list):
     """
     Combine the rotated ligands with the core, creating a bond bewteen the core and ligand.
     """
-    qd = copy.deepcopy(core)
+    qd = core.copy()
 
     # Create a list of ligand atoms and intraligand bonds
     ligand_bonds = np.concatenate([ligand.bonds for ligand in ligand_list])
@@ -273,8 +273,8 @@ def ams_job_run(qd, bonds, maxiter):
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
-    shutil.copy2(results['ams.rkf'], os.path.join(qd_folder, qd_name + '.opt.rkf'))
-    shutil.copy2(results[qd_name + '.out'], os.path.join(qd_folder, qd_name + '.opt.out'))
+    shutil.copy2(results['ams.rkf'], os.path.join(qd_folder, qd_name + '.rkf'))
+    shutil.copy2(results[qd_name + '.out'], os.path.join(qd_folder, qd_name + '.out'))
     shutil.rmtree(os.path.join(qd_folder, qd_name))
 
     return output_mol
