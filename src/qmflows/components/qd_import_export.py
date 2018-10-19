@@ -147,7 +147,7 @@ def read_mol_xyz(mol, mol_dict):
     try:
         return Molecule(mol_dict['mol_path'], inputformat='xyz')
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_xyz.__code__, ex, mol_dict)
+        print_exception(read_mol_xyz.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def read_mol_pdb(mol, mol_dict):
@@ -157,7 +157,7 @@ def read_mol_pdb(mol, mol_dict):
     try:
         return molkit.readpdb(mol_dict['mol_path'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_pdb.__code__, ex, mol_dict)
+        print_exception(read_mol_pdb.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def read_mol_mol(mol, mol_dict):
@@ -167,7 +167,7 @@ def read_mol_mol(mol, mol_dict):
     try:
         return molkit.from_rdmol(Chem.MolFromMolFile(mol_dict['mol_path'], removeHs=False))
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_mol.__code__, ex, mol_dict)
+        print_exception(read_mol_mol.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def read_mol_smiles(mol, mol_dict):
@@ -177,7 +177,7 @@ def read_mol_smiles(mol, mol_dict):
     try:
         return molkit.from_smiles(mol)
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_smiles.__code__, ex, mol_dict)
+        print_exception(read_mol_smiles.__code__, ex, mol_dict, mol)
 
 
 def read_mol_plams(mol, mol_dict):
@@ -187,7 +187,7 @@ def read_mol_plams(mol, mol_dict):
     try:
         return mol
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_plams.__code__, ex, mol_dict)
+        print_exception(read_mol_plams.__code__, ex, mol_dict, mol)
 
 
 def read_mol_rdkit(mol, mol_dict):
@@ -197,7 +197,7 @@ def read_mol_rdkit(mol, mol_dict):
     try:
         return molkit.from_rdmol(mol)
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_rdkit.__code__, ex, mol_dict)
+        print_exception(read_mol_rdkit.__code__, ex, mol_dict, mol)
 
 
 def read_mol_folder(mol, mol_dict):
@@ -208,7 +208,7 @@ def read_mol_folder(mol, mol_dict):
         file_list = [[file, mol_dict] for file in os.listdir(mol_dict['mol_path'])]
         return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_folder.__code__, ex, mol_dict)
+        print_exception(read_mol_folder.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def read_mol_txt(mol, mol_dict):
@@ -223,7 +223,7 @@ def read_mol_txt(mol, mol_dict):
         file_list = [[file, mol_dict] for file in file_list if len(file) >= 2]
         return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_txt.__code__, ex, mol_dict)
+        print_exception(read_mol_txt.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def read_mol_excel(mol, mol_dict):
@@ -235,7 +235,7 @@ def read_mol_excel(mol, mol_dict):
         file_list = [[file, mol_dict] for file in file_list[mol_dict['column']][mol_dict['row']:]]
         return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_excel.__code__, ex, mol_dict)
+        print_exception(read_mol_excel.__code__, ex, mol_dict, mol_dict['mol_path'])
 
 
 def set_prop(mol, mol_dict):
@@ -325,21 +325,20 @@ def export_mol(mol, message='Mol:\t\t\t\t'):
     print(str(message) + str(mol_name) + '.pdb')
 
 
-def print_exception(func, ex, mol_dict):
+def print_exception(func, ex, mol_dict, name):
     """
     test
     """
-    extension_dict = {'read_mol_xyz': '.xyz files', 'read_mol_pdb': '.pdb files',
-                      'read_mol_mol': '.mol files', 'read_mol_smiles': 'SMILES strings',
-                      'read_mol_folder': 'folders', 'read_mol_txt': '.txt files',
-                      'read_mol_excel': '.xlsx files', 'read_mol_plams': 'PLAMS molecules',
-                      'read_mol_rdkit': 'RDKit molecules'}
+    extension_dict = {'read_mol_xyz': '.xyz file', 'read_mol_pdb': '.pdb file',
+                      'read_mol_mol': '.mol file', 'read_mol_smiles': 'SMILES string',
+                      'read_mol_folder': 'folder', 'read_mol_txt': '.txt file',
+                      'read_mol_excel': '.xlsx file', 'read_mol_plams': 'PLAMS molecule',
+                      'read_mol_rdkit': 'RDKit molecule'}
     print(str(type(ex).__name__), str(ex))
     print('function:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
     # print('\t\targ1(mol):', type(mol), mol)
     # print('\t\targ2(mol_dict):', type(mol_dict), mol_dict)
-    print('Warning:  neither', mol_dict['mol_name'], 'nor', mol_dict['mol_path'],
-          'are recognized as valid', extension_dict[func.co_name], '\n')
+    print('Warning:',  name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
     return []
 
 
