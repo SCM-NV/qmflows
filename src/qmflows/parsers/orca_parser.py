@@ -55,12 +55,11 @@ def parse_molecule_traj(file_traj):
     return plams_mol
 
 
-def parse_hessian(file_hess: str) -> Matrix:
+def parse_hessian(file_hess: str, start: str='$hessian') -> Matrix:
     """
     Read the hessian matrix in cartesian coordinates from the job_name.hess file.
     :returns: Numpy array
     """
-    start = '$hessian'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
