@@ -26,12 +26,6 @@ def read_mol(input_mol, folder_path, is_core=False):
                       'plams_mol': read_mol_plams,
                       'rdmol': read_mol_rdkit}
 
-
-        if file_type is 'xyz':
-            user_args = list(mol_dict[mol]['user_args'].keys)
-            if 'guess_bonds' not in user_args:
-                mol_dict[mol]['file_type'] = True
-
     # Reads the input molecule(s), the method depending on the nature of the file extension
     # Returns a list of dictionaries
     input_mol = [read_mol_defaults(mol, folder_path, is_core) for mol in input_mol]
