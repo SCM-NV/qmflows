@@ -21,7 +21,7 @@ install:
   - conda install -c rdkit rdkit
 
   # Install qmflows package
-  - pip install git+https://github.com/SCM-NV/PLAMS.git@rdkit --upgrade
+  - pip install git+https://github.com/SCM-NV/PLAMS.git@rdkit#egg=plams-1.2 --upgrade
   - pip install .[test,doc]
   
 script:
