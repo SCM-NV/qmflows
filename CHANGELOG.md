@@ -1,6 +1,9 @@
 
-# 10/10/2018
+# 19/10/2018
 
+## Added
+ * Quantum Dots builder functionality
+ 
 ## Changed
 
  * Use [noodles==0.3.0](https://github.com/NLeSC/noodles/releases)
@@ -13,7 +16,9 @@
 
  * Dead code related to all noodles API
  * All the `import *`
+ * Dead code from components including PES
 
 ## Fixed
 
  * Job manager issue when removing a SCM job
+ 

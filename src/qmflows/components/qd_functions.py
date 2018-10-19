@@ -23,11 +23,13 @@ def optimize_ligand(ligand, opt, database):
     ligand, match, pdb = compare_database(ligand, database)
 
     # Optimize the ligand if no match has been found with the database
+    ligand.properties.entry = False
     if not match or not pdb:
         # Export the unoptimized ligand to a .pdb and .xyz file
         export_mol(ligand, message='Ligand:\t\t\t\t')
 
-        # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
+        # If ligand optimization is enabled: Optimize the ligand,
+        # set pdb_info and export the result
         if opt:
             ligand_opt = molkit.global_minimum(ligand, n_scans=2, no_h=True)
             ligand_opt.properties.name = ligand.properties.name + '.opt'
@@ -37,15 +39,13 @@ def optimize_ligand(ligand, opt, database):
                 atom.move_to(ligand_opt[i + 1])
 
         # Create an entry for in the database if no previous entries are present
-        # or prints a warning if a structure is present in the database but the .pdb file is missing
+        # or prints a warning if a structure is present in the database but
+        # the .pdb file is missing
         if not match and not pdb:
             ligand.properties.entry = True
         else:
-            ligand.properties.entry = False
             print('\ndatabase entry exists for ' + ligand_opt.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
-    else:
-        ligand.properties.entry = False
 
     return ligand
 

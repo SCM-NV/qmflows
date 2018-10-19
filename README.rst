@@ -1,9 +1,7 @@
 
-.. image:: https://img.shields.io/github/license/SCM-NV/qmflows.svg?maxAge=2592000
-   :target: https://github.com/SCM-NV/qmflows/blob/master/LICENSE.md
 .. image:: https://travis-ci.org/SCM-NV/qmflows.svg?branch=master
    :target: https://travis-ci.org/SCM-NV/qmflows 
-.. image:: https://img.shields.io/badge/python-3-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
 
 QMFlows
 #######
@@ -111,6 +109,15 @@ Now you are ready to use *qmflows*.
     ``conda activate qmflows`` each time that you want to use the software.
 
 
+.. _Quantum Dots builder:
+
+Quantum Dots builder
+--------------------
+An example input file (including documentation) is located in qd-example_.
+Once the path, input ligands and input cores have been specified the job can be run with ``python qd_input.py``
+
+
+    
 
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _anaconda: https://www.continuum.io/downloads
@@ -123,3 +130,4 @@ Now you are ready to use *qmflows*.
 .. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
 .. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
 .. _PLAMS: https://github.com/SCM-NV/PLAMS
+.. _qd-example: https://github.com/SCM-NV/qmflows/blob/master/test/QD_input_examples/qd_input.py
