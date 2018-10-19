@@ -7,13 +7,11 @@ global:
     - MCONDA_VERSION="latest"
     - MCONDA_LINUX="Linux-x86_64"
     - MCONDA_OSX="MacOSX-x86_64"
-
       
 matrix:
   include:
     - os: linux
     - os: osx
-      
       
 install:
   # Install python
@@ -23,7 +21,7 @@ install:
     elif [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
       export MCONDA_OS=$MCONDA_OSX
     fi
-    wget https://repo.continuum.io/miniconda/Miniconda3-latest-${MCONDA_OS}.sh -O miniconda.sh
+    wget https://repo.continuum.io/miniconda/Miniconda3-latest-$MCONDA_OS.sh -O miniconda.sh
   - bash miniconda.sh -b -p $HOME/miniconda
   - export PATH="$HOME/miniconda/bin:$PATH"
   - hash -r
