@@ -25,4 +25,5 @@ __all__ = [
     'read', 'compare', 'write',
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-    'combine_qd', 'check_sys_var', 'ams_job']
+    'combine_qd',
+    'check_sys_var', 'ams_job']

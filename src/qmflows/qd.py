@@ -9,6 +9,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from .components import qd_functions as QD_scripts
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
+from .components import qd_ams as QD_ams
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -51,11 +52,11 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Check if the ADF environment variables are set and optimize the qd with the core frozen
     if arg['qd_opt']:
-        QD_scripts.check_sys_var()
+        QD_ams.check_sys_var()
         if not qd_list:
             raise IndexError('No valid quantum dots were found, aborting geometry optimization')
         for qd in qd_list:
-            QD_scripts.ams_job(qd, arg['maxiter'])
+            QD_ams.ams_job(qd, arg['maxiter'])
 
     # The End
     time_end = time.time()
