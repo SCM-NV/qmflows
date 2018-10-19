@@ -50,7 +50,7 @@ def read_mol(input_mol, folder_path, is_core=False):
                 if mol_dict['guess_bonds']:
                     mol.guess_bonds()
                 # Guess bonbs if an xyz file was provided and the user did not specifiy guess_bonds
-                if file_type is 'xyz':
+                if mol_dict['file_type'] is 'xyz':
                     user_args = list(mol_dict[mol]['user_args'].keys)
                     if 'guess_bonds' not in user_args:
                         mol.guess_bonds()
