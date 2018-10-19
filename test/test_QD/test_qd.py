@@ -2,7 +2,7 @@ import os
 import pytest
 
 from scm.plams import Molecule
-import qd_import_export as QD_inout
+from qmflows.scripts.ligandtocore import qd_import_export as QD_inout
 
 
 def test_read_mol_1():
