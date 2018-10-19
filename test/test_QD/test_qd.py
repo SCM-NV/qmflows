@@ -121,7 +121,7 @@ def test_input():
     core_indices: []
     ligand_indices: []
     database_name: ligand_database.xlsx
-    use_database: False
+    use_database: True
     core_opt: False
     ligand_opt: True
     qd_opt: False
@@ -131,6 +131,7 @@ def test_input():
 
     print(path)
     qd_list = QD.prep(input_ligands, input_cores, path, argument_dict)
+    QD.prep(input_ligands, input_cores, path, argument_dict)
     formula_set = set([qd.get_formula() for qd in qd_list])
 
     assert isinstance(qd_list, list)
@@ -138,3 +139,12 @@ def test_input():
     assert len(formula_set) is 1
     for qd in qd_list:
         assert isinstance(qd, Molecule)
+
+    argument_dict['use_database'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['ligand_opt'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['split'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['dummy'] = 'Cd'
+    QD.prep(input_ligands, input_cores, path, argument_dict)
