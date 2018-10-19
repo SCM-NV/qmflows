@@ -67,11 +67,12 @@ def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
     for ligand in ligand_list:
         if ligand.properties.entry:
             prop = ligand.properties
-            database_entries.append([prop.name,
-                                     prop.formula,
-                                     os.path.join(mol_folder, prop.name.split('@')[0]) + '.pdb',
-                                     os.path.join(mol_folder, prop.name.split('@')[0]) + '.opt.pdb',
-                                     prop.smiles])
+            database_entries.append(
+                [prop.name,
+                 prop.formula,
+                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.pdb',
+                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.opt.pdb',
+                 prop.smiles])
 
     if database_entries:
         database_entries = list(zip(*database_entries))

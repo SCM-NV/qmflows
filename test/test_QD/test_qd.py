@@ -1,10 +1,14 @@
 import os
 import pytest
 
+from os.path import join
 from scm.plams import Molecule
-from qmflows.components.qd_import_export import (read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol,
-                                                 read_mol_smiles, read_mol_folder, read_mol_txt,
-                                                 read_mol_plams, read_mol_rdkit)
+from qmflows.components.qd_import_export import (
+    read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol,
+    read_mol_smiles, read_mol_folder, read_mol_txt,
+    read_mol_plams, read_mol_rdkit)
+
+folder_path = os.path.abspath('test/test_QD/test_QD_files')
 
 
 def test_read_mol_1():
@@ -13,9 +17,10 @@ def test_read_mol_1():
     distances and angles.
     i.e. are all internal coordinates identical?
     """
-    xyz = read_mol_xyz('AcOH.xyz', {'mol_path': 'test/test_QD/test_qd_files/AcOH.xyz'})
-    pdb = read_mol_pdb('AcOH.xyz', {'mol_path': 'test/test_QD/test_qd_files/AcOH.pdb'})
-    mol = read_mol_mol('AcOH.xyz', {'mol_path': 'test/test_QD/test_qd_files/AcOH.mol'})
+    print("Folder: ", folder_path)
+    xyz = read_mol_xyz('AcOH.xyz', {'mol_path': join(folder_path, 'AcOH.xyz')})
+    pdb = read_mol_pdb('AcOH.xyz', {'mol_path': join(folder_path, 'AcOH.pdb')})
+    mol = read_mol_mol('AcOH.xyz', {'mol_path': join(folder_path, 'AcOH.mol')})
     mol_list = [xyz, pdb, mol]
 
     atom_list = [[[at1, at2] for at1 in mol for at2 in mol if at1 != mol[1] and at2 != mol[1]] for
@@ -75,7 +80,6 @@ def test_read_mol_3():
     Check if 5 valid SMILES strings return 5 plams molecules
     """
     input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
-    folder_path = 'test/test_QD/test_qd_files'
     mol_list = read_mol(input_mol, folder_path)
 
     assert isinstance(mol_list, list)
@@ -89,6 +93,5 @@ def test_read_mol_4():
     Check if 2 invalid SMILES strings return an IndexError
     """
     input_mol = ['dwefwefqe', 'fqwdwq']
-    folder_path = 'test/test_QD/test_qd_files'
     with pytest.raises(IndexError):
         assert read_mol(input_mol, folder_path=folder_path)
