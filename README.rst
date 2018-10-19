@@ -1,9 +1,7 @@
 
-.. image:: https://img.shields.io/github/license/SCM-NV/qmflows.svg?maxAge=2592000
-   :target: https://github.com/SCM-NV/qmflows/blob/master/LICENSE.md
 .. image:: https://travis-ci.org/SCM-NV/qmflows.svg?branch=master
    :target: https://travis-ci.org/SCM-NV/qmflows 
-.. image:: https://img.shields.io/badge/python-3-blue.svg
+.. image:: https://img.shields.io/badge/python-3.6-blue.svg
 
 QMFlows
 #######
