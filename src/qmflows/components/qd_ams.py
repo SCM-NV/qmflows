@@ -21,7 +21,11 @@ def check_sys_var():
             print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
     if False in sys_var_exists:
         raise EnvironmentError('One or more ADF environment variables have not been set, aborting '
-                               'geometry optimization.')
+                               'ADF job.')
+    version = float(os.environ['ADFHOME'].rsplit('/').rsplit('\\').split('ADF')[-1])
+    if version < 2018:
+        raise ImportError('ADF version', version, 'detected.'
+                          'ADF2018 or later is required, aborting ADF job.')
 
 
 def ams_job(plams_mol, maxiter=1000, job='qd_opt'):
