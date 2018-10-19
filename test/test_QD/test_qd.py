@@ -2,7 +2,9 @@ import os
 import pytest
 
 from scm.plams import Molecule
-from qmflows.scripts.ligandtocore import qd_import_export as QD_inout
+from qmflows.components.qd_import_export import (read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol,
+                                                 read_mol_smiles, read_mol_folder, read_mol_txt,
+                                                 read_mol_excel, read_mol_plams, read_mol_rdkit)
 
 
 def test_read_mol_1():
@@ -11,9 +13,9 @@ def test_read_mol_1():
     distances and angles.
     i.e. are all internal coordinates identical?
     """
-    xyz = QD_inout.read_mol_xyz('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.xyz'})
-    pdb = QD_inout.read_mol_pdb('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.pdb'})
-    mol = QD_inout.read_mol_mol('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.mol'})
+    xyz = read_mol_xyz('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.xyz'})
+    pdb = read_mol_pdb('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.pdb'})
+    mol = read_mol_mol('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.mol'})
     mol_list = [xyz, pdb, mol]
 
     atom_list = [[[at1, at2] for at1 in mol for at2 in mol if at1 != mol[1] and at2 != mol[1]] for
@@ -46,11 +48,11 @@ def test_read_mol_2():
     mol_name = 'AcOH'
     folder_path = '/test/test_qd/test_qd_files'
 
-    extension_dict = {'xyz': QD_inout.read_mol_xyz, 'pdb': QD_inout.read_mol_pdb,
-                      'mol': QD_inout.read_mol_mol, 'smiles': QD_inout.read_mol_smiles,
-                      'folder': QD_inout.read_mol_folder, 'txt': QD_inout.read_mol_txt,
-                      'xlsx': QD_inout.read_mol_excel, 'plams_mol': QD_inout.read_mol_plams,
-                      'rdmol': QD_inout.read_mol_rdkit}
+    extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb,
+                      'mol': read_mol_mol, 'smiles': read_mol_smiles,
+                      'folder': read_mol_folder, 'txt': read_mol_txt,
+                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams,
+                      'rdmol': read_mol_rdkit}
     key_list = list(extension_dict.keys())
     for item in key_list:
         mol_path = os.path.join(folder_path, mol_name + '.' + item)
@@ -75,7 +77,7 @@ def test_read_mol_3():
     """
     input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
     folder_path = '/test/test_qd/test_qd_files'
-    mol_list = QD_inout.read_mol(input_mol, folder_path)
+    mol_list = read_mol(input_mol, folder_path)
 
     assert isinstance(mol_list, list)
     assert len(mol_list) is len(input_mol)
@@ -90,4 +92,4 @@ def test_read_mol_4():
     input_mol = ['dwefwefqe', 'fqwdwq']
     folder_path = '/test/test_qd/test_qd_files'
     with pytest.raises(IndexError):
-        assert QD_inout.read_mol(input_mol, folder_path=folder_path)
+        assert read_mol(input_mol, folder_path=folder_path)
