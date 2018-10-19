@@ -68,7 +68,7 @@ Dependencies installation
 Using the conda environment the following packages should be installed:    
 
 
-- install rdkit_ using the following command:
+- install rdkit_ using conda:
 
   - ``conda install -y -q --name qmflows -c rdkit rdkit``
 
@@ -87,8 +87,16 @@ Using the conda environment the following packages should be installed:
 
 Package installation
 --------------------
-    
-- Type in your terminal,
+
+- Install QMFlows using pip:
+
+  - ``pip install git+https://github.com/SCM-NV/qmflows.git@scripts``
+  
+- Update PLAMS using pip:
+
+  - ``pip install git+https://github.com/SCM-NV/PLAMS.git@rdkit --upgrade``
+
+- Type in your terminal:
 
   ``conda activate qmflows``  
 

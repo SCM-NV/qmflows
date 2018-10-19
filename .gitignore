@@ -75,3 +75,5 @@ pytest*
 
 # MAC
 .ds_store
+.DS_Store
+scripts/.DS_Store

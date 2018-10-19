@@ -1,0 +1,6 @@
+use argparse for passing arguments
+
+create tests
+    WiP
+    
+Make QD_import_export.py more compact
