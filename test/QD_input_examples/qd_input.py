@@ -73,7 +73,9 @@ database_name: ligand_database.xlsx
 use_database: True
 core_opt: False
 ligand_opt: True
+ligand_crs: False
 qd_opt: False
+qd_int: False
 maxiter: 10000
 split: True
 """)
@@ -110,14 +112,20 @@ Optional arguments:
     use_database <bool>: True
         Enables or disables the use of database_name.
 
-    ligand_opt <False>: True
+    ligand_opt <bool>: True
     core_opt <bool>: False
         Approach the global minimum (RDKit UFF) by systematically scanning dihedral angles.
         Requires well-defined bonds.
         WARNING: No well-defined bonds are present in the cores be default, enable at your own risk!
 
+    ligand_crs <bool>: False
+        Calculate various ligand properties using ADF MOPAC + COSMO-RS.
+
     qd_opt <bool>: False
         Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
+
+    qd_int <bool>: False
+        Calculate the (mean) interaction between ligands on the quantum dot surface using ADF UFF.
 
     maxiter <int>: 10000
         The maximum number of geometry iterations <int> used in qd_opt.
