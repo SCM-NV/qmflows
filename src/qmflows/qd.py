@@ -56,7 +56,22 @@ def prep(input_ligands, input_cores, path, arg):
         if not qd_list:
             raise IndexError('No valid quantum dots were found, aborting geometry optimization')
         for qd in qd_list:
-            QD_ams.ams_job(qd, arg['maxiter'])
+            QD_ams.ams_job(qd, arg['maxiter'], job='qd_opt')
+
+    # Calculate the (mean) interaction between ligands on the quantum dot surface
+    if arg['qd_int']:
+        QD_ams.check_sys_var()
+        for qd in qd_list:
+            qd_copy = qd.copy()
+            for atom in qd_copy:
+                if atom.properties.name == 'COR':
+                    qd_copy.delete_atom(atom)
+            E_no_frag = QD_ams.ams_job(qd_copy, job='qd_int')
+            qd_frag = qd_copy.separate()
+            E_frag_sum = sum([QD_ams.ams_job(ligand, job='qd_int') for ligand in qd_frag])
+
+            qd.properties.int = E_no_frag - E_frag_sum
+            qd.properties.int_mean = qd.properties.int / len(qd_frag)
 
     # The End
     time_end = time.time()
