@@ -84,7 +84,7 @@ Optional arguments:
         A list containing the names of the be created directories.
 
     dummy <int> or <str>: Cl
-        The atomic number <int> of atomic symbol <str> of the atoms in the core that should be
+        The atomic number <int> or atomic symbol <str> of the atoms in the core that should be
         replaced with ligands. Alternatively, dummy atoms can be manually specified with
         the core_indices argument.
 

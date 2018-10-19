@@ -20,7 +20,10 @@ def optimize_ligand(ligand, opt, database):
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
     # Searches for matches between the input ligand and the database; imports the structure
-    ligand, match, pdb = compare_database(ligand, database)
+    if not isinstance(database, bool):
+        ligand, match, pdb = compare_database(ligand, database)
+    else:
+        match, pdb = False, False
 
     # Optimize the ligand if no match has been found with the database
     ligand.properties.entry = False

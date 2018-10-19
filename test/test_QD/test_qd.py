@@ -1,8 +1,10 @@
 import os
 import pytest
+import yaml
 
 from os.path import join
 from scm.plams import Molecule
+import qmflows.qd as QD
 from qmflows.components.qd_import_export import (
     read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol,
     read_mol_smiles, read_mol_folder, read_mol_txt,
@@ -95,3 +97,54 @@ def test_read_mol_4():
     input_mol = ['dwefwefqe', 'fqwdwq']
     with pytest.raises(IndexError):
         assert read_mol(input_mol, folder_path=folder_path)
+
+
+def test_input():
+    path = os.path.abspath('test/test_QD')
+
+    input_cores = yaml.load("""
+    -   - Cd68Se55.xyz
+        - guess_bonds: False
+    """)
+
+    input_ligands = yaml.load("""
+    - AcOH.mol
+    - AcOH.pdb
+    - AcOH.txt
+    - AcOH.xyz
+    - O=C(O)C
+    """)
+
+    argument_dict = yaml.load("""
+    dir_name_list: [test_QD_files, test_QD_files, test_QD_files]
+    dummy: Cl
+    core_indices: []
+    ligand_indices: []
+    database_name: ligand_database.xlsx
+    use_database: True
+    core_opt: False
+    ligand_opt: True
+    qd_opt: False
+    maxiter: 10000
+    split: True
+    """)
+
+    print(path)
+    qd_list = QD.prep(input_ligands, input_cores, path, argument_dict)
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    formula_set = set([qd.get_formula() for qd in qd_list])
+
+    assert isinstance(qd_list, list)
+    assert len(qd_list) is 5
+    assert len(formula_set) is 1
+    for qd in qd_list:
+        assert isinstance(qd, Molecule)
+
+    argument_dict['use_database'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['ligand_opt'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['split'] = False
+    QD.prep(input_ligands, input_cores, path, argument_dict)
+    argument_dict['dummy'] = 'Cd'
+    QD.prep(input_ligands, input_cores, path, argument_dict)
