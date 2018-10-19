@@ -1,4 +1,4 @@
-__all__ = ['read', 'compare', 'write']
+__all__ = ['read_database', 'compare_database', 'write_database']
 
 import os
 import pandas as pd
@@ -9,7 +9,7 @@ from rdkit import Chem
 from .qd_import_export import set_prop
 
 
-def read(mol_folder, database_name='ligand_database.xlsx'):
+def read_database(mol_folder, database_name='ligand_database.xlsx'):
     """
     Open the database
     """
@@ -22,7 +22,7 @@ def read(mol_folder, database_name='ligand_database.xlsx'):
     return database
 
 
-def compare(plams_mol, database):
+def compare_database(plams_mol, database):
     """
     Search the database for any ligand matches.
     """
@@ -58,7 +58,7 @@ def compare(plams_mol, database):
     return plams_mol, match, pdb
 
 
-def write(ligand_list, database, database_name='ligand_database.xlsx'):
+def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
     """
     Write the new database entries to the database.
     """

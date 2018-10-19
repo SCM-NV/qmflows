@@ -4,6 +4,7 @@ from qmflows import (dirac, run, Settings)
 import pytest
 
 
+@pytest.mark.xfail
 @pytest.mark.slow
 def test_numgrad():
     """

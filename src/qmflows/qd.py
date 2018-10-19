@@ -30,7 +30,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
-        database = QD_database.read(folder_list[1], arg['database_name'])
+        database = QD_database.read_database(folder_list[1], arg['database_name'])
     else:
         database = False
 
@@ -43,7 +43,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Write new entries to the ligand database
     if arg['use_database']:
-        QD_database.write(ligand_list, database)
+        QD_database.write_database(ligand_list, database)
 
     # Combine the core with the ligands, yielding qd, and format the resulting list
     qd_list = list(prep_qd(core, ligand, folder_list[2]) for core in core_list for

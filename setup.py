@@ -14,12 +14,11 @@ setup(
     description='Automation of computations in quantum chemistry',
     license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
-    author='felipe zapata',
+    author=['Felipe Zapata', 'Bas van Beek'],
     author_email='f.zapata@esciencecenter.nl',
     keywords='chemistry workflows simulation materials',
     long_description=readme(),
     package_dir={'': 'src'},
-    # packages=find_packages(),
     packages=["qmflows",
               "qmflows.components",
               "qmflows.data",
@@ -42,12 +41,12 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams', 'pymonad',
+    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2', 'pymonad',
                       'pyparsing', 'filelock', 'openpyxl', 'pyyaml', 'xlrd'],
+    dependency_links=[
+        "git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2"],
+
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
-    },
-    dependency_links=[
-        "https://github.com/SCM-NV/plams/tarball/rdkit#egg=plams"]
 )

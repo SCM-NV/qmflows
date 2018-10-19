@@ -11,7 +11,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
 
-from .qd_database import compare
+from .qd_database import compare_database
 from .qd_import_export import export_mol
 
 
@@ -20,7 +20,7 @@ def optimize_ligand(ligand, opt, database):
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
     # Searches for matches between the input ligand and the database; imports the structure
-    ligand, match, pdb = compare(ligand, database)
+    ligand, match, pdb = compare_database(ligand, database)
 
     # Optimize the ligand if no match has been found with the database
     if not match or not pdb:

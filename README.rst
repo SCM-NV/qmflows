@@ -51,8 +51,6 @@ Installation
 
 - Install according to: installConda_. 
 
-- Reopen terminal (or type ``source ~/.bashrc``).
-
 - Create a new virtual environment using the following commands:
 
   - ``conda create -n qmflows`` 
@@ -80,7 +78,13 @@ Using the conda environment the following packages should be installed:
 
   - ``conda install -y -q --name qmflows -c anaconda h5py``
     
+- install PLAMS_ using:
+  - ``pip install git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2``
 
+- install **QMFLOWS** using:
+  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows-0.3.0``
+    
+    
 .. _installation:
 
 Package installation
@@ -96,7 +100,7 @@ Package installation
 
 - Type in your terminal:
 
-  ``source activate qmflows``  
+  ``conda activate qmflows``  
 
 Now you are ready to use *qmflows*. 
  
@@ -104,7 +108,7 @@ Now you are ready to use *qmflows*.
   **Notes:**
 
   - Once the libraries and the virtual environment are installed, you only need to type
-    ``source activate qmflows`` each time that you want to use the software.
+    ``conda activate qmflows`` each time that you want to use the software.
 
 
 
@@ -118,3 +122,4 @@ Now you are ready to use *qmflows*.
 .. _jupyter-notebook: http://jupyter.org/
 .. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
 .. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
+.. _PLAMS: https://github.com/SCM-NV/PLAMS
