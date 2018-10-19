@@ -5,7 +5,8 @@ import pandas as pd
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-import qmflows.components.qd_import_export as QD_inout
+
+from .qd_import_export import set_prop
 
 
 def read(mol_folder, database_name='ligand_database.xlsx'):
@@ -45,7 +46,7 @@ def compare(plams_mol, database):
             plams_mol_new = molkit.readpdb(mol_path)
             prop_dict = {'mol_name': plams_mol.properties.name.replace('Ligand_', ''),
                          'folder_path': plams_mol.properties.source_folder}
-            QD_inout.set_prop(plams_mol_new, prop_dict)
+            set_prop(plams_mol_new, prop_dict)
             plams_mol = plams_mol_new
             pdb = True
         else:

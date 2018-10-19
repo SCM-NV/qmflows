@@ -11,8 +11,8 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import Bond
 
-import qmflows.components.qd_database as QD_database
-import qmflows.components.qd_import_export as QD_inout
+from .qd_database import compare
+from .qd_import_export import export_mol
 
 
 def optimize_ligand(ligand, opt, database):
@@ -20,19 +20,19 @@ def optimize_ligand(ligand, opt, database):
     Pull the structure if a match has been found or alternatively optimize a new geometry.
     """
     # Searches for matches between the input ligand and the database; imports the structure
-    ligand, match, pdb = QD_database.compare(ligand, database)
+    ligand, match, pdb = compare(ligand, database)
 
     # Optimize the ligand if no match has been found with the database
     if not match or not pdb:
         # Export the unoptimized ligand to a .pdb and .xyz file
-        QD_inout.export_mol(ligand, message='Ligand:\t\t\t\t')
+        export_mol(ligand, message='Ligand:\t\t\t\t')
 
         # If ligand optimization is enabled: Optimize the ligand, set pdb_info and export the result
         if opt:
             ligand_opt = molkit.global_minimum(ligand, n_scans=2, no_h=True)
             ligand_opt.properties.name = ligand.properties.name + '.opt'
             ligand_opt.properties.source_folder = ligand.properties.source_folder
-            QD_inout.export_mol(ligand_opt, message='Optimized ligand:\t\t')
+            export_mol(ligand_opt, message='Optimized ligand:\t\t')
             for i, atom in enumerate(ligand):
                 atom.move_to(ligand_opt[i + 1])
 
@@ -244,7 +244,7 @@ def ams_job(qd, maxiter=1000):
 
     # Write the reuslts to an .xyz and .pdb file
     qd.properties.name += '.opt'
-    QD_inout.export_mol(qd, message='Optimized core + ligands:\t\t')
+    export_mol(qd, message='Optimized core + ligands:\t\t')
 
     return qd
 

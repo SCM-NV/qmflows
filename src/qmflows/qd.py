@@ -6,9 +6,9 @@ import time
 from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
-import qmflows.components.qd_functions as QD_scripts
-import qmflows.components.qd_database as QD_database
-import qmflows.components.qd_import_export as QD_inout
+from .components import qd_functions as QD_scripts
+from .components import qd_database as QD_database
+from .components import qd_import_export as QD_inout
 
 
 def prep(input_ligands, input_cores, path, arg):
