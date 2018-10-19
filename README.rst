@@ -65,6 +65,10 @@ To exit the virtual environment type  ``source deactivate``.
 Dependencies installation
 -------------------------
 
+- Type in your terminal:
+
+  ``conda activate qmflows``  
+
 Using the conda environment the following packages should be installed:    
 
 
@@ -76,32 +80,21 @@ Using the conda environment the following packages should be installed:
 
   - ``conda install -y -q --name qmflows -c anaconda h5py``
     
-- install PLAMS_ using:
-  - ``pip install git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2``
-
-- install **QMFLOWS** using:
-  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows-0.3.0``
-    
     
 .. _installation:
 
 Package installation
 --------------------
+Finally install the package:
 
-- Install QMFlows using pip:
+- Update PLAMS_ using pip:
+  - ``pip install git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2``
+    
+- Install **QMFlows** using pip:
+  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows-0.3.0``
 
-  - ``pip install git+https://github.com/SCM-NV/qmflows.git@scripts``
-  
-- Update PLAMS using pip:
+Now you are ready to use *qmflows*.  
 
-  - ``pip install git+https://github.com/SCM-NV/PLAMS.git@rdkit --upgrade``
-
-- Type in your terminal:
-
-  ``conda activate qmflows``  
-
-Now you are ready to use *qmflows*. 
- 
 
   **Notes:**
 
