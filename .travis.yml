@@ -1,8 +1,8 @@
 sudo: false
 language: generic
 
-global:
-  env:
+env:
+  global:
     - COMMIT_AUTHOR_EMAIL: "f.zapata@esciencecenter.nl"
     - MCONDA_VERSION="latest"
     - MCONDA_LINUX="Linux-x86_64"
