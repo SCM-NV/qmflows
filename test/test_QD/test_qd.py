@@ -13,9 +13,9 @@ def test_read_mol_1():
     distances and angles.
     i.e. are all internal coordinates identical?
     """
-    xyz = read_mol_xyz('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.xyz'})
-    pdb = read_mol_pdb('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.pdb'})
-    mol = read_mol_mol('AcOH.xyz', {'mol_path': '/test/test_qd/test_qd_files/AcOH.mol'})
+    xyz = read_mol_xyz('AcOH.xyz', {'mol_path': 'test_QD/test_qd_files/AcOH.xyz'})
+    pdb = read_mol_pdb('AcOH.xyz', {'mol_path': 'test_QD/test_qd_files/AcOH.pdb'})
+    mol = read_mol_mol('AcOH.xyz', {'mol_path': 'test_QD/test_qd_files/AcOH.mol'})
     mol_list = [xyz, pdb, mol]
 
     atom_list = [[[at1, at2] for at1 in mol for at2 in mol if at1 != mol[1] and at2 != mol[1]] for
@@ -46,7 +46,7 @@ def test_read_mol_2():
         3. if that entry is a plams molecule
     """
     mol_name = 'AcOH'
-    folder_path = '/test/test_qd/test_qd_files'
+    folder_path = 'test_QD/test_qd_files'
 
     extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb,
                       'mol': read_mol_mol, 'smiles': read_mol_smiles,
@@ -76,7 +76,7 @@ def test_read_mol_3():
     Check if 5 valid SMILES strings return 5 plams molecules
     """
     input_mol = ['OC', 'OCC', 'OCCC', 'OCCCC', 'OCCCCC']
-    folder_path = '/test/test_qd/test_qd_files'
+    folder_path = 'test_QD/test_qd_files'
     mol_list = read_mol(input_mol, folder_path)
 
     assert isinstance(mol_list, list)
@@ -90,6 +90,6 @@ def test_read_mol_4():
     Check if 2 invalid SMILES strings return an IndexError
     """
     input_mol = ['dwefwefqe', 'fqwdwq']
-    folder_path = '/test/test_qd/test_qd_files'
+    folder_path = 'test_QD/test_qd_files'
     with pytest.raises(IndexError):
         assert read_mol(input_mol, folder_path=folder_path)
