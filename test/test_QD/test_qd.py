@@ -4,7 +4,7 @@ import pytest
 from scm.plams import Molecule
 from qmflows.components.qd_import_export import (read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol,
                                                  read_mol_smiles, read_mol_folder, read_mol_txt,
-                                                 read_mol_excel, read_mol_plams, read_mol_rdkit)
+                                                 read_mol_plams, read_mol_rdkit)
 
 
 def test_read_mol_1():
@@ -51,8 +51,7 @@ def test_read_mol_2():
     extension_dict = {'xyz': read_mol_xyz, 'pdb': read_mol_pdb,
                       'mol': read_mol_mol, 'smiles': read_mol_smiles,
                       'folder': read_mol_folder, 'txt': read_mol_txt,
-                      'xlsx': read_mol_excel, 'plams_mol': read_mol_plams,
-                      'rdmol': read_mol_rdkit}
+                      'plams_mol': read_mol_plams, 'rdmol': read_mol_rdkit}
     key_list = list(extension_dict.keys())
     for item in key_list:
         mol_path = os.path.join(folder_path, mol_name + '.' + item)

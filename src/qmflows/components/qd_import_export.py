@@ -22,7 +22,6 @@ def read_mol(input_mol, folder_path, is_core=False):
                       'smiles': read_mol_smiles,
                       'folder': read_mol_folder,
                       'txt': read_mol_txt,
-                      'xlsx': read_mol_excel,
                       'plams_mol': read_mol_plams,
                       'rdmol': read_mol_rdkit}
 
