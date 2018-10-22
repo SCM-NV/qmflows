@@ -6,11 +6,13 @@ import os
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
 path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 
+# The input cores from path/core/
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz
     - guess_bonds: False
 """)
 
+# The input ligands from path/ligand/
 input_ligands = yaml.load("""
 - OC
 - OCC
