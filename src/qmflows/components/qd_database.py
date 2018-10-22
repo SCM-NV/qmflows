@@ -11,7 +11,11 @@ from .qd_import_export import set_prop
 
 def read_database(mol_folder, database_name='ligand_database.xlsx'):
     """
-    Open the database
+    Open the database.
+
+    mol_folder <str>: The folder (including path) containing the database.
+    database_name <str>: The name (including extension) of the database.
+    return <pd.DataFrame>: The database as pandas dataframe.
     """
     database_path = os.path.join(mol_folder, database_name)
     if os.path.exists(database_path):
