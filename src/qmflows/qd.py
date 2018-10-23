@@ -3,7 +3,7 @@ __all__ = ['prep']
 import itertools
 import time
 
-from scm.plams import (Atom, Molecule, MoleculeError, Settings)
+from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .components import qd_functions as QD_scripts
@@ -55,39 +55,28 @@ def prep(input_ligands, input_cores, path, arg):
         QD_ams.check_sys_var()
         if not qd_list:
             raise IndexError('No valid quantum dots were found, aborting geometry optimization')
-        for qd in qd_list:
-            QD_ams.ams_job(qd, arg['maxiter'], job='qd_opt')
+        else:
+            qd_list = list(QD_ams.ams_job(qd, maxiter=arg['maxiter'], job='qd_opt') for
+                           qd in qd_list)
 
     # Calculate the (mean) interaction between ligands on the quantum dot surface
     if arg['qd_int']:
         QD_ams.check_sys_var()
-        for qd in qd_list:
-            # Create a copy of qd and calculate the total energy (kcal/mol)
-            qd_copy = qd.copy()
-            QD_ams.ams_job(qd_copy, job='qd_sp')
-            E_no_frag = qd_copy.properties.energy
-
-            # Split the core and all ligands of qd into separate fragments
-            qd_frag = qd_copy.separate()
-            qd_frag.insert(0, Molecule())
-            for mol in qd_frag[1:]:
-                if mol[1].properties.pdb_info.ResidueName is 'COR':
-                    qd_frag[0].add_atom(mol[1])
-                    qd_frag.remove(mol)
-
-            # Calculate the total energy (kcal/mol) of all the isolated fragments
-            for mol in qd_frag:
-                mol.properties.source_folder = qd_copy.properties.source_folder
-                mol.properties.name = 'Residue_' + str(mol[1].properties.pdb_info.ResidueNumber)
-                QD_ams.ams_job(mol, job='qd_sp')
-            E_frag_sum = sum([ligand.properties.energy for ligand in qd_frag])
-
-            # Calculate the total and mean (pair-wise) interaction between between fragments
-            qd.properties.int = E_no_frag - E_frag_sum
-            qd.properties.int_mean = qd.properties.int / (len(qd_frag) - 1)
-
-            print('int:', qd.properties.int, 'kcal/mol', '\n', 'int_mean:',
-                  qd.properties.int_mean, 'kcal/mol')
+        if not qd_list:
+            raise IndexError('No valid quantum dots were found, aborting single points')
+        else:
+            qd_list = list(QD_scripts.qd_int(qd, job='qd_sp') for qd in qd_list)
+            for qd in qd_list:
+                E = qd.properties.energy
+                E2 = E / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
+                E_int = qd.properties.int
+                E2_int = E_int / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
+                E_strain = qd.properties.strain
+                E2_strain = E_strain / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
+                print('E_int:', '%.2f' % E_int, '(mean: ' + '%.2f' % E2_int + ') kcal/mol',
+                      '\nE_strain:', '%.2f' % E_strain,
+                      '(mean: ' + '%.2f' % E2_strain + ') kcal/mol',
+                      '\nE:', '%.2f' % E, '(mean: ' + '%.2f' % E2 + ') kcal/mol')
 
     # The End
     time_end = time.time()
@@ -169,6 +158,8 @@ def prep_qd(core, ligand, qd_folder):
     qd.properties = Settings()
     qd.properties.qd_indices = qd_indices
     qd.properties.name = core.properties.name + '__' + ligand.properties.name
+    qd.properties.ligand_source = ligand.properties.source
+    qd.properties.core_source = core.properties.source
     qd.properties.source_folder = qd_folder
     QD_inout.export_mol(qd, message='core + ligands:\t\t\t')
 

@@ -3,7 +3,7 @@ __all__ = ['check_sys_var', 'ams_job']
 import os
 import shutil
 
-from scm.plams import (Settings, AMSJob, init, finish, Units)
+from scm.plams import (Settings, AMSJob, init, finish, add_to_class, Molecule)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
@@ -41,32 +41,13 @@ def ams_job(plams_mol, maxiter=1000, job='qd_opt'):
     job <str>: The to be run AMS job ('qd_opt', 'qd_sp' or 'ligand_sp')
     return <plams.Molecule>: A PLAMS molecule.
     """
-    if job == 'qd_opt' or job == 'qd_sp':
-        # Create a list of aromatic bond indices
-        rdmol = molkit.to_rdmol(plams_mol)
-        aromatic = [Bond.GetIsAromatic(bond) for bond in rdmol.GetBonds()]
-        aromatic = [i for i, item in enumerate(aromatic) if item]
-
-        # Create a connectivity list; aromatic bonds get a bond order of 1.5
-        at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
-        at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
-        bonds = [bond.order for bond in plams_mol.bonds]
-        for i, bond in enumerate(plams_mol.bonds):
-            if i in aromatic:
-                bonds[i] = 1.5
-        bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
-
-        # Launch an AMS UFF constrained geometry optimization
-        if job == 'qd_opt':
-            plams_mol = ams_job_uff_opt(plams_mol, bonds, maxiter)
-
-        # Launch an AMS UFF single point
-        if job == 'qd_sp':
-            plams_mol = ams_job_uff_sp(plams_mol, bonds)
+    # Launch an AMS UFF geometry optimization
+    if job == 'qd_opt':
+        ams_job_uff_opt(plams_mol, maxiter)
 
     # Launch an MOPAC + COSMO-RS single point
-    if job == 'ligand_sp':
-        plams_mol = ams_job_mopac_sp(plams_mol)
+    elif job == 'ligand_sp':
+        ams_job_mopac_sp(plams_mol)
 
     return plams_mol
 
@@ -161,7 +142,7 @@ def ams_job_mopac_sp(plams_mol):
     return plams_mol
 
 
-def ams_job_uff_opt(plams_mol, bonds, maxiter):
+def ams_job_uff_opt(plams_mol, maxiter=2000):
     """
     Runs an AMS UFF constrained geometry optimization.
 
@@ -170,6 +151,19 @@ def ams_job_uff_opt(plams_mol, bonds, maxiter):
     maxiter <int>: The maximum number of iterations during the geometry optimization.
     return <plams.Molecule>: A PLAMS molecule.
     """
+    rdmol = molkit.to_rdmol(plams_mol)
+    aromatic = [Bond.GetIsAromatic(bond) for bond in rdmol.GetBonds()]
+    aromatic = [i for i, item in enumerate(aromatic) if item]
+
+    # Create a connectivity list; aromatic bonds get a bond order of 1.5
+    at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
+    at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
+    bonds = [bond.order for bond in plams_mol.bonds]
+    for i, bond in enumerate(plams_mol.bonds):
+        if i in aromatic:
+            bonds[i] = 1.5
+    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
+
     mol_name = plams_mol.properties.name + '.opt'
     source_folder = plams_mol.properties.source_folder
     mol_indices = plams_mol.properties.qd_indices
@@ -189,10 +183,19 @@ def ams_job_uff_opt(plams_mol, bonds, maxiter):
     output_mol = results.get_main_molecule()
     finish()
 
+    """
+    # Run the job
+    init(path=source_folder, folder=mol_name)
+    job = AMSJob(molecule=output_mol, settings=s, name=mol_name)
+    results = job.run()
+    output_mol = results.get_main_molecule()
+    finish()
+    """
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
-    shutil.copy2(results['ams.rkf'], os.path.join(source_folder, mol_name + '.rkf'))
+    shutil.copy2(results['ams.rkf'], os.path.join(source_folder, mol_name + '.ams.rkf'))
+    shutil.copy2(results['uff.rkf'], os.path.join(source_folder, mol_name + '.uff.rkf'))
     shutil.copy2(results[mol_name + '.out'], os.path.join(source_folder, mol_name + '.out'))
-    shutil.rmtree(os.path.join(source_folder, mol_name))
+    #shutil.rmtree(os.path.join(source_folder, mol_name))
 
     # Update the atomic coordinates of plams_mol
     for i, atom in enumerate(plams_mol):
@@ -205,38 +208,22 @@ def ams_job_uff_opt(plams_mol, bonds, maxiter):
     return output_mol
 
 
-def ams_job_uff_sp(plams_mol, bonds):
-    """
-    Runs an AMS UFF single point.
+@add_to_class(Molecule)
+def closest_atom_mod(self, point, unit='angstrom'):
+    dist = float('inf')
+    for at in self.atoms:
+        newdist = at.distance_to(point, unit=unit)
+        if newdist < dist and at != self:
+            dist = newdist
+            ret = at
+    return ret
 
-    plams_mol <plams.Molecule>: The input PLAMS molecule.
-    bonds <list>[<list>]: A nested list of atomic indices <int> and bond orders <float>.
-    maxiter <int>: The maximum number of iterations during the geometry optimization.
-    return <plams.Molecule>: A PLAMS molecule.
-    """
-    mol_name = plams_mol.properties.name
-    source_folder = plams_mol.properties.source_folder
 
-    # General AMS settings
-    s = Settings()
-    s.input.ams.Task = 'SinglePoint'
-    s.input.ams.System.BondOrders._1 = bonds
-    s.input.uff.Library = 'UFF'
-
-    # Run the job
-    init(path=source_folder, folder=mol_name)
-    job = AMSJob(molecule=plams_mol, settings=s, name=mol_name)
-    results = job.run()
-    output_mol = results.get_main_molecule()
-    finish()
-
-    with open(results[mol_name + '.out']) as file:
-        file = file.read().splitlines()
-    energy_index = file.index('     CALCULATION RESULTS') + 3
-    energy = file[energy_index].split()[-1]
-    plams_mol.properties.energy = Units.convert(float(energy), 'Hartree', 'kcal/mol')
-
-    # Delete the PLAMS directory
-    shutil.rmtree(os.path.join(source_folder, mol_name))
-
-    return output_mol
+def reset_angle(plams_mol, plams_atom):
+    at1 = plams_mol.neighbors(plams_atom)
+    at1 = [atom for atom in at1 if atom != plams_atom][0]
+    at2 = plams_mol.neighbors(at1)
+    at2 = [atom for atom in at2 if atom != at1][0]
+    angle = (at2.angle(at1, plams_atom, result_unit='degree'))
+    plams_mol.rotate_bond(plams_atom.bonds[0], at2, 120 - angle, unit='degree')
+    return plams_mol

@@ -1,18 +1,18 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'combine_qd', 'check_sys_var', 'ams_job']
+           'combine_qd', 'qd_opt', 'qd_int']
 
-import os
 import itertools
-import shutil
+import os
 import numpy as np
 
-from scm.plams import (Atom, Settings, AMSJob, init, finish)
+from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-from rdkit.Chem import Bond
+from rdkit.Chem import AllChem
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
+from .qd_ams import ams_job
 
 
 def optimize_ligand(ligand, opt, database):
@@ -50,6 +50,8 @@ def optimize_ligand(ligand, opt, database):
             print('\ndatabase entry exists for ' + ligand_opt.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
+    ligand.properties.source = os.path.join(ligand.properties.source_folder,
+                                            ligand.properties.name + '.opt.pdb')
     return ligand
 
 
@@ -204,3 +206,44 @@ def combine_qd(core, ligand_list):
         qd.add_bond(bond)
 
     return qd
+
+
+def qd_int(plams_mol, job='qd_sp'):
+    """
+    Perform an activation-strain analyses (RDKit UFF) on the ligands in the absence of the core.
+
+    plams_mol <plams.Molecule>: A PLAMS molecule
+    job <str>: The to be executed AMS job (see qd_ams.py)
+    return <plams.Molecule>: A PLAMS molecule with the int and int_mean properties.
+    """
+    mol_copy = plams_mol.copy()
+    uff = AllChem.UFFGetMoleculeForceField
+
+    # Calculate the total energy of all ligands in the absence of the core
+    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName is 'COR']
+    for atom in atom_list:
+        mol_copy.delete_atom(atom)
+    rdmol = molkit.to_rdmol(mol_copy)
+    E_no_frag = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
+
+    # Calculate the total energy of the isolated ligands in the absence of the core
+    mol_frag = mol_copy.separate()
+
+    E_frag = 0.0
+    for mol in mol_frag:
+        rdmol = molkit.to_rdmol(mol)
+        E = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
+        print(E)
+        E_frag += E
+
+    # Calculate the total energy of an optimized ligand
+    rdmol = molkit.to_rdmol(mol_frag[0])
+    uff(rdmol, ignoreInterfragInteractions=False).Minimize()
+    E_opt = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
+
+    # Calculate the total and mean (pair-wise) interaction between between fragments
+    plams_mol.properties.int = float(E_no_frag - E_frag)
+    plams_mol.properties.strain = float(E_frag - (E_opt * len(mol_frag)))
+    plams_mol.properties.energy = plams_mol.properties.int + plams_mol.properties.strain
+
+    return plams_mol
