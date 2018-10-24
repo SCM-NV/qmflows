@@ -27,16 +27,16 @@ def test_ADF3FDE_Cystine():
     assert_dipoles(expected_dipoles, example_ADF3FDE_Cystine())
 
 
-# @pytest.mark.slow
-# def test_FDE_Fragments():
-#     """
-#     Test FDE Fragments
-#     """
-#     expected_dipoles = np.array(
-#         [7.12156395e-01, 1.22645358e-08, 2.50112616e-17])
-#     test_dipoles = example_FDE_fragments()
-#     print(test_dipoles)
-#     assert_dipoles(expected_dipoles, test_dipoles)
+@pytest.mark.slow
+def test_FDE_Fragments():
+    """
+    Test FDE Fragments
+    """
+    expected_dipoles = np.array(
+        [7.12156395e-01, 1.22645358e-08, 2.50112616e-17])
+    test_dipoles = example_FDE_fragments()
+    print(test_dipoles)
+    assert_dipoles(expected_dipoles, test_dipoles)
 
 
 def assert_dipoles(expected, test, rtol=1e-3):
