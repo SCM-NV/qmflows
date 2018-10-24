@@ -3,18 +3,17 @@ __all__ = ['check_sys_var', 'ams_job']
 import os
 import shutil
 
-from scm.plams import (Settings, AMSJob, init, finish, add_to_class, Molecule)
+from scm.plams import (Settings, AMSJob, init, finish)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
-import scm.plams.interfaces.molecule.rdkit as molkit
-
-from rdkit.Chem import Bond
+# import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
+from .qd_functions import adf_connectivity
 
 
 def check_sys_var():
     """
-    Check if all ADF environment variables are set.
+    Check if all ADF environment variables are set and if the 2018 version of ADF is installed.
     """
     sys_var = ['ADFBIN', 'ADFHOME', 'ADFRESOURCES', 'SCMLICENSE']
     sys_var_exists = [item in os.environ for item in sys_var]
@@ -25,10 +24,13 @@ def check_sys_var():
         raise EnvironmentError('One or more ADF environment variables have not been set, aborting '
                                'ADF job.')
     if '2018' not in os.environ['ADFHOME']:
-        raise ImportError('No ADF2018 detected, aborting ADF job.')
+        raise ImportError('No ADF version 2018 detected, aborting ADF job.')
 
 
 class CRSJob(SCMJob):
+    """
+    A class for running COSMO-RS jobs.
+    """
     _command = 'crs'
 
 
@@ -39,6 +41,7 @@ def ams_job(plams_mol, maxiter=1000, job='qd_opt'):
     plams_mol <plams.Molecule>: The input PLAMS molecule.
     maxiter <int>: The maximum number of iterations during the geometry optimization.
     job <str>: The to be run AMS job ('qd_opt', 'qd_sp' or 'ligand_sp')
+
     return <plams.Molecule>: A PLAMS molecule.
     """
     # Launch an AMS UFF geometry optimization
@@ -57,6 +60,7 @@ def ams_job_mopac_sp(plams_mol):
     Runs a MOPAC + COSMO-RS single point.
 
     plams_mol <plams.Molecule>: The input PLAMS molecule.
+
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     source_folder = plams_mol.properties.source_folder
@@ -147,32 +151,20 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     Runs an AMS UFF constrained geometry optimization.
 
     plams_mol <plams.Molecule>: The input PLAMS molecule.
-    bonds <list>[<list>]: A nested list of atomic indices <int> and bond orders <float>.
+    bonds <list>[<list>[<int>, <float>]]: A nested list of atomic indices and bond orders.
     maxiter <int>: The maximum number of iterations during the geometry optimization.
+
     return <plams.Molecule>: A PLAMS molecule.
     """
-    rdmol = molkit.to_rdmol(plams_mol)
-    aromatic = [Bond.GetIsAromatic(bond) for bond in rdmol.GetBonds()]
-    aromatic = [i for i, item in enumerate(aromatic) if item]
-
-    # Create a connectivity list; aromatic bonds get a bond order of 1.5
-    at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
-    at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
-    bonds = [bond.order for bond in plams_mol.bonds]
-    for i, bond in enumerate(plams_mol.bonds):
-        if i in aromatic:
-            bonds[i] = 1.5
-    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
-
     mol_name = plams_mol.properties.name + '.opt'
     source_folder = plams_mol.properties.source_folder
     mol_indices = plams_mol.properties.qd_indices
 
-    # General AMS settings
+    # AMS settings (UFF constrained geometry optimization)
     s = Settings()
     s.input.ams.Task = 'GeometryOptimization'
     s.input.ams.Constraints.Atom = mol_indices
-    s.input.ams.System.BondOrders._1 = bonds
+    s.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
     s.input.ams.GeometryOptimization.MaxIterations = maxiter
     s.input.uff.Library = 'UFF'
 
@@ -206,24 +198,3 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     export_mol(plams_mol, message='Optimized core + ligands:\t\t')
 
     return output_mol
-
-
-@add_to_class(Molecule)
-def closest_atom_mod(self, point, unit='angstrom'):
-    dist = float('inf')
-    for at in self.atoms:
-        newdist = at.distance_to(point, unit=unit)
-        if newdist < dist and at != self:
-            dist = newdist
-            ret = at
-    return ret
-
-
-def reset_angle(plams_mol, plams_atom):
-    at1 = plams_mol.neighbors(plams_atom)
-    at1 = [atom for atom in at1 if atom != plams_atom][0]
-    at2 = plams_mol.neighbors(at1)
-    at2 = [atom for atom in at2 if atom != at1][0]
-    angle = (at2.angle(at1, plams_atom, result_unit='degree'))
-    plams_mol.rotate_bond(plams_atom.bonds[0], at2, 120 - angle, unit='degree')
-    return plams_mol

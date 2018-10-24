@@ -1,5 +1,5 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'combine_qd', 'qd_opt', 'qd_int']
+           'combine_qd', 'qd_int', 'adf_connectivity']
 
 import itertools
 import os
@@ -8,16 +8,21 @@ import numpy as np
 from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-from rdkit.Chem import AllChem
+from rdkit.Chem import AllChem, Bond
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
-from .qd_ams import ams_job
 
 
-def optimize_ligand(ligand, opt, database):
+def optimize_ligand(ligand, database, opt=True):
     """
     Pull the structure if a match has been found or alternatively optimize a new geometry.
+
+    ligand <plams.Molecule>: The ligand molecule.
+    database <pd.DataFrame>: Database of previous calculations.
+    opt <bool>: If the geometry of the ligand (RDKit UFF) should be optimized (True) or not (False).
+
+    return <plams.Molecule>: The optimized ligand molecule.
     """
     # Searches for matches between the input ligand and the database; imports the structure
     if not isinstance(database, bool):
@@ -58,6 +63,11 @@ def optimize_ligand(ligand, opt, database):
 def find_substructure(ligand, split=True):
     """
     Identify the ligand functional groups.
+
+    ligand <plams.Molecule>: The ligand molecule.
+    split <bool>: If a functional group should be split from the ligand (True) or not (False).
+
+    return <list>[<plams.Molecule>]: A copy of the ligand for each identified functional group.
     """
     ligand_rdkit = molkit.to_rdmol(ligand)
 
@@ -111,8 +121,14 @@ def find_substructure(ligand, split=True):
 
 def find_substructure_split(ligand, ligand_index, split=True):
     """
-    Delete the hydrogen or mono-/polyatomic counterion attached to the functional group
-    Sets the charge of the remaining heteroatom to -1 if split=True
+    Delete the hydrogen or mono-/polyatomic counterion attached to the functional group.
+    Sets the charge of the remaining heteroatom to -1 if split=True.
+
+    ligand <plams.Molecule>: The ligand molecule.
+    ligand_index <list>[<int>, <int>]: A list of atomic indices associated with a functional group.
+    split <bool>: If a functional group should be split from the ligand (True) or not (False).
+
+    return <plams.Molecule>: The ligand molecule.
     """
     at1 = ligand[ligand_index[0] + 1]
     at2 = ligand[ligand_index[1] + 1]
@@ -142,6 +158,14 @@ def find_substructure_split(ligand, ligand_index, split=True):
 def rotate_ligand(core, ligand, i, core_dummy):
     """
     Connects two molecules by alligning the vectors of two bonds.
+
+    core <plams.Molecule>: The core molecule.
+    ligand <plams.Molecule>: The ligand molecule.
+    i <int>: The residue number that is to be assigned to the ligand.
+    core_dummy <plams.Atom>: A dummy atom at the core center of mass.
+
+    return <plams.Molecule>, <plams.Atom>: The rotated ligand and the ligand atom that will be
+        attached to the core.
     """
     ligand = ligand.copy()
     ligand.properties.ligand_dummy = ligand.closest_atom(ligand.properties.ligand_dummy.coords)
@@ -181,6 +205,8 @@ def rotate_ligand_rotation(vec1, vec2):
     Vectors can be any containers with 3 numerical values. They don't need to be normalized.
     Returns 3x3 numpy array.
     """
+    print(type(vec1), vec1)
+    print(type(vec2), vec2)
     a = np.array(vec1) / np.linalg.norm(vec1)
     b = np.array(vec2) / np.linalg.norm(vec2)
     v1, v2, v3 = np.cross(a, b)
@@ -192,6 +218,11 @@ def rotate_ligand_rotation(vec1, vec2):
 def combine_qd(core, ligand_list):
     """
     Combine the rotated ligands with the core, creating a bond bewteen the core and ligand.
+
+    core <plams.Molecule>: The core molecule.
+    ligand_list <list>[<plams.Molecule>]: A list of the rotated ligands.
+
+    return <plams.Molecule>: The quantum dot (core + n*ligands).
     """
     qd = core.copy()
 
@@ -208,12 +239,38 @@ def combine_qd(core, ligand_list):
     return qd
 
 
+def adf_connectivity(plams_mol):
+    """
+    Create an ADF-compatible connectivity list.
+
+    plams_mol <plams.Molecule>: A PLAMS molecule.
+
+    return <list>[<str>]: An ADF-compatible connectivity list.
+    """
+    # Create list of indices of all aromatic bonds
+    rdmol = molkit.to_rdmol(plams_mol)
+    aromatic = [Bond.GetIsAromatic(bond) for bond in rdmol.GetBonds()]
+    aromatic = [i for i, bond in enumerate(aromatic) if bond]
+
+    # Create a connectivity list; aromatic bonds get a bond order of 1.5
+    at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
+    at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
+    bonds = [bond.order for bond in plams_mol.bonds]
+    for i, bond in enumerate(plams_mol.bonds):
+        if i in aromatic:
+            bonds[i] = 1.5
+    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
+
+    return bonds
+
+
 def qd_int(plams_mol, job='qd_sp'):
     """
     Perform an activation-strain analyses (RDKit UFF) on the ligands in the absence of the core.
 
-    plams_mol <plams.Molecule>: A PLAMS molecule
-    job <str>: The to be executed AMS job (see qd_ams.py)
+    plams_mol <plams.Molecule>: A PLAMS molecule.
+    job <str>: The to be executed AMS job (see qd_ams.py).
+
     return <plams.Molecule>: A PLAMS molecule with the int and int_mean properties.
     """
     mol_copy = plams_mol.copy()
@@ -232,9 +289,7 @@ def qd_int(plams_mol, job='qd_sp'):
     E_frag = 0.0
     for mol in mol_frag:
         rdmol = molkit.to_rdmol(mol)
-        E = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
-        print(E)
-        E_frag += E
+        E_frag += uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
     # Calculate the total energy of an optimized ligand
     rdmol = molkit.to_rdmol(mol_frag[0])
