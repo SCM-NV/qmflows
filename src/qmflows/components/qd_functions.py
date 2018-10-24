@@ -1,5 +1,5 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'combine_qd', 'qd_int', 'adf_connectivity']
+           'combine_qd', 'qd_int', 'adf_connectivity', 'fix_h']
 
 import itertools
 import os
@@ -8,7 +8,7 @@ import numpy as np
 from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-from rdkit.Chem import AllChem, Bond
+from rdkit.Chem import AllChem, Bond, rdMolTransforms
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
@@ -205,8 +205,6 @@ def rotate_ligand_rotation(vec1, vec2):
     Vectors can be any containers with 3 numerical values. They don't need to be normalized.
     Returns 3x3 numpy array.
     """
-    print(type(vec1), vec1)
-    print(type(vec2), vec2)
     a = np.array(vec1) / np.linalg.norm(vec1)
     b = np.array(vec2) / np.linalg.norm(vec2)
     v1, v2, v3 = np.cross(a, b)
@@ -262,6 +260,30 @@ def adf_connectivity(plams_mol):
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
 
     return bonds
+
+
+def fix_h(plams_mol):
+    """
+    Sets all H-At1=At2 angles to 120.0 degrees.
+
+    plams_mol <plams.Molecule>: A PLAMS molecule.
+
+    return <plams.Molecule>: A PLAMS molecule where all H-At1=At2 angles are set to 120.0 degrees.
+    """
+    H_list = [atom for atom in plams_mol if atom.atnum is 1]
+    H_list = [atom for atom in H_list if 2.0 in
+              [bond.order for bond in plams_mol.neighbors(atom)[0].bonds]]
+
+    rdmol = molkit.to_rdmol(plams_mol)
+    idx = plams_mol.atoms.index
+    set_angle = rdMolTransforms.SetAngleDeg
+    for atom in H_list:
+        at1 = atom
+        at2 = plams_mol.neighbors(at1)[0]
+        at3 = [atom for atom in plams_mol.neighbors(at2) if atom != at1][0]
+        set_angle(rdmol.GetConformer(), idx(at1), idx(at2), idx(at3), 120.0)
+
+    return molkit.from_rdmol(rdmol)
 
 
 def qd_int(plams_mol, job='qd_sp'):
