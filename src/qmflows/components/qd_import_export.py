@@ -330,7 +330,7 @@ def export_mol(mol, message='Mol:\t\t\t\t'):
 
 def print_exception(func, ex, mol_dict, name):
     """
-    test
+    Manages the printing of exceptions upon failing to import a molecule.
     """
     extension_dict = {'read_mol_xyz': '.xyz file', 'read_mol_pdb': '.pdb file',
                       'read_mol_mol': '.mol file', 'read_mol_smiles': 'SMILES string',
