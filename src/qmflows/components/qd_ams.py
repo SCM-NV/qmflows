@@ -8,7 +8,7 @@ from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 # import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import adf_connectivity
+from .qd_functions import (adf_connectivity, fix_h)
 
 
 def check_sys_var():
@@ -165,29 +165,32 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     s.input.ams.Task = 'GeometryOptimization'
     s.input.ams.Constraints.Atom = mol_indices
     s.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
-    s.input.ams.GeometryOptimization.MaxIterations = maxiter
+    s.input.ams.GeometryOptimization.MaxIterations = 50
     s.input.uff.Library = 'UFF'
 
-    # Run the job
+    # Run the job (pre-optimization)
     init(path=source_folder, folder=mol_name)
     job = AMSJob(molecule=plams_mol, settings=s, name=mol_name)
     results = job.run()
     output_mol = results.get_main_molecule()
     finish()
 
-    """
-    # Run the job
+    # Delete the PLAMS directory and update MaxIterations
+    shutil.rmtree(os.path.join(source_folder, mol_name))
+    s.input.ams.GeometryOptimization.MaxIterations = maxiter
+
+    # Set all H-C=C angles to 120.0 degrees and run the job again
     init(path=source_folder, folder=mol_name)
-    job = AMSJob(molecule=output_mol, settings=s, name=mol_name)
+    job = AMSJob(molecule=fix_h(output_mol), settings=s, name=mol_name)
     results = job.run()
     output_mol = results.get_main_molecule()
     finish()
-    """
+
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
     shutil.copy2(results['ams.rkf'], os.path.join(source_folder, mol_name + '.ams.rkf'))
     shutil.copy2(results['uff.rkf'], os.path.join(source_folder, mol_name + '.uff.rkf'))
     shutil.copy2(results[mol_name + '.out'], os.path.join(source_folder, mol_name + '.out'))
-    #shutil.rmtree(os.path.join(source_folder, mol_name))
+    shutil.rmtree(os.path.join(source_folder, mol_name))
 
     # Update the atomic coordinates of plams_mol
     for i, atom in enumerate(plams_mol):
