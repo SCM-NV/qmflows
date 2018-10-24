@@ -4,7 +4,7 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'D:\QMFlows_DATA'
 
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz
@@ -12,11 +12,7 @@ input_cores = yaml.load("""
 """)
 
 input_ligands = yaml.load("""
-- OC
-- OCC
-- OCCC
-- OCCCC
-- OCCCCC
+- O=C(O)C(C1=CC=CC=C1)(C2=CC=CC=C2)C3=CC=CC=C3
 """)
 
 """
@@ -75,8 +71,8 @@ core_opt: False
 ligand_opt: True
 ligand_crs: False
 qd_opt: False
-qd_int: False
-maxiter: 10000
+qd_int: True
+maxiter: 2000
 split: True
 """)
 
@@ -127,8 +123,8 @@ Optional arguments:
     qd_int <bool>: False
         Calculate the (mean) interaction between ligands on the quantum dot surface using ADF UFF.
 
-    maxiter <int>: 10000
-        The maximum number of geometry iterations <int> used in qd_opt.
+    maxiter <int>: 2000
+        Maxiter + 50 is the maximum number of geometry iterations <int> used in qd_opt.
 
     split <bool>: True
         False: The ligand is to be attached to the core in its entirety.
