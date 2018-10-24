@@ -15,7 +15,8 @@ def read_database(mol_folder, database_name='ligand_database.xlsx'):
 
     mol_folder <str>: The folder (including path) containing the database.
     database_name <str>: The name (including extension) of the database.
-    return <pd.DataFrame>: The database as pandas dataframe.
+
+    return <pd.DataFrame>: A database of previous calculations.
     """
     database_path = os.path.join(mol_folder, database_name)
     if os.path.exists(database_path):
@@ -29,6 +30,12 @@ def read_database(mol_folder, database_name='ligand_database.xlsx'):
 def compare_database(plams_mol, database):
     """
     Search the database for any ligand matches.
+
+    plams_mol <plams.Molecule>: A plams molecule.
+    database <pd.DataFrame>: A database of previous calculations.
+
+    return <plams.Molecule>, <bool>, <bool>: The (imported) ligand, if a match was found between
+        input ligand and the database, and if the .pdb file of this match actually exists.
     """
     mol_folder = plams_mol.properties.source_folder
 
@@ -65,6 +72,10 @@ def compare_database(plams_mol, database):
 def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
     """
     Write the new database entries to the database.
+
+    ligand_list <list>[<plams.Molecule>]: A list of ligands.
+    database <pd.DataFrame>: A database of previous calculations.
+    database_name <str>: The name (including extension) of the database.
     """
     mol_folder = ligand_list[0].properties.source_folder
     database_entries = []
