@@ -3,7 +3,7 @@ __all__ = ['check_sys_var', 'ams_job']
 import os
 import shutil
 
-from scm.plams import (Settings, AMSJob, init, finish)
+from scm.plams import (Atom, Settings, AMSJob, init, finish, Units)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 # import scm.plams.interfaces.molecule.rdkit as molkit
 
@@ -64,14 +64,19 @@ def ams_job_mopac_sp(plams_mol):
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     source_folder = plams_mol.properties.source_folder
+    charge = [atom.properties.charge for atom in plams_mol if atom.properties.charge]
+    mol_name = plams_mol.properties.name
+
+    if plams_mol[-1].atnum is 0:
+        plams_mol.delete_atom(plams_mol[-1])
 
     # MOPAC settings
-    mol_name1 = plams_mol.properties.name + '.MOPAC'
     s1 = Settings()
     s1.input.ams.Task = 'SinglePoint'
+    s1.input.ams.System.Charge = sum(charge)
+    s1.input.MOPAC.Solvation = 'COSMO-CRS'
 
     # COSMO-RS settings
-    mol_name2 = plams_mol.properties.name + '.COSMO-RS'
     s2 = Settings()
     s2.ignore_molecule = True
 
@@ -93,7 +98,7 @@ def ams_job_mopac_sp(plams_mol):
     s2.input.CRSParameters.eta = -9.65
     s2.input.CRSParameters.chortf = 0.816
 
-    s2.input.Compound._h = os.path.join(source_folder, mol_name1 + '.t21')
+    s2.input.Compound._h = os.path.join(source_folder, 'tmp_ligand.coskf')
 
     s2.input.compound._h = os.path.join(os.environ['ADFRESOURCES'], 'ADFCRS/1-Octanol.coskf')
     s2.input.compound.frac1 = 0.725
@@ -113,35 +118,44 @@ def ams_job_mopac_sp(plams_mol):
     s2.input.compounD.density = 0.997
 
     # Run MOPAC
-    init(path=source_folder, folder=mol_name1)
-    job1 = AMSJob(molecule=plams_mol, settings=s1, name=mol_name1)
+    init(path=source_folder, folder=mol_name)
+    job1 = AMSJob(molecule=plams_mol, settings=s1, name=mol_name)
     results1 = job1.run()
     finish()
 
-    # Delete the MOPAC directory
-    shutil.copy2(results1['ams.rkf'], os.path.join(source_folder, mol_name1 + '.rkf'))
-    shutil.rmtree(os.path.join(source_folder, mol_name1))
+    # Read the mopac.coskf file and delete the MOPAC directory
+    coskf = results1['mopac.coskf'].replace('mopac.coskf', 'mopac.cosmo.rkf')
+    os.rename(results1['mopac.coskf'], coskf)
+    results1.refresh()
+    surface = results1.readrkf('COSMO', 'Area', file='mopac.cosmo')
+    volume = results1.readrkf('COSMO', 'Volume', file='mopac.cosmo')
+    shutil.copy2(results1['mopac.cosmo.rkf'], os.path.join(source_folder, mol_name + '.coskf'))
+    shutil.copy2(results1['mopac.cosmo.rkf'], os.path.join(source_folder, 'tmp_ligand.coskf'))
+    shutil.rmtree(os.path.join(source_folder, mol_name))
 
     # Run COSMO-RS
-    init(path=source_folder, folder=mol_name2)
-    job2 = AMSJob(settings=s2, name=mol_name2)
+    init(path=source_folder, folder=mol_name)
+    job2 = CRSJob(settings=s2, name=mol_name)
     results2 = job2.run()
     finish()
 
     # Read logp
-    with open(results2['AcOH.out']) as file:
+    with open(results2[mol_name + '.out']) as file:
         file = file.read().splitlines()
     logp_index = file.index(' Infinite dilute Partition coefficient') + 2
     logp = file[logp_index].split()[-1]
 
     # Delete the PLAMS directory
-    shutil.copy2(results2[mol_name2 + '.out'], os.path.join(source_folder, mol_name2 + '.out'))
-    shutil.rmtree(os.path.join(source_folder, mol_name2))
+    shutil.copy2(results2[mol_name + '.out'], os.path.join(source_folder, mol_name + '.out'))
+    shutil.rmtree(os.path.join(source_folder, mol_name))
+    os.remove(os.path.join(source_folder, 'tmp_ligand.coskf'))
 
     # Create three new properties for plams_mol
-    plams_mol.properties.surface = 0.0
-    plams_mol.properties.volume = 0.0
+    plams_mol.properties.surface = surface * Units.convert(1.0, 'Bohr', 'Angstrom')**2
+    plams_mol.properties.volume = volume * Units.convert(1.0, 'Bohr', 'Angstrom')**3
     plams_mol.properties.logp = logp
+
+    plams_mol.add_atom(Atom(atnum=0, coords=plams_mol.get_center_of_mass()))
 
     return plams_mol
 
@@ -165,7 +179,7 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     s.input.ams.Task = 'GeometryOptimization'
     s.input.ams.Constraints.Atom = mol_indices
     s.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
-    s.input.ams.GeometryOptimization.MaxIterations = 50
+    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter * 0.1)
     s.input.uff.Library = 'UFF'
 
     # Run the job (pre-optimization)
@@ -177,11 +191,15 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
 
     # Delete the PLAMS directory and update MaxIterations
     shutil.rmtree(os.path.join(source_folder, mol_name))
-    s.input.ams.GeometryOptimization.MaxIterations = maxiter
+    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter * 0.9)
+
+    # Update the atomic coordinates of plams_mol
+    for i, atom in enumerate(plams_mol):
+        atom.move_to(output_mol[i + 1])
 
     # Set all H-C=C angles to 120.0 degrees and run the job again
     init(path=source_folder, folder=mol_name)
-    job = AMSJob(molecule=fix_h(output_mol), settings=s, name=mol_name)
+    job = AMSJob(molecule=fix_h(plams_mol), settings=s, name=mol_name)
     results = job.run()
     output_mol = results.get_main_molecule()
     finish()

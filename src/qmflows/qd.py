@@ -44,7 +44,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Optimize all ligands and find their functional groups
     ligand_list = list(prep_ligand(ligand, database, arg['ligand_indices'], arg['ligand_opt'],
-                                   arg['split']) for ligand in ligand_list)
+                                   arg['split'], arg['ligand_crs']) for ligand in ligand_list)
     ligand_list = list(itertools.chain(*ligand_list))
     if not ligand_list:
         raise IndexError('No valid ligand functional groups were found, aborting run')
@@ -124,7 +124,7 @@ def prep_core(core, core_dummies, dummy=0, opt=False):
                             ' was specified as dummy atom, yet no dummy atoms were found')
 
 
-def prep_ligand(ligand, database, ligand_indices=[], opt=True, split=True):
+def prep_ligand(ligand, database, ligand_indices=[], opt=True, split=True, crs=True):
     """
     Function that handles all ligand operations,
 
@@ -150,6 +150,10 @@ def prep_ligand(ligand, database, ligand_indices=[], opt=True, split=True):
             ligand_indices = [i - 1 for i in ligand_indices]
             split = True
         ligand_list = [QD_scripts.find_substructure_split(ligand, ligand_indices, split)]
+
+    if crs:
+        for ligand in ligand_list:
+            QD_ams.ams_job(ligand, job='ligand_sp')
 
     return ligand_list
 

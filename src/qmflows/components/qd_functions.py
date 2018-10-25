@@ -9,6 +9,7 @@ from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, Bond, rdMolTransforms
+from rdkit.Chem import Atom as At
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
@@ -264,11 +265,11 @@ def adf_connectivity(plams_mol):
 
 def fix_h(plams_mol):
     """
-    Sets all H-At1=At2 angles to 120.0 degrees.
+    If a C=C-H angle is smaller than 20 degrees, set it back to 120.0 degrees.
 
     plams_mol <plams.Molecule>: A PLAMS molecule.
 
-    return <plams.Molecule>: A PLAMS molecule where all H-At1=At2 angles are set to 120.0 degrees.
+    return <plams.Molecule>: A PLAMS molecule without C=C-H angles smaller than 20.
     """
     H_list = [atom for atom in plams_mol if atom.atnum is 1]
     H_list = [atom for atom in H_list if 2.0 in
@@ -277,13 +278,24 @@ def fix_h(plams_mol):
     rdmol = molkit.to_rdmol(plams_mol)
     idx = plams_mol.atoms.index
     set_angle = rdMolTransforms.SetAngleDeg
+    get_angle = rdMolTransforms.GetAngleDeg
+
+    update = []
     for atom in H_list:
         at1 = atom
         at2 = plams_mol.neighbors(at1)[0]
-        at3 = [atom for atom in plams_mol.neighbors(at2) if atom != at1][0]
-        set_angle(rdmol.GetConformer(), idx(at1), idx(at2), idx(at3), 120.0)
+        at3 = [atom for atom in plams_mol.neighbors(at2) if atom != at1]
+        if get_angle(rdmol.GetConformer(), idx(at3[0]), idx(at2), idx(at1)) <= 20.0:
+            set_angle(rdmol.GetConformer(), idx(at3[0]), idx(at2), idx(at1), 120.0)
+            update.append(True)
+        elif get_angle(rdmol.GetConformer(), idx(at3[1]), idx(at2), idx(at1)) <= 20.0:
+            set_angle(rdmol.GetConformer(), idx(at3[1]), idx(at2), idx(at1), 120.0)
+            update.append(True)
 
-    return molkit.from_rdmol(rdmol)
+    if update:
+        return molkit.from_rdmol(rdmol)
+    else:
+        return plams_mol
 
 
 def qd_int(plams_mol, job='qd_sp'):
