@@ -9,7 +9,6 @@ from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, Bond, rdMolTransforms
-from rdkit.Chem import Atom as At
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
