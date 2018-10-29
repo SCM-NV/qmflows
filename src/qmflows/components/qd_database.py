@@ -9,7 +9,7 @@ from rdkit import Chem
 from .qd_import_export import set_prop
 
 
-def read_database(mol_folder, database_name='ligand_database.xlsx'):
+def read_database(path, database_name='database.xlsx'):
     """
     Open the database.
 
@@ -18,9 +18,9 @@ def read_database(mol_folder, database_name='ligand_database.xlsx'):
 
     return <pd.DataFrame>: A database of previous calculations.
     """
-    database_path = os.path.join(mol_folder, database_name)
-    if os.path.exists(database_path):
-        database = pd.read_excel(database_path, sheet_name='Ligand')
+    path = os.path.join(path, database_name)
+    if os.path.exists(path):
+        database = pd.read_excel(path, sheet_name='Ligand')
     else:
         database = pd.DataFrame()
 
@@ -69,7 +69,7 @@ def compare_database(plams_mol, database):
     return plams_mol, match, pdb
 
 
-def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
+def write_database(ligand_list, database, path, database_name='ligand_database.xlsx'):
     """
     Write the new database entries to the database.
 
@@ -87,7 +87,10 @@ def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
                  prop.formula,
                  os.path.join(mol_folder, prop.name.split('@')[0]) + '.pdb',
                  os.path.join(mol_folder, prop.name.split('@')[0]) + '.opt.pdb',
-                 prop.smiles])
+                 prop.smiles,
+                 prop.surface,
+                 prop.volume,
+                 prop.logp])
 
     if database_entries:
         database_entries = list(zip(*database_entries))
@@ -95,10 +98,50 @@ def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
                             'Ligand_formula': database_entries[1],
                             'Ligand_pdb': database_entries[2],
                             'Ligand_opt_pdb': database_entries[3],
-                            'Ligand_SMILES': database_entries[4]})
+                            'Ligand_SMILES': database_entries[4],
+                            'Ligand_surface': database_entries[5],
+                            'Ligand_volume': database_entries[6],
+                            'Ligand_logP': database_entries[7]})
 
         if not database.empty:
             new = database.append(new, ignore_index=True)
 
-        database_path = os.path.join(mol_folder, database_name)
-        new.to_excel(database_path, sheet_name='Ligand')
+        path = os.path.join(path, database_name)
+        new.to_excel(path, sheet_name='Ligand')
+
+
+def write_database_qd(qd_list, path, database_name='qd_database.xlsx'):
+    """
+    Write the new database entries to the database.
+
+    qd_list <list>[<plams.Molecule>]: A list of quantum_dots.
+    database_name <str>: The name (including extension) of the database.
+    """
+    mol_folder = qd_list[0].properties.source_folder
+    database_entries = []
+    for qd in qd_list:
+        if qd.properties:
+            prop = qd.properties
+            database_entries.append(
+                [prop.name,
+                 qd.get_formula(),
+                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.pdb',
+                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.opt.pdb',
+                 prop.energy,
+                 prop.int,
+                 prop.strain])
+    if database_entries:
+        database_entries = list(zip(*database_entries))
+        new = pd.DataFrame({'Quantum_dot_name': database_entries[0],
+                            'Quantum_dot_formula': database_entries[1],
+                            'Quantum_dot_pdb': database_entries[2],
+                            'Quantum_dot_opt_pdb': database_entries[3],
+                            'Quantum_dot_E': database_entries[4],
+                            'Quantum_dot_Eint': database_entries[5],
+                            'Quantum_dot_Estrain': database_entries[6]})
+
+        path = os.path.join(path, database_name)
+        if os.path.exists(path):
+            database = pd.read_excel(path, sheet_name='Quantum_dot')
+            database.append(new)
+        new.to_excel(path, sheet_name='Quantum_dot')
