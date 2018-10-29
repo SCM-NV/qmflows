@@ -34,30 +34,29 @@ def prep(input_ligands, input_cores, path, arg):
 
     # Adds the indices of the core dummy atoms to core.properties.core
     for core in core_list:
-        prep_core(core, arg['core_indices'], arg['dummy'], arg['core_opt'])
+        prep_core(core, arg)
 
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
-        database = QD_database.read_database(folder_list[1], arg['database_name'])
+        database = QD_database.read_database(path, arg['database_name'])
     else:
         database = False
 
     # Optimize all ligands and find their functional groups
-    ligand_list = list(prep_ligand(ligand, database, arg['ligand_indices'], arg['ligand_opt'],
-                                   arg['split'], arg['ligand_crs']) for ligand in ligand_list)
+    ligand_list = list(prep_ligand(ligand, database, arg) for ligand in ligand_list)
     ligand_list = list(itertools.chain(*ligand_list))
     if not ligand_list:
         raise IndexError('No valid ligand functional groups were found, aborting run')
 
     # Write new entries to the ligand database
     if arg['use_database']:
-        QD_database.write_database(ligand_list, database)
+        QD_database.write_database(ligand_list, database, path)
 
     # Combine the core with the ligands, yielding qd, and format the resulting list
     qd_list = list(prep_qd(core, ligand, folder_list[2]) for core in core_list for
                    ligand in ligand_list)
 
-    # Check if the ADF environment variables are set and optimize the qd with the core frozen
+    # Optimize the qd with the core frozen
     if arg['qd_opt']:
         QD_ams.check_sys_var()
         if not qd_list:
@@ -73,17 +72,9 @@ def prep(input_ligands, input_cores, path, arg):
             raise IndexError('No valid quantum dots were found, aborting single points')
         else:
             qd_list = list(QD_scripts.qd_int(qd, job='qd_sp') for qd in qd_list)
-            for qd in qd_list:
-                E = qd.properties.energy
-                E2 = E / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
-                E_int = qd.properties.int
-                E2_int = E_int / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
-                E_strain = qd.properties.strain
-                E2_strain = E_strain / float(qd[-1].properties.pdb_info.ResidueNumber - 1)
-                print('E_int:', '%.2f' % E_int, '(mean: ' + '%.2f' % E2_int + ') kcal/mol',
-                      '\nE_strain:', '%.2f' % E_strain,
-                      '(mean: ' + '%.2f' % E2_strain + ') kcal/mol',
-                      '\nE:', '%.2f' % E, '(mean: ' + '%.2f' % E2 + ') kcal/mol')
+
+            if arg['use_database']:
+                QD_database.write_database_qd(qd_list, path)
 
     # The End
     time_end = time.time()
@@ -92,7 +83,7 @@ def prep(input_ligands, input_cores, path, arg):
     return qd_list
 
 
-def prep_core(core, core_dummies, dummy=0, opt=False):
+def prep_core(core, arg):
     """
     Function that handles all core operations.
 
@@ -101,6 +92,11 @@ def prep_core(core, core_dummies, dummy=0, opt=False):
     dummy <int> or <str>: Atomic number or symbol of the to be replaced dummy atoms.
     opt <bool>: If the geometry of the core (RDKit UFF) should be optimized (True) or not (False).
     """
+    core_dummies = arg['core_indices']
+    dummy = arg['dummy']
+    opt = arg['core_opt']
+
+
     # Checks the if the dummy is a string (atomic symbol) or integer (atomic number)
     if isinstance(dummy, str):
         dummy = Atom(symbol=dummy).atnum
@@ -124,7 +120,7 @@ def prep_core(core, core_dummies, dummy=0, opt=False):
                             ' was specified as dummy atom, yet no dummy atoms were found')
 
 
-def prep_ligand(ligand, database, ligand_indices=[], opt=True, split=True, crs=True):
+def prep_ligand(ligand, database, arg):
     """
     Function that handles all ligand operations,
 
@@ -136,6 +132,11 @@ def prep_ligand(ligand, database, ligand_indices=[], opt=True, split=True, crs=T
 
     return <list>[<plams.Molecule>]: A copy of the ligand for each identified functional group.
     """
+    ligand_indices = arg['ligand_indices']
+    opt = arg['ligand_opt']
+    split = arg['split']
+    crs = arg['ligand_crs']
+
     # Handles all interaction between the database, the ligand and the ligand optimization
     ligand = QD_scripts.optimize_ligand(ligand, database, opt)
 
