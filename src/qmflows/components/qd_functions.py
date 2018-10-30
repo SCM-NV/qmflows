@@ -9,7 +9,6 @@ from scm.plams import (Atom)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, Bond, rdMolTransforms
-from rdkit.Chem import Atom as At
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
@@ -42,7 +41,7 @@ def optimize_ligand(ligand, database, opt=True):
         if opt:
             ligand_opt = molkit.global_minimum(ligand, n_scans=2, no_h=True)
             ligand_opt.properties.name = ligand.properties.name + '.opt'
-            ligand_opt.properties.source_folder = ligand.properties.source_folder
+            ligand_opt.properties.path = ligand.properties.path
             export_mol(ligand_opt, message='Optimized ligand:\t\t')
             for i, atom in enumerate(ligand):
                 atom.move_to(ligand_opt[i + 1])
@@ -56,8 +55,6 @@ def optimize_ligand(ligand, database, opt=True):
             print('\ndatabase entry exists for ' + ligand_opt.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
-    ligand.properties.source = os.path.join(ligand.properties.source_folder,
-                                            ligand.properties.name + '.opt.pdb')
     return ligand
 
 
