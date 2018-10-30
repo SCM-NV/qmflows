@@ -4,7 +4,7 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'D:\QMFlows_DATA'
+path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
 
 input_cores = yaml.load("""
 -   - Cd68Se55.xyz
@@ -12,7 +12,7 @@ input_cores = yaml.load("""
 """)
 
 input_ligands = yaml.load("""
-- O=C(O)C(C1=CC=CC=C1)(C2=CC=CC=C2)C3=CC=CC=C3
+- OCCCCC
 """)
 
 """
@@ -56,6 +56,18 @@ Input_ligands <list>[<mol>] or <list>[<list>[<mol>, <dict>]]:
         sheet_name <str>: Sheet1
             The name of the sheet containing the to be imported molecules
             Relevant for .xlsx files.
+
+        core_indices <list>[<int>]: []
+            Manually specify the index <int> of the core atoms that should be replaced with ligands.
+            Alternatively, all atoms of a given element can be identified as dummy atoms with the
+            dummy argument (see argument_dict).
+
+        ligand_indices <list>[<int>] or <list>[<int>, ..., <int>]: []
+            Manually specify the index <int> of the ligand atom that should be attached to the core.
+            Serves as an alternative to the functional group based substructure_search().
+            If a list of ints is supplied instead, list[0] will be attached to the core and list[-1]
+                will be removed from the ligand (see the keyword 'split' in argument_dict).
+
 """
 
 
@@ -63,8 +75,6 @@ Input_ligands <list>[<mol>] or <list>[<list>[<mol>, <dict>]]:
 argument_dict = yaml.load("""
 dir_name_list: [core, ligand, QD]
 dummy: Cl
-core_indices: []
-ligand_indices: []
 database_name: ligand_database.xlsx
 use_database: True
 core_opt: False
@@ -85,20 +95,6 @@ Optional arguments:
         The atomic number <int> or atomic symbol <str> of the atoms in the core that should be
         replaced with ligands. Alternatively, dummy atoms can be manually specified with
         the core_indices argument.
-
-    core_indices <list>[<int>]: []
-        Specify the indices <int> of the core dummy atoms that should be replaced with ligands.
-        Alternatively, all atoms of a given element can be identified as dummy atoms with the
-        dummy argument.
-
-    ligand_indices <list>[<int>] or <list>[<list>[<int>, <int>]]: []
-        Specify the indices <int> of the ligand atoms that should be attached to the core.
-        Or supply two atomic indices (<list>[<int>, <int>] instead of <int>):
-            The bond between <list>[0] and <list>[1] is broken.
-            The resulting molecule containing atom <list>[1] is disgarded
-            The resulting molecule containing atom <list>[0] is returned and attached to the core.
-        Alternatively, all atoms of a given element can be identified as dummy atoms with the
-        dummy argument.
 
     database_name <str>: ligand_database.xlsx
         Name plus extension <str> of the (to be) created database where all results will be stored.
@@ -121,7 +117,8 @@ Optional arguments:
         Optimize the quantum dot (qd, i.e core + all ligands) using ADF UFF.
 
     qd_int <bool>: False
-        Calculate the (mean) interaction between ligands on the quantum dot surface using ADF UFF.
+        Perform an activation strain analyses on the ligands attached to the quantum dot surface
+            using RDKit UFF.
 
     maxiter <int>: 2000
         Maxiter + 50 is the maximum number of geometry iterations <int> used in qd_opt.
@@ -143,4 +140,7 @@ Optional arguments:
 
 
 # Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
-qd_list = QD.prep(input_ligands, input_cores, path, argument_dict)
+qd_list, core_list, ligand_list = QD.prep(input_ligands, input_cores, path, argument_dict)
+qd = qd_list[0]
+ligand = ligand_list[0]
+core = core_list[0]
