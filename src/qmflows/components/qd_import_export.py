@@ -10,7 +10,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 
 
-def read_mol(input_mol, folder_path, is_core=False):
+def read_mol(input_mol, path, is_core=False):
     """
     Checks the filetypes of the input molecules, sets their properties and
     returns a list of plams molecules.
@@ -27,7 +27,7 @@ def read_mol(input_mol, folder_path, is_core=False):
 
     # Reads the input molecule(s), the method depending on the nature of the file extension
     # Returns a list of dictionaries
-    input_mol = [read_mol_defaults(mol, folder_path, is_core) for mol in input_mol]
+    input_mol = [read_mol_defaults(mol, path, is_core) for mol in input_mol]
     input_mol = [read_mol_extension(mol) for mol in input_mol]
     input_mol = dict_concatenate(input_mol)
 
@@ -49,7 +49,6 @@ def read_mol(input_mol, folder_path, is_core=False):
             if isinstance(mol, Molecule):
                 if mol_dict['guess_bonds']:
                     mol.guess_bonds()
-
                 # Guess bonbs if an xyz file was provided and the user did not specifiy guess_bonds
                 if mol_dict['file_type'] == 'xyz':
                     if isinstance(mol_dict['user_args'], str):
@@ -60,7 +59,6 @@ def read_mol(input_mol, folder_path, is_core=False):
                             mol.guess_bonds()
                 set_prop(mol, mol_dict)
                 mol_list.append(mol)
-
             # if mol is a list
             if isinstance(mol, list):
                 mol_list += mol
@@ -86,14 +84,16 @@ def read_mol_defaults(mol, path, is_core=False):
     """
     # A dictionary of default arguments
     kwarg = {'file_type': '',
-             'name': mol,
+             'name': '',
              'row': 0,
              'column': 0,
              'sheet_name': 'Sheet1',
              'guess_bonds': False,
              'is_core': is_core,
              'path': path,
-             'user_args': mol}
+             'user_args': mol,
+             'core_indices': '',
+             'ligand_indices': ''}
 
     # Update the dictionary of default arguments based on used-specified arguments
     if isinstance(mol, (list, tuple)):
@@ -101,6 +101,7 @@ def read_mol_defaults(mol, path, is_core=False):
         mol = mol[0]
     if mol is None:
         mol = ''
+    kwarg['name'] = mol
 
     return {mol: kwarg}
 
@@ -166,7 +167,7 @@ def read_mol_xyz(mol, mol_dict):
     Read an .xyz file
     """
     try:
-        mol_path = os.path.join(mol_dict['path'], mol_dict['name'])
+        mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.xyz')
         return Molecule(mol_path, inputformat='xyz')
     except (Exception, errors.PlamsError) as ex:
         print_exception(read_mol_xyz.__code__, ex, mol_dict, mol_path)
@@ -177,7 +178,7 @@ def read_mol_pdb(mol, mol_dict):
     Read a .pdb file
     """
     try:
-        mol_path = os.path.join(mol_dict['path'], mol_dict['name'])
+        mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.pdb')
         return molkit.readpdb(mol_path)
     except (Exception, errors.PlamsError) as ex:
         print_exception(read_mol_pdb.__code__, ex, mol_dict, mol_path)
@@ -188,7 +189,7 @@ def read_mol_mol(mol, mol_dict):
     Read a .mol file
     """
     try:
-        mol_path = os.path.join(mol_dict['path'], mol_dict['name'])
+        mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.mol')
         return molkit.from_rdmol(Chem.MolFromMolFile(mol_path, removeHs=False))
     except (Exception, errors.PlamsError) as ex:
         print_exception(read_mol_mol.__code__, ex, mol_dict, mol_path)
@@ -231,7 +232,7 @@ def read_mol_folder(mol, mol_dict):
     try:
         mol_path = os.path.join(mol_dict['path'], mol_dict['name'])
         file_list = [[file, mol_dict] for file in os.listdir(mol_path)]
-        return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
+        return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
         print_exception(read_mol_folder.__code__, ex, mol_dict, mol_path)
 
@@ -241,15 +242,15 @@ def read_mol_txt(mol, mol_dict):
     Read a plain text file containing one or more SMILES strings
     """
     try:
-        mol_path = os.path.join(mol_dict['path'], mol_dict['name'])
+        mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.txt')
         with open(mol_path, 'r') as file:
             file_list = file.read().splitlines()
         file_list = [file.split()[mol_dict['column']] for file in file_list[mol_dict['row']:] if
                      file]
         file_list = [[file, mol_dict] for file in file_list if len(file) >= 2]
-        return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
+        return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_txt.__code__, ex, mol_dict, mol_dict['mol_path'])
+        print_exception(read_mol_txt.__code__, ex, mol_dict, mol_path)
 
 
 def read_mol_excel(mol, mol_dict):
@@ -257,11 +258,12 @@ def read_mol_excel(mol, mol_dict):
     Read a plain text file containing one or more SMILES strings
     """
     try:
-        file_list = pd.read_excel(mol_dict['mol_path'], sheet_name=mol_dict['sheet_name'])
+        mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.xlsx')
+        file_list = pd.read_excel(mol_path, sheet_name=mol_dict['sheet_name'])
         file_list = [[file, mol_dict] for file in file_list[mol_dict['column']][mol_dict['row']:]]
-        return read_mol(file_list, mol_dict['folder_path'], mol_dict['is_core'])
+        return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_excel.__code__, ex, mol_dict, mol_dict['mol_path'])
+        print_exception(read_mol_excel.__code__, ex, mol_dict, mol_path)
 
 
 def set_prop(mol, mol_dict):
@@ -271,9 +273,11 @@ def set_prop(mol, mol_dict):
     if mol_dict.get('is_core'):
         residue_name = 'COR'
         mol.properties.name = 'Core_' + mol_dict['name']
+        mol.properties.dummies = mol_dict['core_indices']
     else:
         residue_name = 'LIG'
         mol.properties.name = 'Ligand_' + mol_dict['name']
+        mol.properties.dummies = mol_dict['ligand_indices']
 
     mol.properties.path = mol_dict['path']
     if not mol.properties.smiles:

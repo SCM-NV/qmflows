@@ -72,25 +72,25 @@ def find_substructure(ligand, split=True):
     # Creates a list containing predefined functional groups, each saved as an rdkit molecule
     # IMPORTANT: The first atom should ALWAYS be the atom that should attach to the core
     if split:
-        functional_group_list = ['[N+].[-]',
-                                 'O[H]',
-                                 'S[H]',
-                                 'N[H]',
-                                 'P[H]',
-                                 '[O-].[+]',
-                                 '[S-].[+]',
-                                 '[N-].[+]',
-                                 '[P-].[+]']
+        functional_group_list = ['[N+]C.[-]',
+                                 'O(C)[H]',
+                                 'S(C)[H]',
+                                 'N(C)[H]',
+                                 'P(C)[H]',
+                                 '[O-]C.[+]',
+                                 '[S-]C.[+]',
+                                 '[N-]C.[+]',
+                                 '[P-]C.[+]']
     else:
-        functional_group_list = ['[N+]',
-                                 'O[H]',
-                                 'S[H]',
-                                 'N[H]',
-                                 'P[H]',
-                                 '[O-]',
-                                 '[S-]',
-                                 '[N-]',
-                                 '[P-]']
+        functional_group_list = ['[N+]C',
+                                 'O[H]C',
+                                 'S[H]C',
+                                 'N[H]C',
+                                 'P[H]C',
+                                 '[O-]C',
+                                 '[S-]C',
+                                 '[N-]C',
+                                 '[P-]C']
 
     functional_group_list = [Chem.MolFromSmarts(smarts) for smarts in functional_group_list]
 
@@ -100,7 +100,7 @@ def find_substructure(ligand, split=True):
     matches = [get_match(mol) for mol in functional_group_list]
     matches = list(itertools.chain(*matches))
 
-    # Remove all duplicate matches
+    # Remove all duplicate matches, each heteroatom (match[0]) should have <= 1 entry
     ligand_indices = []
     for match in matches:
         if match[0] not in [item[0] for item in ligand_indices]:
@@ -129,7 +129,7 @@ def find_substructure_split(ligand, ligand_index, split=True):
     return <plams.Molecule>: The ligand molecule.
     """
     at1 = ligand[ligand_index[0] + 1]
-    at2 = ligand[ligand_index[1] + 1]
+    at2 = ligand[ligand_index[-1] + 1]
     ligand.properties.name += '@' + at1.symbol + str(ligand_index[0] + 1)
 
     if split:
@@ -147,7 +147,7 @@ def find_substructure_split(ligand, ligand_index, split=True):
             at1.properties.charge = -1
 
     # Update the index of the ligand heteroatom
-    ligand.properties.ligand_dummy = at1
+    ligand.properties.dummies = at1
     ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
 
     return ligand
@@ -166,14 +166,14 @@ def rotate_ligand(core, ligand, i, core_dummy):
         attached to the core.
     """
     ligand = ligand.copy()
-    ligand.properties.ligand_dummy = ligand.closest_atom(ligand.properties.ligand_dummy.coords)
+    ligand.properties.dummies = ligand.closest_atom(ligand.properties.dummies.coords)
 
     # Defines first atom on coordinate list (hydrogen),
     # The atom connected to it and vector representing bond between them
     core_at1 = core_dummy         # core dummy atom
     core_at2 = core[-1]                 # core center of mass
     core_vector = core_at1.vector_to(core_at2)
-    lig_at1 = ligand.properties.ligand_dummy  	# ligand heteroatom
+    lig_at1 = ligand.properties.dummies  	# ligand heteroatom
     lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
@@ -252,7 +252,7 @@ def adf_connectivity(plams_mol):
     at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
     at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
     bonds = [bond.order for bond in plams_mol.bonds]
-    for i, bond in enumerate(plams_mol.bonds):
+    for i, bond in zip(plams_mol.bonds):
         if i in aromatic:
             bonds[i] = 1.5
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
@@ -262,14 +262,13 @@ def adf_connectivity(plams_mol):
 
 def fix_h(plams_mol):
     """
-    If a C=C-H angle is smaller than 20 degrees, set it back to 120.0 degrees.
+    If a C=C-H angle is smaller than 20.0 degrees, set it back to 120.0 degrees.
 
     plams_mol <plams.Molecule>: A PLAMS molecule.
 
-    return <plams.Molecule>: A PLAMS molecule without C=C-H angles smaller than 20.
+    return <plams.Molecule>: A PLAMS molecule without C=C-H angles smaller than 20.0 degrees.
     """
-    H_list = [atom for atom in plams_mol if atom.atnum is 1]
-    H_list = [atom for atom in H_list if 2.0 in
+    H_list = [atom for atom in plams_mol if atom.atnum is 1 and 2.0 in
               [bond.order for bond in plams_mol.neighbors(atom)[0].bonds]]
 
     rdmol = molkit.to_rdmol(plams_mol)
@@ -295,7 +294,7 @@ def fix_h(plams_mol):
         return plams_mol
 
 
-def qd_int(plams_mol, job='qd_sp'):
+def qd_int(plams_mol):
     """
     Perform an activation-strain analyses (RDKit UFF) on the ligands in the absence of the core.
 
@@ -307,29 +306,27 @@ def qd_int(plams_mol, job='qd_sp'):
     mol_copy = plams_mol.copy()
     uff = AllChem.UFFGetMoleculeForceField
 
-    # Calculate the total energy of all ligands in the absence of the core
-    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName is 'COR']
-    for atom in atom_list:
-        mol_copy.delete_atom(atom)
+    # Calculate the total energy of all perturbed ligands in the absence of the core
+    for atom in mol_copy:
+        if atom.properties.pdb_info.ResidueName is 'COR':
+            mol_copy.delete_atom(atom)
     rdmol = molkit.to_rdmol(mol_copy)
     E_no_frag = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
-    # Calculate the total energy of the isolated ligands in the absence of the core
+    # Calculate the total energy of the isolated perturbed ligands in the absence of the core
     mol_frag = mol_copy.separate()
-
     E_frag = 0.0
     for mol in mol_frag:
         rdmol = molkit.to_rdmol(mol)
         E_frag += uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
-    # Calculate the total energy of an optimized ligand
-    rdmol = molkit.to_rdmol(mol_frag[0])
+    # Calculate the total energy of the optimized ligand
     uff(rdmol, ignoreInterfragInteractions=False).Minimize()
     E_opt = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
-    # Calculate the total and mean (pair-wise) interaction between between fragments
-    plams_mol.properties.int = float(E_no_frag - E_frag)
-    plams_mol.properties.strain = float(E_frag - (E_opt * len(mol_frag)))
-    plams_mol.properties.energy = plams_mol.properties.int + plams_mol.properties.strain
+    # Calculate E, Eint and Estrain
+    plams_mol.properties.Eint = float(E_no_frag - E_frag)
+    plams_mol.properties.Estrain = float(E_frag - (E_opt * len(mol_frag)))
+    plams_mol.properties.E = plams_mol.properties.Eint + plams_mol.properties.Estrain
 
     return plams_mol
