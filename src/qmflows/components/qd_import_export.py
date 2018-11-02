@@ -151,7 +151,7 @@ def smiles_name(smiles_str):
     return <str>: A filename based on a SMILES string.
     """
     name = smiles_str.replace('(', '[').replace(')', ']')
-    cis_trans = [item for item in smiles_str if item is '/' or item is '\\']
+    cis_trans = [item for item in smiles_str if item == '/' or item == '\\']
     if cis_trans:
         cis_trans = [item + cis_trans[i*2+1] for i, item in enumerate(cis_trans[::2])]
         cis_trans_dict = {'//': 'trans-', '/\\': 'cis-'}
@@ -170,7 +170,7 @@ def read_mol_xyz(mol, mol_dict):
         mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.xyz')
         return Molecule(mol_path, inputformat='xyz')
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_xyz.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_xyz.__code__, ex, mol_path)
 
 
 def read_mol_pdb(mol, mol_dict):
@@ -181,7 +181,7 @@ def read_mol_pdb(mol, mol_dict):
         mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.pdb')
         return molkit.readpdb(mol_path)
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_pdb.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_pdb.__code__, ex, mol_path)
 
 
 def read_mol_mol(mol, mol_dict):
@@ -192,7 +192,7 @@ def read_mol_mol(mol, mol_dict):
         mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.mol')
         return molkit.from_rdmol(Chem.MolFromMolFile(mol_path, removeHs=False))
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_mol.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_mol.__code__, ex, mol_path)
 
 
 def read_mol_smiles(mol, mol_dict):
@@ -202,7 +202,7 @@ def read_mol_smiles(mol, mol_dict):
     try:
         return molkit.from_smiles(mol)
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_smiles.__code__, ex, mol_dict, mol)
+        print_exception(read_mol_smiles.__code__, ex, mol)
 
 
 def read_mol_plams(mol, mol_dict):
@@ -212,7 +212,7 @@ def read_mol_plams(mol, mol_dict):
     try:
         return mol
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_plams.__code__, ex, mol_dict, mol)
+        print_exception(read_mol_plams.__code__, ex, mol)
 
 
 def read_mol_rdkit(mol, mol_dict):
@@ -222,7 +222,7 @@ def read_mol_rdkit(mol, mol_dict):
     try:
         return molkit.from_rdmol(mol)
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_rdkit.__code__, ex, mol_dict, mol)
+        print_exception(read_mol_rdkit.__code__, ex, mol)
 
 
 def read_mol_folder(mol, mol_dict):
@@ -234,7 +234,7 @@ def read_mol_folder(mol, mol_dict):
         file_list = [[file, mol_dict] for file in os.listdir(mol_path)]
         return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_folder.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_folder.__code__, ex, mol_path)
 
 
 def read_mol_txt(mol, mol_dict):
@@ -250,7 +250,7 @@ def read_mol_txt(mol, mol_dict):
         file_list = [[file, mol_dict] for file in file_list if len(file) >= 2]
         return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_txt.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_txt.__code__, ex, mol_path)
 
 
 def read_mol_excel(mol, mol_dict):
@@ -263,7 +263,7 @@ def read_mol_excel(mol, mol_dict):
         file_list = [[file, mol_dict] for file in file_list[mol_dict['column']][mol_dict['row']:]]
         return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
-        print_exception(read_mol_excel.__code__, ex, mol_dict, mol_path)
+        print_exception(read_mol_excel.__code__, ex, mol_path)
 
 
 def set_prop(mol, mol_dict):
@@ -280,8 +280,6 @@ def set_prop(mol, mol_dict):
         mol.properties.dummies = mol_dict['ligand_indices']
 
     mol.properties.path = mol_dict['path']
-    if not mol.properties.smiles:
-        mol.properties.smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
 
     # Prepare a list of letters for pdb_info.Name
     alphabet = list('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -293,6 +291,9 @@ def set_prop(mol, mol_dict):
     # Set the atomic properties
     for i, atom in enumerate(mol):
         set_prop_atom(atom, alphabet[i], residue_name, elements_dict)
+
+    if not mol.properties.smiles:
+        mol.properties.smiles = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
 
 
 def set_prop_atom(atom, alphabet, residue_name, elements_dict):
@@ -316,8 +317,19 @@ def set_prop_atom(atom, alphabet, residue_name, elements_dict):
     # Sets the formal atomic charge
     if not atom.properties.charge:
         if atom.symbol in elements_dict:
-            total_bonds = [bond.order for bond in atom.bonds]
-            atom.properties.charge = elements_dict[atom.symbol] + int(sum(total_bonds))
+            total_bonds = int(sum([bond.order for bond in atom.bonds]))
+            default_charge = elements_dict[atom.symbol]
+            sign = int(default_charge / abs(default_charge))
+            atom.properties.charge = default_charge + sign*total_bonds
+
+            # Update formal atomic charges for hypervalent atoms
+            if total_bonds > abs(default_charge):
+                if total_bonds is abs(default_charge) + 2:
+                    atom.properties.charge += sign*2
+                elif total_bonds is abs(default_charge) + 4:
+                    atom.properties.charge += sign*4
+                elif total_bonds >= abs(default_charge) + 6:
+                    atom.properties.charge += sign*6
         else:
             atom.properties.charge = 0
 
@@ -354,7 +366,7 @@ def export_mol(mol, message='Mol:\t\t\t\t'):
     print(str(message) + str(name) + '.pdb')
 
 
-def print_exception(func, ex, mol_dict, name):
+def print_exception(func, ex, name):
     """
     Manages the printing of exceptions upon failing to import a molecule.
     """
