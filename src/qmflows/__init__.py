@@ -4,7 +4,7 @@ from .components import (
     read_database, compare_database, write_database,
     read_mol, set_prop, create_dir,
     optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, combine_qd,
-    check_sys_var, ams_job)
+    check_sys_var, ams_job_mopac_sp, ams_job_uff_opt)
 
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -26,4 +26,4 @@ __all__ = [
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
     'combine_qd',
-    'check_sys_var', 'ams_job']
+    'check_sys_var', 'ams_job_mopac_sp', 'ams_job_uff_opt']
