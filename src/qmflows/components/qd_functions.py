@@ -2,7 +2,6 @@ __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'r
            'combine_qd', 'qd_int', 'adf_connectivity', 'fix_h']
 
 import itertools
-import os
 import numpy as np
 
 from scm.plams import (Atom)
@@ -25,7 +24,7 @@ def optimize_ligand(ligand, database, opt=True):
     return <plams.Molecule>: The optimized ligand molecule.
     """
     # Searches for matches between the input ligand and the database; imports the structure
-    if not isinstance(database, bool):
+    if database is not None:
         ligand, match, pdb = compare_database(ligand, database)
     else:
         match, pdb = False, False
@@ -130,7 +129,7 @@ def find_substructure_split(ligand, ligand_index, split=True):
     """
     at1 = ligand[ligand_index[0] + 1]
     at2 = ligand[ligand_index[-1] + 1]
-    ligand.properties.name += '@' + at1.symbol + str(ligand_index[0] + 1)
+    ligand.properties.group = at1.symbol + str(ligand_index[0] + 1)
 
     if split:
         if len(ligand.separate()) == 1:
@@ -148,7 +147,10 @@ def find_substructure_split(ligand, ligand_index, split=True):
 
     # Update the index of the ligand heteroatom
     ligand.properties.dummies = at1
-    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
+
+    # Set the molecular charge
+    ligand.properties.charge = sum([atom.properties.charge for atom in ligand
+                                    if atom.properties.charge])
 
     return ligand
 
@@ -167,6 +169,7 @@ def rotate_ligand(core, ligand, i, core_dummy):
     """
     ligand = ligand.copy()
     ligand.properties.dummies = ligand.closest_atom(ligand.properties.dummies.coords)
+    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
 
     # Defines first atom on coordinate list (hydrogen),
     # The atom connected to it and vector representing bond between them
