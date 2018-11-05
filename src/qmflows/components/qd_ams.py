@@ -4,9 +4,10 @@ import os
 import shutil
 
 from scm.plams import (Settings, AMSJob, init, finish, Units)
-from scm.plams.core.basejob import MultiJob, Job
 from scm.plams.core.jobrunner import JobRunner
-from scm.plams.interfaces.adfsuite.scmjob import SCMJob
+from scm.plams.tools.kftools import KFFile
+from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
+
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
@@ -35,7 +36,7 @@ def qd_opt(plams_mol, database):
     Check if the to be optimized quantom dot has previously been optimized.
     Pull if the structure from the database if it has, otherwise perform a geometry optimization.
 
-    plams_mol <plams.Molecule> The input quantom dot.
+    plams_mol <plams.Molecule> The input quantom dot with the 'name' property.
     database <pd.DataFrame>: A database of previous calculations.
 
     return <plams.Molecule>: An optimized quantom dot.
@@ -52,17 +53,27 @@ def qd_opt(plams_mol, database):
     return plams_mol
 
 
+class CRSResults(SCMResults):
+    """
+    A class accessing results of COSMO-RS jobs.
+    """
+    _kfext = '.crskf'
+    _rename_map = {'CRSKF': '$JN.crskf'}
+
+
 class CRSJob(SCMJob):
     """
     A class for running COSMO-RS jobs.
     """
     _command = 'crs'
+    _result_type = CRSResults
 
 
 def uff_settings(plams_mol, mol_indices):
-    # AMS settings (UFF constrained geometry optimization)
+    """
+    UFF settings for a constrained geometry optimization
+    """
     s1 = Settings()
-    s1.runscript.post = '\ncp mopac.coskf mopac.cosmo.rkf\n'
 
     s1.input.ams.Task = 'GeometryOptimization'
     s1.input.ams.Constraints.Atom = mol_indices
@@ -74,8 +85,12 @@ def uff_settings(plams_mol, mol_indices):
 
 
 def crs_settings():
+    """
+    COSMO-RS settings for a LogP calculation using 'MOPAC PM6' parameters.
+    """
     s2 = Settings()
     s2.ignore_molecule = True
+    s2.pickle = False
 
     s2.input.Property._h = 'logP'
     s2.input.Property.VolumeQuotient = 6.766
@@ -95,7 +110,7 @@ def crs_settings():
     s2.input.CRSParameters.eta = -9.65
     s2.input.CRSParameters.chortf = 0.816
 
-    s2.input.Compound._h = 'mopac.coskf'
+    s2.input.Compound._h = ''
 
     s2.input.compound._h = os.path.join(os.environ['ADFRESOURCES'], 'ADFCRS/1-Octanol.coskf')
     s2.input.compound.frac1 = 0.725
@@ -118,49 +133,65 @@ def crs_settings():
 
 
 def mopac_settings(charge):
+    """
+    COSMO-MOPAC settings for a single point with COSMO-RS parameters.
+    """
     s3 = Settings()
+    s3.pickle = False
+
     s3.input.ams.Task = 'SinglePoint'
-    s3.input.ams.charge = 'charge'
+    s3.input.ams.System.Charge = charge
     s3.input.MOPAC.Solvation = 'COSMO-CRS'
-    s3.runscript.post = 'cp mopac.coskf mopac.crs.rkf'
+    s3.input.MOPAC.mozyme = True
 
     return s3
-
-
-def get_logp(out_file):
-    with open(out_file) as file:
-        file = file.read().splitlines()
-    index = file.index(' Infinite dilute Partition coefficient') + 2
-    return float(file[index].split()[-1])
 
 
 def ams_job_mopac_sp(mol_list):
     """
     Runs a MOPAC + COSMO-RS single point.
 
-    plams_mol <plams.Molecule>: The input PLAMS molecule.
+    mol_list <list>[<plams.Molecule>]: A list of PLAMS molecule with the 'path', 'charge' and
+        'name' properties.
 
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     path = mol_list[0].properties.path
+    paralel = JobRunner(parallel=True, maxjobs=os.cpu_count())
 
     # Run MOPAC
-    init(path=path)
-    jobrunner = JobRunner(parallel=True, maxjobs=os.cpu_count())
-    job_list = list(MultiJob(children=dict()) for mol in mol_list)
-    crs = crs_settings()
-    for job, mol in zip(job_list, mol_list):
-        job.children['mopac'] = AMSJob(molecule=mol, settings=mopac_settings(mol.properties.charge))
-        job.children['crs'] = CRSJob(settings=crs)
-    results_list = list(job.run(jobrunner) for job in job_list)
+    init(path=path, folder='mopac')
+    mopac_jobs = list(AMSJob(molecule=mol,
+                             settings=mopac_settings(mol.properties.charge),
+                             name=mol.properties.name) for mol in mol_list)
+    results_dict1 = dict((mol.properties.name, mopac_job.run(paralel)) for
+                         mol, mopac_job in zip(mol_list, mopac_jobs))
     finish()
 
-    # Assign three new properties to each molecule
+    # Run COSMO-RS
+    init(path=path, folder='crs')
+    crs = crs_settings()
+    crs_jobs = list(CRSJob(settings=crs, name=mol.properties.name) for mol in mol_list)
+    for crs_job, results1 in zip(crs_jobs, results_dict1):
+        if 'mopac.coskf' in results_dict1[results1].files:
+            crs_job.settings.input.Compound._h = results_dict1[results1]['mopac.coskf']
+        else:
+            crs_job.name = False
+    results_dict2 = dict((mol.properties.name, crs_job.run(paralel)) for
+                         mol, crs_job in zip(mol_list, crs_jobs) if crs_job.name)
+    finish()
+
+    # Extract results from the calculations
     Angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
-    for mol, results in zip(mol_list, results_list):
-        mol.properties.surface = results.readrkf('COSMO', 'Area', file='mopac.cosmo') * Angstrom**2
-        mol.properties.volume = results.readrkf('COSMO', 'Volume', file='mopac.cosmo') * Angstrom**3
-        mol.properties.logp = get_logp(results['$JN.out'])
+    for mol in mol_list:
+        prop = mol.properties
+        results1 = results_dict1.get(mol.properties.name)
+        results2 = results_dict2.get(mol.properties.name)
+        if results1 and 'mopac.coskf' in results1.files:
+            prop.surface = KFFile(results1['mopac.coskf']).read('COSMO', 'Area') * Angstrom**2
+            prop.volume = KFFile(results1['mopac.coskf']).read('COSMO', 'Volume') * Angstrom**3
+            if results2:
+                prop.logp = KFFile(results2['$JN.crskf']).read('LOGP', 'logp')[0]
 
     return mol_list
 
@@ -169,7 +200,8 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     """
     Runs an AMS UFF constrained geometry optimization.
 
-    plams_mol <plams.Molecule>: The input PLAMS molecule.
+    plams_mol <plams.Molecule>: The input PLAMS molecule with the 'path', 'name' and
+        'mol_indices' properties.
     bonds <list>[<list>[<int>, <float>]]: A nested list of atomic indices and bond orders.
     maxiter <int>: The maximum number of iterations during the geometry optimization.
 
