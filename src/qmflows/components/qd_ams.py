@@ -41,13 +41,17 @@ def qd_opt(plams_mol, database):
 
     return <plams.Molecule>: An optimized quantom dot.
     """
-    if database is None or plams_mol.properties.name not in database['Quantum_dot_name']:
-        plams_mol = ams_job_mopac_sp(plams_mol)
+    name = plams_mol.properties.name.rsplit('.', 1)[0]
+    if database is None:
+        plams_mol = ams_job_uff_opt(plams_mol)
+        plams_mol.properties.entry = False
+    elif database.empty or name not in list(database['Quantum_dot_name']):
+        plams_mol = ams_job_uff_opt(plams_mol)
+        plams_mol.properties.entry = True
     else:
-        index = database['Quantum_dot_name'].index(plams_mol.properties.name)
+        index = list(database['Quantum_dot_name']).index(name)
         plams_mol_new = molkit.readpdb(database['Quantum_dot_opt_pdb'][index])
         plams_mol_new.properties = plams_mol.properties
-        plams_mol_new.properties.entry = True
         plams_mol = plams_mol_new
 
     return plams_mol
@@ -112,7 +116,8 @@ def crs_settings():
 
     s2.input.Compound._h = ''
 
-    s2.input.compound._h = os.path.join(os.environ['ADFRESOURCES'], 'ADFCRS/1-Octanol.coskf')
+    s2.input.compound._h = '"' + os.path.join(os.environ['ADFRESOURCES'],
+                                              'ADFCRS/1-Octanol.coskf') + '"'
     s2.input.compound.frac1 = 0.725
     s2.input.compound.pvap = 1.01325
     s2.input.compound.tvap = 468.0
@@ -120,7 +125,8 @@ def crs_settings():
     s2.input.compound.flashpoint = 354.0
     s2.input.compound.density = 0.824
 
-    s2.input.compounD._h = os.path.join(os.environ['ADFRESOURCES'], 'ADFCRS/Water.coskf')
+    s2.input.compounD._h = '"' + os.path.join(os.environ['ADFRESOURCES'],
+                                              'ADFCRS/Water.coskf') + '"'
     s2.input.compounD.frac1 = 0.275
     s2.input.compounD.frac2 = 1.0
     s2.input.compounD.pvap = 1.01325
@@ -163,35 +169,37 @@ def ams_job_mopac_sp(mol_list):
     init(path=path, folder='mopac')
     mopac_jobs = list(AMSJob(molecule=mol,
                              settings=mopac_settings(mol.properties.charge),
-                             name=mol.properties.name) for mol in mol_list)
-    results_dict1 = dict((mol.properties.name, mopac_job.run(paralel)) for
-                         mol, mopac_job in zip(mol_list, mopac_jobs))
+                             name='MOPAC_'+str(i)) for i, mol in enumerate(mol_list))
+    results_dict1 = dict((mopac_job.name, mopac_job.run(paralel)) for mopac_job in mopac_jobs)
     finish()
 
     # Run COSMO-RS
     init(path=path, folder='crs')
     crs = crs_settings()
-    crs_jobs = list(CRSJob(settings=crs, name=mol.properties.name) for mol in mol_list)
+    crs_jobs = list(CRSJob(settings=crs, name='COSMO-RS_'+str(i)) for i, mol in enumerate(mol_list))
     for crs_job, results1 in zip(crs_jobs, results_dict1):
         if 'mopac.coskf' in results_dict1[results1].files:
-            crs_job.settings.input.Compound._h = results_dict1[results1]['mopac.coskf']
+            crs_job.settings.input.Compound._h = '"' + results_dict1[results1]['mopac.coskf'] + '"'
         else:
             crs_job.name = False
-    results_dict2 = dict((mol.properties.name, crs_job.run(paralel)) for
-                         mol, crs_job in zip(mol_list, crs_jobs) if crs_job.name)
+    results_dict2 = dict((crs_job.name, crs_job.run(paralel)) for crs_job in crs_jobs if
+                         crs_job.name)
     finish()
 
     # Extract results from the calculations
     Angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
-    for mol in mol_list:
+    for i, mol in enumerate(mol_list):
         prop = mol.properties
-        results1 = results_dict1.get(mol.properties.name)
-        results2 = results_dict2.get(mol.properties.name)
+        results1 = results_dict1.get('MOPAC_'+str(i))
+        results2 = results_dict2.get('COSMO-RS_'+str(i))
         if results1 and 'mopac.coskf' in results1.files:
             prop.surface = KFFile(results1['mopac.coskf']).read('COSMO', 'Area') * Angstrom**2
             prop.volume = KFFile(results1['mopac.coskf']).read('COSMO', 'Volume') * Angstrom**3
             if results2:
                 prop.logp = KFFile(results2['$JN.crskf']).read('LOGP', 'logp')[0]
+
+    shutil.rmtree(mopac_jobs[0].path.rsplit('/', 1)[0])
+    shutil.rmtree(crs_jobs[0].path.rsplit('/', 1)[0])
 
     return mol_list
 
@@ -239,7 +247,7 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     shutil.copy2(results['ams.rkf'], os.path.join(path, name + '.ams.rkf'))
     shutil.copy2(results['uff.rkf'], os.path.join(path, name + '.uff.rkf'))
     shutil.copy2(results[name + '.out'], os.path.join(path, name + '.out'))
-    shutil.rmtree(os.path.join(path, name))
+    shutil.rmtree(job.path.rsplit('/', 1)[0])
 
     # Update the atomic coordinates of plams_mol
     for i, atom in enumerate(plams_mol):
@@ -248,5 +256,6 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     # Write the reuslts to an .xyz and .pdb file
     plams_mol.properties.name += '.opt'
     export_mol(plams_mol, message='Optimized core + ligands:\t\t')
+    plams_mol.properties.name = plams_mol.properties.name.split('.opt')[0]
 
-    return output_mol
+    return plams_mol

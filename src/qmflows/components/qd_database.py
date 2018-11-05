@@ -85,8 +85,8 @@ def write_database(mol_list, database, path, mol_type='ligand'):
                 database_entries.append(
                     [prop.name,
                      mol.get_formula().split('Xx')[0],
-                     os.path.join(prop.path, prop.name.split('@')[0]) + '.pdb',
-                     os.path.join(prop.path, prop.name.split('@')[0]) + '.opt.pdb',
+                     os.path.join(prop.path, prop.name) + '.pdb',
+                     os.path.join(prop.path, prop.name) + '.opt.pdb',
                      prop.E,
                      prop.Eint,
                      prop.Estrain])
@@ -96,19 +96,19 @@ def write_database(mol_list, database, path, mol_type='ligand'):
         if mol_type == 'ligand':
             keys = ('Ligand_name', 'Ligand_group', 'Ligand_formula', 'Ligand_pdb', 'Ligand_opt_pdb',
                     'Ligand_SMILES', 'Ligand_surface', 'Ligand_volume', 'Ligand_logP')
-            name = 'Database.xlsx'
+            name = 'Ligand_database.xlsx'
             sheet_name = 'Ligand'
         if mol_type == 'qd':
             keys = ('Quantum_dot_name', 'Quantum_dot_formula', 'Quantum_dot_pdb',
                     'Quantum_dot_opt_pdb', 'Quantum_dot_E', 'Quantum_dot_Eint',
                     'Quantum_dot_Estrain')
-            name = 'Database.xlsx'
+            name = 'QD_database.xlsx'
             sheet_name = 'Quantum_dot'
 
         database_entries = pd.DataFrame(dict(zip(keys, database_entries)))
 
         if not database.empty:
-            database.append(database_entries, ignore_index=True)
+            database = pd.concat([database, database_entries])
         else:
             database = database_entries
 

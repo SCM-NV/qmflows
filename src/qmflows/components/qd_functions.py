@@ -255,7 +255,7 @@ def adf_connectivity(plams_mol):
     at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
     at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
     bonds = [bond.order for bond in plams_mol.bonds]
-    for i, bond in zip(plams_mol.bonds):
+    for i, bond in enumerate(plams_mol.bonds):
         if i in aromatic:
             bonds[i] = 1.5
     bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
@@ -310,9 +310,9 @@ def qd_int(plams_mol):
     uff = AllChem.UFFGetMoleculeForceField
 
     # Calculate the total energy of all perturbed ligands in the absence of the core
-    for atom in mol_copy:
-        if atom.properties.pdb_info.ResidueName is 'COR':
-            mol_copy.delete_atom(atom)
+    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName is 'COR']
+    for atom in atom_list:
+        mol_copy.delete_atom(atom)
     rdmol = molkit.to_rdmol(mol_copy)
     E_no_frag = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 

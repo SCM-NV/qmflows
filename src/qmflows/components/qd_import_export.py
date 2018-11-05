@@ -259,7 +259,7 @@ def read_mol_excel(mol, mol_dict):
     """
     try:
         mol_path = os.path.join(mol_dict['path'], mol_dict['name'] + '.xlsx')
-        file_list = pd.read_excel(mol_path, sheet_name=mol_dict['sheet_name'])
+        file_list = list(pd.read_excel(mol_path, sheet_name=mol_dict['sheet_name']))
         file_list = [[file, mol_dict] for file in file_list[mol_dict['column']][mol_dict['row']:]]
         return read_mol(file_list, mol_dict['path'], mol_dict['is_core'])
     except (Exception, errors.PlamsError) as ex:
