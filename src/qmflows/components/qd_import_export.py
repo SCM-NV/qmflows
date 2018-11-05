@@ -63,12 +63,6 @@ def read_mol(input_mol, path, is_core=False):
             if isinstance(mol, list):
                 mol_list += mol
 
-    # Raises an error if mol_list is empty
-    if not mol_list:
-        core_ligand = {True: 'cores', False: 'ligands'}
-        error = 'No valid input ' + core_ligand[is_core] + ' were found, aborting run'
-        raise IndexError(error)
-
     return mol_list
 
 
@@ -99,7 +93,7 @@ def read_mol_defaults(mol, path, is_core=False):
     if isinstance(mol, (list, tuple)):
         kwarg.update(mol[1])
         mol = mol[0]
-    if mol is None:
+    if mol is None or mol == 'None':
         mol = ''
     kwarg['name'] = mol
 
@@ -123,6 +117,12 @@ def read_mol_extension(mol_dict):
         file_type = mol.rsplit('.', 1)[-1]
         name = mol.rsplit('.', 1)[0]
     elif os.path.isdir(mol_path):
+        file_type = 'folder'
+        name = mol
+    elif os.path.isfile(mol):
+        file_type = mol.rsplit('.', 1)[-1]
+        name = mol.rsplit('.', 1)[0].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
+    elif os.path.isdir(mol):
         file_type = 'folder'
         name = mol
     elif isinstance(mol, Molecule):
@@ -319,7 +319,7 @@ def set_prop_atom(atom, alphabet, residue_name, elements_dict):
         if atom.symbol in elements_dict:
             total_bonds = int(sum([bond.order for bond in atom.bonds]))
             default_charge = elements_dict[atom.symbol]
-            sign = int(default_charge / abs(default_charge))
+            sign = int(-1 * default_charge / abs(default_charge))
             atom.properties.charge = default_charge + sign*total_bonds
 
             # Update formal atomic charges for hypervalent atoms

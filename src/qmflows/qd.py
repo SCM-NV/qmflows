@@ -32,6 +32,12 @@ def prep(input_ligands, input_cores, path, arg):
     ligand_list = QD_inout.read_mol(input_ligands, folder_list[1])
     core_list = QD_inout.read_mol(input_cores, folder_list[0], is_core=True)
 
+    # Raises an error if mol_list is empty
+    if not ligand_list:
+        raise IndexError('No valid input ligands were found, aborting run')
+    elif not core_list:
+        raise IndexError('No valid input cores were found, aborting run')
+
     # Adds the indices of the core dummy atoms to core.properties.core
     for core in core_list:
         prep_core(core, arg)
