@@ -91,7 +91,8 @@ def read_mol_defaults(mol, path, is_core=False):
 
     # Update the dictionary of default arguments based on used-specified arguments
     if isinstance(mol, (list, tuple)):
-        kwarg.update(mol[1])
+        for item in mol[1:]:
+            kwarg.update(item)
         mol = mol[0]
     if mol is None or mol == 'None':
         mol = ''
