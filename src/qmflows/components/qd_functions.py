@@ -310,7 +310,7 @@ def qd_int(plams_mol):
     uff = AllChem.UFFGetMoleculeForceField
 
     # Calculate the total energy of all perturbed ligands in the absence of the core
-    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName is 'COR']
+    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName == 'COR']
     for atom in atom_list:
         mol_copy.delete_atom(atom)
     rdmol = molkit.to_rdmol(mol_copy)
