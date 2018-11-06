@@ -31,7 +31,7 @@ def check_sys_var():
         raise ImportError(error)
 
 
-def qd_opt(plams_mol, database):
+def qd_opt(plams_mol, database, arg):
     """
     Check if the to be optimized quantom dot has previously been optimized.
     Pull if the structure from the database if it has, otherwise perform a geometry optimization.
@@ -43,10 +43,10 @@ def qd_opt(plams_mol, database):
     """
     name = plams_mol.properties.name.rsplit('.', 1)[0]
     if database is None:
-        plams_mol = ams_job_uff_opt(plams_mol)
+        plams_mol = ams_job_uff_opt(plams_mol, arg['maxiter'])
         plams_mol.properties.entry = False
     elif database.empty or name not in list(database['Quantum_dot_name']):
-        plams_mol = ams_job_uff_opt(plams_mol)
+        plams_mol = ams_job_uff_opt(plams_mol, arg['maxiter'])
         plams_mol.properties.entry = True
     else:
         index = list(database['Quantum_dot_name']).index(name)
@@ -219,9 +219,8 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     path = plams_mol.properties.path
     mol_indices = plams_mol.properties.indices
 
-    s1 = uff_settings(plams_mol, mol_indices)
-
     # Run the job (pre-optimization)
+    s1 = uff_settings(plams_mol, mol_indices)
     init(path=path, folder=name)
     job = AMSJob(molecule=plams_mol, settings=s1, name=name)
     results = job.run()
@@ -229,7 +228,7 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     finish()
 
     # Delete the PLAMS directory and update MaxIterations
-    shutil.rmtree(os.path.join(path, name))
+    shutil.rmtree(job.path.rsplit('/', 1)[0])
     s1.input.ams.GeometryOptimization.MaxIterations = maxiter
 
     # Update the atomic coordinates of plams_mol
