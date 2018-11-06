@@ -4,15 +4,16 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'/Users/bvanbeek/Documents/CdSe/Week_5'
+path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
 
 input_cores = yaml.load("""
--   - Cd68Se55.xyz
+-   - Cd360Se309.xyz
     - guess_bonds: False
+    - core_indices: [677, 757, 670, 771, 707, 759, 692, 765, 709, 687, 712, 671, 741, 723, 724, 683]
 """)
 
 input_ligands = yaml.load("""
-- OCCCCC
+- OC(C(CCC)(CCC)CCCCCCCCCCCC)=O
 """)
 
 """
@@ -80,9 +81,9 @@ use_database: True
 core_opt: False
 ligand_opt: True
 ligand_crs: False
-qd_opt: False
+qd_opt: True
 qd_int: True
-maxiter: 2000
+maxiter: 400
 split: True
 """)
 
