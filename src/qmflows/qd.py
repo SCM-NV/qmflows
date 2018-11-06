@@ -61,7 +61,7 @@ def prep(input_ligands, input_cores, path, arg):
 
 def prep_core(core, arg):
     """
-    Function that handles all core operations.
+    Function that handles the identification and marking of all core dummy atoms.
 
     core <plams.Molecule>: The core molecule.
     arg <dict>: A dictionary containing all (optional) arguments.
@@ -183,7 +183,7 @@ def prep_qd_1(core, ligand, qd_folder):
     qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_indices]
     qd_indices += [i + 1 for i, atom in enumerate(core)]
 
-    qd_name = core.properties.name + '__' + ligand.properties.name + '@' + ligand.properties.group
+    qd_name = core.properties.name + '__' + str(len(ligand_list)) + '_' + ligand.properties.name + '@' + ligand.properties.group
 
     qd.properties = Settings()
     qd.properties.indices = qd_indices
@@ -218,7 +218,7 @@ def prep_qd_2(qd_list, path, arg):
         QD_ams.check_sys_var()
         if not qd_list:
             raise IndexError('No valid quantum dots found, aborting geometry optimization')
-        qd_list = list(QD_ams.qd_opt(qd, qd_database) for qd in qd_list)
+        qd_list = list(QD_ams.qd_opt(qd, qd_database, arg) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
