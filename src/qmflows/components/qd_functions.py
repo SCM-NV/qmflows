@@ -4,13 +4,156 @@ __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'r
 import itertools
 import numpy as np
 
-from scm.plams import (Atom)
+from scm.plams import Atom, Molecule
+from scm.plams.core.functions import add_to_class
+from scm.plams.core.errors import MoleculeError
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, Bond, rdMolTransforms
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
+
+
+@add_to_class(Molecule)
+def update_coords(self, plams_mol):
+    """
+    Update the atomic coordinates of self with coordinates from plams_mol.
+
+    plams_mol <plams.Molecule>: A PLAMS molecule.
+    """
+    for at, at_self in zip(plams_mol, self):
+        at_self.coords = at.coords
+
+
+@add_to_class(Atom)
+def get_index(self):
+    """
+    Return the index of an |Atom| (numbering starts with 1).
+    """
+    return self.mol.atoms.index(self) + 1
+
+
+@add_to_class(Bond)
+def get_index(self):
+    """
+    Return a tuple of two atomic indices defining a |Bond| (numbering starts with 1).
+    """
+    return self.atom1.get_index(), self.atom2.get_index()
+
+
+@add_to_class(Atom)
+def in_ring(self):
+    """
+    Check if this |Atom| is part of a ring. Returns a boolean.
+    """
+    mol = self.mol.copy()
+    atom = mol[self.get_index()]
+    before = len(mol.separate())
+    neighbors = len(atom.bonds)
+    bonds = [bond for bond in atom.bonds]
+    for bond in bonds:
+        mol.delete_bond(bond)
+    after = len(mol.separate())
+    if before != after - neighbors:
+        return True
+    return False
+
+
+@add_to_class(Molecule)
+def neighbors_mod(self, atom, exclude_atnum=[]):
+    """Return a list of neighbors of *atom* within the molecule.
+
+    *atom* has to belong to the molecule. Returned list follows the same order as
+        the ``bonds`` attribute of *atom*.
+
+    *exclude_atnum* is an optional list of atomic numbers (int).
+    If the atomic number/symbol of an |Atom| matches with any entry in *exclude*,
+        it will not be returned.
+    """
+    if atom.mol != self:
+        raise MoleculeError('neighbors: passed atom should belong to the molecule')
+    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom).atnum not in exclude_atnum]
+
+
+@add_to_class(Molecule)
+def split_bond(self, bond, element='H', length=1.1):
+    """
+    Delete a bond and cap the resulting fragments.
+    A link to the two atoms previously defining the bond & the two capping atoms is stored under
+        self.properties.mark in a list of 4-tuples.
+
+    self <plams.Molecule>: A PLAMS molecule.
+    bond <plams.Bond>: A PLAMS bond.
+    element <str> or <int>: The atomic symbol or number of the two to be created capping atoms.
+    resize <float>: The length of the two new bonds in angstrom.
+    """
+    if isinstance(element, int):
+        element = Atom(atnum=element).symbol
+    at1, at2 = bond.atom1, bond.atom2
+    at3, at4 = Atom(symbol=element, coords=at1.coords), Atom(symbol=element, coords=at2.coords)
+    self.add_atom(at3, adjacent=[at2])
+    self.add_atom(at4, adjacent=[at1])
+    self.bonds[-1].resize(at1, length)
+    self.bonds[-2].resize(at2, length)
+    if self.properties.mark:
+        self.properties.mark.append((at1, at4, at2, at3))
+    else:
+        self.properties.mark = [(at1, at4, at2, at3)]
+    self.delete_bond(bond)
+
+
+def split_mol(plams_mol, exclude_atnum=[1]):
+    """
+    Split a molecule into multiple smaller fragments for every branch within the molecule.
+
+
+    plams_mol <plams.Molecule>: The input molecule.
+    exclude_atom <list>[<plams.Atom>]: A list of one or more atoms that will not be returend by
+        the neighbors_mod() function.
+    exclude_element <list>[<int> or <str>]: A list of atomic numbers or symbols of atoms that will
+        not be returned by the neighbors_mod() function.
+
+    return <list>[<plams.Molecule>] A list of one or more plams molecules.
+    """
+    bond_list = [bond for bond in plams_mol.bonds if
+                 bond.atom1.atnum != 1 and bond.atom2.atnum != 1]
+    for bond in bond_list:
+        neighbors1 = plams_mol.neighbors_mod(bond.atom1, exclude_atnum=exclude_atnum)
+        neighbors2 = plams_mol.neighbors_mod(bond.atom2, exclude_atnum=exclude_atnum)
+        if len(neighbors1) > 2 and len(neighbors2) > 2 and not bond.in_ring():
+            plams_mol.split_bond(bond)
+    properties = plams_mol.properties
+    mol_list = plams_mol.separate()
+    for mol in mol_list:
+        mol.properties = properties
+
+    return mol_list
+
+
+def recombine_mol(mol_list, mol_old=False):
+    """
+    Recombine a list of molecules into a single molecule.
+    A list of 4-tuples of plams.Atoms will be read from mol_list[0].
+    A bond will be created between tuple[0] & tuple[2] and atoms tuple[1] and tuple[3]
+        will be deleted.
+
+    mol_list <list>[<plams.Molecule>, ...]: A list of n plams molecules with the
+        atom.properties.mark atribute.
+
+    return <plams.Molecule>: The (re-)merged PLAMS molecule.
+    """
+    # Create a set of all mol.mark values in mol_list
+    tup_list = mol_list[0].properties.mark
+    for tup in tup_list:
+        mol1, mol2 = tup[0].mol, tup[2].mol
+        mol1.merge_mol(rotate_ligand(mol1, mol2, tup, bond_length=1.5))
+        mol1.delete_atom(tup[1])
+        mol1.delete_atom(tup[2])
+        mol1.add_bond(tup[0], tup[2])
+        tup_list.remove(tup)
+
+    return mol_list[0]
 
 
 def optimize_ligand(ligand, database, opt=True):
@@ -155,7 +298,7 @@ def find_substructure_split(ligand, ligand_index, split=True):
     return ligand
 
 
-def rotate_ligand(core, ligand, i, core_dummy):
+def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     """
     Connects two molecules by alligning the vectors of two bonds.
 
@@ -167,17 +310,18 @@ def rotate_ligand(core, ligand, i, core_dummy):
     return <plams.Molecule>, <plams.Atom>: The rotated ligand and the ligand atom that will be
         attached to the core.
     """
-    ligand = ligand.copy()
-    ligand.properties.dummies = ligand.closest_atom(ligand.properties.dummies.coords)
-    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
 
     # Defines first atom on coordinate list (hydrogen),
     # The atom connected to it and vector representing bond between them
-    core_at1 = core_dummy         # core dummy atom
-    core_at2 = core[-1]                 # core center of mass
+    if isinstance(atoms[0], Atom):
+        core_at1, core_at2 = atoms[0], atoms[1]
+        lig_at1, lig_at2 = atoms[2], atoms[3]
+    else:
+        core_at1, core_at2 = core[atoms[0]], core[atoms[1]]
+        lig_at1, lig_at2 = ligand[atoms[2]], ligand[atoms[3]]
+
+    # Create two vectors defining two bonds
     core_vector = core_at1.vector_to(core_at2)
-    lig_at1 = ligand.properties.dummies  	# ligand heteroatom
-    lig_at2 = ligand[-1]                # ligand center of mass
     lig_vector = lig_at2.vector_to(lig_at1)
 
     # Rotation of ligand - aligning the ligand and core vectors
@@ -186,18 +330,19 @@ def rotate_ligand(core, ligand, i, core_dummy):
     ligand.translate(lig_at1.vector_to(core_at1))
 
     # Translation of the ligand
-    hc_vec = lig_at1.vector_to(core_at1)
-    ligand.translate(hc_vec)
+    if bond_length:
+        vec = np.array(core_at1.vector_to(core_at2))
+        vec = vec*(bond_length/np.linalg.norm(vec))
+        ligand.translate(vec)
 
     # Update the residue numbers
-    for atom in ligand:
-        atom.properties.pdb_info.ResidueNumber = i + 2
+    if residue_number:
+        for atom in ligand:
+            atom.properties.pdb_info.ResidueNumber = residue_number + 1
 
-    # Deletes the core dummy atom and ligand center of mass
-    ligand.delete_atom(lig_at2)
-    core.delete_atom(core_at1)
+    ligand.properties.anchor = lig_at1
 
-    return ligand, lig_at1
+    return ligand
 
 
 def rotate_ligand_rotation(vec1, vec2):
@@ -234,6 +379,13 @@ def combine_qd(core, ligand_list):
         qd.add_atom(atom)
     for bond in ligand_bonds:
         qd.add_bond(bond)
+
+    # Delete redundant atoms
+    indices = [atom.get_index() for atom in core.properties.dummies]
+    indices += [atom.get_index() for atom in qd if atom.atnum == 0]
+    indices.sort(reverse=True)
+    for index in indices:
+        qd.delete_atom(qd[index])
 
     return qd
 
