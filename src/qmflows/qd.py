@@ -79,8 +79,10 @@ def prep_core(core, arg):
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
     if not core.properties.dummies:
-        core.properties.dummies = [atom for atom in core.atoms if atom.atnum == dummy]
+        atoms = core.atoms[::-1]
+        core.properties.dummies = [atom for atom in atoms if atom.atnum == dummy]
     else:
+        core.properties.dummies = core.properties.dummies.sort(reverse=True)
         core.properties.dummies = [core[index] for index in core.properties.dummies]
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
 
@@ -116,7 +118,8 @@ def prep_ligand_1(ligand_list, path, arg):
         raise IndexError('No valid ligand functional groups found, aborting run')
 
     if arg['ligand_crs']:
-        QD_ams.ams_job_mopac_sp(ligand_list)
+        for ligand in ligand_list:
+            QD_ams.ams_job_mopac_sp(ligand)
 
     # Write new entries to the ligand database
     if arg['use_database']:
@@ -138,9 +141,6 @@ def prep_ligand_2(ligand, database, arg):
     """
     split = arg['split']
 
-    # Handles all interaction between the database, the ligand and the ligand optimization
-    ligand = QD_scripts.optimize_ligand(ligand, database, arg['ligand_opt'])
-
     # Identify functional groups within the ligand and add a dummy atom to the center of mass.
     if not ligand.properties.dummies:
         ligand_list = QD_scripts.find_substructure(ligand, split)
@@ -152,6 +152,10 @@ def prep_ligand_2(ligand, database, arg):
             ligand.properties.dummies = [i - 1 for i in ligand.properties.dummies]
             split = True
         ligand_list = [QD_scripts.find_substructure_split(ligand, ligand.properties.dummies, split)]
+
+    # Handles all interaction between the database, the ligand and the ligand optimization
+    ligand_list = [QD_scripts.optimize_ligand(ligand, database, arg['ligand_opt']) for
+                   ligand in ligand_list if ligand_list]
 
     return ligand_list
 
@@ -168,22 +172,23 @@ def prep_qd_1(core, ligand, qd_folder):
     return <plams.Molecule>: The quantum dot (core + n*ligands).
     """
     # Rotate and translate all ligands to their position on the core.
-    core_dummies = core.properties.dummies
+    indices = [(dummy.get_index(), -1, ligand.properties.dummies.get_index(), -1) for
+               i, dummy in enumerate(core.properties.dummies)]
     core = core.copy()
-    core.properties.dummies = [core.closest_atom(dummy.coords) for dummy in core_dummies]
-    ligand_list = [QD_scripts.rotate_ligand(core, ligand, i, core_dummy) for i, core_dummy in
-                   enumerate(core.properties.dummies)]
-    ligand_list, ligand_indices = zip(*ligand_list)
-    core.delete_atom(core[-1])
+    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
+    ligand_list = [QD_scripts.rotate_ligand(core, ligand.copy(), atoms, residue_number=i+1) for
+                   i, atoms in enumerate(indices)]
+    ligand_atoms = [ligand.properties.anchor for ligand in ligand_list]
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule).
     qd = QD_scripts.combine_qd(core, ligand_list)
 
     # indices of all the atoms in the core and the ligand heteroatom anchor.
-    qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_indices]
+    qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_atoms]
     qd_indices += [i + 1 for i, atom in enumerate(core)]
 
-    qd_name = core.properties.name + '__' + str(len(ligand_list)) + '_' + ligand.properties.name + '@' + ligand.properties.group
+    qd_name = core.properties.name + '__'
+    qd_name += str(len(ligand_list)) + '_' + ligand.properties.name + '@' + ligand.properties.group
 
     qd.properties = Settings()
     qd.properties.indices = qd_indices

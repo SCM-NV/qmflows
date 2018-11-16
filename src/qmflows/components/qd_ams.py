@@ -4,14 +4,13 @@ import os
 import shutil
 
 from scm.plams import (Settings, AMSJob, init, finish, Units)
-from scm.plams.core.jobrunner import JobRunner
 from scm.plams.tools.kftools import KFFile
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h)
+from .qd_functions import (adf_connectivity, fix_h, update_coords)
 
 
 def check_sys_var():
@@ -88,7 +87,7 @@ def uff_settings(plams_mol, mol_indices):
     return s1
 
 
-def crs_settings():
+def crs_settings(coskf):
     """
     COSMO-RS settings for a LogP calculation using 'MOPAC PM6' parameters.
     """
@@ -114,7 +113,7 @@ def crs_settings():
     s2.input.CRSParameters.eta = -9.65
     s2.input.CRSParameters.chortf = 0.816
 
-    s2.input.Compound._h = ''
+    s2.input.Compound._h = coskf
 
     s2.input.compound._h = '"' + os.path.join(os.environ['ADFRESOURCES'],
                                               'ADFCRS/1-Octanol.coskf') + '"'
@@ -153,55 +152,36 @@ def mopac_settings(charge):
     return s3
 
 
-def ams_job_mopac_sp(mol_list):
+def ams_job_mopac_sp(plams_mol):
     """
     Runs a MOPAC + COSMO-RS single point.
 
-    mol_list <list>[<plams.Molecule>]: A list of PLAMS molecule with the 'path', 'charge' and
-        'name' properties.
+    plams_mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
 
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
-    path = mol_list[0].properties.path
-    paralel = JobRunner(parallel=True, maxjobs=os.cpu_count())
+    path = plams_mol.properties.path
+    Angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
 
     # Run MOPAC
-    init(path=path, folder='mopac')
-    mopac_jobs = list(AMSJob(molecule=mol,
-                             settings=mopac_settings(mol.properties.charge),
-                             name='MOPAC_'+str(i)) for i, mol in enumerate(mol_list))
-    results_dict1 = dict((mopac_job.name, mopac_job.run(paralel)) for mopac_job in mopac_jobs)
+    init(path=path, folder='ligand')
+    mopac_job = AMSJob(molecule=plams_mol,
+                       settings=mopac_settings(plams_mol.properties.charge),
+                       name='MOPAC')
+    mopac_results = mopac_job.run()
+    if 'mopac.coskf' in mopac_results.files:
+        coskf = KFFile(mopac_results['mopac.coskf'])
+        plams_mol.properties.surface = coskf.read('COSMO', 'Area') * Angstrom**2
+        plams_mol.properties.volume = coskf.read('COSMO', 'Volume') * Angstrom**3
+        crs_job = CRSJob(settings=crs_settings(mopac_results['mopac.coskf']), name='COSMO-RS')
+        crs_results = crs_job.run()
+        if '$JN.crskf' in crs_results.files:
+            plams_mol.properties.logp = KFFile(crs_results['$JN.crskf']).read('LOGP', 'logp')[0]
     finish()
 
-    # Run COSMO-RS
-    init(path=path, folder='crs')
-    crs = crs_settings()
-    crs_jobs = list(CRSJob(settings=crs, name='COSMO-RS_'+str(i)) for i, mol in enumerate(mol_list))
-    for crs_job, results1 in zip(crs_jobs, results_dict1):
-        if 'mopac.coskf' in results_dict1[results1].files:
-            crs_job.settings.input.Compound._h = '"' + results_dict1[results1]['mopac.coskf'] + '"'
-        else:
-            crs_job.name = False
-    results_dict2 = dict((crs_job.name, crs_job.run(paralel)) for crs_job in crs_jobs if
-                         crs_job.name)
-    finish()
+    shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
 
-    # Extract results from the calculations
-    Angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
-    for i, mol in enumerate(mol_list):
-        prop = mol.properties
-        results1 = results_dict1.get('MOPAC_'+str(i))
-        results2 = results_dict2.get('COSMO-RS_'+str(i))
-        if results1 and 'mopac.coskf' in results1.files:
-            prop.surface = KFFile(results1['mopac.coskf']).read('COSMO', 'Area') * Angstrom**2
-            prop.volume = KFFile(results1['mopac.coskf']).read('COSMO', 'Volume') * Angstrom**3
-            if results2:
-                prop.logp = KFFile(results2['$JN.crskf']).read('LOGP', 'logp')[0]
-
-    shutil.rmtree(mopac_jobs[0].path.rsplit('/', 1)[0])
-    shutil.rmtree(crs_jobs[0].path.rsplit('/', 1)[0])
-
-    return mol_list
+    return plams_mol
 
 
 def ams_job_uff_opt(plams_mol, maxiter=2000):
@@ -221,25 +201,23 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
 
     # Run the job (pre-optimization)
     s1 = uff_settings(plams_mol, mol_indices)
-    init(path=path, folder=name)
-    job = AMSJob(molecule=plams_mol, settings=s1, name=name)
+    init(path=path, folder='Quantum_dot')
+    job = AMSJob(molecule=plams_mol, settings=s1, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()
+    plams_mol.update_coords(output_mol)
     finish()
 
     # Delete the PLAMS directory and update MaxIterations
     shutil.rmtree(job.path.rsplit('/', 1)[0])
     s1.input.ams.GeometryOptimization.MaxIterations = maxiter
 
-    # Update the atomic coordinates of plams_mol
-    for i, atom in enumerate(plams_mol):
-        atom.move_to(output_mol[i + 1])
-
     # Set all H-C=C angles to 120.0 degrees and run the job again
     init(path=path, folder=name)
-    job = AMSJob(molecule=fix_h(plams_mol), settings=s1, name=name)
+    job = AMSJob(molecule=fix_h(plams_mol), settings=s1, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
+    plams_mol.update_coords(output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
@@ -247,10 +225,6 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     shutil.copy2(results['uff.rkf'], os.path.join(path, name + '.uff.rkf'))
     shutil.copy2(results[name + '.out'], os.path.join(path, name + '.out'))
     shutil.rmtree(job.path.rsplit('/', 1)[0])
-
-    # Update the atomic coordinates of plams_mol
-    for i, atom in enumerate(plams_mol):
-        atom.move_to(output_mol[i + 1])
 
     # Write the reuslts to an .xyz and .pdb file
     plams_mol.properties.name += '.opt'
