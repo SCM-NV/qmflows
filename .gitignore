@@ -79,3 +79,6 @@ pytest*
 scripts/.DS_Store
 
 src/qmflows/test_kf.py
+src/qmflows/components/from_to_rdmol.py
+src/qmflows/components/test.py
+src/qmflows/components/qd_ligand_opt.py
