@@ -7,6 +7,7 @@ from scm.plams import (Atom, MoleculeError, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .components import qd_functions as QD_scripts
+from .components.qd_functions import merge_mol
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
@@ -181,7 +182,13 @@ def prep_qd_1(core, ligand, qd_folder):
     ligand_atoms = [ligand.properties.anchor for ligand in ligand_list]
 
     # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule).
-    qd = QD_scripts.combine_qd(core, ligand_list)
+    core.merge_mol(ligand_list)
+    qd = core
+    for atoms in indices:
+        qd.delete_atom(qd[atoms[0]])
+    for atom in qd.atoms[::-1]:
+        if atom.atnum == 0:
+            qd.delete_atom(atom)
 
     # indices of all the atoms in the core and the ligand heteroatom anchor.
     qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_atoms]

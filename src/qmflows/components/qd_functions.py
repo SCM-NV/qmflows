@@ -359,35 +359,33 @@ def rotate_ligand_rotation(vec1, vec2):
     return np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b))
 
 
-def combine_qd(core, ligand_list):
+@add_to_class(Molecule)
+def merge_mol(self, mol_list):
     """
-    Combine the rotated ligands with the core, creating a bond bewteen the core and ligand.
+    Merge two or more molecules into a single molecule.
+    No new copies of atoms/bonds are created, all atoms/bonds are moved from mol_list to plams_mol.
 
-    core <plams.Molecule>: The core molecule.
-    ligand_list <list>[<plams.Molecule>]: A list of the rotated ligands.
+    plams_mol <plams.Molecule>: A PLAMS molecule.
+    mol_list <plams.Molecule> or <list>[<plams.Molecule>]: A PLAMS molecule or list of
+        PLAMS molecules.
 
-    return <plams.Molecule>: The quantum dot (core + n*ligands).
+    return <plams.Molecule>: The new combined PLAMS molecule
     """
-    qd = core.copy()
+    if isinstance(mol_list, Molecule):
+        mol_list = [mol_list]
 
-    # Create a list of ligand atoms and intraligand bonds
-    ligand_bonds = np.concatenate([ligand.bonds for ligand in ligand_list])
-    ligand_atoms = np.concatenate(ligand_list)
+    for mol in mol_list:
+        self.properties.soft_update(mol.properties)
 
-    # Combined the ligand bond and atom list with the core
-    for atom in ligand_atoms:
-        qd.add_atom(atom)
-    for bond in ligand_bonds:
-        qd.add_bond(bond)
+    # Create a list of all atoms and bonds in mol_list
+    bond_list = np.concatenate([mol.bonds for mol in mol_list])
+    atom_list = np.concatenate(mol_list)
 
-    # Delete redundant atoms
-    indices = [atom.get_index() for atom in core.properties.dummies]
-    indices += [atom.get_index() for atom in qd if atom.atnum == 0]
-    indices.sort(reverse=True)
-    for index in indices:
-        qd.delete_atom(qd[index])
-
-    return qd
+    # Add all atoms and bonds from mol_list to plams_mol
+    for atom in atom_list:
+        self.add_atom(atom)
+    for bond in bond_list:
+        self.add_bond(bond)
 
 
 def adf_connectivity(plams_mol):

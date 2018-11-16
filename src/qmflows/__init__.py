@@ -3,7 +3,7 @@ from .components import (
     find_first_job, select_max, select_min,
     read_database, compare_database, write_database,
     read_mol, set_prop, create_dir,
-    optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, combine_qd,
+    optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, merge_mol,
     check_sys_var, ams_job_mopac_sp, ams_job_uff_opt)
 
 from .packages import (
@@ -25,5 +25,5 @@ __all__ = [
     'read', 'compare', 'write',
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-    'combine_qd',
+    'merge_mol',
     'check_sys_var', 'ams_job_mopac_sp', 'ams_job_uff_opt']
