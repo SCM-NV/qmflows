@@ -4,7 +4,7 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = os.get_cwd()
+path = os.getcwd()
 
 input_cores = yaml.load("""
 -   - Cd16Se13.xyz
