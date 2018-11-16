@@ -175,7 +175,7 @@ def ams_job_mopac_sp(plams_mol):
         plams_mol.properties.volume = coskf.read('COSMO', 'Volume') * Angstrom**3
         crs_job = CRSJob(settings=crs_settings(mopac_results['mopac.coskf']), name='COSMO-RS')
         crs_results = crs_job.run()
-        if '$JN.crskf' in crs_results.files:
+        if 'COSMO-RS.crskf' in crs_results.files:
             plams_mol.properties.logp = KFFile(crs_results['$JN.crskf']).read('LOGP', 'logp')[0]
     finish()
 
