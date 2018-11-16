@@ -4,18 +4,18 @@ import os
 
 
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
-path = r'/Users/basvanbeek/Documents/CdSe/Week_5'
-
+path = os.get_cwd()
 
 input_cores = yaml.load("""
 -   - Cd16Se13.xyz
     - guess_bonds: False
 """)
 
-# core_indices: [677, 757, 670, 771, 707, 759, 692, 765, 709, 687, 712, 671, 741, 723, 724, 683]
-
 input_ligands = yaml.load("""
-- input_ligands.txt
+- OC
+- OCC
+- OCCC
+- OCCCC
 """)
 
 
@@ -35,8 +35,5 @@ split: True
 """)
 
 
-# Runs the script: add ligand to core and optimize (UFF) the resulting qd with the core frozen
+# Runs the script: the ligand, core and quantum dot lists are returned
 qd_list, core_list, ligand_list = QD.prep(input_ligands, input_cores, path, argument_dict)
-qd = qd_list[0]
-ligand = ligand_list[0]
-core = core_list[0]
