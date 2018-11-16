@@ -223,7 +223,7 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
     shutil.copy2(results['ams.rkf'], os.path.join(path, name + '.ams.rkf'))
     shutil.copy2(results['uff.rkf'], os.path.join(path, name + '.uff.rkf'))
-    shutil.copy2(results[name + '.out'], os.path.join(path, name + '.out'))
+    shutil.copy2(results['$JN.out'], os.path.join(path, name + '.out'))
     shutil.rmtree(job.path.rsplit('/', 1)[0])
 
     # Write the reuslts to an .xyz and .pdb file
