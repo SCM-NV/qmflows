@@ -2,13 +2,16 @@ __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'r
            'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h']
 
 import itertools
+import os
 import numpy as np
 
-from scm.plams import Atom, Molecule
+from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
+from scm.plams.core.errors import MoleculeError
+from scm.plams.tools.units import Units
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
-from rdkit.Chem import AllChem, Bond, rdMolTransforms
+from rdkit.Chem import AllChem, rdMolTransforms
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
@@ -142,23 +145,15 @@ def split_bond(self, bond, element='H', length=1.1):
     self.delete_bond(bond)
 
 
-def filter_neighbors(atom):
+@add_to_class(Molecule)
+def neighbors_mod(self, atom, exclude=1):
+    """Return a list of neighbors of *atom* within the molecule. Atoms with
+    *atom* has to belong to the molecule. Returned list follows the same order as the ``bonds``
+        attribute of *atom*.
     """
-    Returns an atom if: it is hydrogen or it does not have 2 or more non-hydrogen containing bonds.
-    atom <plams.Atom>: a PLAMS atom
-    return <plams.Atom> or <Bool>: Returns the input PLAMS atom or False.
-    """
-    if atom.atnum == 1:
-        return atom
-    else:
-        h_bonds = 0
-        for bond in atom.bonds:
-            if 1 == bond.atom1.atnum or 1 == bond.atom2.atnum:
-                h_bonds += 1
-        if h_bonds > 0 and h_bonds == len(atom.bonds) - 1:
-            return atom
-        else:
-            return False
+    if atom.mol != self:
+        raise MoleculeError('neighbors: passed atom should belong to the molecule')
+    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom).atnum != exclude]
 
 
 def split_mol(plams_mol):
@@ -172,24 +167,15 @@ def split_mol(plams_mol):
                  and not bond.atom1.in_ring() and not bond.atom2.in_ring()]
 
     # Remove even more undesired bonds
-    bond_list2 = []
-    for bond in bond_list:
-        n1, n2 = plams_mol.neighbors(bond.atom1), plams_mol.neighbors(bond.atom2)
-        for atom in reversed(n1):
-            remove_at = filter_neighbors(atom)
-            if remove_at:
-                n1.remove(remove_at)
-        for atom in reversed(n2):
-            remove_at = filter_neighbors(atom)
-            if remove_at:
-                n2.remove(remove_at)
-        if (len(n1) >= 3 and len(n2) >= 2) or (len(n1) >= 2 and len(n2) >= 3):
-            bond_list2.append(bond)
+    for bond in reversed(bond_list):
+        n1, n2 = plams_mol.neighbors_mod(bond.atom1), plams_mol.neighbors_mod(bond.atom2)
+        if not (len(n1) >= 3 and len(n2) >= 2) and not (len(n1) >= 2 and len(n2) >= 3):
+            bond_list.remove(bond)
 
     # Fragment the molecule such that the functional group is on the largest fragment
-    atom_list = [bond.atom1 for bond in bond_list2] + [bond.atom2 for bond in bond_list2]
+    atom_list = [bond.atom1 for bond in bond_list] + [bond.atom2 for bond in bond_list]
     atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
-    atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list2] for atom in atom_set}
+    atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
     for at in atom_dict:
         for i in atom_dict[at][2:]:
             len_atom = []
@@ -266,6 +252,52 @@ def fix_carboxyl(plams_mol):
     return plams_mol
 
 
+def get_dihed(atoms, unit='degree'):
+    """
+    Returns the dihedral angle defined by four atoms.
+    atoms <tuple>: An iterable consisting of 4 PLAMS atoms
+    unit <str>: The output unit
+    return <float>: A dihedral angle
+    """
+    vec1 = -1*np.array(atoms[0].vector_to(atoms[1]))
+    vec2 = np.array(atoms[1].vector_to(atoms[2]))
+    vec3 = np.array(atoms[2].vector_to(atoms[3]))
+
+    v1v2, v2v3 = np.cross(vec1, vec2), np.cross(vec3, vec2)
+    v1v2_v2v3 = np.cross(v1v2, v2v3)
+    v2_norm_v2 = vec2/np.linalg.norm(vec2)
+    epsilon = np.arctan2(np.dot(v1v2_v2v3, v2_norm_v2), np.dot(v1v2, v2v3))
+
+    return Units.convert(epsilon, 'radian', unit)
+
+
+@add_to_class(Molecule)
+def set_dihed(self, angle, unit='degree'):
+    """
+    Change dihedral angles into a specific value.
+    """
+    angle = Units.convert(angle, unit, 'degree')
+    bond_list = [bond for bond in self.bonds if bond.atom1.atnum != 1 and bond.atom2.atnum != 1
+                 and bond.order == 1 and not bond.in_ring()]
+
+    for bond in bond_list:
+        n1, n2 = self.neighbors_mod(bond.atom1), self.neighbors_mod(bond.atom2)
+        n1 = [atom for atom in n1 if atom != bond.atom2]
+        n2 = [atom for atom in n2 if atom != bond.atom1]
+        if len(n1) > 1:
+            n1 = [atom for atom in n1 if len(self.neighbors_mod(atom)) > 1]
+        if len(n2) > 1:
+            n2 = [atom for atom in n2 if len(self.neighbors_mod(atom)) > 1]
+        if n1 and n2:
+            dihed = get_dihed((n1[0], bond.atom1, bond.atom2, n2[0]))
+            self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
+
+    rdmol = molkit.to_rdmol(self)
+    AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
+    mol_tmp = molkit.from_rdmol(rdmol)
+    self.update_coords(mol_tmp)
+
+
 def optimize_ligand(ligand, database, opt=True):
     """
     Pull the structure if a match has been found or alternatively optimize a new geometry.
@@ -292,9 +324,8 @@ def optimize_ligand(ligand, database, opt=True):
         # set pdb_info and export the result
         if opt:
             mol_list = split_mol(ligand)
-            mol_new = [molkit.global_minimum(mol, n_scans=2, no_h=True) for mol in mol_list]
-            for mol, new in zip(mol_list, mol_new):
-                mol.update_coords(new)
+            for mol in mol_list:
+                mol.set_dihed(180.0)
             ligand = recombine_mol(mol_list)
             ligand = fix_carboxyl(ligand)
             ligand.properties.name = ligand.properties.name + '.opt'
