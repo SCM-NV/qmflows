@@ -111,7 +111,7 @@ Once the path, input ligands and input cores have been specified the job can be 
 
 
     
-.. _documentation:
+.. _documentation: https://qmflows.readthedocs.io/en/latest/
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _anaconda: https://www.continuum.io/downloads
 .. _installConda: http://conda.pydata.org/docs/install/quick.html
