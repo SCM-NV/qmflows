@@ -26,8 +26,8 @@ def global_minimum(plams_mol, n_scans=1, no_h=True):
     :parameter plams_mol: PLAMS molecule
     :type plams_mol: plams.Molecule
     :parameter int n_scans: How many times the global scan should be repeated
-    :parameter bool no_h: If dihedral angles of hydrogen-containing bonds should ignored (True) 
-        or included (False)
+    :parameter bool no_h: If dihedral angles of hydrogen-containing bonds should ignored (True)
+    or included (False)
     :return: a PLAMS molecule
     :rtype: plams.Molecule
     """

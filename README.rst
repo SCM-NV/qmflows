@@ -5,7 +5,7 @@
 
 QMFlows
 #######
-See http://scm-nv.github.io/qmflows/ for tutorials and documentation.
+See documentation_ for tutorials and documentation.
 
 Motivation
 ==========
@@ -111,7 +111,7 @@ Once the path, input ligands and input cores have been specified the job can be 
 
 
     
-
+.. _documentation:
 .. _miniconda: http://conda.pydata.org/miniconda.html
 .. _anaconda: https://www.continuum.io/downloads
 .. _installConda: http://conda.pydata.org/docs/install/quick.html
