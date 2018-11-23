@@ -22,7 +22,8 @@ __all__ = [
     'example_H2O2_TS', 'example_freqs', 'example_generic_constraints',
     'example_partial_geometry_opt', 'freq', 'geometry', 'singlepoint', 'ts', 'get_template',
     'find_first_job', 'select_max', 'select_min',
-    'read', 'compare', 'write',
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-    'combine_qd', 'check_sys_var', 'ams_job']
+    'combine_qd', 'check_sys_var', 'ams_job',
+    'read_database', 'compare_database', 'write_database',
+]
