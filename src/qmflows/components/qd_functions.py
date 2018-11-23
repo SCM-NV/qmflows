@@ -542,7 +542,7 @@ def adf_connectivity(plams_mol):
     """
     # Create list of indices of all aromatic bonds
     rdmol = molkit.to_rdmol(plams_mol)
-    aromatic = [Bond.GetIsAromatic(bond) for bond in rdmol.GetBonds()]
+    aromatic = [bond.GetIsAromatic() for bond in rdmol.GetBonds()]
     aromatic = [i for i, bond in enumerate(aromatic) if bond]
 
     # Create a connectivity list; aromatic bonds get a bond order of 1.5
