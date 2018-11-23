@@ -72,16 +72,17 @@ class CRSJob(SCMJob):
     _result_type = CRSResults
 
 
-def uff_settings(plams_mol, mol_indices):
+def uff_settings(plams_mol, mol_indices, maxiter=2000):
     """
     UFF settings for a constrained geometry optimization
     """
     s1 = Settings()
+    s1.pickle = False
 
     s1.input.ams.Task = 'GeometryOptimization'
     s1.input.ams.Constraints.Atom = mol_indices
     s1.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
-    s1.input.ams.GeometryOptimization.MaxIterations = 100
+    s1.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
     s1.input.uff.Library = 'UFF'
 
     return s1
@@ -200,7 +201,7 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     mol_indices = plams_mol.properties.indices
 
     # Run the job (pre-optimization)
-    s1 = uff_settings(plams_mol, mol_indices)
+    s1 = uff_settings(plams_mol, mol_indices, maxiter=maxiter)
     init(path=path, folder='Quantum_dot')
     job = AMSJob(molecule=plams_mol, settings=s1, name='UFF_part1')
     results = job.run()
@@ -210,10 +211,9 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
 
     # Delete the PLAMS directory and update MaxIterations
     shutil.rmtree(job.path.rsplit('/', 1)[0])
-    s1.input.ams.GeometryOptimization.MaxIterations = maxiter
 
     # Set all H-C=C angles to 120.0 degrees and run the job again
-    init(path=path, folder=name)
+    init(path=path, folder='Quantum_dot')
     job = AMSJob(molecule=fix_h(plams_mol), settings=s1, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
