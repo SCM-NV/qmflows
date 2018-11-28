@@ -148,3 +148,8 @@ def test_input():
     QD.prep(input_ligands, input_cores, path, argument_dict)
     argument_dict['dummy'] = 'Cd'
     QD.prep(input_ligands, input_cores, path, argument_dict)
+
+    exclusion = ['AcOH.mol', 'AcOH.pdb', 'AcOH.txt', 'AcOH.xyz', 'Cd68Se55.xyz']
+    for file in os.listdir(folder_path):
+        if file not in exclusion:
+            os.remove(os.path.join(folder_path, file))

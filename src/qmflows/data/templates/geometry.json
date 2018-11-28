@@ -18,12 +18,10 @@
 	    }, 
           "force_eval": {
               "dft": {
-                  "basis_set_file_name": "",
                   "mgrid": {
                       "cutoff": 400,
                       "ngrids": 4
                   },
-                  "potential_file_name": "",
                   "qs": {
                       "method": "gpw"
                   },

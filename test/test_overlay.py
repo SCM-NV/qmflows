@@ -18,11 +18,9 @@ def test_overlay_cp2k_singlepoint():
 
     r = templates.singlepoint.overlay(s)
 
-    dft.basis_set_file_name = ''
     dft.mgrid.cutoff = 400
     dft.mgrid.ngrids = 4
 
-    dft.potential_file_name = ''
     dft['print']['mo']['add_last'] = 'numeric'
     dft['print']['mo']['each']['qs_scf'] = 0
     dft['print']['mo']['eigenvalues'] = ''

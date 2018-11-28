@@ -5,7 +5,7 @@ from scm.plams import Molecule
 from qmflows import (Settings, run, templates)
 from qmflows.packages.SCM import adf
 from qmflows.components import Fragment, adf_fragmentsjob
-from noodles import gather
+from noodles import gather, schedule
 import io
 
 
@@ -47,8 +47,8 @@ def example_FDE_fragments():
     # Prepare second water fragment
     r_h2o_2 = adf(templates.singlepoint.overlay(settings), m_h2o_2, job_name="h2o_2")
 
-    frags = gather(Fragment(r_h2o_1, m_h2o_1, isfrozen=True),
-                   Fragment(r_h2o_2, m_h2o_2, isfrozen=True),
+    frags = gather(schedule(Fragment)(r_h2o_1, m_h2o_1, isfrozen=True),
+                   schedule(Fragment)(r_h2o_2, m_h2o_2, isfrozen=True),
                    Fragment(None, m_mol))
 
     job_fde = adf_fragmentsjob(templates.singlepoint. overlay(settings), frags,
