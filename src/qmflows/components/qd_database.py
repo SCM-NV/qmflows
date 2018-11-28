@@ -108,7 +108,7 @@ def write_database(mol_list, database, path, mol_type='ligand'):
         database_entries = pd.DataFrame(dict(zip(keys, database_entries)))
 
         if not database.empty:
-            database = pd.concat([database, database_entries])
+            database = database.append(database_entries, ignore_index=True)
         else:
             database = database_entries
 
