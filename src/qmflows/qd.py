@@ -80,10 +80,9 @@ def prep_core(core, arg):
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
     if not core.properties.dummies:
-        atoms = core.atoms[::-1]
-        core.properties.dummies = [atom for atom in atoms if atom.atnum == dummy]
+        core.properties.dummies = [atom for atom in reversed(core.atoms) if atom.atnum == dummy]
     else:
-        core.properties.dummies = core.properties.dummies.sort(reverse=True)
+        core.properties.dummies.sort(reverse=True)
         core.properties.dummies = [core[index] for index in core.properties.dummies]
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
 
@@ -191,8 +190,8 @@ def prep_qd_1(core, ligand, qd_folder):
             qd.delete_atom(atom)
 
     # indices of all the atoms in the core and the ligand heteroatom anchor.
-    qd_indices = [qd.atoms.index(atom) + 1 for atom in ligand_atoms]
-    qd_indices += [i + 1 for i, atom in enumerate(core)]
+    qd_indices = [qd.atoms.index(atom) + 1 for atom in qd if
+                  atom.properties.pdb_info.ResidueName == 'COR' or atom in ligand_atoms]
 
     qd_name = core.properties.name + '__'
     qd_name += str(len(ligand_list)) + '_' + ligand.properties.name + '@' + ligand.properties.group
