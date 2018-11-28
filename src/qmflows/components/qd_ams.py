@@ -10,7 +10,7 @@ from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, update_coords)
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, update_coords)
 
 
 def check_sys_var():
@@ -207,14 +207,9 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     results = job.run()
     output_mol = results.get_main_molecule()
     plams_mol.update_coords(output_mol)
-    finish()
 
-    # Delete the PLAMS directory and update MaxIterations
-    shutil.rmtree(job.path.rsplit('/', 1)[0])
-
-    # Set all H-C=C angles to 120.0 degrees and run the job again
-    init(path=path, folder='Quantum_dot')
-    job = AMSJob(molecule=fix_h(plams_mol), settings=s1, name='UFF_part2')
+    # Fix all O=C-O and H-C=C angles and continue the job
+    job = AMSJob(molecule=fix_carboxyl(fix_h(plams_mol)), settings=s1, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
     plams_mol.update_coords(output_mol)
