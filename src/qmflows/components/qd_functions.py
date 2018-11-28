@@ -1,5 +1,5 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h']
+           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl']
 
 import itertools
 import os
@@ -230,26 +230,6 @@ def recombine_mol(mol_list):
     del mol1.properties.mark
 
     return mol1
-
-
-def fix_carboxyl(plams_mol):
-    """
-    Resets carboxylate OCO angles if smaller than 60 degrees
-    """
-    rdmol = molkit.to_rdmol(plams_mol)
-    carboxylate = Chem.MolFromSmarts('[O-]C=O')
-    matches = rdmol.GetSubstructMatches(carboxylate)
-
-    if matches:
-        get_angle = rdMolTransforms.GetAngleDeg
-        set_angle = rdMolTransforms.SetAngleDeg
-        for idx in matches:
-            if get_angle(rdmol.GetConformer(), idx[0], idx[1], idx[2]) < 60:
-                set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[2], 120.0)
-                AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-        mol_tmp = molkit.from_rdmol(rdmol)
-        plams_mol.update_coords(mol_tmp)
-    return plams_mol
 
 
 def get_dihed(atoms, unit='degree'):
@@ -557,12 +537,30 @@ def adf_connectivity(plams_mol):
     return bonds
 
 
+def fix_carboxyl(plams_mol):
+    """
+    Resets carboxylate OCO angles if smaller than 60 degrees
+    """
+    rdmol = molkit.to_rdmol(plams_mol)
+    carboxylate = Chem.MolFromSmarts('[O-]C(C)=O')
+    matches = rdmol.GetSubstructMatches(carboxylate)
+
+    if matches:
+        get_angle = rdMolTransforms.GetAngleDeg
+        set_angle = rdMolTransforms.SetAngleDeg
+        for idx in matches:
+            if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
+                set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
+                set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
+        mol_tmp = molkit.from_rdmol(rdmol)
+        plams_mol.update_coords(mol_tmp)
+    return plams_mol
+
+
 def fix_h(plams_mol):
     """
     If a C=C-H angle is smaller than 20.0 degrees, set it back to 120.0 degrees.
-
     plams_mol <plams.Molecule>: A PLAMS molecule.
-
     return <plams.Molecule>: A PLAMS molecule without C=C-H angles smaller than 20.0 degrees.
     """
     H_list = [atom for atom in plams_mol if atom.atnum is 1 and 2.0 in
