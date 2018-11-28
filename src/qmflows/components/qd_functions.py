@@ -17,9 +17,34 @@ from .qd_database import compare_database
 from .qd_import_export import export_mol
 
 
+@add_to_class(Molecule)
+def to_array(self):
+    """
+    Convert the cartesian coordinates of atoms within a PLAMS molecule into a 3*n numpy array.
+    self <plams.Molecule>: A PLAMS molecule.
+    return <np.array>: A 3*n numpy array with atomic coordinates.
+    """
+    x, y, z = zip(*[atom.coords for atom in self])
+    return np.transpose(np.array((x, y, z)))
+
+
+@add_to_class(Molecule)
+def translate_np(self, vector, unit='angstrom'):
+    """
+    Translate a PLAMS molecule according to a vector using numpy.
+    self <plams.Molecule>: A PLAMS molecule.
+    vector: An iterable containing three floats or integers.
+    """
+    ratio = Units.conversion_ratio(unit, 'angstrom')
+    array = self.to_array()
+    array += np.array(vector)*ratio
+    self.update_coords(array)
+
+
 def to_atnum(item):
     """
     Turn an atomic symbol into an atomic number.
+    item <str> or <int>: An atomic symbol or number.
     return <int>: An atomic number.
     """
     if isinstance(item, str):
@@ -30,6 +55,7 @@ def to_atnum(item):
 def to_symbol(item):
     """
     Turn an atomic number into an atomic symbol.
+    item <str> or <int>: An atomic symbol or number.
     return <str>: An atomic symbol.
     """
     if isinstance(item, int):
@@ -38,19 +64,32 @@ def to_symbol(item):
 
 
 @add_to_class(Molecule)
-def update_coords(self, plams_mol):
+def update_coords(self, iterable):
     """
-    Update the atomic coordinates of self with coordinates from plams_mol.
-    plams_mol <plams.Molecule>: A PLAMS molecule.
+    Update the atomic coordinates of self with coordinates from an iterable.
+    self <plams.Molecule>: A PLAMS molecule.
+    iterable: A PLAMS molecule, RDKit molecule or a nested iterable containing x, y & z coordinates
+        as floats.
     """
-    for at, at_self in zip(plams_mol, self):
-        at_self.coords = at.coords
+    if isinstance(iterable, Chem.Mol):
+        conf = iterable.GetConformer()
+        for at1, at2 in zip(self, iterable.GetAtoms()):
+            pos = conf.GetAtomPosition(at2.GetIdx())
+            at1.coords = (pos.x, pos.y, pos.z)
+    elif isinstance(iterable[1], Atom):
+        for at1, at2 in zip(self, iterable):
+            at1.coords = at2.coords
+    else:
+        for at1, coords in zip(self, iterable):
+            at1.coords = tuple(coords)
 
 
 @add_to_class(Atom)
 def get_index(self):
     """
-    Return the index of an |Atom| (numbering starts with 1).
+    Return the index of an atom (numbering starts with 1).
+    self <plams.Atom>: A PLAMS atom.
+    return <int>: An atomic index.
     """
     return self.mol.atoms.index(self) + 1
 
@@ -58,7 +97,9 @@ def get_index(self):
 @add_to_class(Bond)
 def get_index(self):
     """
-    Return a tuple of two atomic indices defining a |Bond| (numbering starts with 1).
+    Return a tuple of two atomic indices defining a bond (numbering starts with 1).
+    self <plams.Bond>: A PLAMS bond.
+    return <tuple>[<int>, <int>]: A tuple of two atomic indices defining a bond.
     """
     return self.atom1.get_index(), self.atom2.get_index()
 
@@ -84,7 +125,8 @@ def in_ring(self):
 @add_to_class(Molecule)
 def separate_mod(self):
     """
-    Separate the molecule into connected components; no new atoms or bonds are created.
+    Modified PLAMS function: seperates a molecule instead of a copy of a molecule.
+    Separate the molecule into connected components.
     Returned is a list of new |Molecule| objects (all atoms and bonds are disjoint with
         the original molecule).
     Each element of this list is identical to one connected component of the base molecule.
@@ -147,7 +189,9 @@ def split_bond(self, bond, element='H', length=1.1):
 
 @add_to_class(Molecule)
 def neighbors_mod(self, atom, exclude=1):
-    """Return a list of neighbors of *atom* within the molecule. Atoms with
+    """
+    A modified PLAMS function: Allows the exlucison of specific elements from the return list.
+    Return a list of neighbors of *atom* within the molecule. Atoms with
     *atom* has to belong to the molecule. Returned list follows the same order as the ``bonds``
         attribute of *atom*.
     """
@@ -163,8 +207,15 @@ def split_mol(plams_mol):
     return <list>[<plams.Molecule>] A list of one or more plams molecules.
     """
     # Remove undesired bonds
-    bond_list = [bond for bond in plams_mol.bonds if bond.atom1.atnum != 1 and bond.atom2.atnum != 1
-                 and not bond.atom1.in_ring() and not bond.atom2.in_ring()]
+    h_mol = Molecule()
+    h_mol.atoms, h_mol.bonds = zip(*[(atom, atom.bonds[0]) for atom in plams_mol.atoms if
+                                     atom.atnum == 1])
+    for atom, bond in zip(h_mol.atoms, h_mol.bonds):
+        plams_mol.atoms.remove(atom)
+        plams_mol.bonds.remove(bond)
+
+    bond_list = [bond for bond in plams_mol.bonds if not bond.atom1.in_ring() and not
+                 bond.atom1.in_ring()]
 
     # Remove even more undesired bonds
     for bond in reversed(bond_list):
@@ -172,8 +223,15 @@ def split_mol(plams_mol):
         if not (len(n1) >= 3 and len(n2) >= 2) and not (len(n1) >= 2 and len(n2) >= 3):
             bond_list.remove(bond)
 
+    def find_dummy(mol_list):
+        for mol in mol_list:
+            for atom in mol:
+                if plams_mol.properties.dummies.coords == atom.coords:
+                    return len(mol)
+
     # Fragment the molecule such that the functional group is on the largest fragment
-    atom_list = [bond.atom1 for bond in bond_list] + [bond.atom2 for bond in bond_list]
+    plams_mol.merge_mol(h_mol)
+    atom_list = list(itertools.chain.from_iterable((bond.atom1, bond.atom2) for bond in bond_list))
     atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
     atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
     for at in atom_dict:
@@ -184,10 +242,7 @@ def split_mol(plams_mol):
                 mol = plams_mol.copy()
                 mol.delete_bond(mol[idx])
                 mol_list = mol.separate()
-                for mol in mol_list:
-                    for atom in mol:
-                        if plams_mol.properties.dummies.coords == atom.coords:
-                            len_atom.append(len(mol))
+                len_atom.append(find_dummy(mol_list))
             idx = len_atom.index(max(len_atom))
             bond = atom_dict[at][idx]
             plams_mol.split_bond(bond)
@@ -207,10 +262,8 @@ def recombine_mol(mol_list):
     Recombine a list of molecules into a single molecule.
     A list of 4-tuples of plams.Atoms will be read from mol_list[0].properties.mark.
     A bond will be created between tuple[0] & tuple[2]; tuple[1] and tuple[3] will be deleted.
-
-    mol_list <list>[<plams.Molecule>, ...]: A list of n plams molecules with the
-        atom.properties.mark atribute.
-
+    mol_list <list>[<plams.Molecule>]: A list of on or more plams molecules with the
+        properties.mark atribute.
     return <plams.Molecule>: The (re-)merged PLAMS molecule.
     """
     if len(mol_list) == 1:
@@ -236,8 +289,8 @@ def get_dihed(atoms, unit='degree'):
     """
     Returns the dihedral angle defined by four atoms.
     atoms <tuple>: An iterable consisting of 4 PLAMS atoms
-    unit <str>: The output unit
-    return <float>: A dihedral angle
+    unit <str>: The output unit..
+    return <float>: A dihedral angle.
     """
     vec1 = -1*np.array(atoms[0].vector_to(atoms[1]))
     vec2 = np.array(atoms[1].vector_to(atoms[2]))
@@ -254,7 +307,8 @@ def get_dihed(atoms, unit='degree'):
 @add_to_class(Molecule)
 def set_dihed(self, angle, unit='degree'):
     """
-    Change dihedral angles into a specific value.
+    Change a dihedral angle into a specific value.
+    self <plams.Molecule>: A PLAMS molecule.
     """
     angle = Units.convert(angle, unit, 'degree')
     bond_list = [bond for bond in self.bonds if bond.atom1.atnum != 1 and bond.atom2.atnum != 1
@@ -274,8 +328,7 @@ def set_dihed(self, angle, unit='degree'):
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-    mol_tmp = molkit.from_rdmol(rdmol)
-    self.update_coords(mol_tmp)
+    self.update_coords(rdmol)
 
 
 def optimize_ligand(ligand, database, opt=True):
@@ -451,13 +504,13 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     # Rotation of ligand - aligning the ligand and core vectors
     rotmat = rotate_ligand_rotation(lig_vector, core_vector)
     ligand.rotate(rotmat)
-    ligand.translate(lig_at1.vector_to(core_at1))
+    ligand.translate_np(lig_at1.vector_to(core_at1))
 
     # Translation of the ligand
     if bond_length:
         vec = np.array(core_at1.vector_to(core_at2))
         vec = vec*(bond_length/np.linalg.norm(vec))
-        ligand.translate(vec)
+        ligand.translate_np(vec)
 
     # Update the residue numbers
     if residue_number:
@@ -488,11 +541,9 @@ def merge_mol(self, mol_list):
     """
     Merge two or more molecules into a single molecule.
     No new copies of atoms/bonds are created, all atoms/bonds are moved from mol_list to plams_mol.
-
     plams_mol <plams.Molecule>: A PLAMS molecule.
     mol_list <plams.Molecule> or <list>[<plams.Molecule>]: A PLAMS molecule or list of
         PLAMS molecules.
-
     return <plams.Molecule>: The new combined PLAMS molecule
     """
     if isinstance(mol_list, Molecule):
@@ -501,45 +552,43 @@ def merge_mol(self, mol_list):
     for mol in mol_list:
         self.properties.soft_update(mol.properties)
 
-    # Create a list of all atoms and bonds in mol_list
-    bond_list = np.concatenate([mol.bonds for mol in mol_list])
-    atom_list = np.concatenate(mol_list)
-
-    # Add all atoms and bonds from mol_list to plams_mol
+    atom_list = list(itertools.chain.from_iterable(mol.atoms for mol in mol_list))
+    bond_list = list(itertools.chain.from_iterable(mol.bonds for mol in mol_list))
     for atom in atom_list:
-        self.add_atom(atom)
+        atom.mol = self
     for bond in bond_list:
-        self.add_bond(bond)
+        bond.mol = self
+    self.atoms += atom_list
+    self.bonds += bond_list
 
 
 def adf_connectivity(plams_mol):
     """
     Create an ADF-compatible connectivity list.
-
     plams_mol <plams.Molecule>: A PLAMS molecule.
-
     return <list>[<str>]: An ADF-compatible connectivity list.
     """
     # Create list of indices of all aromatic bonds
     rdmol = molkit.to_rdmol(plams_mol)
     aromatic = [bond.GetIsAromatic() for bond in rdmol.GetBonds()]
-    aromatic = [i for i, bond in enumerate(aromatic) if bond]
 
-    # Create a connectivity list; aromatic bonds get a bond order of 1.5
-    at1 = [plams_mol.atoms.index(bond.atom1) + 1 for bond in plams_mol.bonds]
-    at2 = [plams_mol.atoms.index(bond.atom2) + 1 for bond in plams_mol.bonds]
-    bonds = [bond.order for bond in plams_mol.bonds]
-    for i, bond in enumerate(plams_mol.bonds):
-        if i in aromatic:
-            bonds[i] = 1.5
-    bonds = [str(at1[i]) + ' ' + str(at2[i]) + ' ' + str(bond) for i, bond in enumerate(bonds)]
+    # Create a list of bond orders; aromatic bonds get a bond order of 1.5
+    plams_mol.set_atoms_id()
+    bond_orders = [bond.order for bond in plams_mol.bonds]
+    for i, ar in enumerate(aromatic):
+        if ar:
+            bond_orders[i] = 1.5
+    bonds = [str(bond.atom1.id) + ' ' + str(bond.atom2.id) + ' ' + str(order) for
+             bond, order in zip(plams_mol.bonds, bond_orders)]
+    plams_mol.unset_atoms_id()
 
     return bonds
 
 
-def fix_carboxyl(plams_mol):
+def fix_angle(plams_mol):
     """
-    Resets carboxylate OCO angles if smaller than 60 degrees
+    Resets carboxylate OCO angles if smaller than 60 degrees.
+    return <plams.Molecule>: A PLAMS molecule without OCO angles smaller than 60.0 degrees.
     """
     rdmol = molkit.to_rdmol(plams_mol)
     carboxylate = Chem.MolFromSmarts('[O-]C(C)=O')
@@ -552,8 +601,7 @@ def fix_carboxyl(plams_mol):
             if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
                 set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
                 set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
-        mol_tmp = molkit.from_rdmol(rdmol)
-        plams_mol.update_coords(mol_tmp)
+        plams_mol.update_coords(rdmol)
     return plams_mol
 
 
@@ -584,9 +632,8 @@ def fix_h(plams_mol):
             update.append(True)
 
     if update:
-        return molkit.from_rdmol(rdmol)
-    else:
-        return plams_mol
+        plams_mol.update_coords(rdmol)
+    return plams_mol
 
 
 def qd_int(plams_mol):
