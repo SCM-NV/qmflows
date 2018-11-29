@@ -162,7 +162,7 @@ def ams_job_mopac_sp(plams_mol):
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     path = plams_mol.properties.path
-    Angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
+    angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
 
     # Run MOPAC
     init(path=path, folder='ligand')
@@ -172,8 +172,8 @@ def ams_job_mopac_sp(plams_mol):
     mopac_results = mopac_job.run()
     if 'mopac.coskf' in mopac_results.files:
         coskf = KFFile(mopac_results['mopac.coskf'])
-        plams_mol.properties.surface = coskf.read('COSMO', 'Area') * Angstrom**2
-        plams_mol.properties.volume = coskf.read('COSMO', 'Volume') * Angstrom**3
+        plams_mol.properties.surface = coskf.read('COSMO', 'Area') * angstrom**2
+        plams_mol.properties.volume = coskf.read('COSMO', 'Volume') * angstrom**3
         crs_job = CRSJob(settings=crs_settings(mopac_results['mopac.coskf']), name='COSMO-RS')
         crs_results = crs_job.run()
         if 'COSMO-RS.crskf' in crs_results.files:

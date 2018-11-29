@@ -380,7 +380,7 @@ def print_exception(func, ex, name):
     print('function:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
     # print('\t\targ1(mol):', type(mol), mol)
     # print('\t\targ2(mol_dict):', type(mol_dict), mol_dict)
-    print('Warning:',  name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
+    print('Warning:', name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
     return []
 
 

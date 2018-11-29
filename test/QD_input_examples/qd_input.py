@@ -6,11 +6,13 @@ import os
 # Mandatory arguments: input_cores, input ligands & path will have to be specified by the user
 path = os.getcwd()
 
+# The input cores from path/core/
 input_cores = yaml.load("""
 -   - Cd16Se13.xyz
     - guess_bonds: False
 """)
 
+# The input ligands from path/ligand/
 input_ligands = yaml.load("""
 - OC
 - OCC

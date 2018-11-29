@@ -49,8 +49,7 @@ class CP2K(Package):
         :type settings: :class:`~qmflows.Settings`
         :param mol: molecular Geometry
         :type mol: plams Molecule
-        :param hdf5_file: Path to the HDF5 file that contains the
-        numerical results.
+        :param hdf5_file: Path to the HDF5 file that contains the numerical results.
         :type hdf5_file: String
         :param input_file_name: Optional name for the input.
         :type input_file_name: String
