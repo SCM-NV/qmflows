@@ -37,7 +37,7 @@ def translate_np(self, vector, unit='angstrom'):
     ratio = Units.conversion_ratio(unit, 'angstrom')
     array = self.to_array()
     array += np.array(vector)*ratio
-    self.update_coords(array)
+    self.update_coords(array, obj='array')
 
 
 def to_atnum(item):
@@ -63,24 +63,40 @@ def to_symbol(item):
 
 
 @add_to_class(Molecule)
-def update_coords(self, iterable):
+def update_coords(self, iterable, obj='plams'):
     """
     Update the atomic coordinates of self with coordinates from an iterable.
     self <plams.Molecule>: A PLAMS molecule.
-    iterable: A PLAMS molecule, RDKit molecule or a nested iterable containing x, y & z coordinates
-        as floats.
+    iterable <list>, <tuple>, <np.array>, <plams.Molecule>, etc.: A (nested) iterable containg
+        x, y & z coordinates as floats.
+    obj <str>: The nature of the iterable argument; accepted values:
+        'plams': An iterable with PLAMS atoms as elements.
+        'rdkit': An RDKit molecule.
+        'array': A n*3 numpy array consisting of floats.
+        'iterable': A nested iterable, each element consisting of an iterable with 3 floats.
     """
-    if isinstance(iterable, Chem.Mol):
+    def from_plams(self, iterable):
+        for at1, at2 in zip(self, iterable):
+            at1.coords = at2.coords
+
+    def from_rdkit(self, iterable):
         conf = iterable.GetConformer()
         for at1, at2 in zip(self, iterable.GetAtoms()):
             pos = conf.GetAtomPosition(at2.GetIdx())
             at1.coords = (pos.x, pos.y, pos.z)
-    elif isinstance(iterable[1], Atom):
-        for at1, at2 in zip(self, iterable):
-            at1.coords = at2.coords
-    else:
+
+    def from_array(self, iterable):
+        iterable = iterable.T
+        for at1, x, y, z in zip(self, iterable[0], iterable[1], iterable[2]):
+            at1.coords = (x, y, z)
+
+    def from_iterable(self, iterable):
         for at1, coords in zip(self, iterable):
-            at1.coords = tuple(coords)
+            at1.coords = (coords[0], coords[1], coords[2])
+
+    obj_dict = {'plams': from_plams, 'rdkit': from_rdkit,
+                'array': from_array, 'iterable': from_iterable}
+    obj_dict[obj](self, iterable)
 
 
 @add_to_class(Atom)
@@ -303,7 +319,8 @@ def recombine_mol(mol_list):
         mol1.delete_atom(tup[1])
         mol1.delete_atom(tup[3])
         mol1.add_bond(tup[0], tup[2])
-        mol1.update_coords(molkit.global_minimum_scan(mol1, mol1.bonds[-1].get_index()))
+        bond_index = mol1.bonds[-1].get_index()
+        mol1.update_coords(molkit.global_minimum_scan(mol1, bond_index), obj='rdkit')
     del mol1.properties.mark
 
     return mol1
@@ -352,7 +369,7 @@ def set_dihed(self, angle, unit='degree'):
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-    self.update_coords(rdmol)
+    self.update_coords(rdmol, obj='rdkit')
 
 
 def optimize_ligand(ligand, database, opt=True):
@@ -534,7 +551,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     if bond_length:
         vec = np.array(core_at1.vector_to(core_at2))
         xyz_array += vec*(bond_length/np.linalg.norm(vec))
-    ligand.update_coords(xyz_array)
+    ligand.update_coords(xyz_array, obj='array')
 
     # Update the residue numbers
     if residue_number:
@@ -625,7 +642,7 @@ def fix_carboxyl(plams_mol):
             if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
                 set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
                 set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
-        plams_mol.update_coords(rdmol)
+        plams_mol.update_coords(rdmol, obj='rdkit')
     return plams_mol
 
 
@@ -656,7 +673,7 @@ def fix_h(plams_mol):
             update.append(True)
 
     if update:
-        plams_mol.update_coords(rdmol)
+        plams_mol.update_coords(rdmol, obj='rdkit')
     return plams_mol
 
 
