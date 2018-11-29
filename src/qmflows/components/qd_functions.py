@@ -2,7 +2,6 @@ __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'r
            'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl']
 
 import itertools
-import os
 import numpy as np
 
 from scm.plams import Atom, Molecule, Bond
@@ -25,7 +24,7 @@ def to_array(self):
     return <np.array>: A 3*n numpy array with atomic coordinates.
     """
     x, y, z = zip(*[atom.coords for atom in self])
-    return np.transpose(np.array((x, y, z)))
+    return np.array((x, y, z)).T
 
 
 @add_to_class(Molecule)
@@ -120,6 +119,31 @@ def in_ring(self):
     if before != after - neighbors:
         return True
     return False
+
+
+@add_to_class(Molecule)
+def count_frags(self):
+    """
+    Modified PLAMS seperate() functions.
+    """
+    frags = 0
+    for at in self:
+        at._visited = False
+
+    def dfs(at1):
+        at1._visited = True
+        for bond in at1.bonds:
+            at2 = bond.other_end(at1)
+            if not at2._visited:
+                dfs(at2)
+
+    for atom in self.atoms:
+        if not atom._visited:
+            frags += 1
+            dfs(atom)
+    for atom in self.atoms:
+        del atom._visited
+    return frags
 
 
 @add_to_class(Molecule)
@@ -421,9 +445,11 @@ def find_substructure(ligand, split=True):
 
     # Remove all duplicate matches, each heteroatom (match[0]) should have <= 1 entry
     ligand_indices = []
+    ref = []
     for match in matches:
-        if match[0] not in [item[0] for item in ligand_indices]:
+        if match[0] not in ref:
             ligand_indices.append(match)
+            ref.append(match[0])
 
     if ligand_indices:
         ligand_list = [ligand.copy() for match in ligand_indices]
@@ -455,8 +481,8 @@ def find_substructure_split(ligand, ligand_index, split=True):
         if len(ligand.separate()) == 1:
             ligand.delete_atom(at2)
         else:
-            mol1, mol2 = ligand.separate()
-            if str(at1) in [str(atom) for atom in mol1]:
+            mol1, mol2 = ligand.separate_mod()
+            if at1 in mol1:
                 ligand = mol1
             else:
                 ligand = mol2
@@ -502,15 +528,13 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     lig_vector = lig_at2.vector_to(lig_at1)
 
     # Rotation of ligand - aligning the ligand and core vectors
-    rotmat = rotate_ligand_rotation(lig_vector, core_vector)
-    ligand.rotate(rotmat)
-    ligand.translate_np(lig_at1.vector_to(core_at1))
-
-    # Translation of the ligand
+    rotmat = create_rotmat(lig_vector, core_vector)
+    xyz_array = rotmat.dot(ligand.to_array().T).T
+    xyz_array += lig_at1.vector_to(core_at1)
     if bond_length:
         vec = np.array(core_at1.vector_to(core_at2))
-        vec = vec*(bond_length/np.linalg.norm(vec))
-        ligand.translate_np(vec)
+        xyz_array += vec*(bond_length/np.linalg.norm(vec))
+    ligand.update_coords(xyz_array)
 
     # Update the residue numbers
     if residue_number:
@@ -522,7 +546,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     return ligand
 
 
-def rotate_ligand_rotation(vec1, vec2):
+def create_rotmat(vec1, vec2):
     """
     Calculates the rotation matrix rotating *vec1* to *vec2*.
     Vectors can be any containers with 3 numerical values. They don't need to be normalized.
@@ -585,7 +609,7 @@ def adf_connectivity(plams_mol):
     return bonds
 
 
-def fix_angle(plams_mol):
+def fix_carboxyl(plams_mol):
     """
     Resets carboxylate OCO angles if smaller than 60 degrees.
     return <plams.Molecule>: A PLAMS molecule without OCO angles smaller than 60.0 degrees.
