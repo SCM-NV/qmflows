@@ -77,12 +77,3 @@ pytest*
 .ds_store
 .DS_Store
 scripts/.DS_Store
-
-src/qmflows/test_kf.py
-src/qmflows/components/from_to_rdmol.py
-src/qmflows/components/test.py
-src/qmflows/components/qd_ligand_opt.py
-src/qmflows/components/remove_ligand.py
-src/qmflows/components/numpy_test.py
-src/qmflows/components/timeit_test.py
-src/qmflows/components/qd_dissociate.py
