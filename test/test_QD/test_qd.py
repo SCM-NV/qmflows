@@ -6,8 +6,8 @@ from scm.plams import Molecule
 import qmflows.qd as QD
 from qmflows.components.qd_import_export import (read_mol, read_mol_xyz, read_mol_pdb, read_mol_mol)
 
-# path = os.path.abspath('test/test_QD/test_QD_files')
-path = os.path.join(os.getcwd(), 'test_qd_files')
+path = os.path.abspath('test/test_QD/test_QD_files')
+# path = os.path.join(os.getcwd(), 'test_qd_files')
 
 
 def test_read_mol_1():
@@ -55,8 +55,8 @@ def test_read_mol_2():
 
 
 def test_input():
-    # path = os.path.abspath('test/test_QD')
-    path = os.getcwd()
+    path = os.path.abspath('test/test_QD')
+    # path = os.getcwd()
     input_cores = yaml.load("""
     -   - Cd68Se55.xyz
         - guess_bonds: False
