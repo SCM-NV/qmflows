@@ -76,10 +76,6 @@ def prep_core(core, arg):
     if isinstance(dummy, str):
         dummy = Atom(symbol=dummy).atnum
 
-    # Optimize the core with RDKit UFF if opt = True. Returns a RDKit molecule
-    if arg['core_opt']:
-        core = molkit.global_minimum(core)
-
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
     if not core.properties.dummies:
