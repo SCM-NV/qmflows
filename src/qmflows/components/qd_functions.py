@@ -62,25 +62,25 @@ def find_substructure(ligand, split=True):
     # Creates a list containing predefined functional groups, each saved as an rdkit molecule
     # IMPORTANT: The first atom should ALWAYS be the atom that should attach to the core
     if split:
-        functional_group_list = ['[N+].[-]',
-                                 'O[H]',
-                                 'S[H]',
-                                 'N[H]',
-                                 'P[H]',
-                                 '[O-].[+]',
-                                 '[S-].[+]',
-                                 '[N-].[+]',
-                                 '[P-].[+]']
+        functional_group_list = ['[N+]C.[-]', '[n+]C.[-]', '[N+]c.[-]', '[n+]c.[-]',
+                                 'O(C)[H]', 'O(c)[H]',
+                                 'S(C)[H]', 'S(c)[H]',
+                                 'N(C)[H]', 'N(c)[H]',
+                                 'P(C)[H]', 'P(c)[H]',
+                                 '[O-]C.[+]', '[O-]c.[+]',
+                                 '[S-]C.[+]', '[S-]c.[+]',
+                                 '[N-]C.[+]', '[N-]c.[+]',
+                                 '[P-]C.[+]', '[P-]c.[+]']
     else:
-        functional_group_list = ['[N+]',
-                                 'O[H]',
-                                 'S[H]',
-                                 'N[H]',
-                                 'P[H]',
-                                 '[O-]',
-                                 '[S-]',
-                                 '[N-]',
-                                 '[P-]']
+        functional_group_list = ['[N+]C', '[n+]C', '[N+]c', '[n+]c',
+                                 'OC', 'Oc', 'oC', 'oc',
+                                 'SC', 'Sc', 'sC', 'sc',
+                                 'NC', 'Nc', 'nC', 'nc',
+                                 'PC', 'Pc', 'pC', 'pc',
+                                 '[O-]C', '[O-]c',
+                                 '[S-]C', '[S-]c',
+                                 '[N-]C', '[N-]c', '[n-]C', '[n-]c',
+                                 '[P-]C', '[P-]c', '[p-]C', '[p-]c']
 
     functional_group_list = [Chem.MolFromSmarts(smarts) for smarts in functional_group_list]
 
