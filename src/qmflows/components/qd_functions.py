@@ -1,8 +1,9 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl']
+           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
 
 import itertools
 import numpy as np
+import time
 
 from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
@@ -14,6 +15,38 @@ from rdkit.Chem import AllChem, rdMolTransforms
 
 from .qd_database import compare_database
 from .qd_import_export import export_mol
+
+
+time_print = '[' + time.strftime('%H:%M:%S') + '] '
+
+
+@add_to_class(Molecule)
+def global_minimum_scan(self, indices):
+    """
+    Optimize the molecule with 3 different values for the given dihedral angle and
+        find the lowest energy conformer.
+
+    :parameter self: PLAMS molecule
+    :type self: plams.Molecule
+    :parameter tuple indices: indices of two atoms defining a bond
+    """
+    # Define a number of variables and create 3 copies of the ligand
+    uff = AllChem.UFFGetMoleculeForceField
+    angles = (-120, 0, 120)
+    mol_list = [self.copy() for i in range(angles)]
+    for angle, plams_mol in zip(angles, mol_list):
+        bond = plams_mol[indices]
+        atom = plams_mol[indices[0]]
+        plams_mol.rotate_bond(bond, atom, angle, unit='degree')
+
+    # Optimize the geometry for all dihedral angles in angle_list
+    # The geometry that yields the minimum energy is returned
+    mol_list = [molkit.to_rdmol(plams_mol) for plams_mol in mol_list]
+    for rdmol in mol_list:
+        uff(rdmol).Minimize()
+    energy_list = [uff(rdmol).CalcEnergy() for rdmol in mol_list]
+    minimum = energy_list.index(min(energy_list))
+    self.update_coords(mol_list[minimum], obj='rdkit')
 
 
 @add_to_class(Molecule)
@@ -137,11 +170,10 @@ def in_ring(self):
     return False
 
 
+"""
 @add_to_class(Molecule)
 def count_frags(self):
-    """
     Modified PLAMS seperate() functions.
-    """
     frags = 0
     for at in self:
         at._visited = False
@@ -160,6 +192,7 @@ def count_frags(self):
     for atom in self.atoms:
         del atom._visited
     return frags
+"""
 
 
 @add_to_class(Molecule)
@@ -320,7 +353,7 @@ def recombine_mol(mol_list):
         mol1.delete_atom(tup[3])
         mol1.add_bond(tup[0], tup[2])
         bond_index = mol1.bonds[-1].get_index()
-        mol1.update_coords(molkit.global_minimum_scan(mol1, bond_index), obj='rdkit')
+        mol1.global_minimum_scan(bond_index)
     del mol1.properties.mark
 
     return mol1
@@ -392,7 +425,7 @@ def optimize_ligand(ligand, database, opt=True):
     ligand.properties.entry = False
     if not match or not pdb:
         # Export the unoptimized ligand to a .pdb and .xyz file
-        export_mol(ligand, message='Ligand:\t\t\t\t')
+        export_mol(ligand, message='Ligand:\t\t\t')
 
         # If ligand optimization is enabled: Optimize the ligand,
         # set pdb_info and export the result
@@ -412,7 +445,7 @@ def optimize_ligand(ligand, database, opt=True):
         if not match and not pdb:
             ligand.properties.entry = True
         else:
-            print('\ndatabase entry exists for ' + ligand.properties.name +
+            print(time_print + 'database entry exists for ' + ligand.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
     return ligand
@@ -473,7 +506,7 @@ def find_substructure(ligand, split=True):
         ligand_list = [find_substructure_split(ligand, ligand_indices[i], split) for i, ligand in
                        enumerate(ligand_list)]
     else:
-        print('No functional groups were found for ' + str(ligand.get_formula()))
+        print(time_print + 'No functional groups were found for ' + str(ligand.get_formula()))
         ligand_list = []
 
     return ligand_list

@@ -3,11 +3,15 @@ __all__ = ['read_mol', 'set_prop', 'create_dir']
 import os
 import itertools
 import pandas as pd
+import time
 
 from scm.plams import Molecule
 from scm.plams.core import errors
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
+
+
+time_print = '[' + time.strftime('%H:%M:%S') + '] '
 
 
 def read_mol(input_mol, path, is_core=False):
@@ -40,7 +44,7 @@ def read_mol(input_mol, path, is_core=False):
         try:
             read = extension_dict[mol_dict['file_type']]
         except KeyError as ex:
-            print(str(type(ex).__name__) + ':\t' + str(ex) + '\n')
+            print(time_print + str(type(ex).__name__) + ':\t' + str(ex) + '\n')
 
         # Convert mol into either a list or PLAMS molecule
         if read:
@@ -364,7 +368,7 @@ def export_mol(mol, message='Mol:\t\t\t\t'):
     mol_path = os.path.join(mol.properties.path, name)
     molkit.writepdb(mol, mol_path + '.pdb')
     mol.write(mol_path + '.xyz')
-    print(str(message) + str(name) + '.pdb')
+    print(time_print + str(message) + str(name) + '.pdb')
 
 
 def print_exception(func, ex, name):
@@ -376,11 +380,11 @@ def print_exception(func, ex, name):
                       'read_mol_folder': 'folder', 'read_mol_txt': '.txt file',
                       'read_mol_excel': '.xlsx file', 'read_mol_plams': 'PLAMS molecule',
                       'read_mol_rdkit': 'RDKit molecule'}
-    print(str(type(ex).__name__), str(ex))
-    print('function:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
+    print(time_print + str(type(ex).__name__), str(ex))
+    print(time_print + 'function:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
     # print('\t\targ1(mol):', type(mol), mol)
     # print('\t\targ2(mol_dict):', type(mol_dict), mol_dict)
-    print('Warning:', name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
+    print(time_print + 'Warning:', name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
     return []
 
 

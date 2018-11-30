@@ -1,7 +1,8 @@
-__all__ = ['check_sys_var', 'ams_job_mopac_sp', 'ams_job_uff_opt']
+__all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
 import os
 import shutil
+import time
 
 from scm.plams import (Settings, AMSJob, init, finish, Units)
 from scm.plams.tools.kftools import KFFile
@@ -13,6 +14,9 @@ from .qd_import_export import export_mol
 from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, update_coords)
 
 
+time_print = '[' + time.strftime('%H:%M:%S') + '] '
+
+
 def check_sys_var():
     """
     Check if all ADF environment variables are set and if the 2018 version of ADF is installed.
@@ -21,12 +25,12 @@ def check_sys_var():
     sys_var_exists = [item in os.environ for item in sys_var]
     for i, item in enumerate(sys_var_exists):
         if not item:
-            print('WARNING: The environment variable ' + sys_var[i] + ' has not been set')
+            print(time_print + 'WARNING: The environment variable ' + sys_var[i] + ' has not been set')
     if False in sys_var_exists:
-        raise EnvironmentError('One or more ADF environment variables have not been set, aborting '
+        raise EnvironmentError(time_print + 'One or more ADF environment variables have not been set, aborting '
                                'ADF job.')
     if '2018' not in os.environ['ADFHOME']:
-        error = 'No ADF version 2018 detected in', os.environ['ADFHOME'], ', aborting ADF job.'
+        error = time_print + 'No ADF version 2018 detected in', os.environ['ADFHOME'], ', aborting ADF job.'
         raise ImportError(error)
 
 
