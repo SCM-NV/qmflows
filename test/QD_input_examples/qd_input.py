@@ -26,13 +26,12 @@ argument_dict = yaml.load("""
 dir_name_list: [core, ligand, QD]
 dummy: Cl
 database_name: [ligand_database.xlsx, QD_database.xlsx]
-use_database: True
-core_opt: False
+use_database: False
 ligand_opt: True
 ligand_crs: False
-qd_opt: True
-qd_int: True
-maxiter: 900
+qd_opt: False
+qd_int: False
+maxiter: 500
 split: True
 """)
 
