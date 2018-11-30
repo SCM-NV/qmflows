@@ -476,10 +476,10 @@ def find_substructure(ligand, split=True):
                                  '[P-]C.[+]']
     else:
         functional_group_list = ['[N+]C',
-                                 'O[H]C',
-                                 'S[H]C',
-                                 'N[H]C',
-                                 'P[H]C',
+                                 'O([H])C',
+                                 'S([H])C',
+                                 'N([H])C',
+                                 'P([H])C',
                                  '[O-]C',
                                  '[S-]C',
                                  '[N-]C',
@@ -569,6 +569,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     if isinstance(atoms[0], Atom):
         core_at1, core_at2 = atoms[0], atoms[1]
         lig_at1, lig_at2 = atoms[2], atoms[3]
+        atoms = [at.get_index() for at in atoms]
     else:
         core_at1, core_at2 = core[atoms[0]], core[atoms[1]]
         lig_at1, lig_at2 = ligand[atoms[2]], ligand[atoms[3]]
@@ -580,7 +581,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     # Rotation of ligand - aligning the ligand and core vectors
     rotmat = create_rotmat(lig_vector, core_vector)
     xyz_array = rotmat.dot(ligand.to_array().T).T
-    xyz_array += lig_at1.vector_to(core_at1)
+    xyz_array += np.array(core_at1.coords)-xyz_array[atoms[2] - 1]
     if bond_length:
         vec = np.array(core_at1.vector_to(core_at2))
         xyz_array += vec*(bond_length/np.linalg.norm(vec))
