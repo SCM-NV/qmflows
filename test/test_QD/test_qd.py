@@ -71,7 +71,7 @@ def test_input():
     """)
 
     argument_dict = yaml.load("""
-    dir_name_list: [test_qd_files, test_qd_files, test_qd_files]
+    dir_name_list: [test_QD_files, test_QD_files, test_QD_files]
     dummy: Cl
     database_name: [ligand_database.xlsx, QD_database.xlsx]
     use_database: True
