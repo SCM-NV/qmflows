@@ -169,7 +169,7 @@ def prep_qd_1(core, ligand, qd_folder):
     return <plams.Molecule>: The quantum dot (core + n*ligands).
     """
     # Rotate and translate all ligands to their position on the core.
-    indices = [(dummy.get_index(), -1, ligand.properties.dummies.get_index(), -1) for
+    indices = [(dummy.get_atom_index(), -1, ligand.properties.dummies.get_atom_index(), -1) for
                i, dummy in enumerate(core.properties.dummies)]
     core = core.copy()
     ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))

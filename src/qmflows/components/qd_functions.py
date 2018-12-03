@@ -153,7 +153,7 @@ def get_bond_index(self):
 
 
 @add_to_class(Atom)
-def in_ring(self):
+def atom_in_ring(self):
     """
     Check if this |Atom| is part of a ring. Returns a boolean.
     """
@@ -166,6 +166,21 @@ def in_ring(self):
         mol.delete_bond(bond)
     after = len(mol.separate())
     if before != after - neighbors:
+        return True
+    return False
+
+
+@add_to_class(Bond)
+def bond_in_ring(self):
+    """
+    Check if this |Atom| is part of a ring. Returns a boolean.
+    """
+    mol = self.mol.copy()
+    self = mol[self.get_bond_index()]
+    before = len(mol.separate())
+    self.mol.delete_bond(self)
+    after = len(mol.separate())
+    if before != after - 1:
         return True
     return False
 
@@ -262,8 +277,8 @@ def split_mol(plams_mol):
         plams_mol.atoms.remove(atom)
         plams_mol.bonds.remove(bond)
 
-    bond_list = [bond for bond in plams_mol.bonds if not bond.atom1.in_ring() and not
-                 bond.atom1.in_ring()]
+    bond_list = [bond for bond in plams_mol.bonds if not bond.atom1.atom_in_ring() and not
+                 bond.atom1.atom_in_ring()]
 
     # Remove even more undesired bonds
     for bond in reversed(bond_list):
@@ -361,7 +376,7 @@ def set_dihed(self, angle, unit='degree'):
     """
     angle = Units.convert(angle, unit, 'degree')
     bond_list = [bond for bond in self.bonds if bond.atom1.atnum != 1 and bond.atom2.atnum != 1
-                 and bond.order == 1 and not bond.in_ring()]
+                 and bond.order == 1 and not bond.bond_in_ring()]
 
     for bond in bond_list:
         n1, n2 = self.neighbors_mod(bond.atom1), self.neighbors_mod(bond.atom2)
