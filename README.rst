@@ -109,6 +109,7 @@ Quantum Dots builder
 An example input file (including documentation) is located in qd-example_.
 Once the path, input ligands and input cores have been specified the job can be run with ``python qd_input.py``
 
+Update 3 Dec 2018: Ligand optimization has been overhauled, a ligand MOPAC+COSMO-RS property calculation and an inter-ligand activation strain analysis have been (UFF) have been implemented.
 
     
 .. _documentation: https://qmflows.readthedocs.io/en/latest/
