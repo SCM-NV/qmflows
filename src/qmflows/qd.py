@@ -4,10 +4,8 @@ import itertools
 import time
 
 from scm.plams import (Atom, MoleculeError, Settings)
-import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .components import qd_functions as QD_scripts
-from .components.qd_functions import merge_mol
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams

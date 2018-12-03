@@ -133,7 +133,7 @@ def update_coords(self, iterable, obj='plams'):
 
 
 @add_to_class(Atom)
-def get_index(self):
+def get_atom_index(self):
     """
     Return the index of an atom (numbering starts with 1).
     self <plams.Atom>: A PLAMS atom.
@@ -143,13 +143,13 @@ def get_index(self):
 
 
 @add_to_class(Bond)
-def get_index(self):
+def get_bond_index(self):
     """
     Return a tuple of two atomic indices defining a bond (numbering starts with 1).
     self <plams.Bond>: A PLAMS bond.
     return <tuple>[<int>, <int>]: A tuple of two atomic indices defining a bond.
     """
-    return self.atom1.get_index(), self.atom2.get_index()
+    return self.atom1.get_atom_index(), self.atom2.get_atom_index()
 
 
 @add_to_class(Atom)
@@ -158,7 +158,7 @@ def in_ring(self):
     Check if this |Atom| is part of a ring. Returns a boolean.
     """
     mol = self.mol.copy()
-    atom = mol[self.get_index()]
+    atom = mol[self.get_atom_index()]
     before = len(mol.separate())
     neighbors = len(atom.bonds)
     bonds = [bond for bond in atom.bonds]
@@ -168,31 +168,6 @@ def in_ring(self):
     if before != after - neighbors:
         return True
     return False
-
-
-"""
-@add_to_class(Molecule)
-def count_frags(self):
-    Modified PLAMS seperate() functions.
-    frags = 0
-    for at in self:
-        at._visited = False
-
-    def dfs(at1):
-        at1._visited = True
-        for bond in at1.bonds:
-            at2 = bond.other_end(at1)
-            if not at2._visited:
-                dfs(at2)
-
-    for atom in self.atoms:
-        if not atom._visited:
-            frags += 1
-            dfs(atom)
-    for atom in self.atoms:
-        del atom._visited
-    return frags
-"""
 
 
 @add_to_class(Molecule)
@@ -311,7 +286,7 @@ def split_mol(plams_mol):
         for i in atom_dict[at][2:]:
             len_atom = []
             for bond in atom_dict[at]:
-                idx = bond.get_index()
+                idx = bond.get_bond_index()
                 mol = plams_mol.copy()
                 mol.delete_bond(mol[idx])
                 mol_list = mol.separate()
@@ -352,7 +327,7 @@ def recombine_mol(mol_list):
         mol1.delete_atom(tup[1])
         mol1.delete_atom(tup[3])
         mol1.add_bond(tup[0], tup[2])
-        bond_index = mol1.bonds[-1].get_index()
+        bond_index = mol1.bonds[-1].get_bond_index()
         mol1.global_minimum_scan(bond_index)
     del mol1.properties.mark
 
@@ -569,7 +544,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     if isinstance(atoms[0], Atom):
         core_at1, core_at2 = atoms[0], atoms[1]
         lig_at1, lig_at2 = atoms[2], atoms[3]
-        atoms = [at.get_index() for at in atoms]
+        atoms = [at.get_atom_index() for at in atoms]
     else:
         core_at1, core_at2 = core[atoms[0]], core[atoms[1]]
         lig_at1, lig_at2 = ligand[atoms[2]], ligand[atoms[3]]
