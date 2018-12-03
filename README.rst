@@ -121,4 +121,4 @@ Once the path, input ligands and input cores have been specified the job can be 
 .. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
 .. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
 .. _PLAMS: https://github.com/SCM-NV/PLAMS
-.. _qd-example: https://github.com/SCM-NV/qmflows/blob/master/test/QD_input_examples/qd_input.py
+.. _qd-example: https://github.com/SCM-NV/qmflows/blob/master/test/QD_input_examples
