@@ -106,7 +106,7 @@ Now you are ready to use *qmflows*.
 
 Quantum Dots builder
 --------------------
-An example input file (including documentation) is located in QD_input_examples_.
+An example input file (including documentation) is located in qd-example_.
 Once the path, input ligands and input cores have been specified the job can be run with ``python qd_input.py``
     
 .. _documentation: https://qmflows.readthedocs.io/en/latest/
@@ -121,4 +121,4 @@ Once the path, input ligands and input cores have been specified the job can be 
 .. _tutorial-qmflows: https://github.com/SCM-NV/qmflows/tree/master/jupyterNotebooks
 .. _examples: https://github.com/SCM-NV/qmflows/tree/master/src/qmflows/examples
 .. _PLAMS: https://github.com/SCM-NV/PLAMS
-.. _QD_input_examples: https://github.com/SCM-NV/qmflows/blob/master/test/QD_input_examples
+.. _qd-example: https://github.com/SCM-NV/qmflows/blob/master/test/QD_input_examples
