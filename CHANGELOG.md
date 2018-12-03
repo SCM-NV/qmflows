@@ -22,3 +22,14 @@
 
  * Job manager issue when removing a SCM job
  
+ 
+
+# 02/12/2018
+
+## Added
+ * Ligand MOPAC+COSMO-RS property calculation
+ * Inter-ligand activation strain analysis have been (UFF)
+ 
+## Changed
+
+ * Ligand optimization has been overhauled
