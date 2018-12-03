@@ -108,7 +108,7 @@ def test_input():
 
     os.remove(os.path.join(path, 'Ligand_database.xlsx'))
     exclusion = ['AcOH.mol', 'AcOH.pdb', 'AcOH.txt', 'AcOH.xyz', 'Cd68Se55.xyz']
-    path = os.path.join(path, 'test_qd_files')
+    path = os.path.join(path, 'test_QD_files')
     for file in reversed(os.listdir(path)):
         if file not in exclusion:
             os.remove(os.path.join(path, file))
