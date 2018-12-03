@@ -14,6 +14,6 @@ __all__ = [
     'find_first_job', 'select_max', 'select_min', 'Distance', 'Angle', 'Dihedral',
     'read_database', 'compare_database', 'write_database',
     'read_mol', 'set_prop', 'create_dir',
-    'check_sys_var', 'qd_opt', 'ams_job_mopac_sp'
+    'check_sys_var', 'qd_opt', 'ams_job_mopac_sp',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
     'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
