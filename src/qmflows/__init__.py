@@ -3,8 +3,9 @@ from .components import (
     find_first_job, select_max, select_min,
     read_database, compare_database, write_database,
     read_mol, set_prop, create_dir,
-    optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, combine_qd,
-    check_sys_var, ams_job)
+    optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, merge_mol, qd_int,
+    adf_connectivity, fix_h, fix_carboxyl, update_coords,
+    check_sys_var, ams_job_mopac_sp, qd_opt)
 
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -24,6 +25,5 @@ __all__ = [
     'find_first_job', 'select_max', 'select_min',
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-    'combine_qd', 'check_sys_var', 'ams_job',
-    'read_database', 'compare_database', 'write_database',
-]
+    'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords',
+    'check_sys_var', 'ams_job_mopac_sp', 'qd_opt']

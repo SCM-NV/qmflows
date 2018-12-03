@@ -4,18 +4,20 @@ import os
 import pandas as pd
 
 import scm.plams.interfaces.molecule.rdkit as molkit
-from rdkit import Chem
-
-from .qd_import_export import set_prop
 
 
-def read_database(mol_folder, database_name='ligand_database.xlsx'):
+def read_database(path, database_name='Ligand_database.xlsx', sheet_name='Ligand'):
     """
-    Open the database
+    Open the database.
+
+    path <str>: The path to the database.
+    database_name <str>: The name (including extension) of the database.
+
+    return <pd.DataFrame>: A database of previous calculations.
     """
-    database_path = os.path.join(mol_folder, database_name)
-    if os.path.exists(database_path):
-        database = pd.read_excel(database_path, sheet_name='Ligand')
+    path = os.path.join(path, database_name)
+    if os.path.exists(path):
+        database = pd.read_excel(path, sheet_name)
     else:
         database = pd.DataFrame()
 
@@ -25,28 +27,22 @@ def read_database(mol_folder, database_name='ligand_database.xlsx'):
 def compare_database(plams_mol, database):
     """
     Search the database for any ligand matches.
+
+    plams_mol <plams.Molecule>: A plams molecule.
+    database <pd.DataFrame>: A database of previous calculations.
+
+    return <plams.Molecule>, <bool>, <bool>: The (imported) ligand, if a match was found between
+        input ligand and the database, and if the .pdb file of this match actually exists.
     """
-    mol_folder = plams_mol.properties.source_folder
-
-    # If database usage is enabled: compare the ligand with previous entries.
-    if not database.empty:
-        database_mol = [Chem.MolFromSmiles(mol) for mol in database['Ligand_SMILES']]
-        database_mol = [Chem.AddHs(mol) for mol in database_mol]
-        matches = [molkit.to_rdmol(plams_mol).HasSubstructMatch(mol) for mol in database_mol]
-    else:
-        matches = [False]
-
-    # Searches for matches between ligand and the database and Check if the ligand .pdb exists
-    # Import the .pdb file
-    if any(matches):
-        index = matches.index(True)
-        mol_path = os.path.join(mol_folder, str(database['Ligand_opt_pdb'][index]))
+    # Check if plams_mol is in database based on matches in plams.properties.name
+    # Imports a molecule if a match is found
+    if not database.empty and plams_mol.properties.name in list(database['Ligand_name']):
+        index = list(database['Ligand_name']).index(plams_mol.properties.name)
+        mol_path = list(database['Ligand_opt_pdb'])[index]
         match = True
         if os.path.exists(mol_path):
             plams_mol_new = molkit.readpdb(mol_path)
-            prop_dict = {'mol_name': plams_mol.properties.name.replace('Ligand_', ''),
-                         'folder_path': plams_mol.properties.source_folder}
-            set_prop(plams_mol_new, prop_dict)
+            plams_mol_new.properties = plams_mol.properties
             plams_mol = plams_mol_new
             pdb = True
         else:
@@ -58,32 +54,63 @@ def compare_database(plams_mol, database):
     return plams_mol, match, pdb
 
 
-def write_database(ligand_list, database, database_name='ligand_database.xlsx'):
+def write_database(mol_list, database, path, mol_type='ligand'):
     """
     Write the new database entries to the database.
+    New entries are defined by molecules marked as mol.properties.entry = True.
+
+    mol_list <list>[<plams.Molecule>]: A list of ligands or quantum dots.
+    database <pd.DataFrame>: A database of previous calculations.
+    path <str>: The path to the database.
+    mol_type <str>: 'ligand' for ligands and 'qd' for quantum dots.
+
+    return: A .xlsx file.
     """
-    mol_folder = ligand_list[0].properties.source_folder
     database_entries = []
-    for ligand in ligand_list:
-        if ligand.properties.entry:
-            prop = ligand.properties
-            database_entries.append(
-                [prop.name,
-                 prop.formula,
-                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.pdb',
-                 os.path.join(mol_folder, prop.name.split('@')[0]) + '.opt.pdb',
-                 prop.smiles])
+    for mol in mol_list:
+        if mol.properties.entry:
+            prop = mol.properties
+            if mol_type == 'ligand':
+                database_entries.append(
+                    [prop.name,
+                     prop.group,
+                     mol.get_formula().split('Xx')[0],
+                     os.path.join(prop.path, prop.name.split('@')[0]) + '.pdb',
+                     os.path.join(prop.path, prop.name.split('@')[0]) + '.opt.pdb',
+                     prop.smiles,
+                     prop.surface,
+                     prop.volume,
+                     prop.logp])
+            elif mol_type == 'qd':
+                database_entries.append(
+                    [prop.name,
+                     mol.get_formula().split('Xx')[0],
+                     os.path.join(prop.path, prop.name) + '.pdb',
+                     os.path.join(prop.path, prop.name) + '.opt.pdb',
+                     prop.E,
+                     prop.Eint,
+                     prop.Estrain])
 
     if database_entries:
         database_entries = list(zip(*database_entries))
-        new = pd.DataFrame({'Ligand_name': database_entries[0],
-                            'Ligand_formula': database_entries[1],
-                            'Ligand_pdb': database_entries[2],
-                            'Ligand_opt_pdb': database_entries[3],
-                            'Ligand_SMILES': database_entries[4]})
+        if mol_type == 'ligand':
+            keys = ('Ligand_name', 'Ligand_group', 'Ligand_formula', 'Ligand_pdb', 'Ligand_opt_pdb',
+                    'Ligand_SMILES', 'Ligand_surface', 'Ligand_volume', 'Ligand_logP')
+            name = 'Ligand_database.xlsx'
+            sheet_name = 'Ligand'
+        if mol_type == 'qd':
+            keys = ('Quantum_dot_name', 'Quantum_dot_formula', 'Quantum_dot_pdb',
+                    'Quantum_dot_opt_pdb', 'Quantum_dot_E', 'Quantum_dot_Eint',
+                    'Quantum_dot_Estrain')
+            name = 'QD_database.xlsx'
+            sheet_name = 'Quantum_dot'
+
+        database_entries = pd.DataFrame(dict(zip(keys, database_entries)))
 
         if not database.empty:
-            new = database.append(new, ignore_index=True)
+            database = database.append(database_entries, ignore_index=True)
+        else:
+            database = database_entries
 
-        database_path = os.path.join(mol_folder, database_name)
-        new.to_excel(database_path, sheet_name='Ligand')
+        path = os.path.join(path, name)
+        database.to_excel(path, sheet_name=sheet_name)
