@@ -33,7 +33,7 @@ def global_minimum_scan(self, indices):
     # Define a number of variables and create 3 copies of the ligand
     uff = AllChem.UFFGetMoleculeForceField
     angles = (-120, 0, 120)
-    mol_list = [self.copy() for i in range(angles)]
+    mol_list = [self.copy() for i in angles]
     for angle, plams_mol in zip(angles, mol_list):
         bond = plams_mol[indices]
         atom = plams_mol[indices[0]]
