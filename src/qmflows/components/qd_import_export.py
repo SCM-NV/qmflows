@@ -115,30 +115,33 @@ def read_mol_extension(mol_dict):
         now with an updated name and file_type.
     """
     mol = list(mol_dict.keys())[0]
-    mol_path = os.path.join(mol_dict[mol]['path'], mol_dict[mol]['name'])
-
-    # Identify the filetype of name
-    if os.path.isfile(mol_path):
-        file_type = mol.rsplit('.', 1)[-1]
-        name = mol.rsplit('.', 1)[0]
-    elif os.path.isdir(mol_path):
-        file_type = 'folder'
-        name = mol
-    elif os.path.isfile(mol):
-        file_type = mol.rsplit('.', 1)[-1]
-        name = mol.rsplit('.', 1)[0].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
-    elif os.path.isdir(mol):
-        file_type = 'folder'
-        name = mol
-    elif isinstance(mol, Molecule):
-        file_type = 'plams_mol'
-        name = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
-    elif isinstance(mol, Chem.rdchem.Mol):
-        file_type = 'rdmol'
-        name = Chem.MolToSmiles(Chem.RemoveHs(mol))
-    else:
-        file_type = 'smiles'
-        name = smiles_name(mol)
+    try:
+        mol_path = os.path.join(mol_dict[mol]['path'], mol_dict[mol]['name'])
+        if os.path.isfile(mol_path):
+            file_type = mol.rsplit('.', 1)[-1]
+            name = mol.rsplit('.', 1)[0]
+        elif os.path.isdir(mol_path):
+            file_type = 'folder'
+            name = mol
+        elif os.path.isfile(mol):
+            file_type = mol.rsplit('.', 1)[-1]
+            name = mol.rsplit('.', 1)[0].rsplit('/', 1)[-1].rsplit('\\', 1)[-1]
+        elif os.path.isdir(mol):
+            file_type = 'folder'
+            name = mol
+        else:
+            file_type = 'smiles'
+            name = smiles_name(mol)
+    except TypeError:
+        if isinstance(mol, Molecule):
+            file_type = 'plams_mol'
+            if not mol.properties.name:
+                name = Chem.MolToSmiles(Chem.RemoveHs(molkit.to_rdmol(mol)))
+            else:
+                name = mol.properties.name
+        elif isinstance(mol, Chem.rdchem.Mol):
+            file_type = 'rdmol'
+            name = Chem.MolToSmiles(Chem.RemoveHs(mol))
 
     # Update mol_dict
     mol_dict[mol]['file_type'] = file_type
