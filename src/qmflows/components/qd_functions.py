@@ -159,12 +159,12 @@ def atom_in_ring(self):
     """
     mol = self.mol.copy()
     atom = mol[self.get_atom_index()]
-    before = len(mol.separate())
+    before = mol.count_frags()
     neighbors = len(atom.bonds)
     bonds = [bond for bond in atom.bonds]
     for bond in bonds:
         mol.delete_bond(bond)
-    after = len(mol.separate())
+    after = mol.count_frags()
     if before != after - neighbors:
         return True
     return False
@@ -177,12 +177,39 @@ def bond_in_ring(self):
     """
     mol = self.mol.copy()
     self = mol[self.get_bond_index()]
-    before = len(mol.separate())
+    before = mol.count_frags()
     self.mol.delete_bond(self)
-    after = len(mol.separate())
+    after = mol.count_frags()
     if before != after - 1:
         return True
     return False
+
+
+@add_to_class(Molecule)
+def count_frags(self):
+    """
+    Modified PLAMS seperate() function; equavalent to len(self.separate()).
+    Returns the number of fragments if the molecule were to be separated into connected components.
+    """
+    frags = 0
+    for at in self:
+        at._visited = False
+
+    def dfs(at1):
+        at1._visited = True
+        for bond in at1.bonds:
+            at2 = bond.other_end(at1)
+            if not at2._visited:
+                dfs(at2)
+
+    for atom in self.atoms:
+        if not atom._visited:
+            frags += 1
+            dfs(atom)
+    for atom in self.atoms:
+        del atom._visited
+
+    return frags
 
 
 @add_to_class(Molecule)
@@ -270,12 +297,14 @@ def split_mol(plams_mol):
     return <list>[<plams.Molecule>] A list of one or more plams molecules.
     """
     # Remove undesired bonds
-    h_mol = Molecule()
-    h_mol.atoms, h_mol.bonds = zip(*[(atom, atom.bonds[0]) for atom in plams_mol.atoms if
-                                     atom.atnum == 1])
-    for atom, bond in zip(h_mol.atoms, h_mol.bonds):
-        plams_mol.atoms.remove(atom)
-        plams_mol.bonds.remove(bond)
+    plams_mol.properties.dummies = plams_mol[1]
+    h_atoms = []
+    h_bonds = []
+    for atom in reversed(plams_mol.atoms):
+        if atom.atnum == 1:
+            h_atoms.append(atom)
+            h_bonds.append(atom.bonds[0])
+            plams_mol.delete_atom(atom)
 
     bond_list = [bond for bond in plams_mol.bonds if not bond.atom1.atom_in_ring() and not
                  bond.atom1.atom_in_ring()]
@@ -293,10 +322,14 @@ def split_mol(plams_mol):
                     return len(mol)
 
     # Fragment the molecule such that the functional group is on the largest fragment
-    plams_mol.merge_mol(h_mol)
+    for atom, bond in zip(h_atoms, h_bonds):
+        plams_mol.add_atom(atom)
+        plams_mol.add_bond(bond)
+
     atom_list = list(itertools.chain.from_iterable((bond.atom1, bond.atom2) for bond in bond_list))
     atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
     atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
+
     for at in atom_dict:
         for i in atom_dict[at][2:]:
             len_atom = []
