@@ -103,8 +103,7 @@ def prep_ligand_1(ligand_list, path, arg):
     """
     # Open the ligand database and check if the specified ligand(s) is already present
     if arg['use_database']:
-        ligand_database = QD_database.read_database(path, database_name='Ligand_database.xlsx',
-                                                    sheet_name='Ligand')
+        ligand_database = QD_database.read_database(path, database_name='Ligand_database')
     else:
         ligand_database = None
 
@@ -115,6 +114,7 @@ def prep_ligand_1(ligand_list, path, arg):
         raise IndexError('No valid ligand functional groups found, aborting run')
 
     if arg['ligand_crs']:
+        QD_ams.check_sys_var()
         for ligand in ligand_list:
             QD_ams.ams_job_mopac_sp(ligand)
 
@@ -216,8 +216,7 @@ def prep_qd_2(qd_list, path, arg):
     """
     # Open the quantum dot database and check if the specified quantum dot(s) is already present
     if arg['use_database']:
-        qd_database = QD_database.read_database(path, database_name='QD_database.xlsx',
-                                                sheet_name='Quantum_dot')
+        qd_database = QD_database.read_database(path, database_name='QD_database')
     else:
         qd_database = None
 
