@@ -2,6 +2,8 @@ __all__ = ['prep']
 
 import itertools
 import time
+import os
+import pandas as pd
 
 from scm.plams import (Atom, MoleculeError, Settings)
 
@@ -214,6 +216,9 @@ def prep_qd_2(qd_list, path, arg):
 
     return <list>[<plams.Molecule>]: A list of all optimized quantom dots.
     """
+    if not qd_list:
+        raise IndexError('No valid quantum dots found, aborting')
+
     # Open the quantum dot database and check if the specified quantum dot(s) is already present
     if arg['use_database']:
         qd_database = QD_database.read_database(path, database_name='QD_database')
@@ -223,16 +228,27 @@ def prep_qd_2(qd_list, path, arg):
     # Optimize the qd with the core frozen
     if arg['qd_opt']:
         QD_ams.check_sys_var()
-        if not qd_list:
-            raise IndexError('No valid quantum dots found, aborting geometry optimization')
         qd_list = list(QD_ams.qd_opt(qd, qd_database, arg) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
-        if not qd_list:
-            raise IndexError('No valid quantum dots found, aborting activation strain analyses')
-        else:
-            qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
+        qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
+
+    # Calculate the interaction between ligands on the quantum dot surface upon removal of
+    # one or more ligands
+    if arg['qd_dissociate']:
+        def diss_list_to_pd(diss_list, residue_list, top_dict):
+            gen = ((tuple(res), tuple(top_dict[i] for i in res),
+                   qd.properties.Eint, qd.properties.Estrain, qd.properties.E) for
+                   qd, res in zip(diss_list, residue_list))
+            keys = ('Residue numbers', 'Topology', 'Eint', 'Estrain', 'E')
+            return pd.DataFrame(dict(zip(keys, zip(*gen))))
+
+        for qd in qd_list:
+            top_dict = QD_scripts.get_topology_dict(qd, dist=4.5)
+            diss_list, residue_list = QD_scripts.dissociate_ligand(qd, n=2)
+            entries = diss_list_to_pd(diss_list, residue_list, top_dict)
+            entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 
     # Write the new quantum dot results to the quantum dot database
     if arg['use_database']:
