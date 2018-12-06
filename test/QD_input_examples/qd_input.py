@@ -31,7 +31,6 @@ ligand_opt: True
 ligand_crs: False
 qd_opt: False
 qd_int: False
-qd_dissociate: False
 maxiter: 500
 split: True
 """)
