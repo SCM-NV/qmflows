@@ -232,11 +232,13 @@ def prep_qd_2(qd_list, path, arg):
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
+        print(time_print, 'calculating ligand distortion and inter-ligand interaction...')
         qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of
     # one or more ligands
     if arg['qd_dissociate']:
+        print(time_print, 'calculating ligand dissociation energy...')
         def diss_list_to_pd(diss_list, residue_list, top_dict):
             gen = ((tuple(res), tuple(top_dict[i] for i in res),
                    qd.properties.Eint, qd.properties.Estrain, qd.properties.E) for
