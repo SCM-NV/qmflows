@@ -297,7 +297,6 @@ def split_mol(plams_mol):
     return <list>[<plams.Molecule>] A list of one or more plams molecules.
     """
     # Remove undesired bonds
-    plams_mol.properties.dummies = plams_mol[1]
     h_atoms = []
     h_bonds = []
     for atom in reversed(plams_mol.atoms):
