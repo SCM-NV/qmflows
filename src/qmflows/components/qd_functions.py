@@ -1,5 +1,6 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
+           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords',
+           'get_time']
 
 import itertools
 import numpy as np
@@ -17,7 +18,11 @@ from .qd_database import compare_database
 from .qd_import_export import export_mol
 
 
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
+def get_time():
+    """
+    Returns the current time in Hour(24h):Minute:Second format.
+    """
+    return str('[' + time.strftime('%H:%M:%S') + '] ')
 
 
 @add_to_class(Molecule)
@@ -467,7 +472,7 @@ def optimize_ligand(ligand, database, opt=True):
         if not match and not pdb:
             ligand.properties.entry = True
         else:
-            print(time_print + 'database entry exists for ' + ligand.properties.name +
+            print(get_time() + 'database entry exists for ' + ligand.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
     return ligand
@@ -528,7 +533,7 @@ def find_substructure(ligand, split=True):
         ligand_list = [find_substructure_split(ligand, ligand_indices[i], split) for i, ligand in
                        enumerate(ligand_list)]
     else:
-        print(time_print + 'No functional groups were found for ' + str(ligand.get_formula()))
+        print(get_time() + 'No functional groups were found for ' + str(ligand.get_formula()))
         ligand_list = []
 
     return ligand_list
@@ -771,6 +776,11 @@ def qd_int(plams_mol):
     return plams_mol
 
 
+# ===========================================================================
+#                           Ligand dissociation
+# ===========================================================================
+
+
 def get_topology_dict(mol, dist=4.5):
     """
     Returns the topology of all ligands on a quantum dot (vertice, edge or face) based on
@@ -791,6 +801,7 @@ def get_topology_dict(mol, dist=4.5):
         dist_list = [at.distance_to(residue_dict[residue][idx]) for residue in residue_dict if
                      at.distance_to(residue_dict[residue][idx]) <= dist]
         topology_dict[residue] = dist_dict[len(dist_list) - 1]
+    topology_dict[None] = None
     return topology_dict
 
 

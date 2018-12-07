@@ -8,12 +8,10 @@ import pandas as pd
 from scm.plams import (Atom, MoleculeError, Settings)
 
 from .components import qd_functions as QD_scripts
+from .components.qd_functions import get_time
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
-
-
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -58,7 +56,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # The End
     time_end = time.time()
-    print('\n' + time_print + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
+    print('\n' + get_time() + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
     return qd_list, core_list, ligand_list
 
@@ -122,6 +120,9 @@ def prep_ligand_1(ligand_list, path, arg):
 
     # Write new entries to the ligand database
     if arg['use_database']:
+        if not arg['ligand_opt']:
+            for ligand in ligand_list:
+                ligand.properties.entry = True
         QD_database.write_database(ligand_list, ligand_database, path, mol_type='ligand')
 
     return ligand_list
@@ -232,28 +233,28 @@ def prep_qd_2(qd_list, path, arg):
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
-        print(time_print, 'calculating ligand distortion and inter-ligand interaction...')
+        print(get_time(), 'calculating ligand distortion and inter-ligand interaction...')
         qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of
     # one or more ligands
     if arg['qd_dissociate']:
-        print(time_print, 'calculating ligand dissociation energy...')
-        def diss_list_to_pd(diss_list, residue_list, top_dict):
-            gen = ((tuple(res), tuple(top_dict[i] for i in res),
-                   qd.properties.Eint, qd.properties.Estrain, qd.properties.E) for
-                   qd, res in zip(diss_list, residue_list))
-            keys = ('Residue numbers', 'Topology', 'Eint', 'Estrain', 'E')
-            return pd.DataFrame(dict(zip(keys, zip(*gen))))
-
+        print(get_time(), 'calculating ligand dissociation energy...')
         for qd in qd_list:
             top_dict = QD_scripts.get_topology_dict(qd, dist=4.5)
-            diss_list, residue_list = QD_scripts.dissociate_ligand(qd, n=2)
-            entries = diss_list_to_pd(diss_list, residue_list, top_dict)
-            entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
+            if isinstance(arg['qd_dissociate'], int):
+                diss_list, residue_list = QD_scripts.dissociate_ligand(qd, n=arg['qd_dissociate'])
+            else:
+                diss_list, residue_list = QD_scripts.dissociate_ligand(qd, n=2)
+            entries = QD_database.diss_list_to_pd(diss_list, residue_list, top_dict)
+            entries_slim = QD_database.average_energy(entries)
+            entries.to_excel(os.path.join(path, qd.properties.name + '_dissociate.xlsx'))
 
     # Write the new quantum dot results to the quantum dot database
     if arg['use_database']:
+        if not arg['qd_opt']:
+            for qd in qd_list:
+                qd.properties.entry = True
         QD_database.write_database(qd_list, qd_database, path, mol_type='qd')
 
     return qd_list
