@@ -1,7 +1,7 @@
 from .components import (
     Angle, Dihedral, Distance,
     find_first_job, select_max, select_min,
-    read_database, compare_database, write_database,
+    read_database, compare_database, write_database, diss_list_to_pd,
     read_mol, set_prop, create_dir,
     optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, merge_mol, qd_int,
     adf_connectivity, fix_h, fix_carboxyl, update_coords,
