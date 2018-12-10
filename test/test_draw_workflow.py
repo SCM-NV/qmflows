@@ -1,16 +1,16 @@
-from noodles import (get_workflow, schedule_hint)
+from noodles import (get_workflow, schedule)
 from qmflows.draw_workflow import draw_workflow
 import os
 import pytest
 import tempfile
 
 
-@schedule_hint()
+@schedule
 def f(a, b):
     return a ** b
 
 
-@schedule_hint()
+@schedule
 def g(c, d):
     return c + d * 2
 
