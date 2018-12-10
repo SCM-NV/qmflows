@@ -6,7 +6,7 @@ import pandas as pd
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 
-def read_database(path, database_name='Ligand_database.xlsx', sheet_name='Ligand'):
+def read_database(path, database_name='Ligand_database'):
     """
     Open the database.
 
@@ -16,8 +16,8 @@ def read_database(path, database_name='Ligand_database.xlsx', sheet_name='Ligand
     return <pd.DataFrame>: A database of previous calculations.
     """
     path = os.path.join(path, database_name)
-    if os.path.exists(path):
-        database = pd.read_excel(path, sheet_name)
+    if os.path.exists(path + '.json'):
+        database = pd.read_json(path + '.json')
     else:
         database = pd.DataFrame()
 
@@ -64,7 +64,7 @@ def write_database(mol_list, database, path, mol_type='ligand'):
     path <str>: The path to the database.
     mol_type <str>: 'ligand' for ligands and 'qd' for quantum dots.
 
-    return: A .xlsx file.
+    return: A .json and .xlsx file.
     """
     database_entries = []
     for mol in mol_list:
@@ -96,13 +96,13 @@ def write_database(mol_list, database, path, mol_type='ligand'):
         if mol_type == 'ligand':
             keys = ('Ligand_name', 'Ligand_group', 'Ligand_formula', 'Ligand_pdb', 'Ligand_opt_pdb',
                     'Ligand_SMILES', 'Ligand_surface', 'Ligand_volume', 'Ligand_logP')
-            name = 'Ligand_database.xlsx'
+            name = 'Ligand_database'
             sheet_name = 'Ligand'
         if mol_type == 'qd':
             keys = ('Quantum_dot_name', 'Quantum_dot_formula', 'Quantum_dot_pdb',
                     'Quantum_dot_opt_pdb', 'Quantum_dot_E', 'Quantum_dot_Eint',
                     'Quantum_dot_Estrain')
-            name = 'QD_database.xlsx'
+            name = 'QD_database'
             sheet_name = 'Quantum_dot'
 
         database_entries = pd.DataFrame(dict(zip(keys, database_entries)))
@@ -113,4 +113,5 @@ def write_database(mol_list, database, path, mol_type='ligand'):
             database = database_entries
 
         path = os.path.join(path, name)
-        database.to_excel(path, sheet_name=sheet_name)
+        database.to_excel(path + '.xlsx', sheet_name=sheet_name)
+        database.to_json(path + '.json')

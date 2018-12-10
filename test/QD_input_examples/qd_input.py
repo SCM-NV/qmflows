@@ -25,7 +25,7 @@ input_ligands = yaml.load("""
 argument_dict = yaml.load("""
 dir_name_list: [core, ligand, QD]
 dummy: Cl
-database_name: [ligand_database.xlsx, QD_database.xlsx]
+database_name: [ligand_database, QD_database]
 use_database: False
 ligand_opt: True
 ligand_crs: False

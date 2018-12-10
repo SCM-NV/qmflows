@@ -55,9 +55,13 @@ def qd_opt(plams_mol, database, arg):
         plams_mol.properties.entry = True
     else:
         index = list(database['Quantum_dot_name']).index(name)
-        plams_mol_new = molkit.readpdb(database['Quantum_dot_opt_pdb'][index])
-        plams_mol_new.properties = plams_mol.properties
-        plams_mol = plams_mol_new
+        try:
+            plams_mol_new = molkit.readpdb(database['Quantum_dot_opt_pdb'][index])
+            plams_mol_new.properties = plams_mol.properties
+            plams_mol = plams_mol_new
+        except FileNotFoundError:
+            plams_mol = ams_job_uff_opt(plams_mol, arg['maxiter'])
+            plams_mol.properties.entry = True
 
     return plams_mol
 
