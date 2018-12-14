@@ -8,6 +8,7 @@ import pandas as pd
 from scm.plams import (Atom, MoleculeError, Settings)
 
 from .components import qd_functions as QD_scripts
+from .components.qd_functions import get_time
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
@@ -121,6 +122,9 @@ def prep_ligand_1(ligand_list, path, arg):
 
     # Write new entries to the ligand database
     if arg['use_database']:
+        if not arg['ligand_opt']:
+            for ligand in ligand_list:
+                ligand.properties.entry = True
         QD_database.write_database(ligand_list, ligand_database, path, mol_type='ligand')
 
     return ligand_list
@@ -254,6 +258,9 @@ def prep_qd_2(qd_list, path, arg):
 
     # Write the new quantum dot results to the quantum dot database
     if arg['use_database']:
+        if not arg['qd_opt']:
+            for qd in qd_list:
+                qd.properties.entry = True
         QD_database.write_database(qd_list, qd_database, path, mol_type='qd')
 
     return qd_list
