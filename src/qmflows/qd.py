@@ -11,9 +11,8 @@ from .components import qd_functions as QD_scripts
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
-
-
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
+from .components import qd_dissociate as QD_dissociate
+from .components import qd_ligand_opt as QD_ligand_opt
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -58,7 +57,7 @@ def prep(input_ligands, input_cores, path, arg):
 
     # The End
     time_end = time.time()
-    print('\n' + time_print + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
+    print('\n' + QD_scripts.get_time() + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
     return qd_list, core_list, ligand_list
 
@@ -110,8 +109,8 @@ def prep_ligand_1(ligand_list, path, arg):
         ligand_database = None
 
     # Optimize all ligands and find their functional groups
-    ligand_list = list(prep_ligand_2(ligand, ligand_database, arg) for ligand in ligand_list)
-    ligand_list = list(itertools.chain(*ligand_list))
+    ligand_list = list(itertools.chain.from_iterable(prep_ligand_2(ligand, ligand_database, arg) for
+                                                     ligand in ligand_list))
     if not ligand_list:
         raise IndexError('No valid ligand functional groups found, aborting run')
 
@@ -153,7 +152,7 @@ def prep_ligand_2(ligand, database, arg):
         ligand_list = [QD_scripts.find_substructure_split(ligand, ligand.properties.dummies, split)]
 
     # Handles all interaction between the database, the ligand and the ligand optimization
-    ligand_list = [QD_scripts.optimize_ligand(ligand, database, arg['ligand_opt']) for
+    ligand_list = [QD_ligand_opt.optimize_ligand(ligand, database, arg['ligand_opt']) for
                    ligand in ligand_list if ligand_list]
 
     return ligand_list
@@ -184,7 +183,7 @@ def prep_qd_1(core, ligand, qd_folder):
     qd = core
     for atoms in indices:
         qd.delete_atom(qd[atoms[0]])
-    for atom in qd.atoms[::-1]:
+    for atom in reversed(qd.atoms):
         if atom.atnum == 0:
             qd.delete_atom(atom)
 
@@ -232,13 +231,14 @@ def prep_qd_2(qd_list, path, arg):
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
-        print(time_print, 'calculating ligand distortion and inter-ligand interaction...')
+        print(QD_scripts.get_time(), 'calculating ligand distortion and inter-ligand interaction...')
         qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of
     # one or more ligands
     if arg['qd_dissociate']:
-        print(time_print, 'calculating ligand dissociation energy...')
+        print(QD_scripts.get_time(), 'calculating ligand dissociation energy...')
+
         def diss_list_to_pd(diss_list, residue_list, top_dict):
             gen = ((tuple(res), tuple(top_dict[i] for i in res),
                    qd.properties.Eint, qd.properties.Estrain, qd.properties.E) for
@@ -247,8 +247,8 @@ def prep_qd_2(qd_list, path, arg):
             return pd.DataFrame(dict(zip(keys, zip(*gen))))
 
         for qd in qd_list:
-            top_dict = QD_scripts.get_topology_dict(qd, dist=4.5)
-            diss_list, residue_list = QD_scripts.dissociate_ligand(qd, n=2)
+            top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
+            diss_list, residue_list = QD_dissociate.dissociate_ligand(qd, n=2)
             entries = diss_list_to_pd(diss_list, residue_list, top_dict)
             entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 

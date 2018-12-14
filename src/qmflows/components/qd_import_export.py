@@ -64,7 +64,7 @@ def read_mol(input_mol, path, is_core=False):
                 set_prop(mol, mol_dict)
                 mol_list.append(mol)
             # if mol is a list
-            if isinstance(mol, list):
+            elif isinstance(mol, list):
                 mol_list += mol
 
     return mol_list

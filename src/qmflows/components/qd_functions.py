@@ -1,52 +1,23 @@
-__all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
+__all__ = ['find_substructure', 'find_substructure_split', 'get_time',
            'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
 
 import itertools
-import numpy as np
 import time
+import numpy as np
 
 from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
-from scm.plams.core.errors import MoleculeError
 from scm.plams.tools.units import Units
 import scm.plams.interfaces.molecule.rdkit as molkit
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdMolTransforms
 
-from .qd_database import compare_database
-from .qd_import_export import export_mol
 
-
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
-
-
-@add_to_class(Molecule)
-def global_minimum_scan(self, indices):
+def get_time():
     """
-    Optimize the molecule with 3 different values for the given dihedral angle and
-        find the lowest energy conformer.
-
-    :parameter self: PLAMS molecule
-    :type self: plams.Molecule
-    :parameter tuple indices: indices of two atoms defining a bond
+    Returns the current time.
     """
-    # Define a number of variables and create 3 copies of the ligand
-    uff = AllChem.UFFGetMoleculeForceField
-    angles = (-120, 0, 120)
-    mol_list = [self.copy() for i in angles]
-    for angle, plams_mol in zip(angles, mol_list):
-        bond = plams_mol[indices]
-        atom = plams_mol[indices[0]]
-        plams_mol.rotate_bond(bond, atom, angle, unit='degree')
-
-    # Optimize the geometry for all dihedral angles in angle_list
-    # The geometry that yields the minimum energy is returned
-    mol_list = [molkit.to_rdmol(plams_mol) for plams_mol in mol_list]
-    for rdmol in mol_list:
-        uff(rdmol).Minimize()
-    energy_list = [uff(rdmol).CalcEnergy() for rdmol in mol_list]
-    minimum = energy_list.index(min(energy_list))
-    self.update_coords(mol_list[minimum], obj='rdkit')
+    return '[' + time.strftime('%H:%M:%S') + '] '
 
 
 @add_to_class(Molecule)
@@ -152,327 +123,6 @@ def get_bond_index(self):
     return self.atom1.get_atom_index(), self.atom2.get_atom_index()
 
 
-@add_to_class(Atom)
-def atom_in_ring(self):
-    """
-    Check if this |Atom| is part of a ring. Returns a boolean.
-    """
-    mol = self.mol.copy()
-    atom = mol[self.get_atom_index()]
-    before = mol.count_frags()
-    neighbors = len(atom.bonds)
-    bonds = [bond for bond in atom.bonds]
-    for bond in bonds:
-        mol.delete_bond(bond)
-    after = mol.count_frags()
-    if before != after - neighbors:
-        return True
-    return False
-
-
-@add_to_class(Bond)
-def bond_in_ring(self):
-    """
-    Check if this |Atom| is part of a ring. Returns a boolean.
-    """
-    mol = self.mol.copy()
-    self = mol[self.get_bond_index()]
-    before = mol.count_frags()
-    self.mol.delete_bond(self)
-    after = mol.count_frags()
-    if before != after - 1:
-        return True
-    return False
-
-
-@add_to_class(Molecule)
-def count_frags(self):
-    """
-    Modified PLAMS seperate() function; equavalent to len(self.separate()).
-    Returns the number of fragments if the molecule were to be separated into connected components.
-    """
-    frags = 0
-    for at in self:
-        at._visited = False
-
-    def dfs(at1):
-        at1._visited = True
-        for bond in at1.bonds:
-            at2 = bond.other_end(at1)
-            if not at2._visited:
-                dfs(at2)
-
-    for atom in self.atoms:
-        if not atom._visited:
-            frags += 1
-            dfs(atom)
-    for atom in self.atoms:
-        del atom._visited
-
-    return frags
-
-
-@add_to_class(Molecule)
-def separate_mod(self):
-    """
-    Modified PLAMS function: seperates a molecule instead of a copy of a molecule.
-    Separate the molecule into connected components.
-    Returned is a list of new |Molecule| objects (all atoms and bonds are disjoint with
-        the original molecule).
-    Each element of this list is identical to one connected component of the base molecule.
-    A connected component is a subset of atoms such that there exists a path
-        (along one or more bonds) between any two atoms.
-    """
-    frags = []
-    for at in self:
-        at._visited = False
-
-    def dfs(v, mol):
-        v._visited = True
-        v.mol = mol
-        for e in v.bonds:
-            e.mol = mol
-            u = e.other_end(v)
-            if not u._visited:
-                dfs(u, mol)
-
-    for src in self.atoms:
-        if not src._visited:
-            m = Molecule()
-            dfs(src, m)
-            frags.append(m)
-
-    for at in self.atoms:
-        del at._visited
-        at.mol.atoms.append(at)
-    for b in self.bonds:
-        b.mol.bonds.append(b)
-
-    return frags
-
-
-@add_to_class(Molecule)
-def split_bond(self, bond, element='H', length=1.1):
-    """
-    Delete a bond and cap the resulting fragments.
-    A link to the two atoms previously defining the bond & the two capping atoms is stored under
-        self.properties.mark in a list of 4-tuples.
-
-    self <plams.Molecule>: A PLAMS molecule.
-    bond <plams.Bond>: A PLAMS bond.
-    element <str> or <int>: The atomic symbol or number of the two to be created capping atoms.
-    length <float>: The length of the two new bonds in angstrom.
-    """
-    element = to_symbol(element)
-    at1, at2 = bond.atom1, bond.atom2
-    at3, at4 = Atom(symbol=element, coords=at1.coords), Atom(symbol=element, coords=at2.coords)
-    self.add_atom(at3, adjacent=[at2])
-    self.add_atom(at4, adjacent=[at1])
-    self.bonds[-1].resize(at1, length)
-    self.bonds[-2].resize(at2, length)
-    if self.properties.mark:
-        self.properties.mark.append((at1, at4, at2, at3))
-    else:
-        self.properties.mark = [(at1, at4, at2, at3)]
-    self.delete_bond(bond)
-
-
-@add_to_class(Molecule)
-def neighbors_mod(self, atom, exclude=1):
-    """
-    A modified PLAMS function: Allows the exlucison of specific elements from the return list.
-    Return a list of neighbors of *atom* within the molecule. Atoms with
-    *atom* has to belong to the molecule. Returned list follows the same order as the ``bonds``
-        attribute of *atom*.
-    """
-    if atom.mol != self:
-        raise MoleculeError('neighbors: passed atom should belong to the molecule')
-    return [b.other_end(atom) for b in atom.bonds if b.other_end(atom).atnum != exclude]
-
-
-def split_mol(plams_mol):
-    """
-    Split a molecule into multiple smaller fragments for every branch within the molecule.
-    plams_mol <plams.Molecule>: The input molecule with the properties.dummies attribute.
-    return <list>[<plams.Molecule>] A list of one or more plams molecules.
-    """
-    # Remove undesired bonds
-    h_atoms = []
-    h_bonds = []
-    for atom in reversed(plams_mol.atoms):
-        if atom.atnum == 1:
-            h_atoms.append(atom)
-            h_bonds.append(atom.bonds[0])
-            plams_mol.delete_atom(atom)
-
-    bond_list = [bond for bond in plams_mol.bonds if not bond.atom1.atom_in_ring() and not
-                 bond.atom1.atom_in_ring()]
-
-    # Remove even more undesired bonds
-    for bond in reversed(bond_list):
-        n1, n2 = plams_mol.neighbors_mod(bond.atom1), plams_mol.neighbors_mod(bond.atom2)
-        if not (len(n1) >= 3 and len(n2) >= 2) and not (len(n1) >= 2 and len(n2) >= 3):
-            bond_list.remove(bond)
-
-    def find_dummy(mol_list):
-        for mol in mol_list:
-            for atom in mol:
-                if plams_mol.properties.dummies.coords == atom.coords:
-                    return len(mol)
-
-    # Fragment the molecule such that the functional group is on the largest fragment
-    for atom, bond in zip(h_atoms, h_bonds):
-        plams_mol.add_atom(atom)
-        plams_mol.add_bond(bond)
-
-    atom_list = list(itertools.chain.from_iterable((bond.atom1, bond.atom2) for bond in bond_list))
-    atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
-    atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
-
-    for at in atom_dict:
-        for i in atom_dict[at][2:]:
-            len_atom = []
-            for bond in atom_dict[at]:
-                idx = bond.get_bond_index()
-                mol = plams_mol.copy()
-                mol.delete_bond(mol[idx])
-                mol_list = mol.separate()
-                len_atom.append(find_dummy(mol_list))
-            idx = len_atom.index(max(len_atom))
-            bond = atom_dict[at][idx]
-            plams_mol.split_bond(bond)
-            atom_dict[at].remove(bond)
-
-    # Copy the properties attribute to all fragment molecules
-    properties = plams_mol.properties
-    mol_list = plams_mol.separate_mod()
-    for mol in mol_list:
-        mol.properties = properties
-
-    return mol_list
-
-
-def recombine_mol(mol_list):
-    """
-    Recombine a list of molecules into a single molecule.
-    A list of 4-tuples of plams.Atoms will be read from mol_list[0].properties.mark.
-    A bond will be created between tuple[0] & tuple[2]; tuple[1] and tuple[3] will be deleted.
-    mol_list <list>[<plams.Molecule>]: A list of on or more plams molecules with the
-        properties.mark atribute.
-    return <plams.Molecule>: The (re-)merged PLAMS molecule.
-    """
-    if len(mol_list) == 1:
-        return mol_list[0]
-    tup_list = mol_list[0].properties.mark
-    if not tup_list:
-        error = 'No PLAMS atoms specified in mol_list[0].properties.mark, aborting recombine_mol()'
-        raise IndexError(error)
-
-    for tup in tup_list:
-        mol1, mol2 = tup[0].mol, tup[2].mol
-        mol1.merge_mol(rotate_ligand(mol1, mol2, tup, bond_length=1.5))
-        mol1.delete_atom(tup[1])
-        mol1.delete_atom(tup[3])
-        mol1.add_bond(tup[0], tup[2])
-        bond_index = mol1.bonds[-1].get_bond_index()
-        mol1.global_minimum_scan(bond_index)
-    del mol1.properties.mark
-
-    return mol1
-
-
-def get_dihed(atoms, unit='degree'):
-    """
-    Returns the dihedral angle defined by four atoms.
-    atoms <tuple>: An iterable consisting of 4 PLAMS atoms
-    unit <str>: The output unit..
-    return <float>: A dihedral angle.
-    """
-    vec1 = -1*np.array(atoms[0].vector_to(atoms[1]))
-    vec2 = np.array(atoms[1].vector_to(atoms[2]))
-    vec3 = np.array(atoms[2].vector_to(atoms[3]))
-
-    v1v2, v2v3 = np.cross(vec1, vec2), np.cross(vec3, vec2)
-    v1v2_v2v3 = np.cross(v1v2, v2v3)
-    v2_norm_v2 = vec2/np.linalg.norm(vec2)
-    epsilon = np.arctan2(np.dot(v1v2_v2v3, v2_norm_v2), np.dot(v1v2, v2v3))
-
-    return Units.convert(epsilon, 'radian', unit)
-
-
-@add_to_class(Molecule)
-def set_dihed(self, angle, unit='degree'):
-    """
-    Change a dihedral angle into a specific value.
-    self <plams.Molecule>: A PLAMS molecule.
-    """
-    angle = Units.convert(angle, unit, 'degree')
-    bond_list = [bond for bond in self.bonds if bond.atom1.atnum != 1 and bond.atom2.atnum != 1
-                 and bond.order == 1 and not bond.bond_in_ring()]
-
-    for bond in bond_list:
-        n1, n2 = self.neighbors_mod(bond.atom1), self.neighbors_mod(bond.atom2)
-        n1 = [atom for atom in n1 if atom != bond.atom2]
-        n2 = [atom for atom in n2 if atom != bond.atom1]
-        if len(n1) > 1:
-            n1 = [atom for atom in n1 if len(self.neighbors_mod(atom)) > 1]
-        if len(n2) > 1:
-            n2 = [atom for atom in n2 if len(self.neighbors_mod(atom)) > 1]
-        if n1 and n2:
-            dihed = get_dihed((n1[0], bond.atom1, bond.atom2, n2[0]))
-            self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
-
-    rdmol = molkit.to_rdmol(self)
-    AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-    self.update_coords(rdmol, obj='rdkit')
-
-
-def optimize_ligand(ligand, database, opt=True):
-    """
-    Pull the structure if a match has been found or alternatively optimize a new geometry.
-
-    ligand <plams.Molecule>: The ligand molecule.
-    database <pd.DataFrame>: Database of previous calculations.
-    opt <bool>: If the geometry of the ligand (RDKit UFF) should be optimized (True) or not (False).
-
-    return <plams.Molecule>: The optimized ligand molecule.
-    """
-    # Searches for matches between the input ligand and the database; imports the structure
-    if database is not None:
-        ligand, match, pdb = compare_database(ligand, database)
-    else:
-        match, pdb = False, False
-
-    # Optimize the ligand if no match has been found with the database
-    ligand.properties.entry = False
-    if not match or not pdb:
-        # Export the unoptimized ligand to a .pdb and .xyz file
-        export_mol(ligand, message='Ligand:\t\t\t')
-
-        # If ligand optimization is enabled: Optimize the ligand,
-        # set pdb_info and export the result
-        if opt:
-            mol_list = split_mol(ligand)
-            for mol in mol_list:
-                mol.set_dihed(180.0)
-            ligand = recombine_mol(mol_list)
-            ligand = fix_carboxyl(ligand)
-            ligand.properties.name = ligand.properties.name + '.opt'
-            export_mol(ligand, message='Optimized ligand:\t\t')
-            ligand.properties.name = ligand.properties.name.split('.opt')[0]
-
-        # Create an entry for in the database if no previous entries are present
-        # or prints a warning if a structure is present in the database but
-        # the .pdb file is missing
-        if not match and not pdb:
-            ligand.properties.entry = True
-        else:
-            print(time_print + 'database entry exists for ' + ligand.properties.name +
-                  ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
-
-    return ligand
-
-
 def find_substructure(ligand, split=True):
     """
     Identify the ligand functional groups.
@@ -512,8 +162,7 @@ def find_substructure(ligand, split=True):
     # Searches for functional groups (defined by functional_group_list) within the ligand
     # Duplicates are removed
     get_match = ligand_rdkit.GetSubstructMatches
-    matches = [get_match(mol) for mol in functional_group_list]
-    matches = list(itertools.chain(*matches))
+    matches = list(itertools.chain(*[get_match(mol) for mol in functional_group_list]))
 
     # Remove all duplicate matches, each heteroatom (match[0]) should have <= 1 entry
     ligand_indices = []
@@ -524,11 +173,9 @@ def find_substructure(ligand, split=True):
             ref.append(match[0])
 
     if ligand_indices:
-        ligand_list = [ligand.copy() for match in ligand_indices]
-        ligand_list = [find_substructure_split(ligand, ligand_indices[i], split) for i, ligand in
-                       enumerate(ligand_list)]
+        ligand_list = [find_substructure_split(ligand.copy(), idx, split) for idx in ligand_indices]
     else:
-        print(time_print + 'No functional groups were found for ' + str(ligand.get_formula()))
+        print(get_time() + 'No functional groups were found for ' + str(ligand.get_formula()))
         ligand_list = []
 
     return ligand_list
@@ -567,8 +214,8 @@ def find_substructure_split(ligand, ligand_index, split=True):
     ligand.properties.dummies = at1
 
     # Set the molecular charge
-    ligand.properties.charge = sum([atom.properties.charge for atom in ligand
-                                    if atom.properties.charge])
+    ligand.properties.charge = sum(atom.properties.charge for atom in ligand
+                                   if atom.properties.charge)
 
     return ligand
 
@@ -600,7 +247,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     core_vector = core_at1.vector_to(core_at2)
     lig_vector = lig_at2.vector_to(lig_at1)
 
-    # Rotation of ligand - aligning the ligand and core vectors
+    # Rotation & translation of the ligand - aligning the ligand and core vectors
     rotmat = create_rotmat(lig_vector, core_vector)
     xyz_array = rotmat.dot(ligand.to_array().T).T
     xyz_array += np.array(core_at1.coords)-xyz_array[atoms[2] - 1]
@@ -639,8 +286,8 @@ def merge_mol(self, mol_list):
     Merge two or more molecules into a single molecule.
     No new copies of atoms/bonds are created, all atoms/bonds are moved from mol_list to plams_mol.
     plams_mol <plams.Molecule>: A PLAMS molecule.
-    mol_list <plams.Molecule> or <list>[<plams.Molecule>]: A PLAMS molecule or list of
-        PLAMS molecules.
+    mol_list <plams.Molecule> or <list>[<plams.Molecule>]: A PLAMS molecule or an iterable
+        consisting of PLAMS molecules.
     return <plams.Molecule>: The new combined PLAMS molecule
     """
     if isinstance(mol_list, Molecule):
@@ -746,18 +393,16 @@ def qd_int(plams_mol):
     uff = AllChem.UFFGetMoleculeForceField
 
     # Calculate the total energy of all perturbed ligands in the absence of the core
-    atom_list = [atom for atom in mol_copy if atom.properties.pdb_info.ResidueName == 'COR']
-    for atom in atom_list:
-        mol_copy.delete_atom(atom)
+    for atom in reversed(mol_copy):
+        if atom.properties.pdb_info.ResidueName == 'COR':
+            mol_copy.delete_atom(atom)
     rdmol = molkit.to_rdmol(mol_copy)
     E_no_frag = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
     # Calculate the total energy of the isolated perturbed ligands in the absence of the core
     mol_frag = mol_copy.separate()
-    E_frag = 0.0
-    for mol in mol_frag:
-        rdmol = molkit.to_rdmol(mol)
-        E_frag += uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
+    E_frag = sum(uff(molkit.to_rdmol(mol), ignoreInterfragInteractions=False).CalcEnergy() for
+                 mol in mol_frag)
 
     # Calculate the total energy of the optimized ligand
     uff(rdmol, ignoreInterfragInteractions=False).Minimize()
@@ -769,81 +414,3 @@ def qd_int(plams_mol):
     plams_mol.properties.E = plams_mol.properties.Eint + plams_mol.properties.Estrain
 
     return plams_mol
-
-
-def get_topology_dict(mol, dist=4.5):
-    """
-    Returns the topology of all ligands on a quantum dot (vertice, edge or face) based on
-        the amount of neighbouring ligands.
-    mol <plams.Molecule>: A PLAMS molecule.
-    dist <float>: The maximum distance between a pair of ligands to be considered neighbours.
-    return <dict>: A dictionary with residue numbers as keys and
-        the topology of the ligand (vertice, edge or face) as value.
-    """
-    dist_dict = {0: 'None', 1: 'None', 2: 'vertice', 3: 'edge', 4: 'face'}
-    topology_dict = {}
-    residue_dict = get_residue_dict(mol)
-    del residue_dict[1]
-    idx = list(residue_dict.keys())[-1]
-    idx = residue_dict[idx].index(mol[mol.properties.indices[-1]])
-    for residue in residue_dict:
-        at = residue_dict[residue][idx]
-        dist_list = [at.distance_to(residue_dict[residue][idx]) for residue in residue_dict if
-                     at.distance_to(residue_dict[residue][idx]) <= dist]
-        topology_dict[residue] = dist_dict[len(dist_list) - 1]
-    return topology_dict
-
-
-def dissociate_ligand(mol, n=2, res_old=False):
-    """
-    Create all possible combinations of quantum dots by removing n ligands.
-    mol <plams.Molecule>: A PLAMS molecule.
-    n <int>: The number of to be removed ligands.
-    res_old False or <list>: A list of residue numbers of previously removed residues.
-    return <list>[<plams.Molecule>]: A list of PLAMS molecules with between 1 and n ligands removed.
-    """
-    residue_dict = get_residue_dict(mol)
-    del residue_dict[1]
-    mol.set_atoms_id()
-    mol_list, residue_list = zip(*(delete_ligand(mol.copy(), residue_dict[residue]) for
-                                   residue in residue_dict))
-    mol_list, residue_list = list(mol_list), list(residue_list)
-    for mol in mol_list:
-        qd_int(mol)
-    if res_old:
-        residue_list = [res_old.copy() + res for res in residue_list]
-    if n > 1:
-        for mol, res in zip(reversed(mol_list), reversed(residue_list)):
-            mol_new, res_new = dissociate_ligand(mol, n=n-1, res_old=res)
-            residue_list += res_new
-            mol_list += mol_new
-    return mol_list, residue_list
-
-
-def delete_ligand(mol, atom_list):
-    """
-    Delete all atoms in a molecule whose id attribute matches the one provided by atom_list.
-    mol <plams.Molecule>: A PLAMS molecule.
-    atom <list>[<plams.Atom>]: A list of PLAMS atoms with the id attribute.
-    return <plams.Molecule>, <list>[<int>]: A copy of mol with all atoms from atom_list removed and
-        the residue number of the first atom removed.
-    """
-    for atom in reversed(atom_list):
-        mol.delete_atom(mol[atom.id])
-    return mol, [atom_list[0].properties.pdb_info.ResidueNumber]
-
-
-def get_residue_dict(mol):
-    """
-    Creates a dictionary of atom residue numbers and their corresponding atoms.
-    mol <plams.Molecule>: A PLAMS molecule with the properties.pdb_info.ResidueNumber attribute.
-    return <dict>: A dictionary with residue numbers as keys and
-        a list of corresponding PLAMS atoms as values.
-    """
-    residue_dict = {}
-    for atom in mol:
-        try:
-            residue_dict[atom.properties.pdb_info.ResidueNumber].append(atom)
-        except KeyError:
-            residue_dict[atom.properties.pdb_info.ResidueNumber] = [atom]
-    return residue_dict
