@@ -57,7 +57,8 @@ def prep(input_ligands, input_cores, path, arg):
 
     # The End
     time_end = time.time()
-    print('\n' + QD_scripts.get_time() + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
+    print('\n' + QD_scripts.get_time(),
+          'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
 
     return qd_list, core_list, ligand_list
 
@@ -69,11 +70,8 @@ def prep_core(core, arg):
     core <plams.Molecule>: The core molecule.
     arg <dict>: A dictionary containing all (optional) arguments.
     """
-    dummy = arg['dummy']
-
     # Checks the if the dummy is a string (atomic symbol) or integer (atomic number)
-    if isinstance(dummy, str):
-        dummy = Atom(symbol=dummy).atnum
+    dummy = QD_scripts.to_atnum(arg['dummy'])
 
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
@@ -251,9 +249,9 @@ def prep_qd_2(qd_list, path, arg):
 
         for qd in qd_list:
             top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
-            diss_list, residue_list = QD_dissociate.dissociate_ligand(qd, n=2)
-            entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
-            entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
+            qd_gen = QD_dissociate.dissociate_ligand_cd(qd)
+            # entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
+            # entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 
     # Write the new quantum dot results to the quantum dot database
     if arg['use_database']:

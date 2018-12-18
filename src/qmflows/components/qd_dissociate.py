@@ -4,7 +4,11 @@ import itertools
 import numpy as np
 import pandas as pd
 
-from .qd_functions import qd_int
+from scm.plams.core.functions import add_to_class
+from scm.plams.core.basemol import (Atom, Molecule)
+from scm.plams.tools.units import Units
+
+from .qd_functions import (qd_int, to_atnum)
 
 
 def get_topology_dict(mol, dist=4.5):
@@ -71,7 +75,7 @@ def delete_ligand(mol, atom_list):
     return mol, [atom_list[0].properties.pdb_info.ResidueNumber]
 
 
-def get_residue_dict(mol):
+def get_residue_dict(mol, mark=True):
     """
     Creates a dictionary of atom residue numbers and their corresponding atoms.
     mol <plams.Molecule>: A PLAMS molecule with the properties.pdb_info.ResidueNumber attribute.
@@ -84,6 +88,10 @@ def get_residue_dict(mol):
             residue_dict[atom.properties.pdb_info.ResidueNumber].append(atom)
         except KeyError:
             residue_dict[atom.properties.pdb_info.ResidueNumber] = [atom]
+    if mark:
+        for i in mol.properties.indices:
+            mol[i].properties.mark = True
+        mol.properties.mark = []
     return residue_dict
 
 
@@ -133,3 +141,66 @@ def average_energy(df):
     ret.set_index('Energy')
 
     return ret
+
+
+def delete_ligand_cd(mol, atom_list):
+    for atom in reversed(atom_list):
+        mol.delete_atom(mol[atom.id])
+        if atom.properties.mark:
+            mol.properties.mark.append(atom.coords)
+    return mol
+
+
+def delete_cd(xyz_array, mol):
+    point = mol.properties.mark[0].coords
+    idx1, idx2 = closest_atoms(xyz_array, point)
+    mol1, mol2 = mol.copy(), mol.copy()
+    mol1.delete_atom(mol1[idx1])
+    mol2.delete_atom(mol2[idx2])
+    return mol1, mol2
+
+
+def closest_atoms(xyz_array, point):
+    """
+    Returns the indices of the two rows in xyz_array closest (i.e. smallest norm) to point.
+    xyz_array <np.ndarray>: A n*3 numpy array.
+    point <tuple>: A 3-tuple consisting of floats.
+    return <int>, <int>: The indices of the two rows yielding the smallest norm.
+    """
+    dist_array = np.linalg.norm(np.array(point) - xyz_array, axis=1)
+    idx1 = np.argmin(dist_array)
+    idx2 = np.argpartition(dist_array, 1)[1]
+    return int(idx1 + 1), int(idx2 + 1)
+
+
+def dissociate_ligand_cd(plams_mol):
+    """
+    Create all possible combinations of quantum dots by removing 2 ligands and one of the two Cd
+        atoms closest to the first ligand.
+    mol <plams.Molecule>: A PLAMS molecule.
+    return <generator>: A generator that yields n*2*(n-1) molecules.
+    """
+    plams_mol.set_atoms_id()
+    res_dict = get_residue_dict(plams_mol)
+    core_array = np.array([at.coords for at in res_dict[1]])
+    del res_dict[1]
+
+    def dissociate_ligand_cd_2(plams_mol):
+        plams_mol.set_atoms_id()
+        res_dict = get_residue_dict(plams_mol, mark=False)
+        del res_dict[1]
+        return (delete_ligand_cd(plams_mol.copy(), res_dict[key]) for key in res_dict)
+
+    # Remove the first ligand: n possibilities
+    mol_gen = (delete_ligand_cd(plams_mol.copy(), res_dict[key]) for key in res_dict)
+
+    # Remove one of the two closest cadmium atoms: n*2 possibilities
+    mol_gen = itertools.chain.from_iterable(delete_cd(core_array, mol) for mol in mol_gen)
+
+    # Remove the second ligand: n*2*(n-1) posibilities
+    mol_gen = itertools.chain.from_iterable(dissociate_ligand_cd_2(mol) for mol in mol_gen)
+
+    plams_mol.unset_atoms_id()
+    del plams_mol.properties.mark
+
+    return mol_gen
