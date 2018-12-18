@@ -77,3 +77,4 @@ pytest*
 .ds_store
 .DS_Store
 scripts/.DS_Store
+src/qmflows/components/timeit_test.py
