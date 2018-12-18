@@ -1,9 +1,7 @@
-__all__ = ['read_database', 'compare_database', 'write_database', 'diss_list_to_pd']
+__all__ = ['read_database', 'compare_database', 'write_database']
 
 import os
 import pandas as pd
-import itertools
-import numpy as np
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 
@@ -82,7 +80,15 @@ def write_database(mol_list, database, path, mol_type='ligand'):
                      prop.smiles,
                      prop.surface,
                      prop.volume,
-                     prop.logp])
+                     prop.solvation.Acetone,
+                     prop.solvation.Acetonitrile,
+                     prop.solvation.DMF,
+                     prop.solvation.DMSO,
+                     prop.solvation.EtOAc,
+                     prop.solvation.Ethanol,
+                     prop.solvation.Hexane,
+                     prop.solvation.Toluene,
+                     prop.solvation.Water])
             elif mol_type == 'qd':
                 database_entries.append(
                     [prop.name,
@@ -97,7 +103,8 @@ def write_database(mol_list, database, path, mol_type='ligand'):
         database_entries = list(zip(*database_entries))
         if mol_type == 'ligand':
             keys = ('Ligand_name', 'Ligand_group', 'Ligand_formula', 'Ligand_pdb', 'Ligand_opt_pdb',
-                    'Ligand_SMILES', 'Ligand_surface', 'Ligand_volume', 'Ligand_logP')
+                    'Ligand_SMILES', 'Ligand_surface', 'Ligand_volume', 'Acetone', 'Acetonitrile',
+                    'DMF', 'DMSO', 'EtOAc', 'Ethanol', 'Hexane', 'Toluene', 'Water')
             name = 'Ligand_database'
             sheet_name = 'Ligand'
         if mol_type == 'qd':
