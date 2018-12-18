@@ -385,7 +385,6 @@ def qd_int(plams_mol):
     Perform an activation-strain analyses (RDKit UFF) on the ligands in the absence of the core.
 
     plams_mol <plams.Molecule>: A PLAMS molecule.
-    job <str>: The to be executed AMS job (see qd_ams.py).
 
     return <plams.Molecule>: A PLAMS molecule with the int and int_mean properties.
     """
@@ -393,16 +392,19 @@ def qd_int(plams_mol):
     uff = AllChem.UFFGetMoleculeForceField
 
     # Calculate the total energy of all perturbed ligands in the absence of the core
-    for atom in reversed(mol_copy):
+    for atom in reversed(mol_copy.atoms):
         if atom.properties.pdb_info.ResidueName == 'COR':
             mol_copy.delete_atom(atom)
+
     rdmol = molkit.to_rdmol(mol_copy)
     E_no_frag = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
     # Calculate the total energy of the isolated perturbed ligands in the absence of the core
     mol_frag = mol_copy.separate()
-    E_frag = sum(uff(molkit.to_rdmol(mol), ignoreInterfragInteractions=False).CalcEnergy() for
-                 mol in mol_frag)
+    E_frag = 0.0
+    for mol in mol_frag:
+        rdmol = molkit.to_rdmol(mol)
+        E_frag += uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
     # Calculate the total energy of the optimized ligand
     uff(rdmol, ignoreInterfragInteractions=False).Minimize()

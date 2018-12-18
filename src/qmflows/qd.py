@@ -8,7 +8,6 @@ import pandas as pd
 from scm.plams import (Atom, MoleculeError, Settings)
 
 from .components import qd_functions as QD_scripts
-from .components.qd_functions import get_time
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
@@ -253,7 +252,7 @@ def prep_qd_2(qd_list, path, arg):
         for qd in qd_list:
             top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
             diss_list, residue_list = QD_dissociate.dissociate_ligand(qd, n=2)
-            entries = diss_list_to_pd(diss_list, residue_list, top_dict)
+            entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
             entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 
     # Write the new quantum dot results to the quantum dot database
