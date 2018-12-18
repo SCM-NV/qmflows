@@ -9,15 +9,16 @@ from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
 from scm.plams.tools.units import Units
 import scm.plams.interfaces.molecule.rdkit as molkit
+
 from rdkit import Chem
-from rdkit.Chem import AllChem, rdMolTransforms
+from rdkit.Chem import (AllChem, rdMolTransforms)
 
 
 def get_time():
     """
     Returns the current time.
     """
-    return '[' + time.strftime('%H:%M:%S') + '] '
+    return '[' + time.strftime('%H:%M:%S') + ']'
 
 
 @add_to_class(Molecule)
@@ -74,7 +75,7 @@ def update_coords(self, iterable, obj='plams'):
     iterable <list>, <tuple>, <np.array>, <plams.Molecule>, etc.: A (nested) iterable containg
         x, y & z coordinates as floats.
     obj <str>: The nature of the iterable argument; accepted values:
-        'plams': An iterable with PLAMS atoms as elements.
+        'plams': An iterable with consisting of PLAMS atoms.
         'rdkit': An RDKit molecule.
         'array': A n*3 numpy array consisting of floats.
         'iterable': A nested iterable, each element consisting of an iterable with 3 floats.
@@ -162,7 +163,7 @@ def find_substructure(ligand, split=True):
     # Searches for functional groups (defined by functional_group_list) within the ligand
     # Duplicates are removed
     get_match = ligand_rdkit.GetSubstructMatches
-    matches = list(itertools.chain(*[get_match(mol) for mol in functional_group_list]))
+    matches = itertools.chain(*[get_match(mol) for mol in functional_group_list])
 
     # Remove all duplicate matches, each heteroatom (match[0]) should have <= 1 entry
     ligand_indices = []
@@ -247,13 +248,18 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
     core_vector = core_at1.vector_to(core_at2)
     lig_vector = lig_at2.vector_to(lig_at1)
 
-    # Rotation & translation of the ligand - aligning the ligand and core vectors
+    # Rotate the ligand
     rotmat = create_rotmat(lig_vector, core_vector)
     xyz_array = rotmat.dot(ligand.to_array().T).T
-    xyz_array += np.array(core_at1.coords)-xyz_array[atoms[2] - 1]
+
+    # Translate the ligand
+    xyz_array += np.array(core_at1.coords) - xyz_array[atoms[2] - 1]
+
+    # Further adjust the distance between ligand and core
     if bond_length:
         vec = np.array(core_at1.vector_to(core_at2))
         xyz_array += vec*(bond_length/np.linalg.norm(vec))
+
     ligand.update_coords(xyz_array, obj='array')
 
     # Update the residue numbers
@@ -383,9 +389,7 @@ def fix_h(plams_mol):
 def qd_int(plams_mol):
     """
     Perform an activation-strain analyses (RDKit UFF) on the ligands in the absence of the core.
-
     plams_mol <plams.Molecule>: A PLAMS molecule.
-
     return <plams.Molecule>: A PLAMS molecule with the int and int_mean properties.
     """
     mol_copy = plams_mol.copy()
