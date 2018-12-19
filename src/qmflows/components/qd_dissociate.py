@@ -1,14 +1,11 @@
 __all__ = ['get_topology_dict', 'dissociate_ligand', 'diss_list_to_pd']
 
+import copy
 import itertools
 import numpy as np
 import pandas as pd
 
-from scm.plams.core.functions import add_to_class
-from scm.plams.core.basemol import (Atom, Molecule)
-from scm.plams.tools.units import Units
-
-from .qd_functions import (qd_int, to_atnum)
+from .qd_functions import qd_int
 
 
 def get_topology_dict(mol, dist=4.5):
@@ -143,34 +140,48 @@ def average_energy(df):
     return ret
 
 
-def delete_ligand_cd(mol, atom_list):
+def delete_ligand_cd(plams_mol, atom_list, get_point=False):
+    mol = plams_mol.copy()
+    mol.properties = copy.deepcopy(plams_mol.properties)
     for atom in reversed(atom_list):
         mol.delete_atom(mol[atom.id])
         if atom.properties.mark:
-            mol.properties.mark.append(atom.coords)
+            mol.properties.mark.append(atom.properties.pdb_info.ResidueNumber)
+            if get_point:
+                point = atom.coords
+    if get_point:
+        return mol, point
     return mol
 
 
-def delete_cd(xyz_array, mol):
-    point = mol.properties.mark[0].coords
+def delete_cd(xyz_array, mol, point):
+    """
+    Create a copy of mol and delete the two atoms closest to the atom in mol.properties.mark.
+    xyz_array <np.ndarray>: A n*3 numpy array.
+    mol <plams.Molecule>: A PLAMS molecule with the mol.properties.mark attribute.
+    return <plams.Molecule>, <plams.Molecule>: Two copies of mol with the first and second
+        closest atom to mol.properties.mark removed, respectively.
+    """
     idx1, idx2 = closest_atoms(xyz_array, point)
     mol1, mol2 = mol.copy(), mol.copy()
+    mol1.properties, mol2.properties = copy.deepcopy(mol.properties), copy.deepcopy(mol.properties)
+    mol1.properties.mark.append(idx1)
     mol1.delete_atom(mol1[idx1])
+    mol2.properties.mark.append(idx2)
     mol2.delete_atom(mol2[idx2])
     return mol1, mol2
 
 
-def closest_atoms(xyz_array, point):
+def closest_atoms(xyz_array, point, n=2):
     """
-    Returns the indices of the two rows in xyz_array closest (i.e. smallest norm) to point.
+    Returns the indices of the n rows in xyz_array closest to point (i.e. smallest norm).
     xyz_array <np.ndarray>: A n*3 numpy array.
     point <tuple>: A 3-tuple consisting of floats.
-    return <int>, <int>: The indices of the two rows yielding the smallest norm.
+    n <int>: How many of the smallest norms should be returned.
+    return <list>[<int>]: The indices of the n rows yielding the smallest norms.
     """
     dist_array = np.linalg.norm(np.array(point) - xyz_array, axis=1)
-    idx1 = np.argmin(dist_array)
-    idx2 = np.argpartition(dist_array, 1)[1]
-    return int(idx1 + 1), int(idx2 + 1)
+    return [int(np.argpartition(dist_array, i)[i] + 1) for i in range(n)]
 
 
 def dissociate_ligand_cd(plams_mol):
@@ -181,6 +192,7 @@ def dissociate_ligand_cd(plams_mol):
     return <generator>: A generator that yields n*2*(n-1) molecules.
     """
     plams_mol.set_atoms_id()
+    from_iter = itertools.chain.from_iterable
     res_dict = get_residue_dict(plams_mol)
     core_array = np.array([at.coords for at in res_dict[1]])
     del res_dict[1]
@@ -189,18 +201,20 @@ def dissociate_ligand_cd(plams_mol):
         plams_mol.set_atoms_id()
         res_dict = get_residue_dict(plams_mol, mark=False)
         del res_dict[1]
-        return (delete_ligand_cd(plams_mol.copy(), res_dict[key]) for key in res_dict)
+        return (delete_ligand_cd(plams_mol, res_dict[key]).properties for key in res_dict)
 
     # Remove the first ligand: n possibilities
-    mol_gen = (delete_ligand_cd(plams_mol.copy(), res_dict[key]) for key in res_dict)
+    mol_gen, points = zip(*(delete_ligand_cd(plams_mol, res_dict[key], get_point=True) for
+                            key in res_dict))
 
     # Remove one of the two closest cadmium atoms: n*2 possibilities
-    mol_gen = itertools.chain.from_iterable(delete_cd(core_array, mol) for mol in mol_gen)
+    mol_gen = from_iter(delete_cd(core_array, mol, point) for mol, point in zip(mol_gen, points))
 
     # Remove the second ligand: n*2*(n-1) posibilities
-    mol_gen = itertools.chain.from_iterable(dissociate_ligand_cd_2(mol) for mol in mol_gen)
+    mol_gen = from_iter(dissociate_ligand_cd_2(mol) for mol in mol_gen)
+    prop_list = [mol.properties.mark for mol in mol_gen]
 
     plams_mol.unset_atoms_id()
     del plams_mol.properties.mark
 
-    return mol_gen
+    return prop_list
