@@ -123,33 +123,6 @@ def in_ring(self, arg):
 
 
 @add_to_class(Molecule)
-def count_frags(self):
-    """
-    Modified PLAMS seperate() function; equavalent to len(self.separate()).
-    Returns the number of fragments if the molecule were to be separated into connected components.
-    """
-    frags = 0
-    for at in self:
-        at._visited = False
-
-    def dfs(at1):
-        at1._visited = True
-        for bond in at1.bonds:
-            at2 = bond.other_end(at1)
-            if not at2._visited:
-                dfs(at2)
-
-    for atom in self.atoms:
-        if not atom._visited:
-            frags += 1
-            dfs(atom)
-    for atom in self.atoms:
-        del atom._visited
-
-    return frags
-
-
-@add_to_class(Molecule)
 def separate_mod(self):
     """
     Modified PLAMS function: seperates a molecule instead of a copy of a molecule.
