@@ -13,6 +13,7 @@ from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
 from .components import qd_dissociate as QD_dissociate
 from .components import qd_ligand_opt as QD_ligand_opt
+from .components import qd_ligand_rotate as QD_ligand_rot
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -184,6 +185,8 @@ def prep_qd_1(core, ligand, qd_folder):
     qd = core
     for atoms in indices:
         qd.delete_atom(qd[atoms[0]])
+    anchor = indices[0][2]
+    QD_ligand_rot.rotation_check(qd, step=2**-6, anchor=anchor, radius=150.0)
     for atom in reversed(qd.atoms):
         if atom.atnum == 0:
             qd.delete_atom(atom)
