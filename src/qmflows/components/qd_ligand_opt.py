@@ -230,18 +230,11 @@ def split_mol(plams_mol):
         plams_mol.add_atom(atom)
         plams_mol.add_bond(bond)
 
-    def get_atom_dict(bond_list):
-        """
-        Returns a dictionary with atoms as keys and all its connected bonds,
-            if they are in bond_list, as values.
-        """
-        atom_list = list(itertools.chain.from_iterable((bond.atom1, bond.atom2) for
-                                                       bond in bond_list))
-        atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
-        return {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
+    atom_list = list(itertools.chain.from_iterable((bond.atom1, bond.atom2) for bond in bond_list))
+    atom_set = {atom for atom in atom_list if atom_list.count(atom) >= 3}
+    atom_dict = {atom: [bond for bond in atom.bonds if bond in bond_list] for atom in atom_set}
 
     # Fragment the molecule such that the functional group is on the largest fragment
-    atom_dict = get_atom_dict(bond_list)
     for at in atom_dict:
         for i in atom_dict[at][2:]:
             len_atom = [plams_mol.get_frag_size(bond, plams_mol.properties.dummies) for
@@ -371,7 +364,10 @@ def set_dihed(self, angle, unit='degree'):
             n2 = [atom for atom in n2 if len(self.neighbors_mod(atom)) > 1]
         if n1 and n2:
             dihed = get_dihed((n1[0], bond.atom1, bond.atom2, n2[0]))
-            self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
+            if self.properties.dummies not in bond:
+                self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
+            else:
+                self.rotate_bond(bond, bond.atom1, -dihed, unit='degree')
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
