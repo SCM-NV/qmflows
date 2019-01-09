@@ -420,7 +420,10 @@ def set_dihed(self, angle, unit='degree'):
             n2 = [atom for atom in n2 if len(self.neighbors_mod(atom)) > 1]
         if n1 and n2:
             dihed = get_dihed((n1[0], bond.atom1, bond.atom2, n2[0]))
-            self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
+            if self.properties.dummies not in bond:
+                self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
+            else:
+                self.rotate_bond(bond, bond.atom1, -dihed, unit='degree')                
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
