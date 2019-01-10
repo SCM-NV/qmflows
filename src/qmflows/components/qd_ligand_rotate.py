@@ -12,11 +12,11 @@ def rotate(vec, array, step=0.5, anchor=0):
         rotation between 0*pi and 2*pi with a user-specified rotation stepsize (radian).
     vec <np.ndarray>: A vector with 3 elements.
     array <np.ndarray>: A n*3 xyz array.
-    step <float>: The rotation stepsize in radian, yielding m = int(2 * step**-1) angles.
+    step <float>: The rotation stepsize in radian, yielding m = 2 * step**-1 angles.
     anchor <int>: The index of the anchor; the array will be translated to ensure that the
         coordinates of array[anchor] remain unchanged upon rotation.
-    return <np.ndarray>: A m*n*3 xyz array, each 2d array along the axis m representing an array
-        rotated at a different angle.
+    return <np.ndarray>: A m*n*3 xyz array flattened to a (m*n)*3 array. Each 2d array along the
+        axis m representing the xyz array rotated at a different angle.
     """
     vec /= np.linalg.norm(vec)
 
@@ -33,13 +33,14 @@ def rotate(vec, array, step=0.5, anchor=0):
     ret += (array[anchor] - ret.T[anchor].T)[:, :, None]
     ret = np.swapaxes(ret, 1, 2)
     a, b, c = ret.shape
+
     return ret.reshape(a*b, c)
 
 
 def rotation_check(mol, step=0.5, anchor=0, radius=10.0):
     """
     mol <plams.Molecule>: A PLAMS molecule with each atom marked by a residue number.
-    step <float>: The rotation stepsize in radian, yielding m = int(2 * step**-1) angles.
+    step <float>: The rotation stepsize in radian, yielding m = 2 * step**-1 angles.
     anchor <int>: The index of the anchor within a ligand residue; ligand arrays will be translated
         to ensure that the coordinates of array[anchor] remain unchanged upon rotation.
     radius <float>: The radius
@@ -63,6 +64,7 @@ def rotation_check(mol, step=0.5, anchor=0, radius=10.0):
     r = int(2 * step**-1)
 
     dist = cdist(xyz[cor:], xyz[cor:]).reshape(a, lig, len(xyz[cor:]))
+    cor -= 1
 
     for i, dist_slice in enumerate(dist):
         # Set all intra-ligand distances to >100.0 A, ignoring them

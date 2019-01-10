@@ -2,7 +2,6 @@ __all__ = ['prep']
 
 import itertools
 import time
-import os
 import pandas as pd
 
 from scm.plams import (Atom, MoleculeError, Settings)
@@ -82,6 +81,7 @@ def prep_core(core, arg):
         core.properties.dummies.sort(reverse=True)
         core.properties.dummies = [core[index] for index in core.properties.dummies]
     core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
+    core[-1].properties.pdb_info.ResidueNumber = 1
 
     # Returns an error if no dummy atoms were found
     if not core.properties.dummies:
@@ -185,8 +185,7 @@ def prep_qd_1(core, ligand, qd_folder):
     qd = core
     for atoms in indices:
         qd.delete_atom(qd[atoms[0]])
-    anchor = indices[0][2]
-    QD_ligand_rot.rotation_check(qd, step=2**-6, anchor=anchor, radius=150.0)
+    QD_ligand_rot.rotation_check(qd, step=2**-3, anchor=indices[0][2], radius=10.0)
     for atom in reversed(qd.atoms):
         if atom.atnum == 0:
             qd.delete_atom(atom)
