@@ -1,5 +1,6 @@
 __all__ = ['optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
+           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords',
+           'get_time']
 
 import itertools
 import numpy as np
@@ -17,7 +18,11 @@ from .qd_database import compare_database
 from .qd_import_export import export_mol
 
 
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
+def get_time():
+    """
+    Returns the current time as string.
+    """
+    return '[' + time.strftime('%H:%M:%S') + ']'
 
 
 @add_to_class(Molecule)
@@ -423,7 +428,7 @@ def set_dihed(self, angle, unit='degree'):
             if self.properties.dummies not in bond:
                 self.rotate_bond(bond, bond.atom1, angle - dihed, unit='degree')
             else:
-                self.rotate_bond(bond, bond.atom1, -dihed, unit='degree')                
+                self.rotate_bond(bond, bond.atom1, -dihed, unit='degree')
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
@@ -470,7 +475,7 @@ def optimize_ligand(ligand, database, opt=True):
         if not match and not pdb:
             ligand.properties.entry = True
         else:
-            print(time_print + 'database entry exists for ' + ligand.properties.name +
+            print(get_time() + 'database entry exists for ' + ligand.properties.name +
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
     return ligand
@@ -531,7 +536,7 @@ def find_substructure(ligand, split=True):
         ligand_list = [find_substructure_split(ligand, ligand_indices[i], split) for i, ligand in
                        enumerate(ligand_list)]
     else:
-        print(time_print + 'No functional groups were found for ' + str(ligand.get_formula()))
+        print(get_time() + 'No functional groups were found for ' + str(ligand.get_formula()))
         ligand_list = []
 
     return ligand_list
