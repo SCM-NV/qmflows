@@ -3,7 +3,7 @@ __all__ = ['rotation_check']
 import numpy as np
 from scipy.spatial.distance import cdist
 
-from .qd_functions import to_array, update_coords
+from .qd_functions import to_array, from_iterable
 
 
 def rotate(vec, array, step=0.5, anchor=0):
@@ -19,28 +19,28 @@ def rotate(vec, array, step=0.5, anchor=0):
         axis m representing the xyz array rotated at a different angle.
     """
     vec /= np.linalg.norm(vec)
-
     W = np.array([[0, -vec[2], vec[1]],
                  [vec[2], 0, -vec[0]],
                  [-vec[1], vec[0], 0]])
 
-    r = np.arange(0.0, 2.0, step)
-    a1 = np.sin(r)[:, None, None]
-    a2 = (np.sin(0.5 * r)**2)[:, None, None]
+    # Create r rotation matrices
+    step_range = np.arange(0.0, 2.0, step)
+    a1 = np.sin(step_range)[:, None, None]
+    a2 = (np.sin(0.5 * step_range)**2)[:, None, None]
     rotmat = np.identity(3) + a1 * W + a2 * np.dot(W, W)
 
+    # Apply the rotation matrices
     ret = np.matmul(rotmat, array.T)
     ret += (array[anchor] - ret.T[anchor].T)[:, :, None]
-    ret = np.swapaxes(ret, 1, 2)
     a, b, c = ret.shape
 
-    return ret.reshape(a*b, c)
+    return ret.swapaxes(1, 2).reshape(a*c, b)
 
 
-def rotation_check(mol, step=0.5, anchor=0, radius=10.0):
+def rotation_check(mol, step=0.25, anchor=0, radius=10.0):
     """
     mol <plams.Molecule>: A PLAMS molecule with each atom marked by a residue number.
-    step <float>: The rotation stepsize in radian, yielding m = 2 * step**-1 angles.
+    step <float>: The rotation stepsize in radian, yielding m = 2/step conformations.
     anchor <int>: The index of the anchor within a ligand residue; ligand arrays will be translated
         to ensure that the coordinates of array[anchor] remain unchanged upon rotation.
     radius <float>: The radius
@@ -57,11 +57,11 @@ def rotation_check(mol, step=0.5, anchor=0, radius=10.0):
 
     # cor/lig: the number of atoms in the core/ligands;
     # a: the number of ligand residues;
-    # r: the number of rotations per ligand
+    # step_range: the number of rotations per ligand
     cor = count_res(mol.atoms, res=1)
     lig = count_res(mol.atoms[cor:], res=2)
     a = len({at.properties.pdb_info.ResidueNumber for at in mol}) - 1
-    r = int(2 * step**-1)
+    step_range = int(2 / step)
 
     dist = cdist(xyz[cor:], xyz[cor:]).reshape(a, lig, len(xyz[cor:]))
     cor -= 1
@@ -81,11 +81,11 @@ def rotation_check(mol, step=0.5, anchor=0, radius=10.0):
         idx_other = np.unique(np.where(dist_slice < radius)[1] // lig)
         xyz_other = np.concatenate([xyz[j*lig:(j+1)*lig] for j in idx_other] + [xyz[0:cor]])
 
-        dist2 = cdist(xyz2, xyz_other).reshape(r, lig, len(xyz_other))
+        dist2 = cdist(xyz2, xyz_other).reshape(step_range, lig, len(xyz_other))
 
         # Find the conformation with the largest distance between atoms in
         # the reference ligand and all other ligands. Weighting sum: sum(e^-r(ij))
-        idx_min = np.argmin(np.sum(np.exp(-dist2), axis=(1, 2)))
+        idx_min = np.exp(-dist2).sum(axis=(1, 2)).argmin()
         xyz[idx1:idx2] = xyz2[idx_min*lig:(idx_min+1)*lig]
 
-    mol.update_coords(xyz, obj='array')
+    mol.from_iterable(xyz, obj='array')
