@@ -5,7 +5,7 @@ from .components import (
     read_mol, set_prop, create_dir,
     optimize_ligand, find_substructure, find_substructure_split, rotate_ligand, merge_mol, qd_int,
     adf_connectivity, fix_h, fix_carboxyl, update_coords,
-    check_sys_var, ams_job_mopac_sp, qd_opt)
+    check_sys_var, ams_job_mopac_sp, qd_opt, get_time)
 
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -26,4 +26,4 @@ __all__ = [
     'read_mol', 'set_prop', 'create_dir',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
     'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords',
-    'check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
+    'check_sys_var', 'ams_job_mopac_sp', 'qd_opt', 'get_time']

@@ -11,9 +11,6 @@ from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
 
 
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
-
-
 def prep(input_ligands, input_cores, path, arg):
     """
     function that handles all tasks related to prep_core, prep_ligand and prep_qd.
@@ -56,7 +53,9 @@ def prep(input_ligands, input_cores, path, arg):
 
     # The End
     time_end = time.time()
-    print('\n' + time_print + 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
+    message = '\n' + QD_scripts.get_time()
+    message += 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec'
+    print(message)
 
     return qd_list, core_list, ligand_list
 

@@ -7,7 +7,7 @@ from .qd_import_export import (read_mol, set_prop, create_dir)
 from .qd_ams import (check_sys_var, qd_opt, ams_job_mopac_sp)
 from .qd_functions import (optimize_ligand, find_substructure, find_substructure_split,
                            rotate_ligand, merge_mol, qd_int, adf_connectivity, fix_h,
-                           fix_carboxyl, update_coords)
+                           fix_carboxyl, update_coords, get_time)
 
 __all__ = [
     'ADF3FDE_Result', 'Fragment', 'MFCC_Result', 'adf3fde', 'adf_fragmentsjob', 'mfcc',
@@ -16,4 +16,5 @@ __all__ = [
     'read_mol', 'set_prop', 'create_dir',
     'check_sys_var', 'qd_opt', 'ams_job_mopac_sp',
     'optimize_ligand', 'find_substructure', 'find_substructure_split', 'rotate_ligand',
-    'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
+    'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords',
+    'get_time']
