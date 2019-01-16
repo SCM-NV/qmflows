@@ -2,19 +2,19 @@ __all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
 import os
 import shutil
-import time
 
-from scm.plams import (Settings, AMSJob, init, finish, Units)
+from scm.plams.core.functions import (init, finish)
+from scm.plams.core.jobrunner import JobRunner
+from scm.plams.core.settings import Settings
 from scm.plams.tools.kftools import KFFile
+from scm.plams.tools.units import Units
+from scm.plams.interfaces.adfsuite.ams import AMSJob
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl)
-
-
-time_print = '[' + time.strftime('%H:%M:%S') + '] '
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time)
 
 
 def check_sys_var():
@@ -25,13 +25,13 @@ def check_sys_var():
     sys_var_exists = [item in os.environ for item in sys_var]
     for i, item in enumerate(sys_var_exists):
         if not item:
-            print(time_print +
+            print(get_time() +
                   'WARNING: The environment variable ' + sys_var[i] + ' has not been set')
     if False in sys_var_exists:
-        raise EnvironmentError(time_print + 'One or more ADF environment variables have '
+        raise EnvironmentError(get_time() + 'One or more ADF environment variables have '
                                'not been set, aborting ADF job.')
     if '2018' not in os.environ['ADFHOME']:
-        error = time_print + 'No ADF version 2018 detected in ' + os.environ['ADFHOME']
+        error = get_time() + 'No ADF version 2018 detected in ' + os.environ['ADFHOME']
         error += ', aborting ADF job.'
         raise ImportError(error)
 
@@ -73,6 +73,12 @@ class CRSResults(SCMResults):
     _kfext = '.crskf'
     _rename_map = {'CRSKF': '$JN.crskf'}
 
+    def get_solvation_energy(self, kf):
+        """
+        Returns the solvation energy from a Activity Coefficients calculation.
+        """
+        return KFFile(self[kf]).read('ACTIVITYCOEF', 'deltag')[0]
+
 
 class CRSJob(SCMJob):
     """
@@ -98,16 +104,16 @@ def uff_settings(plams_mol, mol_indices, maxiter=2000):
     return s1
 
 
-def crs_settings(coskf):
+def crs_settings(solute, solvent):
     """
-    COSMO-RS settings for a LogP calculation using 'MOPAC PM6' parameters.
+    COSMO-RS settings for Activity Coefficient calculations using 'MOPAC PM6' parameters.
+    Yields the solvation energy, among other things.
     """
     s2 = Settings()
     s2.ignore_molecule = True
     s2.pickle = False
 
-    s2.input.Property._h = 'logP'
-    s2.input.Property.VolumeQuotient = 6.766
+    s2.input.Property._h = 'activitycoef'
 
     s2.input.CRSParameters._1 = 'HB_HNOF'
     s2.input.CRSParameters._2 = 'HB_TEMP'
@@ -124,26 +130,11 @@ def crs_settings(coskf):
     s2.input.CRSParameters.eta = -9.65
     s2.input.CRSParameters.chortf = 0.816
 
-    s2.input.Compound._h = coskf
+    s2.input.Compound._h = '"' + solute + '"'
 
-    s2.input.compound._h = '"' + os.path.join(os.environ['ADFRESOURCES'],
-                                              'ADFCRS/1-Octanol.coskf') + '"'
-    s2.input.compound.frac1 = 0.725
-    s2.input.compound.pvap = 1.01325
-    s2.input.compound.tvap = 468.0
-    s2.input.compound.meltingpoint = 257.0
-    s2.input.compound.flashpoint = 354.0
-    s2.input.compound.density = 0.824
-
-    s2.input.compounD._h = '"' + os.path.join(os.environ['ADFRESOURCES'],
-                                              'ADFCRS/Water.coskf') + '"'
-    s2.input.compounD.frac1 = 0.275
-    s2.input.compounD.frac2 = 1.0
-    s2.input.compounD.pvap = 1.01325
-    s2.input.compounD.tvap = 373.15
-    s2.input.compounD.meltingpoint = 273.15
-    s2.input.compounD.hfusion = 1.436
-    s2.input.compounD.density = 0.997
+    path = os.path.join(os.path.dirname(__file__), 'coskf')
+    s2.input.compound._h = '"' + os.path.join(path, solvent + '.coskf') + '"'
+    s2.input.compound.frac1 = 1.0
 
     return s2
 
@@ -163,36 +154,50 @@ def mopac_settings(charge):
     return s3
 
 
-def ams_job_mopac_sp(plams_mol):
+def ams_job_mopac_sp(mol):
     """
     Runs a MOPAC + COSMO-RS single point.
-
-    plams_mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
-
+    mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
-    path = plams_mol.properties.path
+    path = mol.properties.path
     angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
+    solvents = ('Acetone', 'Acetonitrile', 'DMF', 'DMSO', 'Ethanol',
+                'EtOAc', 'Hexane', 'Toluene', 'Water')
 
     # Run MOPAC
     init(path=path, folder='ligand')
-    mopac_job = AMSJob(molecule=plams_mol,
-                       settings=mopac_settings(plams_mol.properties.charge),
+    mopac_job = AMSJob(molecule=mol,
+                       settings=mopac_settings(mol.properties.charge),
                        name='MOPAC')
     mopac_results = mopac_job.run()
+
     if 'mopac.coskf' in mopac_results.files:
-        coskf = KFFile(mopac_results['mopac.coskf'])
-        plams_mol.properties.surface = coskf.read('COSMO', 'Area') * angstrom**2
-        plams_mol.properties.volume = coskf.read('COSMO', 'Volume') * angstrom**3
-        crs_job = CRSJob(settings=crs_settings(mopac_results['mopac.coskf']), name='COSMO-RS')
-        crs_results = crs_job.run()
-        if 'COSMO-RS.crskf' in crs_results.files:
-            plams_mol.properties.logp = KFFile(crs_results['$JN.crskf']).read('LOGP', 'logp')[0]
+        # Extract properties from mopac.coskf
+        coskf = mopac_results['mopac.coskf']
+        mol.properties.surface = KFFile(coskf).read('COSMO', 'Area') * angstrom**2
+        mol.properties.volume = KFFile(coskf).read('COSMO', 'Volume') * angstrom**3
+
+        # Run COSMO-RS in parallel
+        parallel = JobRunner(parallel=True)
+        crs_jobs = [CRSJob(settings=crs_settings(coskf, solv), name='COSMO-RS_'+solv) for
+                    solv in solvents]
+        crs_result = [job.run(jobrunner=parallel) for job in crs_jobs]
+
+        # Extract properties from COSMO-RS_solv.crskf
+        solvation_energy = Settings()
+        for results, solv in zip(crs_result, solvents):
+            results.wait()
+            if 'COSMO-RS_' + solv + '.crskf' in results.files:
+                solvation_energy[solv] = results.get_solvation_energy('$JN.crskf')
+            else:
+                solvation_energy[solv] = None
+        mol.properties.solvation = solvation_energy
     finish()
 
     shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
 
-    return plams_mol
+    return mol
 
 
 def ams_job_uff_opt(plams_mol, maxiter=2000):
