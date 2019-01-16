@@ -1,9 +1,12 @@
 __all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
+import math
 import os
 import shutil
 
-from scm.plams import (Settings, AMSJob, init, finish, Units)
+import numpy as np
+
+from scm.plams import (Settings, AMSJob, init, finish, Units, add_to_class, AMSResults)
 from scm.plams.tools.kftools import KFFile
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 from scm.plams.core.jobrunner import JobRunner
@@ -82,9 +85,89 @@ class CRSJob(SCMJob):
     _result_type = CRSResults
 
 
+@add_to_class(AMSResults)
+def get_entropy(self, freqs, T=298.15):
+    """
+    Calculate the translational, vibrational and rotational entropy.
+    All units and constants are in SI units.
+    self <plams.AMSResults>: An AMSResults object of a vibrational analysis
+    freqs <np.ndarray>: A numpy array containg vibrational frequencies in atomic units
+    T <float>: The temperature in Kelvin
+    Return <np.ndarray>: A numpy array containing the translational, rotational and
+        vibrational contributions to the entropy
+    """
+    # Define constants
+    kT = 1.380648 * 10**-23 * T  # Boltzmann constant * temperature
+    h = 6.6260701 * 10**-34  # Planck constant
+    hv_kT = (h * freqs) / kT  # (Planck constant * frequencies) / (Boltzmann * temperature)
+    R = 8.31445  # Gas constant
+    V_Na = ((R * T) / 10**5) / Units.constants['NA']  # Volume(1 mol ideal gas) / Avogadro's number
+    pi = math.pi
+
+    # Extract atomic masses and coordinates
+    mol = self.get_main_molecule()
+    m = np.array([at.mass for at in mol]) * 1.6605390 * 10**-27
+    x, y, z = mol.to_array().T * 10**-10
+
+    # Calculate the rotational partition function
+    inertia = np.array([sum(m*(y**2 + z**2)), -sum(m*x*y), -sum(m*x*z),
+                        -sum(m*x*y), sum(m*(x**2 + z**2)), -sum(m*y*z),
+                        -sum(m*x*z), -sum(m*y*z), sum(m*(x**2 + y**2))]).reshape(3, 3)
+    inertia = np.product(np.linalg.eig(inertia)[0])
+    q_rot = pi**0.5 * ((8 * pi**2 * kT) / h**2)**1.5 * inertia**0.5
+
+    # Calculate the translational, rotational and vibrational entropy (divided by R)
+    S_trans = 1.5 + np.log(V_Na * ((2 * pi * sum(m) * kT) / h**2)**1.5)
+    S_rot = 1.5 + np.log(q_rot)
+    S_vib = sum(hv_kT / np.expm1(hv_kT) - np.log(1 - np.exp(-hv_kT)))
+
+    return R * np.array([S_trans, S_rot, S_vib])
+
+
+@add_to_class(AMSResults)
+def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
+    """
+    Extract and return Gibbs free energies, entropies and/or enthalpies from an AMS KF file.
+    All vibrational frequencies smaller than 100 cm**-1 are set to 100 cm**-1.
+    self <plams.AMSResults>: An AMSResults object resulting from a vibrational analysis
+    kf <str>: The name+extension of the AMS KF file containing energies and frequencies
+    T <float>: The temperature in Kelvin
+    export <list>[<str>]: An iterable containing strings of the to be exported energies:
+        'E': Electronic energy
+        'U': Interal energy (E + U_nuc)
+        'H': Enthalpy (U + pV)
+        'S': Entropy
+        'G': Gibbs free energy (H - T*S)
+    unit <str>: The unit of the to be returned energies.
+    Return <float> or <dict>[<float>]: An energy or dictionary of energies
+    """
+    # Get frequencies; set all frequencies smaller than 100 cm**-1 to 100 cm**-1
+    freqs = np.array(KFFile(self[kf]).read('Vibrations', 'Frequencies[cm-1]'))
+    freqs[freqs < 100] = 100
+    freqs *= 100 * Units.constants['c']
+
+    # hv_kT = (Planck constant * frequencies) / (Boltzmann constant * temperature)
+    hv_kT = (6.6260701 * 10**-34 * freqs) / (1.380648 * 10**-23 * T)
+    RT = 8.31445 * T  # Gas constant * temperature
+
+    # Extract and/or calculate the various energies
+    E = KFFile(self[kf]).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', 'kj/mol')
+    E *= 1000
+    U = E + RT * (3.0 + sum(0.5 * hv_kT + hv_kT / np.expm1(hv_kT)))
+    H = U + RT
+    S = sum(self.get_entropy(freqs, T=T))
+    G = H - T * S
+
+    ret = {'E': E, 'U': U, 'H': H, 'S': S, 'G': G}
+
+    if len(export) == 1:
+        return Units.convert(ret[export[0]], 'kj/mol', unit) / 1000
+    return {i: Units.convert(ret[i], 'kj/mol', unit) / 1000 for i in ret if i in export}
+
+
 def uff_settings(plams_mol, mol_indices, maxiter=2000):
     """
-    UFF settings for a constrained geometry optimization
+    UFF settings for a constrained geometry optimization.
     """
     s1 = Settings()
     s1.pickle = False
@@ -211,12 +294,13 @@ def ams_job_uff_opt(mol, maxiter=2000):
     init(path=path, folder='Quantum_dot')
     job = AMSJob(molecule=mol, settings=s1, name='UFF_part1')
     results = job.run()
-    mol.update_coords(results.get_main_molecule())
+    mol.from_iterable(results.get_main_molecule())
 
     # Fix all O=C-O and H-C=C angles and continue the job
+    s1.input.ams.Properties.NormalModes = 'Yes'
     job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s1, name='UFF_part2')
     results = job.run()
-    mol.update_coords(results.get_main_molecule())
+    mol.from_iterable(results.get_main_molecule())
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
