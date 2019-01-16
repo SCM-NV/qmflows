@@ -189,7 +189,8 @@ def dissociate_ligand_cd(plams_mol):
     Create all possible combinations of quantum dots by removing 2 ligands and one of the two Cd
         atoms closest to the first ligand.
     mol <plams.Molecule>: A PLAMS molecule.
-    return <generator>: A generator that yields n*2*(n-1) molecules.
+    return <list>[<list>]: A nested list which contains the residue number and atomic indices of
+        removed ligands and Cd atoms, respectively
     """
     plams_mol.set_atoms_id()
     from_iter = itertools.chain.from_iterable
@@ -201,7 +202,7 @@ def dissociate_ligand_cd(plams_mol):
         plams_mol.set_atoms_id()
         res_dict = get_residue_dict(plams_mol, mark=False)
         del res_dict[1]
-        return (delete_ligand_cd(plams_mol, res_dict[key]).properties for key in res_dict)
+        return (delete_ligand_cd(plams_mol, res_dict[key]) for key in res_dict)
 
     # Remove the first ligand: n possibilities
     mol_gen, points = zip(*(delete_ligand_cd(plams_mol, res_dict[key], get_point=True) for
@@ -211,10 +212,8 @@ def dissociate_ligand_cd(plams_mol):
     mol_gen = from_iter(delete_cd(core_array, mol, point) for mol, point in zip(mol_gen, points))
 
     # Remove the second ligand: n*2*(n-1) posibilities
-    mol_gen = from_iter(dissociate_ligand_cd_2(mol) for mol in mol_gen)
-    prop_list = [mol.properties.mark for mol in mol_gen]
+    prop_list = list(from_iter(dissociate_ligand_cd_2(mol) for mol in mol_gen))
 
     plams_mol.unset_atoms_id()
     del plams_mol.properties.mark
-
     return prop_list
