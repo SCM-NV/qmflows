@@ -1,5 +1,5 @@
 __all__ = ['find_substructure', 'find_substructure_split', 'get_time',
-           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'update_coords']
+           'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_iterable']
 
 import itertools
 import time
@@ -42,7 +42,7 @@ def translate_np(self, vector, unit='angstrom'):
     ratio = Units.conversion_ratio(unit, 'angstrom')
     array = self.to_array()
     array += np.array(vector)*ratio
-    self.update_coords(array, obj='array')
+    self.from_iterable(array, obj='array')
 
 
 def to_atnum(item):
@@ -68,17 +68,17 @@ def to_symbol(item):
 
 
 @add_to_class(Molecule)
-def update_coords(self, iterable, obj='plams'):
+def from_iterable(self, iterable, obj='plams'):
     """
-    Update the atomic coordinates of self with coordinates from an iterable.
+    Update the atomic coordinates of self (a PLAMS molecule) with coordinates from an iterable.
     self <plams.Molecule>: A PLAMS molecule.
     iterable <list>, <tuple>, <np.array>, <plams.Molecule>, etc.: A (nested) iterable containg
         x, y & z coordinates as floats.
     obj <str>: The nature of the iterable argument; accepted values:
-        'plams': An iterable with consisting of PLAMS atoms.
+        'plams': An iterable consisting of PLAMS atoms.
         'rdkit': An RDKit molecule.
-        'array': A n*3 numpy array consisting of floats.
-        'iterable': A nested iterable, each element consisting of an iterable with 3 floats.
+        'array': A n*3 numpy array.
+        'iterable': A nested iterable, each element consisting of 3 floats.
     """
     def from_plams(self, iterable):
         for at1, at2 in zip(self, iterable):
@@ -260,7 +260,7 @@ def rotate_ligand(core, ligand, atoms, bond_length=False, residue_number=False):
         vec = np.array(core_at1.vector_to(core_at2))
         xyz_array += vec*(bond_length/np.linalg.norm(vec))
 
-    ligand.update_coords(xyz_array, obj='array')
+    ligand.from_iterable(xyz_array, obj='array')
 
     # Update the residue numbers
     if residue_number:
@@ -281,7 +281,9 @@ def create_rotmat(vec1, vec2):
     a = np.array(vec1) / np.linalg.norm(vec1)
     b = np.array(vec2) / np.linalg.norm(vec2)
     v1, v2, v3 = np.cross(a, b)
-    M = np.array([[0, -v3, v2], [v3, 0, -v1], [-v2, v1, 0]])
+    M = np.array([[0, -v3, v2],
+                  [v3, 0, -v1],
+                  [-v2, v1, 0]])
 
     return np.identity(3) + M + np.dot(M, M)/(1+np.dot(a, b))
 
@@ -300,16 +302,13 @@ def merge_mol(self, mol_list):
         mol_list = [mol_list]
 
     for mol in mol_list:
+        for atom in mol.atoms:
+            atom.mol = self
+        for bond in mol.bonds:
+            bond.mol = self
         self.properties.soft_update(mol.properties)
-
-    atom_list = list(itertools.chain.from_iterable(mol.atoms for mol in mol_list))
-    bond_list = list(itertools.chain.from_iterable(mol.bonds for mol in mol_list))
-    for atom in atom_list:
-        atom.mol = self
-    for bond in bond_list:
-        bond.mol = self
-    self.atoms += atom_list
-    self.bonds += bond_list
+        self.atoms += mol.atoms
+        self.bonds += mol.bonds
 
 
 def adf_connectivity(plams_mol):
@@ -351,7 +350,7 @@ def fix_carboxyl(plams_mol):
             if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
                 set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
                 set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
-        plams_mol.update_coords(rdmol, obj='rdkit')
+        plams_mol.from_iterable(rdmol, obj='rdkit')
     return plams_mol
 
 
@@ -382,7 +381,7 @@ def fix_h(plams_mol):
             update.append(True)
 
     if update:
-        plams_mol.update_coords(rdmol, obj='rdkit')
+        plams_mol.from_iterable(rdmol, obj='rdkit')
     return plams_mol
 
 

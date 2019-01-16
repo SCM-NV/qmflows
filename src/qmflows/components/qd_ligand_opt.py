@@ -88,7 +88,7 @@ def global_minimum_scan(self, indices):
         uff(rdmol).Minimize()
     energy_list = [uff(rdmol).CalcEnergy() for rdmol in mol_list]
     minimum = energy_list.index(min(energy_list))
-    self.update_coords(mol_list[minimum], obj='rdkit')
+    self.from_iterable(mol_list[minimum], obj='rdkit')
 
 
 @add_to_class(Molecule)
@@ -371,4 +371,4 @@ def set_dihed(self, angle, unit='degree'):
 
     rdmol = molkit.to_rdmol(self)
     AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-    self.update_coords(rdmol, obj='rdkit')
+    self.from_iterable(rdmol, obj='rdkit')
