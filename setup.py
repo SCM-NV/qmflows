@@ -33,7 +33,7 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/templates/*json', 'data/dictionaries/*json']
+        "qmflows": ['data/templates/*json', 'data/dictionaries/*json', 'data/coskf/*coskf']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
