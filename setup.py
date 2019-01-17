@@ -23,6 +23,7 @@ setup(
               "qmflows.components",
               "qmflows.data",
               "qmflows.data.dictionaries",
+              "qmflows.data.coskf",
               "qmflows.examples",
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
