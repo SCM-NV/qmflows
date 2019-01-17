@@ -1,7 +1,6 @@
 __all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
 import os
-from os.path import (dirname, join)
 import shutil
 
 from scm.plams.core.functions import (init, finish)
@@ -133,8 +132,8 @@ def crs_settings(solute, solvent):
 
     s2.input.Compound._h = '"' + solute + '"'
 
-    path = join(join(dirname(dirname(__file__)), 'data'), 'coskf')
-    s2.input.compound._h = '"' + join(path, solvent + '.coskf') + '"'
+    path = os.path.join(os.path.dirname(__file__), 'coskf')
+    s2.input.compound._h = '"' + os.path.join(path, solvent + '.coskf') + '"'
     s2.input.compound.frac1 = 1.0
 
     return s2
@@ -196,7 +195,7 @@ def ams_job_mopac_sp(mol):
         mol.properties.solvation = solvation_energy
     finish()
 
-    # shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
+    shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
 
     return mol
 
@@ -232,9 +231,9 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
-    shutil.copy2(results['ams.rkf'], join(path, name + '.ams.rkf'))
-    shutil.copy2(results['uff.rkf'], join(path, name + '.uff.rkf'))
-    shutil.copy2(results['$JN.out'], join(path, name + '.out'))
+    shutil.copy2(results['ams.rkf'], os.path.join(path, name + '.ams.rkf'))
+    shutil.copy2(results['uff.rkf'], os.path.join(path, name + '.uff.rkf'))
+    shutil.copy2(results['$JN.out'], os.path.join(path, name + '.out'))
     shutil.rmtree(job.path.rsplit('/', 1)[0])
 
     # Write the reuslts to an .xyz and .pdb file
