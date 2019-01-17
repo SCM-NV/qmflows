@@ -23,6 +23,7 @@ setup(
               "qmflows.components",
               "qmflows.data",
               "qmflows.data.dictionaries",
+              "qmflows.data.coskf",
               "qmflows.examples",
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
@@ -32,7 +33,7 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/templates/*json', 'data/dictionaries/*json']
+        "qmflows": ['data/templates/*json', 'data/dictionaries/*json', 'data/coskf/*coskf']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
