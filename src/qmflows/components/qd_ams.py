@@ -15,7 +15,7 @@ from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time)
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_iterable)
 
 
 def check_sys_var():
@@ -196,7 +196,8 @@ def ams_job_mopac_sp(mol):
         mol.properties.solvation = solvation_energy
     finish()
 
-    # shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
+    if len(mol.properties.solvation) == len(solvents):
+        shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
 
     return mol
 
@@ -222,13 +223,13 @@ def ams_job_uff_opt(plams_mol, maxiter=2000):
     job = AMSJob(molecule=plams_mol, settings=s1, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()
-    plams_mol.update_coords(output_mol)
+    from_iterable(plams_mol, output_mol)
 
     # Fix all O=C-O and H-C=C angles and continue the job
     job = AMSJob(molecule=fix_carboxyl(fix_h(plams_mol)), settings=s1, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
-    plams_mol.update_coords(output_mol)
+    from_iterable(plams_mol, output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
