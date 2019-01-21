@@ -296,7 +296,7 @@ def fix_carboxyl(plams_mol):
             if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
                 set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
                 set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
-        plams_mol.update_coords(rdmol, obj='rdkit')
+        from_iterable(plams_mol, rdmol, obj='rdkit')
     return plams_mol
 
 
@@ -327,7 +327,7 @@ def fix_h(plams_mol):
             update.append(True)
 
     if update:
-        plams_mol.update_coords(rdmol, obj='rdkit')
+        from_iterable(plams_mol, rdmol, obj='rdkit')
     return plams_mol
 
 
