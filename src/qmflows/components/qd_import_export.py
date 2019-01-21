@@ -8,14 +8,10 @@ import pandas as pd
 from scm.plams import Molecule
 from scm.plams.core import errors
 import scm.plams.interfaces.molecule.rdkit as molkit
+
 from rdkit import Chem
 
-
-def get_time():
-    """
-    Returns the current time as string.
-    """
-    return '[' + time.strftime('%H:%M:%S') + ']'
+from .qd_functions import get_time
 
 
 def read_mol(input_mol, path, is_core=False):
