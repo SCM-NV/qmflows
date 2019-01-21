@@ -1,10 +1,10 @@
 
 __all__ = ['find_first_job', 'select_max', 'select_min']
 
-from noodles import schedule_hint, find_first
+from noodles import schedule, find_first
 
 
-@schedule_hint()
+@schedule
 def find_first_job(pred, packagelist, settings, molecule, job_name, **kwargs):
     joblist = [package(
         settings, molecule, job_name=package.pkg_name + "_" + job_name, **kwargs)
@@ -12,7 +12,7 @@ def find_first_job(pred, packagelist, settings, molecule, job_name, **kwargs):
     return find_first(pred, joblist)
 
 
-@schedule_hint()
+@schedule
 def select_max(results, prop='energy'):
     """
     Scheduled function to select a result with the maximum value for property from
@@ -30,7 +30,7 @@ def select_max(results, prop='energy'):
         return None
 
 
-@schedule_hint()
+@schedule
 def select_min(results, prop='energy'):
     """
     Scheduled function to select a result with the minimum value for property from

@@ -3,15 +3,17 @@ __all__ = ['optimize_ligand']
 import itertools
 import numpy as np
 
-from scm.plams.core.basemol import (Molecule, Atom, Bond)
+from scm.plams.core.basemol import (Molecule, Atom)
 from scm.plams.core.errors import MoleculeError
 from scm.plams.core.functions import add_to_class
 from scm.plams.tools.units import Units
+from scm.plams.recipes.global_minimum import global_minimum_scan_rdkit
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from rdkit.Chem import AllChem
 
-from .qd_functions import (to_symbol, fix_carboxyl, rotate_ligand, get_time)
+from .qd_functions import (to_symbol, fix_carboxyl, get_time, from_iterable, get_bond_index)
+from .qd_ligand_rotate import (rot_mol_angle, sanitize_dim_2)
 from .qd_database import compare_database
 from .qd_import_export import export_mol
 
@@ -60,66 +62,6 @@ def optimize_ligand(ligand, database, opt=True):
                   ' yet the corresponding .pdb file is absent. The geometry has been reoptimized.')
 
     return ligand
-
-
-@add_to_class(Molecule)
-def global_minimum_scan(self, indices):
-    """
-    Optimize the molecule with 3 different values for the given dihedral angle and
-        find the lowest energy conformer.
-
-    :parameter self: PLAMS molecule
-    :type self: plams.Molecule
-    :parameter tuple indices: indices of two atoms defining a bond
-    """
-    # Define a number of variables and create 3 copies of the ligand
-    uff = AllChem.UFFGetMoleculeForceField
-    angles = (-120, 0, 120)
-    mol_list = [self.copy() for i in angles]
-    for angle, plams_mol in zip(angles, mol_list):
-        bond = plams_mol[indices]
-        atom = plams_mol[indices[0]]
-        plams_mol.rotate_bond(bond, atom, angle, unit='degree')
-
-    # Optimize the geometry for all dihedral angles in angle_list
-    # The geometry that yields the minimum energy is returned
-    mol_list = [molkit.to_rdmol(plams_mol) for plams_mol in mol_list]
-    for rdmol in mol_list:
-        uff(rdmol).Minimize()
-    energy_list = [uff(rdmol).CalcEnergy() for rdmol in mol_list]
-    minimum = energy_list.index(min(energy_list))
-    self.from_iterable(mol_list[minimum], obj='rdkit')
-
-
-@add_to_class(Molecule)
-def in_ring(self, arg):
-    """Check if an atom or a bond belonging to this |Molecule| forms a ring.
-    *arg* should be an instance of |Atom| or |Bond| belonging to this |Molecule|.
-    """
-    if (not isinstance(arg, (Atom, Bond))) or arg.mol != self:
-        raise MoleculeError('in_ring: Argument should be a Bond or an Atom and it should be',
-                            'a part of the Molecule')
-
-    def dfs(v, depth=0):
-        v._visited = True
-        for bond in v.bonds:
-            if bond is not arg:
-                u = bond.other_end(v)
-                if u is arg and depth > 1:
-                    u._visited = 'cycle'
-                if not u._visited:
-                    dfs(u, depth+1)
-    for at in self:
-        at._visited = False
-    if isinstance(arg, Atom):
-        dfs(arg)
-        ret = (arg._visited == 'cycle')
-    else:
-        dfs(arg.atom1)
-        ret = arg.atom2._visited
-    for at in self:
-        del at._visited
-    return ret
 
 
 @add_to_class(Molecule)
@@ -257,7 +199,7 @@ def split_mol(plams_mol):
 def get_frag_size(self, bond, atom):
     """
     self <plams.Molecule>: A PLAMS molecule.
-    bond <plams.Bond>: A PLAMS bond. The
+    bond <plams.Bond>: A PLAMS bond.
     atom <plams.Atom>: A PLAMS atom. The size of the fragment containg this atom will be returned.
     """
     if bond not in self.bonds:
@@ -314,14 +256,19 @@ def recombine_mol(mol_list):
 
     for tup in tup_list:
         mol1, mol2 = tup[0].mol, tup[2].mol
-        mol1.merge_mol(rotate_ligand(mol1, mol2, tup, bond_length=1.5))
+        vec1 = sanitize_dim_2(tup[3]) - sanitize_dim_2(tup[2])
+        vec2 = sanitize_dim_2(tup[0]) - sanitize_dim_2(tup[1])
+        idx = tup[2].get_atom_index() - 1
+        mol_array = rot_mol_angle(mol2, vec1, vec2, atoms_other=tup[0], idx=idx, bond_length=1.5)
+        from_iterable(mol2, mol_array, obj='array')
+        mol1.merge_mol(mol2)
         mol1.delete_atom(tup[1])
         mol1.delete_atom(tup[3])
         mol1.add_bond(tup[0], tup[2])
-        bond_index = mol1.bonds[-1].get_bond_index()
-        mol1.global_minimum_scan(bond_index)
-    del mol1.properties.mark
+        bond_tup = mol1.bonds[-1].get_bond_index()
+        from_iterable(mol1, global_minimum_scan_rdkit(mol1, bond_tup), obj='plams')
 
+    del mol1.properties.mark
     return mol1
 
 
@@ -345,7 +292,7 @@ def get_dihed(atoms, unit='degree'):
 
 
 @add_to_class(Molecule)
-def set_dihed(self, angle, unit='degree'):
+def set_dihed(self, angle, opt=True, unit='degree'):
     """
     Change a dihedral angle into a specific value.
     self <plams.Molecule>: A PLAMS molecule.
@@ -369,6 +316,7 @@ def set_dihed(self, angle, unit='degree'):
             else:
                 self.rotate_bond(bond, bond.atom1, -dihed, unit='degree')
 
-    rdmol = molkit.to_rdmol(self)
-    AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-    self.from_iterable(rdmol, obj='rdkit')
+    if opt:
+        rdmol = molkit.to_rdmol(self)
+        AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
+        from_iterable(self, rdmol, obj='rdkit')

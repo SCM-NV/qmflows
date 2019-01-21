@@ -4,15 +4,14 @@ import itertools
 import time
 import pandas as pd
 
-from scm.plams import (Atom, MoleculeError, Settings)
+from scm.plams import (Atom, MoleculeError)
 
 from .components import qd_functions as QD_scripts
 from .components import qd_database as QD_database
 from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
-from .components import qd_dissociate as QD_dissociate
 from .components import qd_ligand_opt as QD_ligand_opt
-from .components import qd_ligand_rotate as QD_ligand_rot
+from .components import qd_ligand_rotate as QD_ligand_rotate
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -31,9 +30,9 @@ def prep(input_ligands, input_cores, path, arg):
     print('\n')
 
     # Create the result directories (if they do not exist) and ligand and core lists
-    folder_list = [QD_inout.create_dir(name, path) for name in arg['dir_name_list']]
-    ligand_list = QD_inout.read_mol(input_ligands, folder_list[1])
-    core_list = QD_inout.read_mol(input_cores, folder_list[0], is_core=True)
+    cor_dir, lig_dir, qd_dir = [QD_inout.create_dir(name, path) for name in arg['dir_name_list']]
+    ligand_list = QD_inout.read_mol(input_ligands, lig_dir)
+    core_list = QD_inout.read_mol(input_cores, cor_dir, is_core=True)
 
     # Raises an error if mol_list is empty
     if not ligand_list:
@@ -49,16 +48,17 @@ def prep(input_ligands, input_cores, path, arg):
     ligand_list = prep_ligand_1(ligand_list, path, arg)
 
     # Combine the core with the ligands, yielding qd, and format the resulting list
-    qd_list = list(prep_qd_1(core, ligand, folder_list[2]) for core in core_list for
-                   ligand in ligand_list)
+    qd_list = list(QD_ligand_rotate.ligand_to_qd(core, ligand, qd_dir) for core
+                   in core_list for ligand in ligand_list)
 
     # Optimize the quantum dots, perform an activation strain analyses and read/write the results
-    qd_list = prep_qd_2(qd_list, path, arg)
+    qd_list = prep_qd(qd_list, path, arg)
 
     # The End
     time_end = time.time()
-    print('\n' + QD_scripts.get_time(),
-          'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec')
+    message = '\n' + QD_scripts.get_time()
+    message += 'Total elapsed time:\t\t' + '%.4f' % (time_end - time_start) + ' sec'
+    print(message)
 
     return qd_list, core_list, ligand_list
 
@@ -76,12 +76,13 @@ def prep_core(core, arg):
     # Returns the indices (integer) of all dummy atom ligand placeholders in the core
     # An additional dummy atom is added at the core center of mass for orientating the ligands
     if not core.properties.dummies:
-        core.properties.dummies = [atom for atom in reversed(core.atoms) if atom.atnum == dummy]
+        core.properties.dummies = [atom for atom in core.atoms if atom.atnum == dummy]
     else:
-        core.properties.dummies.sort(reverse=True)
-        core.properties.dummies = [core[index] for index in core.properties.dummies]
-    core.add_atom(Atom(atnum=0, coords=(core.get_center_of_mass())))
-    core[-1].properties.pdb_info.ResidueNumber = 1
+         core.properties.dummies = [core[index] for index in core.properties.dummies]
+
+    # Delete all core dummy atoms
+    for at in reversed(core.properties.dummies):
+        core.delete_atom(at)
 
     # Returns an error if no dummy atoms were found
     if not core.properties.dummies:
@@ -160,53 +161,7 @@ def prep_ligand_2(ligand, database, arg):
     return ligand_list
 
 
-def prep_qd_1(core, ligand, qd_folder):
-    """
-    Function that handles quantum dot (qd, i.e. core + all ligands) operations.
-    Combine the core and ligands and assign properties to the quantom dot.
-
-    core <plams.Molecule>: The core molecule.
-    ligand <plams.Molecule>: The ligand molecule.
-    qd_folder <str>: The quantum dot export folder.
-
-    return <plams.Molecule>: The quantum dot (core + n*ligands).
-    """
-    # Rotate and translate all ligands to their position on the core.
-    indices = [(dummy.get_atom_index(), -1, ligand.properties.dummies.get_atom_index(), -1) for
-               i, dummy in enumerate(core.properties.dummies)]
-    core = core.copy()
-    ligand.add_atom(Atom(atnum=0, coords=ligand.get_center_of_mass()))
-    ligand_list = [QD_scripts.rotate_ligand(core, ligand.copy(), atoms, residue_number=i+1) for
-                   i, atoms in enumerate(indices)]
-    ligand_atoms = [ligand.properties.anchor for ligand in ligand_list]
-
-    # Attach the rotated ligands to the core, returning the resulting strucutre (PLAMS Molecule).
-    core.merge_mol(ligand_list)
-    qd = core
-    for atoms in indices:
-        qd.delete_atom(qd[atoms[0]])
-    QD_ligand_rot.rotation_check(qd, step=2**-3, anchor=indices[0][2], radius=10.0)
-    for atom in reversed(qd.atoms):
-        if atom.atnum == 0:
-            qd.delete_atom(atom)
-
-    # indices of all the atoms in the core and the ligand heteroatom anchor.
-    qd_indices = [qd.atoms.index(atom) + 1 for atom in qd if
-                  atom.properties.pdb_info.ResidueName == 'COR' or atom in ligand_atoms]
-
-    qd_name = core.properties.name + '__'
-    qd_name += str(len(ligand_list)) + '_' + ligand.properties.name + '@' + ligand.properties.group
-
-    qd.properties = Settings()
-    qd.properties.indices = qd_indices
-    qd.properties.name = qd_name
-    qd.properties.path = qd_folder
-    QD_inout.export_mol(qd, message='core + ligands:\t\t')
-
-    return qd
-
-
-def prep_qd_2(qd_list, path, arg):
+def prep_qd(qd_list, path, arg):
     """
     Function that handles quantum dot (qd, i.e. core + all ligands) operations.
     Optimize the quantum dot, perform and activation strain analyses on the ligands and read/write

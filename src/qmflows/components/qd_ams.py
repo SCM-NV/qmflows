@@ -2,18 +2,21 @@ __all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
 import math
 import os
+from os.path import (dirname, join)
 import shutil
 
-import numpy as np
-
-from scm.plams import (Settings, AMSJob, init, finish, Units, add_to_class, AMSResults)
+from scm.plams.core.functions import (init, finish)
+from scm.plams.core.jobrunner import JobRunner
+from scm.plams.core.settings import Settings
 from scm.plams.tools.kftools import KFFile
+from scm.plams.tools.units import Units
+from scm.plams.interfaces.adfsuite.ams import AMSJob
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 from scm.plams.core.jobrunner import JobRunner
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time)
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_iterable)
 
 
 def check_sys_var():
@@ -209,8 +212,8 @@ def crs_settings(solute, solvent):
 
     s2.input.Compound._h = '"' + solute + '"'
 
-    path = os.path.join(os.path.dirname(__file__), 'coskf')
-    s2.input.compound._h = '"' + os.path.join(path, solvent + '.coskf') + '"'
+    path = join(join(dirname(dirname(__file__)), 'data'), 'coskf')
+    s2.input.compound._h = '"' + join(path, solvent + '.coskf') + '"'
     s2.input.compound.frac1 = 1.0
 
     return s2
@@ -264,6 +267,7 @@ def ams_job_mopac_sp(mol):
         # Extract properties from COSMO-RS_solv.crskf
         solvation_energy = Settings()
         for results, solv in zip(crs_result, solvents):
+            results.wait()
             if 'COSMO-RS_' + solv + '.crskf' in results.files:
                 solvation_energy[solv] = results.get_solvation_energy('$JN.crskf')
             else:
@@ -271,7 +275,8 @@ def ams_job_mopac_sp(mol):
         mol.properties.solvation = solvation_energy
     finish()
 
-    shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
+    if len(mol.properties.solvation) == len(solvents):
+        shutil.rmtree(mopac_job.path.rsplit('/', 1)[0])
 
     return mol
 
@@ -294,19 +299,21 @@ def ams_job_uff_opt(mol, maxiter=2000):
     init(path=path, folder='Quantum_dot')
     job = AMSJob(molecule=mol, settings=s1, name='UFF_part1')
     results = job.run()
-    mol.from_iterable(results.get_main_molecule())
+    output_mol = results.get_main_molecule()
+    from_iterable(plams_mol, output_mol)
 
     # Fix all O=C-O and H-C=C angles and continue the job
     s1.input.ams.Properties.NormalModes = 'Yes'
     job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s1, name='UFF_part2')
     results = job.run()
-    mol.from_iterable(results.get_main_molecule())
+    output_mol = results.get_main_molecule()
+    from_iterable(plams_mol, output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
-    shutil.copy2(results['ams.rkf'], os.path.join(path, name + '.ams.rkf'))
-    shutil.copy2(results['uff.rkf'], os.path.join(path, name + '.uff.rkf'))
-    shutil.copy2(results['$JN.out'], os.path.join(path, name + '.out'))
+    shutil.copy2(results['ams.rkf'], join(path, name + '.ams.rkf'))
+    shutil.copy2(results['uff.rkf'], join(path, name + '.uff.rkf'))
+    shutil.copy2(results['$JN.out'], join(path, name + '.out'))
     shutil.rmtree(job.path.rsplit('/', 1)[0])
 
     # Write the reuslts to an .xyz and .pdb file

@@ -2,11 +2,13 @@ __all__ = ['read_mol', 'set_prop', 'create_dir']
 
 import os
 import itertools
+import time
 import pandas as pd
 
 from scm.plams import Molecule
 from scm.plams.core import errors
 import scm.plams.interfaces.molecule.rdkit as molkit
+
 from rdkit import Chem
 
 from .qd_functions import get_time
@@ -369,7 +371,7 @@ def export_mol(mol, message='Mol:\t\t\t\t'):
     mol_path = os.path.join(mol.properties.path, name)
     molkit.writepdb(mol, mol_path + '.pdb')
     mol.write(mol_path + '.xyz')
-    print(get_time(), str(message) + str(name) + '.pdb')
+    print(get_time() + str(message) + str(name) + '.pdb')
 
 
 def print_exception(func, ex, name):
@@ -385,7 +387,8 @@ def print_exception(func, ex, name):
     print(get_time() + 'function:', str(func.co_name) + str(func.co_varnames[:func.co_argcount]))
     # print('\t\targ1(mol):', type(mol), mol)
     # print('\t\targ2(mol_dict):', type(mol_dict), mol_dict)
-    print(get_time() + 'Warning:', name, 'not recognized as a valid', extension_dict[func.co_name], '\n')
+    print(get_time() + 'Warning:', name, 'not recognized as a valid',
+          extension_dict[func.co_name], '\n')
     return []
 
 

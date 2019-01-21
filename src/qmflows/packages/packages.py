@@ -6,7 +6,7 @@ __all__ = ['package_properties',
 
 # ========>  Standard and third party Python Libraries <======
 from functools import partial
-from noodles import (schedule_hint, has_scheduled_methods, serial)
+from noodles import (schedule, has_scheduled_methods, serial)
 from noodles.serial.path import SerPath
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import (Serialiser, Registry, AsDict)
@@ -170,7 +170,7 @@ class Package:
     def __init__(self, pkg_name):
         self.pkg_name = pkg_name
 
-    @schedule_hint(
+    @schedule(
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
     def __call__(self, settings, mol, job_name='', **kwargs):

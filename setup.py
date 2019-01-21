@@ -23,6 +23,7 @@ setup(
               "qmflows.components",
               "qmflows.data",
               "qmflows.data.dictionaries",
+              "qmflows.data.coskf",
               "qmflows.examples",
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
@@ -32,7 +33,7 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/templates/*json', 'data/dictionaries/*json']
+        "qmflows": ['data/templates/*json', 'data/dictionaries/*json', 'data/coskf/*coskf']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -42,7 +43,7 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
     install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2', 'pymonad',
-                      'pyparsing', 'filelock', 'openpyxl', 'pyyaml', 'xlrd'],
+                      'pyparsing', 'filelock', 'openpyxl', 'pyyaml', 'xlrd', 'scipy'],
     dependency_links=[
         "git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2"],
 
