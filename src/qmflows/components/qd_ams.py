@@ -1,18 +1,19 @@
 __all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
 
 import math
+import shutil
 import os
 from os.path import (dirname, join)
-import shutil
 
-from scm.plams.core.functions import (init, finish)
+import numpy as np
+
+from scm.plams.core.functions import (init, finish, add_to_class)
 from scm.plams.core.jobrunner import JobRunner
 from scm.plams.core.settings import Settings
 from scm.plams.tools.kftools import KFFile
 from scm.plams.tools.units import Units
-from scm.plams.interfaces.adfsuite.ams import AMSJob
+from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
-from scm.plams.core.jobrunner import JobRunner
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
@@ -300,14 +301,14 @@ def ams_job_uff_opt(mol, maxiter=2000):
     job = AMSJob(molecule=mol, settings=s1, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()
-    from_iterable(plams_mol, output_mol)
+    from_iterable(mol, output_mol)
 
     # Fix all O=C-O and H-C=C angles and continue the job
     s1.input.ams.Properties.NormalModes = 'Yes'
     job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s1, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
-    from_iterable(plams_mol, output_mol)
+    from_iterable(mol, output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
