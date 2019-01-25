@@ -7,21 +7,29 @@ Step 4:		Optional arguments
 The names of the to be created folders.
 dir_name_list[0] is the core input folder, dir_name_list[1] the ligand input folder and dir_name_list[2] the quantum dot output folder.
 
+|
+
 - dummy = Cl
 :mod:`int`:
 The atomic number  or atomic symbol :mod:`str` of the atoms in the core that should be replaced with ligands. Alternatively, dummy atoms can be manually specified with the core_indices variable.
+
+|
 
 - use_database = True
 :mod:`bool`:
 Enables or disables the use of database_name.
 
+|
+
 - ligand_opt = True
 :mod:`bool`:
 split the ligand into linear fragments and then recombine these fragments, searching for the optimal dihedral angle of the newly (re-)formed bond in the process. Involved an optimization with RDKit UFF.
 
+|
+
 - split = True
 :mod:`bool`:
-If False: The ligand is to be attached to the core in its entirety.
+If False: The ligand in its entirety is to be attached to the core.
 
     NR\ :sub:`4`\ :sup:`+` \     ->     NR\ :sub:`4`\ :sup:`+` \
     
@@ -31,7 +39,7 @@ If False: The ligand is to be attached to the core in its entirety.
     
     H\ :sub:`3`\CO\ :sub:`2`\CR     ->     H\ :sub:`3`\CO\ :sub:`2`\CR
 
-If True: A proton, counterion or functional group first is to be removed first from the ligand.
+If True: A proton, counterion or functional group is to be removed from the ligand before attachment to the core.
 
     X\ :sup:`-`\.NR\ :sub:`4`\     ->     NR\ :sub:`4`\ :sup:`+` \
     
@@ -41,19 +49,27 @@ If True: A proton, counterion or functional group first is to be removed first f
     
     H\ :sub:`3`\CO\ :sub:`2`\CR     ->     O\ :sup:`-`\ :sub:`2`\CR
 
+|
+
 - ligand_crs = False
 :mod:`bool`:
 Calculate the ligand volume, surface area and octanol/water partition coefficient
 with ADF MOPAC + COSMO-RS.
+
+|
 
 - qd_opt = False
 :mod:`bool`:
 Optimize the quantum dot (i.e. core + all ligands) with ADF UFF.
 The geometry of the core and ligand atoms directly attached to the core are frozen during this optimization.
 
+|
+
 - maxiter = 500
 :mod:`int`:
 The maximum number of geometry iterations during qd_opt.
+
+|
 
 - qd_int = False
 :mod:`bool`:
