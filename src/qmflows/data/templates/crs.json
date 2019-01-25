@@ -1,0 +1,83 @@
+{"MOPAC PM6": 
+    {"CRSParameters": {
+        "_1": "HB_HNOF",
+        "_2": "HB_TEMP",
+        "_3": "FAST",
+        "_4": "COMBI2005",
+        "rav": 0.400,
+        "aprime": 1550.0,
+        "fcorr": 2.802,
+        "chb": 0.0,
+        "sigmahbond": 0.00978,
+        "aef": 5.96,
+        "Lambda": 0.135,
+        "omega": -0.212,
+        "Eta": -9.65,
+        "chortf": 0.816
+        },
+    "Dispersion": {
+        "H": -0.0340,
+        "C": -0.0356,
+        "N": -0.0224,
+        "O": -0.0333,
+        "F": -0.026,
+        "Si": -0.04,
+        "P": -0.045,
+        "S": -0.052,
+        "Cl": -0.0485,
+        "Br": -0.055,
+        "I": -0.062
+        },
+    "Technical": {
+        "rsconv": 1e-7,
+        "maxiter": 10000,
+        "bpconv": 1e-6,
+        "bpmaxiter": 40,
+        "solconv": 1e-5,
+        "solmaxiter": 40,
+        "solxilarge": 0.99,
+        "ehdeltaT": 1.0
+        }
+    },
+"ADF combi2005": {
+    "CRSParameters": {
+        "_1": "HB_HNOF",
+        "_2": "HB_TEMP",
+        "_3": "FAST",
+        "_4": "COMBI2005",
+        "rav": 0.400,
+        "aprime": 1510.0,
+        "fcorr": 2.802,
+        "chb": 8850.0,
+        "sigmahbond": 0.00854,
+        "aef": 6.94,
+        "Lambda": 0.130,
+        "omega": -0.212,
+        "Eta": -9.65,
+        "chortf": 0.816
+        },
+    "Dispersion": {
+        "H": -0.0340,
+        "C": -0.0356,
+        "N": -0.0224,
+        "O": -0.0333,
+        "F": -0.026,
+        "Si": -0.04,
+        "P": -0.045,
+        "S": -0.052,
+        "Cl": -0.0485,
+        "Br": -0.055,
+        "I": -0.062
+        },
+    "Technical": {
+        "rsconv": 1e-7,
+        "maxiter": 10000,
+        "bpconv": 1e-6,
+        "bpmaxiter": 40,
+        "solconv": 1e-5,
+        "solmaxiter": 40,
+        "solxilarge": 0.99,
+        "ehdeltaT": 1.0
+        }
+    }
+}
