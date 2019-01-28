@@ -8,7 +8,6 @@ For a more detailed description of **QMFlows** read the documentation
    templates
    dictionaries
    packages
-   molkit
    promise
    parsers
    hdf5
