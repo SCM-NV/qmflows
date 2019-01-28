@@ -1,7 +1,7 @@
 Library Documentation
 =====================
 
-For a more detail descrition of **QMworks** read the documentation
+For a more detail descrition of **QMFlows** read the documentation
 
 .. toctree::
    settings
