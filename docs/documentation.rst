@@ -1,7 +1,7 @@
 Library Documentation
 =====================
 
-For a more detail descrition of **QMFlows** read the documentation
+For a more detailed description of **QMFlows** read the documentation
 
 .. toctree::
    settings
