@@ -1,35 +1,36 @@
-=====
 Further Optional Arguments
-=====
+==========================
 
-Placeholder text.
+There are a number of arguments which can be used to modify the functionality and behaviour of the quantum dot builder. Herein an overview is provided.
 
 Optional Arguments
-~~~~
+~~~~~~~~~~~~~~~~~~
 
-- dir_name_list = ['core', 'ligand', 'QD']
-|list| consisting of |str|: 
+dir_name_list = ['core', 'ligand', 'QD']
+----------------------------------------
+
+``list`` consisting of ``str`` : 
 The names of the (to be created) folders.
 By default, ligand structures will be stored and read from dir_name_list[0], cores will be stored and read dir_name_list[1] and the combined core+ligands will be stored and read from dir_name_list[2].
-Structures can be read from different folders if their filename is prepended with its absolute path.
+Structures can be read from different folders if their filename is prepended with its absolute path, thus effectively ignoring this argument.
 
-|
+dummy = 'Cl'
+------------
 
-- dummy = Cl
-|int| or |str|:
+``int`` or ``str`` :
 The atomic number or atomic symbol of the atoms in the core that is to be replaced with ligands. 
 Alternatively, dummy atoms can be manually specified with the core_indices variable.
 
-|
+use_database = True
+-------------------
 
-- use_database = True
-|bool|:
+``bool`` :
 Enables or disables the storing and pulling of structures and properties from a user-created database (stored in .json and .xlsx formats). The script will attempt to pull a structure from the database if a match is found between a current input ligand and/or core+ligands and a previously optimized structure.
 
-|
+ligand_opt = True
+-----------------
 
-- ligand_opt = True
-|bool|:
+``bool`` :
 Optimize the geometry of the to be attached ligands. 
 The ligand is split into one or multiple (more or less) linear fragments, which are subsequently optimized (RDKit UFF 
 [`1 <http://www.rdkit.org>`_,
@@ -37,10 +38,10 @@ The ligand is split into one or multiple (more or less) linear fragments, which 
 `3 <https://doi.org/10.1021/ja00051a040>`_]
 ) and reassembled while checking for the optimal dihedral angle. The ligand fragments are biased towards more linear conformations to minimize inter-ligand repulsion once the ligands are attached to the core.
 
-|
+split = True
+------------
 
-- split = True
-|bool|:
+``bool`` :
 If False: The ligand in its entirety is to be attached to the core.
 
     NR\ :sub:`4`\ :sup:`+` \                    ->     NR\ :sub:`4`\ :sup:`+` \
@@ -61,9 +62,10 @@ If True: A proton, counterion or functional group is to be removed from the liga
     
     H\ :sub:`3`\CO\ :sub:`2`\CR                 ->     O\ :sup:`-`\ :sub:`2`\CR
 
-|
-- ligand_crs = False
-|bool|:
+ligand_crs = False
+------------------
+
+``bool`` :
 Perform a property calculation with COSMO-RS 
 [`4 <https://www.scm.com/doc/COSMO-RS/index.html>`_,
 `5 <https://doi.org/10.1021/j100007a062>`_, 
@@ -82,27 +84,27 @@ The following properties are calculated:
     
 3. The solvation energy of the ligand (kcal mol\ :sup:`-1`\), at infinite dilution, in the following solvents: acetone, acetonitrile, dimethyl formamide (DMF), dimethyl sulfoxide (DMSO), ethyl acetate, ethanol, *n*-hexane, toluene and water.
 
-|
+qd_opt = False
+--------------
 
-- qd_opt = False
-|bool|:
+``bool`` :
 Optimize the quantum dot (i.e. core + all ligands) with ADF UFF
 [`3 <https://doi.org/10.1021/ja00051a040>`_,
 `11 <https://www.scm.com/doc/UFF/index.html>`_]
 .
 The geometry of the core and ligand atoms directly attached to the core are frozen during this optimization.
 
-|
+maxiter = 500
+-------------
 
-- maxiter = 500
-|int|:
+``int`` :
 The maximum number of iterations during the geometry optimization of the quantum dot.
 Only applicable if qd_opt = True.
 
-|
+qd_int = False
+--------------
 
-- qd_int = False
-|bool|:
+``bool`` :
 Perform an activation strain analyses
 [`12 <https://doi.org/10.1002/9780470125922.ch1>`_,
 `13 <https://doi.org/10.1002/wcms.1221>`_,
