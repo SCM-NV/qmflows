@@ -89,6 +89,7 @@ The core is removed during this process; the analyses is thus exclusively focuse
 Yields three terms:
 
 1.  d\ *E*\ :sub:`strain`\  : 	The energy required to deform the ligands from their equilibrium geometry to the geometry they adopt on the quantum dot surface. This term is, by definition, destabilizing.
+
 2.  d\ *E*\ :sub:`int`\  :	The mutual interaction between all deformed ligands. 
 This term is characterized by the non-covalent interaction between ligands (UFF Lennard-Jones potential) and, depending on the inter-ligand distances, can be either stabilizing or destabilizing.
 3.  d\ *E* :	The sum of d\ *E*\ :sub:`strain`\  and d\ *E*\ :sub:`int`\  accounts for both the destabilizing ligand deformation and (de-)stabilizing interaction between all ligands in the absence of the core.
