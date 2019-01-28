@@ -114,7 +114,8 @@ Enables or disables the storing and pulling of structures and properties from a 
 Optimize the geometry of the to be attached ligands. 
 The ligand is split into one or multiple (more or less) linear fragments, which are subsequently optimized (RDKit UFF 
 [`1 <http://www.rdkit.org>`_,
-`2 <https://doi.org/10.1021/ja00051a040>`_]
+`2 <https://github.com/rdkit/rdkit>`_,
+`3 <https://doi.org/10.1021/ja00051a040>`_]
 ) and reassembled while checking for the optimal dihedral angle. The ligand fragments are biased towards more linear conformations to minimize inter-ligand repulsion once the ligands are attached to the core.
 
 
@@ -146,14 +147,14 @@ If True: A proton, counterion or functional group is to be removed from the liga
 - ligand_crs = False
 |bool|:
 Perform a property calculation with COSMO-RS 
-[`3 <https://www.scm.com/doc/COSMO-RS/index.html>`_,
-`4 <https://doi.org/10.1021/j100007a062>`_, 
-`5 <https://doi.org/10.1021/jp980017s>`_, 
-`6 <https://doi.org/10.1139/V09-008>`_]
+[`4 <https://www.scm.com/doc/COSMO-RS/index.html>`_,
+`5 <https://doi.org/10.1021/j100007a062>`_, 
+`6 <https://doi.org/10.1021/jp980017s>`_, 
+`7 <https://doi.org/10.1139/V09-008>`_]
 ; the COSMO surfaces are constructed using ADF MOPAC
-[`7 <https://www.scm.com/doc/MOPAC/Introduction.html>`_, 
-`8 <http://openmopac.net/>`_, 
-`9 <https://doi.org/10.1007/s00894-012-1667-x>`_]
+[`8 <https://www.scm.com/doc/MOPAC/Introduction.html>`_, 
+`9 <http://openmopac.net/>`_, 
+`10 <https://doi.org/10.1007/s00894-012-1667-x>`_]
 .
 The following properties are calculated:
     
@@ -168,8 +169,8 @@ The following properties are calculated:
 - qd_opt = False
 |bool|:
 Optimize the quantum dot (i.e. core + all ligands) with ADF UFF
-[`2 <https://doi.org/10.1021/ja00051a040>`_,
-`10 <https://www.scm.com/doc/UFF/index.html>`_]
+[`3 <https://doi.org/10.1021/ja00051a040>`_,
+`11 <https://www.scm.com/doc/UFF/index.html>`_]
 .
 The geometry of the core and ligand atoms directly attached to the core are frozen during this optimization.
 
@@ -185,12 +186,13 @@ Only applicable if qd_opt = True.
 - qd_int = False
 |bool|:
 Perform an activation strain analyses
-[`11 <https://doi.org/10.1002/9780470125922.ch1>`_,
-`12 <https://doi.org/10.1002/wcms.1221>`_,
-`13 <https://doi.org/10.1021/acs.jpcc.5b02987>`_]
+[`12 <https://doi.org/10.1002/9780470125922.ch1>`_,
+`13 <https://doi.org/10.1002/wcms.1221>`_,
+`14 <https://doi.org/10.1021/acs.jpcc.5b02987>`_] (kcal mol\ :sup:`-1`\)
 on the ligands attached to the quantum dot surface with RDKit UFF
 [`1 <http://www.rdkit.org>`_,
-`2 <https://doi.org/10.1021/ja00051a040>`_]
+`2 <https://github.com/rdkit/rdkit>`_,
+`3 <https://doi.org/10.1021/ja00051a040>`_]
 . 
 The core is removed during this process; the analyses is thus exclusively focused on ligand deformation and inter-ligand interaction.
 Yields three terms:
@@ -199,4 +201,4 @@ Yields three terms:
 
 2.  d\ *E*\ :sub:`int`\  :	The mutual interaction between all deformed ligands. This term is characterized by the non-covalent interaction between ligands (UFF Lennard-Jones potential) and, depending on the inter-ligand distances, can be either stabilizing or destabilizing.
 
-3.  d\ *E* :	The sum of d\ *E*\ :sub:`strain`\  and d\ *E*\ :sub:`int`\  accounts for both the destabilizing ligand deformation and (de-)stabilizing interaction between all ligands in the absence of the core.
+3.  d\ *E* :	The sum of d\ *E*\ :sub:`strain`\  and d\ *E*\ :sub:`int`\ . Accounts for both the destabilizing ligand deformation and (de-)stabilizing interaction between all ligands in the absence of the core.
