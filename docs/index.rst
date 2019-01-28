@@ -15,6 +15,7 @@ Contents:
    interactive_tutorial
    Further_reading
    documentation
+   Manual_QD_QMFlows
 
 
 Indices and tables
