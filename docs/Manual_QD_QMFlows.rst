@@ -185,11 +185,9 @@ Only applicable if qd_opt = True.
 - qd_int = False
 |bool|:
 Perform an activation strain analyses
-[
-`11 <https://doi.org/10.1002/9780470125922.ch1>`_,
+[`11 <https://doi.org/10.1002/9780470125922.ch1>`_,
 `12 <https://doi.org/10.1002/wcms.1221>`_,
-`13 <https://doi.org/10.1021/acs.jpcc.5b02987>`_
-]
+`13 <https://doi.org/10.1021/acs.jpcc.5b02987>`_]
 on the ligands attached to the quantum dot surface with RDKit UFF
 [`1 <http://www.rdkit.org>`_,
 `2 <https://doi.org/10.1021/ja00051a040>`_]
