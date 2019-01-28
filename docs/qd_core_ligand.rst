@@ -10,8 +10,6 @@ The section related to the importing and processing of cores and ligands. Ligand
 
 In the later case, the container can consist of multiple SMILES strings or paths to .xyz, .pdb and/or .mol files. If necessary, containers are searched recursively. Both absolute and relative paths are explored.
 
-|
-
 Optional arguments
 ~~~~
 
