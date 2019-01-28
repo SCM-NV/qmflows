@@ -1,5 +1,5 @@
 =====
-1:		General overview & getting started
+General Overview & Getting Started
 =====
 
 1.  Create two directories named ‘core’ and ‘ligand’. The 'core' directory should contain the input cores & the 'ligand' should contain the input ligands. The quantum dots will be exported to the 'QD' directory.
