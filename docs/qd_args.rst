@@ -28,13 +28,17 @@ Enables or disables the storing and pulling of structures and properties from a 
 
 |
 
+[`1 <http://www.rdkit.org>`_,
+`2 <https://github.com/rdkit/rdkit>`_,
+`3 <https://doi.org/10.1021/ja00051a040>`_]
+
 - ligand_opt = True
 |bool|:
 Optimize the geometry of the to be attached ligands. 
 The ligand is split into one or multiple (more or less) linear fragments, which are subsequently optimized (RDKit UFF 
-[`1 <http://www.rdkit.org>`_,
-`2 <https://github.com/rdkit/rdkit>`_,
-`3 <https://doi.org/10.1021/ja00051a040>`_]
+[1]_, 
+[2]_, 
+[3]_
 ) and reassembled while checking for the optimal dihedral angle. The ligand fragments are biased towards more linear conformations to minimize inter-ligand repulsion once the ligands are attached to the core.
 
 
@@ -121,3 +125,9 @@ Yields three terms:
 2.  d\ *E*\ :sub:`int`\  :	The mutual interaction between all deformed ligands. This term is characterized by the non-covalent interaction between ligands (UFF Lennard-Jones potential) and, depending on the inter-ligand distances, can be either stabilizing or destabilizing.
 
 3.  d\ *E* :	The sum of d\ *E*\ :sub:`strain`\  and d\ *E*\ :sub:`int`\ . Accounts for both the destabilizing ligand deformation and (de-)stabilizing interaction between all ligands in the absence of the core.
+
+
+
+.. [1] http://www.rdkit.org
+.. [2] https://github.com/rdkit/rdkit
+.. [3] https://doi.org/10.1021/ja00051a040
