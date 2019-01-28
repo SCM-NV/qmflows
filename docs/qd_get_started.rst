@@ -10,4 +10,4 @@ General Overview & Getting Started
 
 4.	Alter any optional argument in input_cores, input_ligands and/or argument_dict (see below).
 
-5.	Start the job by running qd_input.py (*e.g.* ‘python qd_input.py’).
+5.	Start the job by running qd_input.py (*e.g.* python qd_input.py).
