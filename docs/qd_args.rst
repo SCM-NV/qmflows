@@ -4,8 +4,6 @@ Further Optional Arguments
 
 Placeholder text.
 
-|
-
 Optional Arguments
 ~~~~
 
