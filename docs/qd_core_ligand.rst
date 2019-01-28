@@ -1,5 +1,5 @@
 =====
-2:		Input core & ligand arguments
+Input cores & ligands
 =====
 
 The section related to the importing and processing of cores and ligands. Ligand & cores can be imported from a wide range of different files and files types, which can roughly be divided into three categories:
@@ -9,6 +9,9 @@ The section related to the importing and processing of cores and ligands. Ligand
 3.  Containers containing on or multiple input molecules: .txt, .xlsx & directories
 
 In the later case, the container can consist of multiple SMILES strings or paths to .xyz, .pdb and/or .mol files. If necessary, containers are searched recursively. Both absolute and relative paths are explored.
+
+Optional arguments
+~~~~
 
 |
 
