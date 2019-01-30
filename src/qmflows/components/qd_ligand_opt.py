@@ -198,6 +198,8 @@ def split_mol(plams_mol):
 @add_to_class(Molecule)
 def get_frag_size(self, bond, atom):
     """
+    Return the size of a moleculair fragment containing *atom* if *self* was split into two
+    molecules by the breaking of *bond*.
     self <plams.Molecule>: A PLAMS molecule.
     bond <plams.Bond>: A PLAMS bond.
     atom <plams.Atom>: A PLAMS atom. The size of the fragment containg this atom will be returned.
@@ -214,18 +216,16 @@ def get_frag_size(self, bond, atom):
     for at in self:
         at._visited = False
 
-    def dfs(at1, size=0, has_atom=0, atom=atom):
+    def dfs(at1, ar=np.zeros(2), atom=atom):
         at1._visited = True
-        size += 1
+        ar[0] += 1
         if at1 is atom:
-            has_atom = 1
+            ar[1] = 1
         for bond in at1.bonds:
             at2 = bond.other_end(at1)
             if not at2._visited:
-                ret1, ret2 = dfs(at2)
-                size += ret1
-                has_atom += ret2
-        return size, has_atom
+                ar += dfs(at2)
+        return ar
 
     bond.atom1._visited = bond.atom2._visited = True
     size1, has_atom1 = dfs(bond.atom1)
@@ -255,12 +255,15 @@ def recombine_mol(mol_list):
         raise IndexError(error)
 
     for tup in tup_list:
+        # Allign mol1 & mol2
         mol1, mol2 = tup[0].mol, tup[2].mol
         vec1 = sanitize_dim_2(tup[3]) - sanitize_dim_2(tup[2])
         vec2 = sanitize_dim_2(tup[0]) - sanitize_dim_2(tup[1])
         idx = tup[2].get_atom_index() - 1
         mol_array = rot_mol_angle(mol2, vec1, vec2, atoms_other=tup[0], idx=idx, bond_length=1.5)
         from_iterable(mol2, mol_array, obj='array')
+
+        # Merge mol1 & mol2
         mol1.merge_mol(mol2)
         mol1.delete_atom(tup[1])
         mol1.delete_atom(tup[3])
@@ -279,14 +282,14 @@ def get_dihed(atoms, unit='degree'):
     unit <str>: The output unit..
     return <float>: A dihedral angle.
     """
-    vec1 = -1*np.array(atoms[0].vector_to(atoms[1]))
+    vec1 = -np.array(atoms[0].vector_to(atoms[1]))
     vec2 = np.array(atoms[1].vector_to(atoms[2]))
     vec3 = np.array(atoms[2].vector_to(atoms[3]))
 
     v1v2, v2v3 = np.cross(vec1, vec2), np.cross(vec3, vec2)
     v1v2_v2v3 = np.cross(v1v2, v2v3)
-    v2_norm_v2 = vec2/np.linalg.norm(vec2)
-    epsilon = np.arctan2(np.dot(v1v2_v2v3, v2_norm_v2), np.dot(v1v2, v2v3))
+    v2_norm_v2 = vec2 / np.linalg.norm(vec2)
+    epsilon = np.arctan2(v1v2_v2v3@v2_norm_v2, v1v2@v2v3)
 
     return Units.convert(epsilon, 'radian', unit)
 

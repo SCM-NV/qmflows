@@ -357,8 +357,8 @@ def qd_int(plams_mol):
     E_opt = uff(rdmol, ignoreInterfragInteractions=False).CalcEnergy()
 
     # Calculate E, Eint and Estrain
-    plams_mol.properties.Eint = float(E_no_frag - E_frag)
-    plams_mol.properties.Estrain = float(E_frag - (E_opt * len(mol_frag)))
-    plams_mol.properties.E = plams_mol.properties.Eint + plams_mol.properties.Estrain
+    plams_mol.properties.energy.Eint = float(E_no_frag - E_frag)
+    plams_mol.properties.energy.Estrain = float(E_frag - (E_opt * len(mol_frag)))
+    plams_mol.properties.energy.E = plams_mol.properties.energy.Eint + plams_mol.properties.energy.Estrain
 
     return plams_mol

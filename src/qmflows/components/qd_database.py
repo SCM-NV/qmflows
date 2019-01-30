@@ -80,24 +80,24 @@ def write_database(mol_list, database, path, mol_type='ligand'):
                      prop.smiles,
                      prop.surface,
                      prop.volume,
-                     prop.solvation.Acetone,
-                     prop.solvation.Acetonitrile,
-                     prop.solvation.DMF,
-                     prop.solvation.DMSO,
-                     prop.solvation.EtOAc,
-                     prop.solvation.Ethanol,
-                     prop.solvation.Hexane,
-                     prop.solvation.Toluene,
-                     prop.solvation.Water])
+                     prop.energy.Acetone,
+                     prop.energy.Acetonitrile,
+                     prop.energy.DMF,
+                     prop.energy.DMSO,
+                     prop.energy.EtOAc,
+                     prop.energy.Ethanol,
+                     prop.energy.Hexane,
+                     prop.energy.Toluene,
+                     prop.energy.Water])
             elif mol_type == 'qd':
                 database_entries.append(
                     [prop.name,
                      mol.get_formula().split('Xx')[0],
                      os.path.join(prop.path, prop.name) + '.pdb',
                      os.path.join(prop.path, prop.name) + '.opt.pdb',
-                     prop.E,
-                     prop.Eint,
-                     prop.Estrain])
+                     prop.energy.E,
+                     prop.energy.Eint,
+                     prop.energy.Estrain])
 
     if database_entries:
         database_entries = list(zip(*database_entries))
