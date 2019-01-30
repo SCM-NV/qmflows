@@ -12,6 +12,8 @@ from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
 from .components import qd_ligand_opt as QD_ligand_opt
 from .components import qd_ligand_rotate as QD_ligand_rotate
+from .components import qd_dissociate as QD_dissociate
+from .components import qd_bde as QD_BDE
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -117,7 +119,7 @@ def prep_ligand_1(ligand_list, path, arg):
     if arg['ligand_crs']:
         QD_ams.check_sys_var()
         for ligand in ligand_list:
-            QD_ams.ams_job_mopac_sp(ligand)
+            QD_ams.ams_job_mopac_crs(ligand)
 
     # Write new entries to the ligand database
     if arg['use_database']:
@@ -146,10 +148,10 @@ def prep_ligand_2(ligand, database, arg):
     if not ligand.properties.dummies:
         ligand_list = QD_scripts.find_substructure(ligand, split)
     else:
-        if isinstance(ligand.properties.dummies, int):
-            ligand.properties.dummies += -1
+        if len(ligand.properties.dummies) == 1:
+            ligand.properties.dummies = ligand.properties.dummies[0] -1
             split = False
-        elif isinstance(ligand.properties.dummies, (list, tuple)):
+        elif len(ligand.properties.dummies) == 2:
             ligand.properties.dummies = [i - 1 for i in ligand.properties.dummies]
             split = True
         ligand_list = [QD_scripts.find_substructure_split(ligand, ligand.properties.dummies, split)]
@@ -192,10 +194,9 @@ def prep_qd(qd_list, path, arg):
         print(QD_scripts.get_time(), 'calculating ligand distortion and inter-ligand interaction...')
         qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
 
-    # Calculate the interaction between ligands on the quantum dot surface upon removal of
-    # one or more ligands
+    # Calculate the interaction between ligands on the quantum dot surface upon removal of CdX2
     if arg['qd_dissociate']:
-        print(QD_scripts.get_time(), 'calculating ligand dissociation energy...')
+        print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
 
         def diss_list_to_pd(diss_list, residue_list, top_dict):
             gen = ((tuple(res), tuple(top_dict[i] for i in res),
@@ -205,8 +206,8 @@ def prep_qd(qd_list, path, arg):
             return pd.DataFrame(dict(zip(keys, zip(*gen))))
 
         for qd in qd_list:
-            top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
-            qd_gen = QD_dissociate.dissociate_ligand_cd(qd)
+            # top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
+            E_list = QD_BDE.get_bde(qd)
             # entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
             # entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 

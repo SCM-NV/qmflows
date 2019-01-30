@@ -1,4 +1,5 @@
-__all__ = ['check_sys_var', 'ams_job_mopac_sp', 'qd_opt']
+__all__ = ['check_sys_var', 'qd_opt', 'ams_job_mopac_crs', 'ams_job_mopac_opt', 'ams_job_mopac_sp',
+           'ams_job_uff_opt']
 
 import math
 import shutil
@@ -16,6 +17,7 @@ from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
+from ..templates.templates import get_template
 from .qd_import_export import export_mol
 from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_iterable)
 
@@ -169,20 +171,20 @@ def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     return {i: Units.convert(ret[i], 'kj/mol', unit) / 1000 for i in ret if i in export}
 
 
-def uff_settings(plams_mol, mol_indices, maxiter=2000):
+def uff_settings(plams_mol, constraints, maxiter=2000):
     """
     UFF settings for a constrained geometry optimization.
     """
-    s1 = Settings()
-    s1.pickle = False
+    s = Settings()
+    s.pickle = False
 
-    s1.input.ams.Task = 'GeometryOptimization'
-    s1.input.ams.Constraints.Atom = mol_indices
-    s1.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
-    s1.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
-    s1.input.uff.Library = 'UFF'
+    s.input.ams.Task = 'GeometryOptimization'
+    s.input.ams.Constraints.Atom = constraints
+    s.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
+    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
+    s.input.uff.Library = 'UFF'
 
-    return s1
+    return s
 
 
 def crs_settings(solute, solvent):
@@ -190,52 +192,90 @@ def crs_settings(solute, solvent):
     COSMO-RS settings for Activity Coefficient calculations using 'MOPAC PM6' parameters.
     Yields the solvation energy, among other things.
     """
-    s2 = Settings()
-    s2.ignore_molecule = True
-    s2.pickle = False
+    s = Settings()
+    s.ignore_molecule = True
+    s.pickle = False
 
-    s2.input.Property._h = 'activitycoef'
-
-    s2.input.CRSParameters._1 = 'HB_HNOF'
-    s2.input.CRSParameters._2 = 'HB_TEMP'
-    s2.input.CRSParameters._3 = 'FAST'
-    s2.input.CRSParameters._4 = 'COMBI2005'
-    s2.input.CRSParameters.rav = 0.400
-    s2.input.CRSParameters.aprime = 1510.0
-    s2.input.CRSParameters.fcorr = 2.802
-    s2.input.CRSParameters.chb = 8850.0
-    s2.input.CRSParameters.sigmahbond = 0.00854
-    s2.input.CRSParameters.aeff = 6.94
-    s2.input.CRSParameters.Lambda = 0.130
-    s2.input.CRSParameters.omega = -0.212
-    s2.input.CRSParameters.eta = -9.65
-    s2.input.CRSParameters.chortf = 0.816
-
-    s2.input.Compound._h = '"' + solute + '"'
+    s.input = get_template('crs.json')['MOPAC PM6']
+    s.input.Property._h = 'activitycoef'
+    s.input.Compound._h = '"' + solute + '"'
 
     path = join(join(dirname(dirname(__file__)), 'data'), 'coskf')
-    s2.input.compound._h = '"' + join(path, solvent + '.coskf') + '"'
-    s2.input.compound.frac1 = 1.0
+    s.input.compound._h = '"' + join(path, solvent + '.coskf') + '"'
+    s.input.compound.frac1 = 1.0
 
-    return s2
+    return s
 
 
 def mopac_settings(charge):
     """
     COSMO-MOPAC settings for a single point with COSMO-RS parameters.
     """
-    s3 = Settings()
-    s3.pickle = False
+    s = Settings()
+    s.pickle = False
 
-    s3.input.ams.Task = 'SinglePoint'
-    s3.input.ams.System.Charge = charge
-    s3.input.MOPAC.Solvation = 'COSMO-CRS'
-    s3.input.MOPAC.mozyme = True
+    s.input.ams.Task = 'SinglePoint'
+    s.input.ams.System.Charge = charge
+    s.input.MOPAC.Solvation = 'COSMO-CRS'
+    s.input.MOPAC.mozyme = False
 
-    return s3
+    return s
+
+
+def mopac_settings_gas():
+    """
+    COSMO-MOPAC settings for a single point with COSMO-RS parameters.
+    """
+    s = Settings()
+    s.pickle = False
+
+    s.input.ams.Task = 'SinglePoint'
+    s.input.ams.System.Charge = 0
+    s.input.MOPAC.mozyme = False
+
+    return s
 
 
 def ams_job_mopac_sp(mol):
+    """
+    Runs a gas-phase MOPAC single point.
+    mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
+    return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
+    """
+    path = mol.properties.path
+
+    # Run MOPAC
+    init(path=path, folder='QD_dissociate')
+    job = AMSJob(molecule=mol, settings=mopac_settings_gas(), name='MOPAC')
+    results = job.run()
+    results.wait()
+    mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
+
+    return mol
+
+
+def ams_job_mopac_opt(mol):
+    """
+    Runs a gas-phase MOPAC geometry optimization.
+    mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
+    return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
+    """
+    path = mol.properties.path
+
+    # Run MOPAC
+    init(path=path, folder='QD_dissociate')
+    s = mopac_settings_gas()
+    s.input.ams.Task = 'GeometryOptimization'
+
+    job = AMSJob(molecule=mol, settings=s, name='MOPAC')
+    results = job.run()
+    results.wait()
+    mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
+
+    return mol
+
+
+def ams_job_mopac_crs(mol):
     """
     Runs a MOPAC + COSMO-RS single point.
     mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
@@ -273,7 +313,7 @@ def ams_job_mopac_sp(mol):
                 solvation_energy[solv] = results.get_solvation_energy('$JN.crskf')
             else:
                 solvation_energy[solv] = None
-        mol.properties.solvation = solvation_energy
+        mol.properties.energy = solvation_energy
     finish()
 
     if len(mol.properties.solvation) == len(solvents):
@@ -282,13 +322,14 @@ def ams_job_mopac_sp(mol):
     return mol
 
 
-def ams_job_uff_opt(mol, maxiter=2000):
+def ams_job_uff_opt(mol, maxiter=200, get_freq=False):
     """
     Runs an AMS UFF constrained geometry optimization.
     mol <plams.Molecule>: The input PLAMS molecule with the 'path', 'name' and
         'mol_indices' properties.
     bonds <list>[<list>[<int>, <float>]]: A nested list of atomic indices and bond orders.
     maxiter <int>: The maximum number of iterations during the geometry optimization.
+    get_freq <bool>: Perform a frequency analyses after the geometry optimization.
     return <plams.Molecule>: A PLAMS molecule.
     """
     name = mol.properties.name + '.opt'
@@ -296,19 +337,22 @@ def ams_job_uff_opt(mol, maxiter=2000):
     mol_indices = mol.properties.indices
 
     # Run the job (pre-optimization)
-    s1 = uff_settings(mol, mol_indices, maxiter=maxiter)
+    s = uff_settings(mol, mol_indices, maxiter=maxiter)
     init(path=path, folder='Quantum_dot')
-    job = AMSJob(molecule=mol, settings=s1, name='UFF_part1')
+    job = AMSJob(molecule=mol, settings=s, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()
     from_iterable(mol, output_mol)
 
     # Fix all O=C-O and H-C=C angles and continue the job
-    s1.input.ams.Properties.NormalModes = 'Yes'
-    job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s1, name='UFF_part2')
+    if get_freq:
+        s.input.ams.Properties.NormalModes = 'Yes'
+    job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s, name='UFF_part2')
     results = job.run()
     output_mol = results.get_main_molecule()
     from_iterable(mol, output_mol)
+    if get_freq:
+        mol.properties.energy = Settings(results.get_thermo('uff.rkf'))
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory

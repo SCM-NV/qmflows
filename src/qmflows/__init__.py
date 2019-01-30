@@ -4,10 +4,13 @@ from .components import (
     read_database, compare_database, write_database,
     read_mol, set_prop, create_dir,
     find_substructure, find_substructure_split, merge_mol, qd_int,
-    adf_connectivity, fix_h, fix_carboxyl, from_iterable,
-    check_sys_var, ams_job_mopac_sp, qd_opt, get_time,
+    adf_connectivity, fix_h, fix_carboxyl, from_iterable, get_time,
+    check_sys_var, check_sys_var, qd_opt, ams_job_mopac_crs,
+    ams_job_mopac_opt, ams_job_mopac_sp, ams_job_uff_opt,
     optimize_ligand,
-    ligand_to_qd)
+    ligand_to_qd,
+    get_topology_dict, dissociate_ligand,
+    get_bde)
 
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -28,6 +31,9 @@ __all__ = [
     'read_mol', 'set_prop', 'create_dir',
     'find_substructure', 'find_substructure_split',
     'merge_mol', 'qd_int', 'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_iterable',
-    'check_sys_var', 'ams_job_mopac_sp', 'qd_opt', 'get_time',
+    'check_sys_var', 'qd_opt', 'ams_job_mopac_crs', 'ams_job_mopac_opt',
+    'ams_job_mopac_sp', 'ams_job_uff_opt',
     'optimize_ligand',
-    'ligand_to_qd']
+    'ligand_to_qd',
+    'get_topology_dict', 'dissociate_ligand',
+    'get_bde']
