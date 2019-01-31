@@ -38,9 +38,6 @@
                       "eps_scf": 1e-06,
                       "max_scf": 200,
                       "scf_guess": "restart"
-                  },
-                  "xc": {
-                      "xc_functional": "pbe"
                   }
               },
               "subsys": {
