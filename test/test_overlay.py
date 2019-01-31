@@ -31,7 +31,6 @@ def test_overlay_cp2k_singlepoint():
 
     dft.scf.max_scf = 200
     dft.scf.scf_guess = 'atomic'
-    dft.xc.xc_functional = 'pbe'
 
     dft.qs.method = 'gpw'
     force.subsys.cell.periodic = 'xyz'
