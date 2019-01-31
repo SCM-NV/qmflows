@@ -1,14 +1,13 @@
 Library Documentation
 =====================
 
-For a more detail descrition of **QMworks** read the documentation
+For a more detailed description of **QMFlows** read the documentation
 
 .. toctree::
    settings
    templates
    dictionaries
    packages
-   molkit
    promise
    parsers
    hdf5

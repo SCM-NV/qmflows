@@ -15,6 +15,7 @@ Contents:
    interactive_tutorial
    Further_reading
    documentation
+   qd_manual
 
 
 Indices and tables
