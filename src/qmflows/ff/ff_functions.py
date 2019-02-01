@@ -86,73 +86,91 @@ def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     return dens / dens_mean
 
 
-def get_all_radial(mol_list, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 'O')):
+def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 'O')):
     """ Return the radial distribution functions for all possible atom-pairs in *elements*
     as dataframe. Accepts both single molecules and list of molecules as input, the later allowing
     for conformational and/or configurational averaging.
 
-    mol_list <list>[<plams.Molecule>]: A PLAMS molecule or list of PLAMS molecules.
+    xyz_array <np.ndarray>: A m*n*3 or n*3 numpy array of cartesian coordinates.
     atoms <tuple>[<str>]: A tuple of strings representing atomic symbols; RDF's will be calculated
         for all unique atomp pairs.
     return <pd.DataFrame>: A Pandas dataframe of radial distribution functions.
     """
     # Make sure we're dealing with a list of molecules
-    if isinstance(mol_list, Molecule):
-        mol_list = [mol_list]
-
-    # Create a dictionary consisting of {atomic symbol: [atomic indices]}
-    idx_dict = {}
-    for i, at in enumerate(mol_list[0]):
-        try:
-            idx_dict[at.symbol].append(i)
-        except KeyError:
-            idx_dict[at.symbol] = [i]
+    if len(xyz_array.shape) == 2:
+        xyz_array = xyz_array[None, :, :]
 
     # Create a dataframe of RDF's, summed over all conformations in mol_list
     df = pd.DataFrame(index=np.arange(dr, r_max + dr, dr))
-    for mol in mol_list:
-        xyz_array = to_array(mol)
+    for xyz in xyz_array:
         for i, at1 in enumerate(atoms):
             for at2 in atoms[i:]:
                 try:
-                    df[at1 + '_' + at2] += get_radial_distr(xyz_array[idx_dict[at1]],
-                                                            xyz_array[idx_dict[at2]],
+                    df[at1 + '_' + at2] += get_radial_distr(xyz[idx_dict[at1]],
+                                                            xyz[idx_dict[at2]],
                                                             dr=dr, r_max=r_max)
                 except KeyError:
-                    df[at1 + '_' + at2] = get_radial_distr(xyz_array[idx_dict[at1]],
-                                                           xyz_array[idx_dict[at2]],
+                    df[at1 + '_' + at2] = get_radial_distr(xyz[idx_dict[at1]],
+                                                           xyz[idx_dict[at2]],
                                                            dr=dr, r_max=r_max)
 
     # Average the RDF's over all conformations in mol_list
-    df /= len(mol_list)
+    df /= xyz_array.shape[0]
     return df.rename_axis('r(ij) / A')
 
 
-path = dirname(__file__)
-name = 'Cd360Se309X102.pdb'
-mol = Molecule(join(path, name))
+def read_multi_xyz(file, ret_idx_dict=True):
+    """ Return a m*n*3 array of cartesian coordinates extracted from a multi-xyz file.
+    file <str>: The path + filename to a multi-xyz file.
+    ret_idx_dict <bool>: Return a dictionary consisting of {atomic symbols: [atomic indices]} as
+        derived from the first molecule in *file*.
+    return <np.ndarray> (and <dict>): A m*n*3 numpy array of cartesian coordinates and, optionally,
+        a dictionary consisting of {atomic symbols: [atomic indices]}.
+    """
+    # Read the multi-xyz file
+    with open(join(path, name)) as file:
+        file = file.read().splitlines()
+    mol_size = int(file[0])
 
-# Create copies of mol and randomly displace all atoms between 0.00 and 0.25 Angstrom
-# Skip this step if the variable mol_list is alreayd assigned and is of length n
-n = 100
-print('')
-try:
-    mol_list == True
-    if len(mol_list) != n:
-        name_error == True
-except NameError:
-    print(get_time() + 'generating mol_list')
-    mol_list = [mol.copy() for i in range(n)]
-    for mol in mol_list:
-        ar = to_array(mol)
-        ar += np.random.rand(len(ar), 3) / 4
-        from_iterable(mol, ar, obj='array')
-        del ar
-    print(get_time() + 'mol_list has been generated')
+    # Create a list of atomic symbols and xyz coordinates
+    xyz = []
+    at_symbol = []
+    for item in file:
+        item = item.split()
+        if len(item) == 4:
+            at_symbol.append(item[0])
+            xyz.append(item[1:])
+
+    # Captilize the first letter of each atomic symbol
+    for i, at in enumerate(at_symbol[0:mol_size]):
+        at_symbol[i] = at.capitalize()
+
+    # Turn the xyz list into a m*n*3 numpy array
+    shape = int(len(xyz) / mol_size), mol_size, 3
+    xyz = np.array(xyz, dtype=float, order='F').reshape(shape)
+
+    # Turn the atomic symbols list into a dictionary: {atomic symbols: [atomic indices]}
+    if ret_idx_dict:
+        idx_dict = {}
+        for i, at in enumerate(at_symbol[0:mol_size]):
+            try:
+                idx_dict[at].append(i)
+            except KeyError:
+                idx_dict[at] = [i]
+        return xyz, idx_dict
+    return xyz
+
+
+# Define variables
+dr = 0.05
+r_max = 12.0
+path = dirname(__file__)
+name = 'Cd68Se55_26COO_MD_trajec.xyz'
 
 # Run the actual script and plot the results
-dr, r_max = 0.05, 12.0
+print('')
 start = time.time()
-df = get_all_radial(mol_list, dr=dr, r_max=r_max)
+xyz_array, idx_dict = read_multi_xyz(join(path, name))
+df = get_all_radial(xyz_array, idx_dict, dr=dr, r_max=r_max)
 print(get_time() + 'run time:', '%.2f' % (time.time() - start), 'sec')
 df.plot()
