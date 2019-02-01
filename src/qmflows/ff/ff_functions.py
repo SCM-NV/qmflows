@@ -61,10 +61,10 @@ def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     dist_int = np.array(dist / dr, dtype=int).flatten()
 
     # Calculate the average particle density N / V
-    # The diameter of the spherical volume (V) is defined by the largest inter-particle distance: max(r_ij)
+    # The diameter of the spherical volume (V) is defined by the largest inter-particle distance
     dens_mean = len(array2) / ((4/3) * np.pi * (0.5 * dist.max())**3)
 
-    # Count the number of occurances of each (rounded) distance; the first element (0 A) is skipped
+    # Count the number of occurances of each (rounded) distance
     dens = np.bincount(dist_int)[:idx_max]
 
     # Correct for the number of reference atoms
@@ -95,7 +95,7 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 
         for all unique atomp pairs.
     return <pd.DataFrame>: A Pandas dataframe of radial distribution functions.
     """
-    # Make sure we're dealing with a list of molecules
+    # Make sure we're with a 3d array
     if len(xyz_array.shape) == 2:
         xyz_array = xyz_array[None, :, :]
 
@@ -105,12 +105,10 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 
         for i, at1 in enumerate(atoms):
             for at2 in atoms[i:]:
                 try:
-                    df[at1 + '_' + at2] += get_radial_distr(xyz[idx_dict[at1]],
-                                                            xyz[idx_dict[at2]],
+                    df[at1 + '_' + at2] += get_radial_distr(xyz[idx_dict[at1]], xyz[idx_dict[at2]],
                                                             dr=dr, r_max=r_max)
                 except KeyError:
-                    df[at1 + '_' + at2] = get_radial_distr(xyz[idx_dict[at1]],
-                                                           xyz[idx_dict[at2]],
+                    df[at1 + '_' + at2] = get_radial_distr(xyz[idx_dict[at1]], xyz[idx_dict[at2]],
                                                            dr=dr, r_max=r_max)
 
     # Average the RDF's over all conformations in mol_list
@@ -141,10 +139,6 @@ def read_multi_xyz(file, ret_idx_dict=True):
             at_symbol.append(item[0])
             xyz.append(item[1:])
 
-    # Captilize the first letter of each atomic symbol
-    for i, at in enumerate(at_symbol[0:mol_size]):
-        at_symbol[i] = at.capitalize()
-
     # Turn the xyz list into a m*n*3 numpy array
     shape = int(len(xyz) / mol_size), mol_size, 3
     xyz = np.array(xyz, dtype=float, order='F').reshape(shape)
@@ -153,6 +147,7 @@ def read_multi_xyz(file, ret_idx_dict=True):
     if ret_idx_dict:
         idx_dict = {}
         for i, at in enumerate(at_symbol[0:mol_size]):
+            at = at.capitalize()
             try:
                 idx_dict[at].append(i)
             except KeyError:
