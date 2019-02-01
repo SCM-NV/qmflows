@@ -1,17 +1,15 @@
-__all__ = []
+__all__ = ['read_multi_xyz', 'get_all_radial']
 
 from os.path import (dirname, join)
 import time
-import pdb
 
 import numpy as np
 import pandas as pd
 from scipy.spatial.distance import cdist
 
-from scm.plams.core.basemol import Molecule
 from scm.plams.tools.units import Units
 
-from qmflows.components.qd_functions import to_array, from_iterable, get_time
+from qmflows.components.qd_functions import get_time
 
 
 def get_rel_error(g_QM, g_MM, T=298.15, unit='kcal/mol'):
@@ -67,13 +65,14 @@ def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     dens_mean = len(array2) / ((4/3) * np.pi * (0.5 * dist.max())**3)
 
     # Count the number of occurances of each (rounded) distance; the first element (0 A) is skipped
-    dens = np.bincount(dist_int)[1:idx_max]
+    dens = np.bincount(dist_int)[:idx_max]
 
     # Correct for the number of reference atoms
     dens = dens / len(array1)
+    dens[0] = np.nan
 
     # Convert the particle count into a partical density
-    r = np.arange(dr, r_max + dr, dr)
+    r = np.arange(0, r_max + dr, dr)
     try:
         dens /= (4 * np.pi * r**2 * dr)
     except ValueError:
@@ -101,7 +100,7 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 
         xyz_array = xyz_array[None, :, :]
 
     # Create a dataframe of RDF's, summed over all conformations in mol_list
-    df = pd.DataFrame(index=np.arange(dr, r_max + dr, dr))
+    df = pd.DataFrame(index=np.arange(0, r_max + dr, dr))
     for xyz in xyz_array:
         for i, at1 in enumerate(atoms):
             for at2 in atoms[i:]:
@@ -115,6 +114,7 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 
                                                            dr=dr, r_max=r_max)
 
     # Average the RDF's over all conformations in mol_list
+    df.iloc[0] = 0.0
     df /= xyz_array.shape[0]
     return df.rename_axis('r(ij) / A')
 
