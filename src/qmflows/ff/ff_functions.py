@@ -1,4 +1,7 @@
+__all__ = []
+
 from os.path import (dirname, join)
+import time
 import pdb
 
 import numpy as np
@@ -7,9 +10,8 @@ from scipy.spatial.distance import cdist
 
 from scm.plams.core.basemol import Molecule
 from scm.plams.tools.units import Units
-from scm.plams.tools.periodic_table import PeriodicTable
 
-from qmflows.components.qd_functions import to_array, from_iterable
+from qmflows.components.qd_functions import to_array, from_iterable, get_time
 
 
 def get_rel_error(g_QM, g_MM, T=298.15, unit='kcal/mol'):
@@ -48,7 +50,7 @@ def get_increment(phi_old, a_old, a, y=2.0):
     return phi_old * y**np.sign(a - a_old.mean())
 
 
-def get_radial_distr(array1, array2, dr=0.01, r_max=10.0):
+def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     """ Calculate the radial distribution function between *array1* and *array2*: g(r_ij).
 
     array1 <np.ndarray>: A n*3 array representing the cartesian coordinates of the reference atoms.
@@ -56,32 +58,32 @@ def get_radial_distr(array1, array2, dr=0.01, r_max=10.0):
     dr <float>: The integration step-size in Angstrom.
     r_max <float>: The maximum to be returned interatomic distance.
     """
+    idx_max = 1 + int(r_max / dr)
     dist = cdist(array1, array2)
-    dist_int = np.array(dist / dr, dtype=np.int64).flatten()
+    dist_int = np.array(dist / dr, dtype=int).flatten()
 
     # Calculate the average particle density N / V
     # The diameter of the spherical volume (V) is defined by the largest inter-particle distance: max(r_ij)
-    r = np.arange(dr, r_max + dr, dr)
     dens_mean = len(array2) / ((4/3) * np.pi * (0.5 * dist.max())**3)
 
-    # Count the number of occurances of each distance; the first element (0 A) is skipped
-    dens = np.bincount(dist_int)[1:1+int(r_max/dr)]
+    # Count the number of occurances of each (rounded) distance; the first element (0 A) is skipped
+    dens = np.bincount(dist_int)[1:idx_max]
 
     # Correct for the number of reference atoms
     dens = dens / len(array1)
 
     # Convert the particle count into a partical density
+    r = np.arange(dr, r_max + dr, dr)
     try:
         dens /= (4 * np.pi * r**2 * dr)
     except ValueError:
-        # Plan b: is executed if r_max is larger than the largest distance
+        # Plan b: Pad the array with zeros if r_max is larger than dist.max()
         zeros = np.zeros(len(r))
         zeros[0:len(dens)] = dens
         dens = zeros / (4 * np.pi * r**2 * dr)
 
-    # Normalize the particle density
-    dens /= dens_mean
-    return dens
+    # Normalize and return the particle density
+    return dens / dens_mean
 
 
 def get_all_radial(mol_list, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 'O')):
@@ -90,30 +92,39 @@ def get_all_radial(mol_list, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 'O')):
     for conformational and/or configurational averaging.
 
     mol_list <list>[<plams.Molecule>]: A PLAMS molecule or list of PLAMS molecules.
-    atoms <tuple>[<str>]: A tuple of strings representing atomic symbols.
+    atoms <tuple>[<str>]: A tuple of strings representing atomic symbols; RDF's will be calculated
+        for all unique atomp pairs.
     return <pd.DataFrame>: A Pandas dataframe of radial distribution functions.
     """
-    # Create a dictionary of atomic symbols: atomic numbers
-    atoms = {i: PeriodicTable.get_atomic_number(i) for i in atoms}
-
+    # Make sure we're dealing with a list of molecules
     if isinstance(mol_list, Molecule):
         mol_list = [mol_list]
 
+    # Create a dictionary consisting of {atomic symbol: [atomic indices]}
+    idx_dict = {}
+    for i, at in enumerate(mol_list[0]):
+        try:
+            idx_dict[at.symbol].append(i)
+        except KeyError:
+            idx_dict[at.symbol] = [i]
+
+    # Create a dataframe of RDF's, summed over all conformations in mol_list
     df = pd.DataFrame(index=np.arange(dr, r_max + dr, dr))
     for mol in mol_list:
-        xyz_dict = {i: to_array([at for at in mol if at.atnum == atoms[i]]) for i in atoms}
-        for i in xyz_dict:
-            for j in xyz_dict:
-                if j + '_' + i not in df.keys():
-                    try:
-                        df[i + '_' + j] += get_radial_distr(xyz_dict[i], xyz_dict[j],
+        xyz_array = to_array(mol)
+        for i, at1 in enumerate(atoms):
+            for at2 in atoms[i:]:
+                try:
+                    df[at1 + '_' + at2] += get_radial_distr(xyz_array[idx_dict[at1]],
+                                                            xyz_array[idx_dict[at2]],
                                                             dr=dr, r_max=r_max)
-                    except KeyError:
-                        df[i + '_' + j] = get_radial_distr(xyz_dict[i], xyz_dict[j],
+                except KeyError:
+                    df[at1 + '_' + at2] = get_radial_distr(xyz_array[idx_dict[at1]],
+                                                           xyz_array[idx_dict[at2]],
                                                            dr=dr, r_max=r_max)
 
+    # Average the RDF's over all conformations in mol_list
     df /= len(mol_list)
-
     return df.rename_axis('r(ij) / A')
 
 
@@ -122,16 +133,26 @@ name = 'Cd360Se309X102.pdb'
 mol = Molecule(join(path, name))
 
 # Create copies of mol and randomly displace all atoms between 0.00 and 0.25 Angstrom
-mol_list = [mol.copy() for i in range(100)]
-for mol in mol_list:
-    ar = to_array(mol)
-    ar += np.random.rand(len(ar), 3) / 4
-    from_iterable(mol, ar, obj='array')
+# Skip this step if the variable mol_list is alreayd assigned and is of length n
+n = 100
+print('')
+try:
+    mol_list == True
+    if len(mol_list) != n:
+        name_error == True
+except NameError:
+    print(get_time() + 'generating mol_list')
+    mol_list = [mol.copy() for i in range(n)]
+    for mol in mol_list:
+        ar = to_array(mol)
+        ar += np.random.rand(len(ar), 3) / 4
+        from_iterable(mol, ar, obj='array')
+        del ar
+    print(get_time() + 'mol_list has been generated')
 
-# Plot it
+# Run the actual script and plot the results
 dr, r_max = 0.05, 12.0
+start = time.time()
 df = get_all_radial(mol_list, dr=dr, r_max=r_max)
-phi_init = 1.0
-w = 100
+print(get_time() + 'run time:', '%.2f' % (time.time() - start), 'sec')
 df.plot()
-# df.plot(figsize=(60,30), fontsize=30)
