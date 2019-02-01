@@ -3,6 +3,7 @@ __all__ = ['get_bde']
 import numpy as np
 
 from scm.plams.core.basemol import (Molecule, Atom)
+from scm.plams.tools.units import Units
 
 from .qd_ligand_rotate import rot_mol_angle
 from .qd_ams import ams_job_mopac_opt, ams_job_mopac_sp, ams_job_uff_opt
@@ -54,15 +55,16 @@ def get_cdx2(mol):
     CdX2.add_atom(Atom(atnum=48))
     CdX2.merge_mol([lig1, lig2])
     CdX2.properties.path = mol.properties.path
-    CdX2.properties.indices = [0, idx1, 1 + len(lig2) + idx2]
+    CdX2.properties.indices = [1, 1 + idx1, 2 + len(lig2) + idx2]
     CdX2 = ams_job_mopac_opt(CdX2)
     return CdX2
 
 
-def get_bde(mol, get_ddG=True):
+def get_bde(mol, get_ddG=True, unit='kcal/mol'):
     """ Calculate the bond dissociation energy: dE = dE(mopac) + (dG(uff) - dE(uff))
     """
     lig = get_cdx2(mol)
+    lig.properties.name = 'CdX2'
     core = dissociate_ligand(mol)
     tot = ams_job_mopac_sp(mol)
 
@@ -70,11 +72,12 @@ def get_bde(mol, get_ddG=True):
     E_core_mopac = np.array([ams_job_mopac_sp(mol).properties.energy.E for mol in core])
     E_tot_mopac = tot.properties.energy.E
     dE_mopac = (E_lig_mopac + E_core_mopac) - E_tot_mopac
+    dE_mopac *= Units.conversion_ratio('Hartree', 'kcal/mol')
 
     if get_ddG:
-        lig = ams_job_uff_opt(lig, get_freq=True)
-        core = [ams_job_uff_opt(mol, get_freq=True) for mol in core]
-        tot = ams_job_uff_opt(tot, get_freq=True)
+        lig = ams_job_uff_opt(lig, get_freq=True, fix_angle=False)
+        core = [ams_job_uff_opt(mol, get_freq=True, fix_angle=False) for mol in core]
+        tot = ams_job_uff_opt(tot, get_freq=True, fix_angle=False)
 
         G_lig_uff = lig.properties.energy.G
         G_core_uff = np.array([mol.properties.energy.G for mol in core])
