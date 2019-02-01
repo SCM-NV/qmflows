@@ -12,7 +12,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 
 from rdkit.Chem import AllChem
 
-from .qd_functions import (to_symbol, fix_carboxyl, get_time, from_iterable, get_bond_index)
+from .qd_functions import (to_symbol, fix_carboxyl, get_time, get_bond_index, from_plams_mol, from_rdmol)
 from .qd_ligand_rotate import (rot_mol_angle, sanitize_dim_2)
 from .qd_database import compare_database
 from .qd_import_export import export_mol
@@ -261,7 +261,7 @@ def recombine_mol(mol_list):
         vec2 = sanitize_dim_2(tup[0]) - sanitize_dim_2(tup[1])
         idx = tup[2].get_atom_index() - 1
         mol_array = rot_mol_angle(mol2, vec1, vec2, atoms_other=tup[0], idx=idx, bond_length=1.5)
-        from_iterable(mol2, mol_array, obj='array')
+        mol2.from_array(mol_array)
 
         # Merge mol1 & mol2
         mol1.merge_mol(mol2)
@@ -269,7 +269,7 @@ def recombine_mol(mol_list):
         mol1.delete_atom(tup[3])
         mol1.add_bond(tup[0], tup[2])
         bond_tup = mol1.bonds[-1].get_bond_index()
-        from_iterable(mol1, global_minimum_scan_rdkit(mol1, bond_tup), obj='plams')
+        mol1.from_plams_mol(global_minimum_scan_rdkit(mol1, bond_tup))
 
     del mol1.properties.mark
     return mol1
@@ -322,4 +322,4 @@ def set_dihed(self, angle, opt=True, unit='degree'):
     if opt:
         rdmol = molkit.to_rdmol(self)
         AllChem.UFFGetMoleculeForceField(rdmol).Minimize()
-        from_iterable(self, rdmol, obj='rdkit')
+        self.from_rdmol(rdmol)

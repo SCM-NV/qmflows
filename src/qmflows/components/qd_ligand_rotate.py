@@ -6,8 +6,7 @@ import numpy as np
 from scm.plams.core.settings import Settings
 
 from .qd_import_export import export_mol
-from .qd_functions import (to_array, from_iterable, get_center_of_mass_np, merge_mol,
-                           get_atom_index)
+from .qd_functions import (merge_mol, get_atom_index)
 
 
 def sanitize_dim_2(arg):
@@ -19,7 +18,7 @@ def sanitize_dim_2(arg):
         try:
             return np.array(arg.coords)[None, :]
         except AttributeError:
-            return to_array(arg)
+            return arg.to_array()
     else:
         if len(arg.shape) == 1:
             return arg[None, :]
@@ -34,13 +33,13 @@ def sanitize_dim_3(arg, padding=np.nan):
     """
     if not isinstance(arg, np.ndarray):
         try:
-            return to_array(arg)[None, :, :]
+            return arg.to_array()[None, :, :]
         except AttributeError:
             max_at = max(len(mol) for mol in arg)
             ret = np.empty((len(arg), max_at, 3), order='F')
             ret[:] = padding
             for i, mol in enumerate(arg):
-                ret[i, 0:len(mol)] = to_array(mol)
+                ret[i, 0:len(mol)] = mol.to_array()
             return ret
     else:
         if len(arg.shape) == 2:
@@ -214,7 +213,7 @@ def array_to_qd(mol, xyz_array, mol_other=False):
     xyz_array = sanitize_dim_3(xyz_array)
     for i, xyz in enumerate(xyz_array, 2):
         mol_cp = mol.copy()
-        from_iterable(mol_cp, xyz, obj='array')
+        mol_cp.from_array(xyz)
         for at in mol_cp:
             at.properties.pdb_info.ResidueNumber = i
         mol_list.append(mol_cp)
@@ -237,8 +236,8 @@ def ligand_to_qd(core, ligand, qd_folder):
     return <plams.Molecule>: The quantum dot (core + n*ligands).
     """
     # Define vectors and indices used for rotation and translation the ligands
-    vec1 = sanitize_dim_2(ligand.properties.dummies) - sanitize_dim_2(ligand.get_center_of_mass_np())
-    vec2 = sanitize_dim_2(core.get_center_of_mass_np()) - sanitize_dim_2(core.properties.dummies)
+    vec1 = sanitize_dim_2(ligand.properties.dummies) - sanitize_dim_2(ligand.get_center_of_mass())
+    vec2 = sanitize_dim_2(core.get_center_of_mass()) - sanitize_dim_2(core.properties.dummies)
     idx = ligand.properties.dummies.get_atom_index() - 1
     ligand.properties.dummies.properties.anchor = True
 

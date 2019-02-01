@@ -7,7 +7,7 @@ from scm.plams.tools.units import Units
 
 from .qd_ligand_rotate import rot_mol_angle
 from .qd_ams import ams_job_mopac_opt, ams_job_mopac_sp, ams_job_uff_opt
-from .qd_functions import (get_center_of_mass_np, merge_mol, from_iterable)
+from .qd_functions import merge_mol
 from .qd_dissociate import dissociate_ligand
 
 
@@ -40,17 +40,18 @@ def get_cdx2(mol):
     lig2.translate(anchor2.vector_to(-target))
 
     # Define vectors for the ligand rotation
-    vec1_1 = np.array(anchor1.vector_to(lig1.get_center_of_mass_np()))
+    vec1_1 = np.array(anchor1.vector_to(lig1.get_center_of_mass()))
     vec2_1 = -1 * np.array(anchor1.vector_to(np.zeros(3)))
-    vec1_2 = np.array(anchor2.vector_to(lig2.get_center_of_mass_np()))
+    vec1_2 = np.array(anchor2.vector_to(lig2.get_center_of_mass()))
     vec2_2 = -1 * np.array(anchor2.vector_to(np.zeros(3)))
 
     # Rotate the ligands
     lig1_ar = rot_mol_angle(lig1, vec1_1, vec2_1, idx=idx1, atoms_other=anchor1, bond_length=False)
     lig2_ar = rot_mol_angle(lig2, vec1_2, vec2_2, idx=idx2, atoms_other=anchor2, bond_length=False)
-    from_iterable(lig1, lig1_ar, obj='array')
-    from_iterable(lig2, lig2_ar, obj='array')
+    lig1.from_array(lig1_ar)
+    lig2.from_array(lig2_ar)
 
+    # Construct the CdX2 molecule
     CdX2 = Molecule()
     CdX2.add_atom(Atom(atnum=48))
     CdX2.merge_mol([lig1, lig2])

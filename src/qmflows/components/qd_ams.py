@@ -19,7 +19,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 
 from ..templates.templates import get_template
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, to_array, from_iterable)
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_plams_mol)
 
 
 def check_sys_var():
@@ -113,7 +113,7 @@ def get_entropy(self, freqs, T=298.15):
     # Extract atomic masses and coordinates
     mol = self.get_main_molecule()
     m = np.array([at.mass for at in mol]) * 1.6605390 * 10**-27
-    x, y, z = to_array(mol).T * 10**-10
+    x, y, z = mol.to_array().T * 10**-10
 
     # Calculate the rotational partition function
     inertia = np.array([sum(m*(y**2 + z**2)), -sum(m*x*y), -sum(m*x*z),
@@ -345,7 +345,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     job = AMSJob(molecule=mol, settings=s, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()
-    from_iterable(mol, output_mol)
+    mol.from_plams_mol(output_mol)
     if get_freq:
         results.wait()
         mol.properties.energy = Settings(results.get_thermo('uff.rkf'))
@@ -355,7 +355,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
         job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s, name='UFF_part2')
         results = job.run()
         output_mol = results.get_main_molecule()
-        from_iterable(mol, output_mol)
+        mol.from_plams_mol(output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory

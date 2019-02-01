@@ -1,5 +1,5 @@
 __all__ = ['find_substructure', 'find_substructure_split', 'merge_mol', 'qd_int',
-           'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_iterable', 'get_time']
+           'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_plams_mol', 'from_rdmol', 'get_time']
 
 import itertools
 import time
@@ -7,8 +7,9 @@ import numpy as np
 
 from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
-from scm.plams.tools.units import Units
+from scm.plams.tools.periodic_table import PeriodicTable
 import scm.plams.interfaces.molecule.rdkit as molkit
+
 from rdkit import Chem
 from rdkit.Chem import AllChem, rdMolTransforms
 
@@ -20,76 +21,26 @@ def get_time():
     return '[' + time.strftime('%H:%M:%S') + '] '
 
 
-def to_array(mol):
+@add_to_class(Molecule)
+def from_plams_mol(self, mol, atom_subset=None):
+    """ Update the atomic coordinates of *self* with coordinates from another PLAMS molecule.
+    Alternatively, update only a subset of atoms.
     """
-    Convert the cartesian coordinates of atoms within a PLAMS molecule into a 3*n numpy array.
-    mol <plams.Molecule>: An iterable consisting of PLAMS atoms.
-    return <np.array>: A 3*n numpy array with atomic coordinates.
-    """
-    x, y, z = zip(*[atom.coords for atom in mol])
-    return np.array((x, y, z)).T
-
-
-def from_iterable(mol, iterable, obj='plams'):
-    """
-    Update the atomic coordinates of self with coordinates from an iterable.
-    self <plams.Molecule>: An iterable consisting of PLAMS atoms.
-    iterable <list>, <tuple>, <np.array>, <plams.Molecule>, etc.: A (nested) iterable containg
-        x, y & z coordinates as floats.
-    obj <str>: The nature of the iterable argument; accepted values:
-        'plams': An iterable with PLAMS atoms as elements.
-        'rdkit': An RDKit molecule.
-        'array': A n*3 numpy array consisting of floats.
-        'iterable': A nested iterable, each element consisting of an iterable with 3 floats.
-    """
-    def from_plams(mol, iterable):
-        for at1, at2 in zip(mol, iterable):
-            at1.coords = at2.coords
-
-    def from_rdkit(mol, iterable):
-        conf = iterable.GetConformer()
-        for at1, at2 in zip(mol, iterable.GetAtoms()):
-            pos = conf.GetAtomPosition(at2.GetIdx())
-            at1.coords = (pos.x, pos.y, pos.z)
-
-    def from_array(mol, iterable):
-        iterable = iterable.T
-        for at1, x, y, z in zip(mol, iterable[0], iterable[1], iterable[2]):
-            at1.coords = (x, y, z)
-
-    def from_misc_iterable(mol, iterable):
-        for at1, coords in zip(mol, iterable):
-            at1.coords = (coords[0], coords[1], coords[2])
-
-    obj_dict = {'plams': from_plams, 'rdkit': from_rdkit,
-                'array': from_array, 'iterable': from_misc_iterable}
-    obj_dict[obj](mol, iterable)
+    atom_subset = atom_subset or self.atoms
+    for at1, at2 in zip(atom_subset, mol):
+        at1.coords = at2.coords
 
 
 @add_to_class(Molecule)
-def get_center_of_mass_np(self, unit='angstrom'):
+def from_rdmol(self, rdmol, atom_subset=None):
+    """ Update the atomic coordinates of *self* with coordinates from an RDKit molecule.
+    Alternatively, update only a subset of atoms.
     """
-    PLAMS get_center_of_mass() function rewritten using numpy; input and output remains unchanged.
-    """
-    mass_array = np.array([atom.mass for atom in self])
-    xyz_array = to_array(self).T
-    xyz_array *= mass_array
-    center = xyz_array.sum(axis=1)
-    center /= mass_array.sum()
-    return center * Units.conversion_ratio('angstrom', unit)
-
-
-@add_to_class(Molecule)
-def translate_np(self, vector, unit='angstrom'):
-    """
-    Translate a PLAMS molecule according to a vector using numpy.
-    self <plams.Molecule>: A PLAMS molecule.
-    vector: An iterable containing three floats or integers.
-    """
-    ratio = Units.conversion_ratio(unit, 'angstrom')
-    array = to_array(self)
-    array += np.array(vector)*ratio
-    from_iterable(self, array, obj='array')
+    atom_subset = atom_subset or self.atoms
+    conf = rdmol.GetConformer()
+    for at1, at2 in zip(atom_subset, rdmol.GetAtoms()):
+        pos = conf.GetAtomPosition(at2.GetIdx())
+        at1.coords = (pos.x, pos.y, pos.z)
 
 
 def to_atnum(item):
@@ -99,7 +50,7 @@ def to_atnum(item):
     return <int>: An atomic number.
     """
     if isinstance(item, str):
-        return Atom(symbol=item).atnum
+        return PeriodicTable.get_atomic_number(item)
     return item
 
 
@@ -110,7 +61,7 @@ def to_symbol(item):
     return <str>: An atomic symbol.
     """
     if isinstance(item, int):
-        return Atom(atnum=item).symbol
+        return PeriodicTable.get_symbol(item)
     return item
 
 
@@ -293,7 +244,7 @@ def fix_carboxyl(plams_mol):
             if get_angle(rdmol.GetConformer(), idx[3], idx[1], idx[0]) < 60:
                 set_angle(rdmol.GetConformer(), idx[2], idx[1], idx[3], 180.0)
                 set_angle(rdmol.GetConformer(), idx[0], idx[1], idx[3], 120.0)
-        from_iterable(plams_mol, rdmol, obj='rdkit')
+        plams_mol.from_iterable(rdmol)
     return plams_mol
 
 
@@ -324,7 +275,7 @@ def fix_h(plams_mol):
             update.append(True)
 
     if update:
-        from_iterable(plams_mol, rdmol, obj='rdkit')
+        plams_mol.from_rdmol(rdmol)
     return plams_mol
 
 
