@@ -17,7 +17,6 @@ def get_rel_error(g_QM, g_MM, T=298.15, unit='kcal/mol'):
 
     g_QM & G_MM <np.ndarray>: A m*n numpy arrays of m radial distribution functions of QM & MM
         calculations, respectively.
-
     T <float>: The temperature in Kelvin.
     unit <str>: The unit of the to be returned energy
     return <np.array>: The relative error dXi.
@@ -51,11 +50,11 @@ def get_increment(phi_old, a_old, a, y=2.0):
 def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     """ Calculate the radial distribution function between *array1* and *array2*: g(r_ij).
 
-    array1 <np.ndarray>: A n*3 array representing the cartesian coordinates of the reference atoms.
-    array2 <np.ndarray>: A m*3 array representing the cartesian coordinates of (non-reference) atoms.
+    array1 <np.ndarray>: A n*3 array of the cartesian coordinates of reference atoms.
+    array2 <np.ndarray>: A m*3 array of the cartesian coordinates of (non-reference) atoms.
     dr <float>: The integration step-size in Angstrom, i.e. the distance between concentric spheres.
     r_max <float>: The maximum to be evaluated interatomic distance.
-    return <np.ndarray>: The radial distribution function; a 1d numpy array of length *dr* / *r_max*.
+    return <np.ndarray>: The radial distribution function: a 1d array of length *dr* / *r_max*.
     """
     idx_max = 1 + int(r_max / dr)
     dist = cdist(array1, array2)
@@ -90,7 +89,8 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=None):
     """ Return the radial distribution functions (RDF's) for all possible atom-pairs in *atoms*
     as dataframe. Accepts both 2d and 3d arrays of cartesian coordinates.
 
-    xyz_array <np.ndarray>: A m*n*3 or n*3 numpy array of cartesian coordinates.
+    xyz_array <np.ndarray>: A m*n*3 or n*3 numpy array of the cartesian coordinates of m molecules
+        (isomers) consisting of n atoms.
     idx_dict <dict>[<list>]: A dictionary consisting of {atomic symbols: [atomic indices]}.
     dr <float>: The integration step-size in Angstrom, i.e. the distance between concentric spheres.
     r_max <float>: The maximum to be evaluated interatomic distance.
@@ -127,13 +127,14 @@ def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=None):
 
 
 def read_multi_xyz(file, ret_idx_dict=True):
-    """ Return a m*n*3 array of cartesian coordinates extracted from a multi-xyz file.
+    """ Return a m*n*3 array of cartesian coordinates extracted from an xyz or multi-xyz file.
 
-    file <str>: The path + filename of a multi-xyz file.
+    file <str>: The path + filename of a xyz or multi-xyz file.
     ret_idx_dict <bool>: Return a dictionary consisting of {atomic symbols: [atomic indices]} as
         derived from the first molecule in *file*.
-    return <np.ndarray> (and <dict>): A m*n*3 numpy array of cartesian coordinates and, optionally,
-        a dictionary consisting of {atomic symbols: [atomic indices]}.
+    return <np.ndarray> (and <dict>): A m*n*3 numpy array with the cartesian coordinates of
+        m molecules (isomers) consisting of n atoms. Optionally, a dictionary can be returned
+        consisting of {atomic symbols: [atomic indices]}.
     """
     # Read the multi-xyz file
     with open(join(path, name)) as file:
@@ -151,7 +152,7 @@ def read_multi_xyz(file, ret_idx_dict=True):
 
     # Turn the xyz list into a m*n*3 numpy array
     shape = int(len(xyz) / mol_size), mol_size, 3
-    xyz = np.array(xyz, dtype=float, order='F').reshape(shape)
+    xyz = np.array(xyz, dtype=float).reshape(shape)
 
     # Turn the atomic symbols list into a dictionary: {atomic symbols: [atomic indices]}
     if ret_idx_dict:
