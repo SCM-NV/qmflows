@@ -53,8 +53,8 @@ def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
 
     array1 <np.ndarray>: A n*3 array representing the cartesian coordinates of the reference atoms.
     array2 <np.ndarray>: A m*3 array representing the cartesian coordinates of (non-reference) atoms.
-    dr <float>: The integration step-size in Angstrom.
-    r_max <float>: The maximum to be returned interatomic distance.
+    dr <float>: The integration step-size in Angstrom, i.e. the distance between concentric spheres.
+    r_max <float>: The maximum to be evaluated interatomic distance.
     return <np.ndarray>: The radial distribution function; a 1d numpy array of length *dr* / *r_max*.
     """
     idx_max = 1 + int(r_max / dr)
@@ -86,18 +86,27 @@ def get_radial_distr(array1, array2, dr=0.05, r_max=12.0):
     return dens / dens_mean
 
 
-def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=('Cd', 'Se', 'O')):
-    """ Return the radial distribution functions for all possible atom-pairs in *atoms*
+def get_all_radial(xyz_array, idx_dict, dr=0.05, r_max=12.0, atoms=None):
+    """ Return the radial distribution functions (RDF's) for all possible atom-pairs in *atoms*
     as dataframe. Accepts both 2d and 3d arrays of cartesian coordinates.
 
     xyz_array <np.ndarray>: A m*n*3 or n*3 numpy array of cartesian coordinates.
-    idx_dict <dict>[<list>]: A dictionary consisting of {atomic symbols: [atomic indices]}
+    idx_dict <dict>[<list>]: A dictionary consisting of {atomic symbols: [atomic indices]}.
+    dr <float>: The integration step-size in Angstrom, i.e. the distance between concentric spheres.
+    r_max <float>: The maximum to be evaluated interatomic distance.
+    atoms <None> or <tuple>[<str>]: A tuple of atomic symbols. An RDF will be calculated for all
+        possible atom-pairs in *atoms*. If *atoms* = <None>, An RDF will be calculated for all
+        possible atom-pairs in *idx_dict*.keys() (i.e. the entire molecule).
     return <pd.DataFrame>: A Pandas dataframe of radial distribution functions, averaged over all
         conformations in *xyz_array*.
     """
     # Make sure we're with a 3d array
     if len(xyz_array.shape) == 2:
         xyz_array = xyz_array[None, :, :]
+
+    # Extract atomic symbols from *idx_dict*.keys() if no atomic symbols have been specified
+    if atoms is None:
+        atoms = tuple(idx_dict.keys())
 
     # Create a dataframe of RDF's, summed over all conformations in mol_list
     df = pd.DataFrame(index=np.arange(0, r_max + dr, dr))
@@ -160,6 +169,7 @@ def read_multi_xyz(file, ret_idx_dict=True):
 # Define variables
 dr = 0.05
 r_max = 12.0
+atoms = ('Cd', 'Se', 'O')
 path = dirname(__file__)
 name = 'Cd68Se55_26COO_MD_trajec.xyz'
 
@@ -167,6 +177,6 @@ name = 'Cd68Se55_26COO_MD_trajec.xyz'
 print('')
 start = time.time()
 xyz_array, idx_dict = read_multi_xyz(join(path, name))
-df = get_all_radial(xyz_array, idx_dict, dr=dr, r_max=r_max)
+df = get_all_radial(xyz_array, idx_dict, dr=dr, r_max=r_max, atoms=atoms)
 print(get_time() + 'run time:', '%.2f' % (time.time() - start), 'sec')
 df.plot()
