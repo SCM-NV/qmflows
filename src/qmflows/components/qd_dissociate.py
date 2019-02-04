@@ -72,6 +72,7 @@ def get_topology_dict(mol, dist=4.5):
     topology_dict = {}
     residue_dict = get_residue_dict(mol)
     del residue_dict[1]
+
     idx = list(residue_dict.keys())[-1]
     idx = residue_dict[idx].index(mol[mol.properties.indices[-1]])
     for residue in residue_dict:
@@ -80,6 +81,7 @@ def get_topology_dict(mol, dist=4.5):
                      at.distance_to(residue_dict[residue][idx]) <= dist]
         topology_dict[residue] = dist_dict[len(dist_list) - 1]
     topology_dict[None] = None
+
     return topology_dict
 
 

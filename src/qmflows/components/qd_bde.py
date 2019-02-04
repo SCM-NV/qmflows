@@ -2,8 +2,10 @@ __all__ = ['get_bde']
 
 import numpy as np
 import pandas as pd
+from scipy.spatial.distance import cdist
 
 from scm.plams import (Molecule, Atom)
+from scm.plams.core.functions import (init, finish)
 from scm.plams.tools.units import Units
 
 from .qd_functions import to_atnum
@@ -64,25 +66,56 @@ def get_cdx2(mol, ion='Cd'):
     return CdX2
 
 
+def get_topology(mol, idx_list, max_dist=5.0):
+    """ Return the topology of all atoms *idx_list*, a list of atomic indices. The returned topology
+    is based on the number of atoms with a radius *max_dist* from a reference atom. Only atoms with
+    the same atomic number as those in *idx_list* will be considered, which in turn should only
+    contain atoms of a single element.
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    idx_list <list>: A list of atomic indices.
+    max_dist <float>: The maximum interatomic distance which is to be considered in topology
+        determination.
+    return <list>: A list of the topologies in idx_list. Can be either a <str> or <None> if the
+        topology is not recognized.
+    """
+    # Create a dictionary which translates the number of neighbours to a topology
+    neighbour_dict = {0: None, 1: None, 2: None, 3: None, 4: None, 5: None, 6: None,
+                      7: 'Vertice', 8: 'Edge', 9: 'Face', 10: None, 11: None}
+    atnum = mol[idx_list[0]].atnum
+
+    # Create an array with the number of neighbouring atoms in idx_list
+    array = mol.as_array(atom_subset=[mol[idx] for idx in idx_list])
+    array_other = mol.as_array(atom_subset=[at for at in mol.atoms if at.atnum == atnum])
+    dist = cdist(array, array_other)
+    dist_count = np.bincount(np.where(dist <= max_dist)[0])
+
+    return [neighbour_dict[i] for i in dist_count]
+
+
 def get_bde(mol, get_ddG=True, unit='kcal/mol'):
     """ Calculate the bond dissociation energy: dE = dE(mopac) + (dG(uff) - dE(uff))
     """
+    init(path=mol.properties.path, folder='QD_dissociate')
+
     # Perform MOPAC single points
-    core = dissociate_ligand(mol)
     lig = get_cdx2(mol)
     lig.properties.name = 'CdX2'
+    core = dissociate_ligand(mol)
     tot = ams_job_mopac_sp(mol)
 
     # Extract MOPAC total energies
-    E_lig_mopac = lig.properties.energy.E
-    E_core_mopac = np.array([ams_job_mopac_sp(mol).properties.energy.E for mol in core])
-    E_tot_mopac = tot.properties.energy.E
+    E_lig_1 = lig.properties.energy.E
+    E_core_1 = np.array([ams_job_mopac_sp(mol).properties.energy.E for mol in core])
+    E_tot_1 = tot.properties.energy.E
 
     # Calculate dE
-    dE_mopac = (E_lig_mopac + E_core_mopac) - E_tot_mopac
-    dE_mopac *= Units.conversion_ratio('Hartree', 'kcal/mol')
+    dE_1 = (E_lig_1 + E_core_1) - E_tot_1
+    dE_1 *= Units.conversion_ratio('Hartree', 'kcal/mol')
 
+    # Extract the ligand residue numbers and Cd atomic indices from core
     res_list1, idx_list, res_list2 = zip(*[mol.properties.mark for mol in core])
+    finish()
 
     if get_ddG:
         # Perform UFF constrained geometry optimizations + frequency analyses
@@ -91,31 +124,31 @@ def get_bde(mol, get_ddG=True, unit='kcal/mol'):
         tot = ams_job_uff_opt(tot, get_freq=True, fix_angle=False)
 
         # Extract UFF total Gibbs free energies
-        G_lig_uff = lig.properties.energy.G
-        G_core_uff = np.array([mol.properties.energy.G for mol in core])
-        G_tot_uff = tot.properties.energy.G
+        G_lig_2 = lig.properties.energy.G
+        G_core_2 = np.array([mol.properties.energy.G for mol in core])
+        G_tot_2 = tot.properties.energy.G
 
         # Extract UFF total energies
-        E_lig_uff = lig.properties.energy.E
-        E_core_uff = np.array([mol.properties.energy.E for mol in core])
-        E_tot_uff = tot.properties.energy.E
+        E_lig_2 = lig.properties.energy.E
+        E_core_2 = np.array([mol.properties.energy.E for mol in core])
+        E_tot_2 = tot.properties.energy.E
 
         # Calculate ddG
-        dG_uff = (G_lig_uff + G_core_uff) - G_tot_uff
-        dE_uff = (E_lig_uff + E_core_uff) - E_tot_uff
-        ddG_uff = dG_uff - dE_uff
+        dG_2 = (G_lig_2 + G_core_2) - G_tot_2
+        dE_2 = (E_lig_2 + E_core_2) - E_tot_2
+        ddG_2 = dG_2 - dE_2
 
-        return pd.DataFrame({'First ligand': res_list1,
-                             'Cd index': idx_list,
-                             'Second ligand': res_list2,
-                             'dE': dE_mopac,
-                             'ddG': ddG_uff,
-                             'dG': dE_mopac+ddG_uff})
+        return pd.DataFrame({'Ligand Residue Num #1': res_list1,
+                             'Cd Topology': get_topology(mol, idx_list),
+                             'Ligand Residue Num #2': res_list2,
+                             'dE': dE_1,
+                             'ddG': ddG_2,
+                             'dG': dE_1 + ddG_2})
 
-    return pd.DataFrame({'First ligand': res_list1,
-                         'Cd index': idx_list,
-                         'Second ligand': res_list2,
-                         'dE': dE_mopac})
+    return pd.DataFrame({'Ligand Residue Num #1': res_list1,
+                         'Cd Topology': get_topology(mol, idx_list),
+                         'Ligand Residue Num #2': res_list2,
+                         'dE': dE_1})
 
 
 def get_y_axis():
