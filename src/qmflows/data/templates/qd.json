@@ -1,0 +1,57 @@
+{"UFF constrained optimization":
+    {"description": "UFF constrained geometry optimization",
+     "pickle": false,
+     "input":
+        {"ams":
+            {"Task": "GeometryOptimization",
+             "Constrains": {"Atom": null},
+             "GeometryOptimization": {"MaxIterations": 500},
+             "System": 
+                {"BondOrders": {"_1": null},
+                 "Charge": 0
+                }
+            }
+        }
+    },
+ "COSMO-RS activity coefficient":
+    {"description": "COSMO-RS activity coefficient calculation; parameters not included",
+     "ignore_molecule": true,
+     "pickle": false,
+     "input": 
+        {"Property": {"_h": "activitycoef"},
+         "Compound": {"_h": null},
+         "compound": {"_h": null, "frac1": 1.0}
+        }
+    },
+ "COSMO-MOPAC single point":
+    {"description": "MOPAC condensed phase (conductor) single point",
+     "pickle": false,
+     "input": 
+        {"MOPAC": {"Solvation": "COSMO-CRS"},
+         "ams": 
+            {"Task": "SinglePoint",
+             "System": {"Charge": 0}
+            }
+        }
+    },
+ "MOPAC single point":
+    {"description": "MOPAC gas phase single point",
+     "pickle": false,
+     "input": 
+        {"ams": 
+            {"Task": "SinglePoint",
+             "System": {"Charge": 0}
+            }
+        }
+    },
+ "MOPAC geometry optimization":
+    {"description": "MOPAC gas phase geometry optimization",
+     "pickle": false,
+     "input": 
+        {"ams": 
+            {"Task": "GeometryOptimization",
+             "System": {"Charge": 0}
+            }
+        }
+    }
+}
