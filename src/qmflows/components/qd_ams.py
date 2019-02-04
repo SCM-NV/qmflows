@@ -8,7 +8,7 @@ from os.path import (dirname, join)
 
 import numpy as np
 
-from scm.plams.core.functions import (init, finish, add_to_class)
+from scm.plams.core.functions import (init, finish, add_to_class, config)
 from scm.plams.core.jobrunner import JobRunner
 from scm.plams.core.settings import Settings
 from scm.plams.tools.kftools import KFFile
@@ -148,16 +148,13 @@ def ams_job_mopac_sp(mol):
     mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
-    path = mol.properties.path
-
     # Run MOPAC
-    init(path=path, folder='QD_dissociate')
+    config.default_jobmanager.settings.hashing = None
     s = get_template('qd.json')['MOPAC single point']
     job = AMSJob(molecule=mol, settings=s, name='MOPAC')
     results = job.run()
     results.wait()
     mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
-    finish()
 
     return mol
 
@@ -168,16 +165,12 @@ def ams_job_mopac_opt(mol):
     mol <plams.Molecule>: A PLAMS molecule with the 'path' and 'charge' properties.
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
-    path = mol.properties.path
-
     # Run MOPAC
-    init(path=path, folder='QD_dissociate')
     s = get_template('qd.json')['MOPAC geometry optimization']
     job = AMSJob(molecule=mol, settings=s, name='MOPAC')
     results = job.run()
     results.wait()
     mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
-    finish()
 
     return mol
 
