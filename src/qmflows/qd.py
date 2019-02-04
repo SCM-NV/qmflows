@@ -199,16 +199,9 @@ def prep_qd(qd_list, path, arg):
         QD_ams.check_sys_var()
         print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
 
-        def diss_list_to_pd(diss_list, residue_list, top_dict):
-            gen = ((tuple(res), tuple(top_dict[i] for i in res),
-                   qd.properties.Eint, qd.properties.Estrain, qd.properties.E) for
-                   qd, res in zip(diss_list, residue_list))
-            keys = ('Residue numbers', 'Topology', 'Eint', 'Estrain', 'E')
-            return pd.DataFrame(dict(zip(keys, zip(*gen))))
-
         for qd in qd_list:
             # top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
-            E_list, G_list = QD_BDE.get_bde(qd)
+            qd.properties.energy.BDE = QD_BDE.get_bde(qd)
             # entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
             # entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 
