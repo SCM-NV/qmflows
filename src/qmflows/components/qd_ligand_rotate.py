@@ -1,12 +1,15 @@
-__all__ = ['ligand_to_qd']
+__all__ = ['ligand_to_qd', 'qd_opt']
 
 from scipy.spatial.distance import cdist
 import numpy as np
 
+from scm.plams import Molecule
 from scm.plams.core.settings import Settings
+import scm.plams.interfaces.molecule.rdkit as molkit
 
 from .qd_import_export import export_mol
 from .qd_functions import (merge_mol, get_atom_index)
+from .qd_ams import ams_job_uff_opt
 
 
 def sanitize_dim_2(arg):
@@ -18,7 +21,8 @@ def sanitize_dim_2(arg):
         try:
             return np.array(arg.coords)[None, :]
         except AttributeError:
-            return arg.to_array()
+            dummy = Molecule()
+            return dummy.as_array(atom_subset=arg)
     else:
         if len(arg.shape) == 1:
             return arg[None, :]
@@ -32,14 +36,15 @@ def sanitize_dim_3(arg, padding=np.nan):
     are converted into m*n*3 arrays.
     """
     if not isinstance(arg, np.ndarray):
+        dummy = Molecule()
         try:
-            return arg.to_array()[None, :, :]
+            return dummy.as_array(atom_subset=arg)[None, :, :]
         except AttributeError:
             max_at = max(len(mol) for mol in arg)
             ret = np.empty((len(arg), max_at, 3), order='F')
             ret[:] = padding
             for i, mol in enumerate(arg):
-                ret[i, 0:len(mol)] = mol.to_array()
+                ret[i, 0:len(mol)] = dummy.as_array(atom_subset=mol)
             return ret
     else:
         if len(arg.shape) == 2:
@@ -224,6 +229,34 @@ def array_to_qd(mol, xyz_array, mol_other=False):
     mol_other.merge_mol(mol_list)
 
 
+def qd_opt(mol, database, arg):
+    """
+    Check if the to be optimized quantom dot has previously been optimized.
+    Pull if the structure from the database if it has, otherwise perform a geometry optimization.
+    mol <plams.Molecule> The input quantom dot with the 'name' property.
+    database <pd.DataFrame>: A database of previous calculations.
+    return <plams.Molecule>: An optimized quantom dot.
+    """
+    name = mol.properties.name.rsplit('.', 1)[0]
+    if database is None:
+        mol = ams_job_uff_opt(mol, arg['maxiter'])
+        mol.properties.entry = False
+    elif database.empty or name not in list(database['Quantum_dot_name']):
+        mol = ams_job_uff_opt(mol, arg['maxiter'])
+        mol.properties.entry = True
+    else:
+        index = list(database['Quantum_dot_name']).index(name)
+        try:
+            mol_new = molkit.readpdb(database['Quantum_dot_opt_pdb'][index])
+            mol_new.properties = mol.properties
+            mol = mol_new
+        except FileNotFoundError:
+            mol = ams_job_uff_opt(mol, arg['maxiter'])
+            mol.properties.entry = True
+
+    return mol
+
+
 def ligand_to_qd(core, ligand, qd_folder):
     """
     Function that handles quantum dot (qd, i.e. core + all ligands) operations.
@@ -236,8 +269,8 @@ def ligand_to_qd(core, ligand, qd_folder):
     return <plams.Molecule>: The quantum dot (core + n*ligands).
     """
     # Define vectors and indices used for rotation and translation the ligands
-    vec1 = sanitize_dim_2(ligand.properties.dummies) - sanitize_dim_2(ligand.get_center_of_mass())
-    vec2 = sanitize_dim_2(core.get_center_of_mass()) - sanitize_dim_2(core.properties.dummies)
+    vec1 = sanitize_dim_2(ligand.properties.dummies) - np.array(ligand.get_center_of_mass())
+    vec2 = np.array(core.get_center_of_mass()) - sanitize_dim_2(core.properties.dummies)
     idx = ligand.properties.dummies.get_atom_index() - 1
     ligand.properties.dummies.properties.anchor = True
 

@@ -1,4 +1,4 @@
-__all__ = ['check_sys_var', 'qd_opt', 'ams_job_mopac_crs', 'ams_job_mopac_opt', 'ams_job_mopac_sp',
+__all__ = ['check_sys_var', 'ams_job_mopac_crs', 'ams_job_mopac_opt', 'ams_job_mopac_sp',
            'ams_job_uff_opt']
 
 import math
@@ -15,7 +15,6 @@ from scm.plams.tools.kftools import KFFile
 from scm.plams.tools.units import Units
 from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
-import scm.plams.interfaces.molecule.rdkit as molkit
 
 from ..templates.templates import get_template
 from .qd_import_export import export_mol
@@ -39,34 +38,6 @@ def check_sys_var():
         error = get_time() + 'No ADF version 2018 detected in ' + os.environ['ADFHOME']
         error += ', aborting ADF job.'
         raise ImportError(error)
-
-
-def qd_opt(mol, database, arg):
-    """
-    Check if the to be optimized quantom dot has previously been optimized.
-    Pull if the structure from the database if it has, otherwise perform a geometry optimization.
-    mol <plams.Molecule> The input quantom dot with the 'name' property.
-    database <pd.DataFrame>: A database of previous calculations.
-    return <plams.Molecule>: An optimized quantom dot.
-    """
-    name = mol.properties.name.rsplit('.', 1)[0]
-    if database is None:
-        mol = ams_job_uff_opt(mol, arg['maxiter'])
-        mol.properties.entry = False
-    elif database.empty or name not in list(database['Quantum_dot_name']):
-        mol = ams_job_uff_opt(mol, arg['maxiter'])
-        mol.properties.entry = True
-    else:
-        index = list(database['Quantum_dot_name']).index(name)
-        try:
-            mol_new = molkit.readpdb(database['Quantum_dot_opt_pdb'][index])
-            mol_new.properties = mol.properties
-            mol = mol_new
-        except FileNotFoundError:
-            mol = ams_job_uff_opt(mol, arg['maxiter'])
-            mol.properties.entry = True
-
-    return mol
 
 
 class CRSResults(SCMResults):
@@ -113,7 +84,7 @@ def get_entropy(self, freqs, T=298.15):
     # Extract atomic masses and coordinates
     mol = self.get_main_molecule()
     m = np.array([at.mass for at in mol]) * 1.6605390 * 10**-27
-    x, y, z = mol.to_array().T * 10**-10
+    x, y, z = mol.as_array().T * 10**-10
 
     # Calculate the rotational partition function
     inertia = np.array([sum(m*(y**2 + z**2)), -sum(m*x*y), -sum(m*x*z),
@@ -171,71 +142,6 @@ def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     return {i: Units.convert(ret[i], 'kj/mol', unit) / 1000 for i in ret if i in export}
 
 
-def uff_settings(plams_mol, constraints, maxiter=2000):
-    """
-    UFF settings for a constrained geometry optimization.
-    """
-    s = Settings()
-    s.pickle = False
-
-    s.input.ams.Task = 'GeometryOptimization'
-    s.input.ams.Constraints.Atom = constraints
-    s.input.ams.System.BondOrders._1 = adf_connectivity(plams_mol)
-    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
-    s.input.uff.Library = 'UFF'
-
-    return s
-
-
-def crs_settings(solute, solvent):
-    """
-    COSMO-RS settings for Activity Coefficient calculations using 'MOPAC PM6' parameters.
-    Yields the solvation energy, among other things.
-    """
-    s = Settings()
-    s.ignore_molecule = True
-    s.pickle = False
-
-    s.input = get_template('crs.json')['MOPAC PM6']
-    s.input.Property._h = 'activitycoef'
-    s.input.Compound._h = '"' + solute + '"'
-
-    path = join(join(dirname(dirname(__file__)), 'data'), 'coskf')
-    s.input.compound._h = '"' + join(path, solvent + '.coskf') + '"'
-    s.input.compound.frac1 = 1.0
-
-    return s
-
-
-def mopac_settings(charge):
-    """
-    COSMO-MOPAC settings for a single point with COSMO-RS parameters.
-    """
-    s = Settings()
-    s.pickle = False
-
-    s.input.ams.Task = 'SinglePoint'
-    s.input.ams.System.Charge = charge
-    s.input.MOPAC.Solvation = 'COSMO-CRS'
-    s.input.MOPAC.mozyme = False
-
-    return s
-
-
-def mopac_settings_gas():
-    """
-    COSMO-MOPAC settings for a single point with COSMO-RS parameters.
-    """
-    s = Settings()
-    s.pickle = False
-
-    s.input.ams.Task = 'SinglePoint'
-    s.input.ams.System.Charge = 0
-    s.input.MOPAC.mozyme = False
-
-    return s
-
-
 def ams_job_mopac_sp(mol):
     """
     Runs a gas-phase MOPAC single point.
@@ -246,10 +152,12 @@ def ams_job_mopac_sp(mol):
 
     # Run MOPAC
     init(path=path, folder='QD_dissociate')
-    job = AMSJob(molecule=mol, settings=mopac_settings_gas(), name='MOPAC')
+    s = get_template('qd.json')['MOPAC single point']
+    job = AMSJob(molecule=mol, settings=s, name='MOPAC')
     results = job.run()
     results.wait()
     mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
+    finish()
 
     return mol
 
@@ -264,13 +172,12 @@ def ams_job_mopac_opt(mol):
 
     # Run MOPAC
     init(path=path, folder='QD_dissociate')
-    s = mopac_settings_gas()
-    s.input.ams.Task = 'GeometryOptimization'
-
+    s = get_template('qd.json')['MOPAC geometry optimization']
     job = AMSJob(molecule=mol, settings=s, name='MOPAC')
     results = job.run()
     results.wait()
     mol.properties.energy.E = KFFile(results['mopac.rkf']).read('AMSResults', 'Energy')
+    finish()
 
     return mol
 
@@ -282,15 +189,16 @@ def ams_job_mopac_crs(mol):
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     path = mol.properties.path
-    angstrom = Units.convert(1.0, 'Bohr', 'Angstrom')
+    angstrom = Units.conversion_ratio('Bohr', 'Angstrom')
     solvents = ('Acetone', 'Acetonitrile', 'DMF', 'DMSO', 'Ethanol',
                 'EtOAc', 'Hexane', 'Toluene', 'Water')
+    solv_path = join(join(dirname(dirname(__file__)), 'data'), 'coskf')
 
     # Run MOPAC
     init(path=path, folder='ligand')
-    mopac_job = AMSJob(molecule=mol,
-                       settings=mopac_settings(mol.properties.charge),
-                       name='MOPAC')
+    s1 = get_template('qd.json')['COSMO-MOPAC single point']
+    s1.input.ams.System.Charge = mol.properties.charge
+    mopac_job = AMSJob(molecule=mol, settings=s1, name='MOPAC')
     mopac_results = mopac_job.run()
 
     if 'mopac.coskf' in mopac_results.files:
@@ -299,10 +207,19 @@ def ams_job_mopac_crs(mol):
         mol.properties.surface = KFFile(coskf).read('COSMO', 'Area') * angstrom**2
         mol.properties.volume = KFFile(coskf).read('COSMO', 'Volume') * angstrom**3
 
-        # Run COSMO-RS in parallel
+        # Prepare COSMO-RS a list of settings; one for each solvent
         parallel = JobRunner(parallel=True)
-        crs_jobs = [CRSJob(settings=crs_settings(coskf, solv), name='COSMO-RS_'+solv) for
-                    solv in solvents]
+        s2 = get_template('qd.json')['COSMO-RS activity coefficient']
+        s2.input = get_template('crs.json')['MOPAC PM6']
+        s2.input.Compound._h = '"' + coskf + '"'
+        s2_list = []
+        for solv in solvents:
+            s2_tmp = s2.copy()
+            s2_tmp.input.compound._h = '"' + join(solv_path, solv + '.coskf') + '"'
+            s2_list.append(s2_tmp)
+
+        # Run COSMO-RS in parallel
+        crs_jobs = [CRSJob(settings=s2, name='COSMO-RS_'+solv) for s2 in s2_list]
         crs_result = [job.run(jobrunner=parallel) for job in crs_jobs]
 
         # Extract properties from COSMO-RS_solv.crskf
@@ -334,14 +251,18 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     """
     name = mol.properties.name + '.opt'
     path = mol.properties.path
-    mol_indices = mol.properties.indices
+    constrains = mol.properties.indices
 
-    # Run the job (pre-optimization)
+    # Prepare the job settings
     init(path=path, folder='Quantum_dot')
-
-    s = uff_settings(mol, mol_indices, maxiter=maxiter)
+    s = get_template('qd.json')['UFF constrained optimization']
+    s.input.ams.Constraints.Atom = constrains
+    s.input.ams.System.BondOrders._1 = adf_connectivity(mol)
+    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
     if get_freq:
         s.input.ams.Properties.NormalModes = 'Yes'
+
+    # Run the job (pre-optimization)
     job = AMSJob(molecule=mol, settings=s, name='UFF_part1')
     results = job.run()
     output_mol = results.get_main_molecule()

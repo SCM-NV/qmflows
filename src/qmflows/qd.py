@@ -187,15 +187,16 @@ def prep_qd(qd_list, path, arg):
     # Optimize the qd with the core frozen
     if arg['qd_opt']:
         QD_ams.check_sys_var()
-        qd_list = list(QD_ams.qd_opt(qd, qd_database, arg) for qd in qd_list)
+        qd_list = list(QD_ligand_rotate.qd_opt(qd, qd_database, arg) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface
     if arg['qd_int']:
-        print(QD_scripts.get_time(), 'calculating ligand distortion and inter-ligand interaction...')
+        print(QD_scripts.get_time() + 'calculating ligand distortion and inter-ligand interaction...')
         qd_list = list(QD_scripts.qd_int(qd) for qd in qd_list)
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of CdX2
     if arg['qd_dissociate']:
+        QD_ams.check_sys_var()
         print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
 
         def diss_list_to_pd(diss_list, residue_list, top_dict):

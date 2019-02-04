@@ -3,7 +3,7 @@ __all__ = ['optimize_ligand']
 import itertools
 import numpy as np
 
-from scm.plams.core.basemol import (Molecule, Atom)
+from scm.plams import (Molecule, Atom)
 from scm.plams.core.errors import MoleculeError
 from scm.plams.core.functions import add_to_class
 from scm.plams.tools.units import Units

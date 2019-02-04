@@ -3,7 +3,6 @@ __all__ = ['find_substructure', 'find_substructure_split', 'merge_mol', 'qd_int'
 
 import itertools
 import time
-import numpy as np
 
 from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
