@@ -6,7 +6,8 @@
             "integration": {"accint": 4.0},
             "scf": {
         	"converge": 1e-6,
-        	"iterations": 100} },
+            "iterations": 100} },
+        "ams": {"ams": {"Task": "SinglePoint"} },
         "dftb": {
             "task": {"runtype": "SP"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },

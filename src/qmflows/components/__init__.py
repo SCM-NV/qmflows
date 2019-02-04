@@ -12,7 +12,7 @@ from .qd_functions import (find_substructure, find_substructure_split,
 from .qd_ligand_opt import optimize_ligand
 from .qd_ligand_rotate import ligand_to_qd, qd_opt
 from .qd_dissociate import get_topology_dict, dissociate_ligand
-from .qd_bde import get_bde
+from .qd_bde import init_bde
 
 __all__ = [
     'ADF3FDE_Result', 'Fragment', 'MFCC_Result', 'adf3fde', 'adf_fragmentsjob', 'mfcc',
@@ -26,4 +26,4 @@ __all__ = [
     'optimize_ligand',
     'ligand_to_qd',
     'get_topology_dict', 'dissociate_ligand',
-    'get_bde']
+    'init_bde']

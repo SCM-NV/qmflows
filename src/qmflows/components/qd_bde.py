@@ -5,14 +5,101 @@ import pandas as pd
 from scipy.spatial.distance import cdist
 
 from scm.plams import (Molecule, Atom)
-from scm.plams.core.functions import (init, finish)
-from scm.plams.tools.units import Units
+from scm.plams.core.functions import (init, finish, config)
+from scm.plams.interfaces.adfsuite.ams import AMSJob
 
 from .qd_functions import to_atnum
 from .qd_ligand_rotate import rot_mol_angle
 from .qd_ams import ams_job_mopac_opt, ams_job_mopac_sp, ams_job_uff_opt
 from .qd_functions import merge_mol
 from .qd_dissociate import dissociate_ligand
+
+from ..templates.templates import get_template
+
+
+def init_bde(mol, job1=None, job2=None, s1=None, s2=None):
+    lig = get_cdx2(mol)
+    core = dissociate_ligand(mol)
+
+    res_list1, idx_list, res_list2 = zip(*[mol.properties.mark for mol in core])
+    df = pd.DataFrame({'Ligand Residue Num #1': res_list1,
+                       'Cd Topology': get_topology(mol, idx_list),
+                       'Ligand Residue Num #2': res_list2})
+    df['dE'] = get_bde_dE(mol, lig, core, job=job1, s=s1)
+    df['dG'], df['ddG'] = get_bde_ddG(mol, lig, core, job=job2, s=s2)
+
+    return df
+
+
+def get_bde_dE(tot, lig, core, job=None, s=None):
+    """ Calculate the bond dissociation energy: dE = dE(mopac) + (dG(uff) - dE(uff))
+    """
+    init(path=tot.properties.path, folder='BDE_dE')
+    config.default_jobmanager.settings.hashing = None
+
+    if job is None and s is None:
+        job = AMSJob
+        s = get_template('qd.json')['MOPAC']
+    elif job is None or s is None:
+        finish()
+        raise TypeError('job & s should neither or both be None')
+
+    # Perform single points
+    tot.job_single_point(job, s)
+    for mol in core:
+        mol.job_single_point(job, s)
+    lig.job_geometry_opt(job, s)
+
+    # Extract total energies
+    E_lig = lig.properties.energy.E
+    E_core = np.array([mol.properties.energy.E for mol in core])
+    E_tot = tot.properties.energy.E
+
+    # Calculate and return dE
+    dE = (E_lig + E_core) - E_tot
+    finish()
+
+    return dE
+
+
+def get_bde_ddG(tot, lig, core, job=None, s=None):
+    """ Calculate the bond dissociation energy: dE = dE(mopac) + (dG(uff) - dE(uff))
+    """
+    init(path=tot.properties.path, folder='BDE_ddG')
+    config.default_jobmanager.settings.hashing = None
+
+    if job is None and s is None:
+        job = AMSJob
+        s = get_template('qd.json')['UFF']
+    elif job is None or s is None:
+        finish()
+        raise TypeError('job & s should neither or both be None')
+
+    # Perform a constrained geometry optimizations + frequency analyses
+    s.input.ams.Constraints.Atom = lig.properties.indices
+    lig.job_freq(job, s)
+    for mol in core:
+        s.input.ams.Constraints.Atom = mol.properties.indices
+        mol.job_freq(job, s)
+    s.input.ams.Constraints.Atom = mol.properties.indices
+    tot.job_freq(job, s)
+
+    # Extract total Gibbs free energies
+    G_lig = lig.properties.energy.G
+    G_core = np.array([mol.properties.energy.G for mol in core])
+    G_tot = tot.properties.energy.G
+
+    # Extract total energies
+    E_lig = lig.properties.energy.E
+    E_core = np.array([mol.properties.energy.E for mol in core])
+    E_tot = tot.properties.energy.E
+
+    # Calculate and return dG and ddG
+    dG = (G_lig + G_core) - G_tot
+    ddG = dG - ((E_lig + E_core) - E_tot)
+    finish()
+
+    return np.array([dG, ddG])
 
 
 def get_cdx2(mol, ion='Cd'):
@@ -59,9 +146,9 @@ def get_cdx2(mol, ion='Cd'):
     CdX2 = Molecule()
     CdX2.add_atom(Atom(atnum=to_atnum(ion)))
     CdX2.merge_mol([lig1, lig2])
+    CdX2.properties.name = 'YX2'
     CdX2.properties.path = mol.properties.path
     CdX2.properties.indices = [1, 1 + idx1, 2 + len(lig2) + idx2]
-    CdX2 = ams_job_mopac_opt(CdX2)
 
     return CdX2
 
@@ -92,64 +179,3 @@ def get_topology(mol, idx_list, max_dist=5.0):
 
     return [neighbour_dict[i] for i in dist_count]
 
-
-def get_bde(mol, get_ddG=True, unit='kcal/mol'):
-    """ Calculate the bond dissociation energy: dE = dE(mopac) + (dG(uff) - dE(uff))
-    """
-    init(path=mol.properties.path, folder='QD_dissociate')
-
-    # Perform MOPAC single points
-    lig = get_cdx2(mol)
-    lig.properties.name = 'CdX2'
-    core = dissociate_ligand(mol)
-    tot = ams_job_mopac_sp(mol)
-
-    # Extract MOPAC total energies
-    E_lig_1 = lig.properties.energy.E
-    E_core_1 = np.array([ams_job_mopac_sp(mol).properties.energy.E for mol in core])
-    E_tot_1 = tot.properties.energy.E
-
-    # Calculate dE
-    dE_1 = (E_lig_1 + E_core_1) - E_tot_1
-    dE_1 *= Units.conversion_ratio('Hartree', 'kcal/mol')
-
-    # Extract the ligand residue numbers and Cd atomic indices from core
-    res_list1, idx_list, res_list2 = zip(*[mol.properties.mark for mol in core])
-    finish()
-
-    if get_ddG:
-        # Perform UFF constrained geometry optimizations + frequency analyses
-        lig = ams_job_uff_opt(lig, get_freq=True, fix_angle=False)
-        core = [ams_job_uff_opt(mol, get_freq=True, fix_angle=False) for mol in core]
-        tot = ams_job_uff_opt(tot, get_freq=True, fix_angle=False)
-
-        # Extract UFF total Gibbs free energies
-        G_lig_2 = lig.properties.energy.G
-        G_core_2 = np.array([mol.properties.energy.G for mol in core])
-        G_tot_2 = tot.properties.energy.G
-
-        # Extract UFF total energies
-        E_lig_2 = lig.properties.energy.E
-        E_core_2 = np.array([mol.properties.energy.E for mol in core])
-        E_tot_2 = tot.properties.energy.E
-
-        # Calculate ddG
-        dG_2 = (G_lig_2 + G_core_2) - G_tot_2
-        dE_2 = (E_lig_2 + E_core_2) - E_tot_2
-        ddG_2 = dG_2 - dE_2
-
-        return pd.DataFrame({'Ligand Residue Num #1': res_list1,
-                             'Cd Topology': get_topology(mol, idx_list),
-                             'Ligand Residue Num #2': res_list2,
-                             'dE': dE_1,
-                             'ddG': ddG_2,
-                             'dG': dE_1 + ddG_2})
-
-    return pd.DataFrame({'Ligand Residue Num #1': res_list1,
-                         'Cd Topology': get_topology(mol, idx_list),
-                         'Ligand Residue Num #2': res_list2,
-                         'dE': dE_1})
-
-
-def get_y_axis():
-    pass

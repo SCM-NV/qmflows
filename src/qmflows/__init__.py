@@ -10,7 +10,7 @@ from .components import (
     optimize_ligand,
     ligand_to_qd,
     get_topology_dict, dissociate_ligand,
-    get_bde)
+    init_bde)
 
 from .packages import (
     adf, cp2k, dftb, dirac, gamess, orca, run)
@@ -36,4 +36,4 @@ __all__ = [
     'optimize_ligand',
     'ligand_to_qd',
     'get_topology_dict', 'dissociate_ligand',
-    'get_bde']
+    'init_bde']

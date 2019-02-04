@@ -1,13 +1,10 @@
-{"UFF constrained optimization":
-    {"description": "UFF constrained geometry optimization",
+{"UFF":
+    {"description": "UFF calculation",
      "pickle": false,
      "input":
         {"uff": {"Library": "UFF"},
          "ams":
-            {"Task": "GeometryOptimization",
-             "Constraints": {"Atom": null},
-             "GeometryOptimization": {"MaxIterations": 500},
-             "System": 
+            {"System": 
                 {"BondOrders": {"_1": null},
                  "Charge": 0
                 }
@@ -24,8 +21,8 @@
          "compound": {"_h": null, "Frac1": 1.0}
         }
     },
- "COSMO-MOPAC single point":
-    {"description": "MOPAC (PM7) condensed phase (conductor) single point",
+ "COSMO-MOPAC":
+    {"description": "MOPAC (PM7) condensed phase (conductor) calculation",
      "pickle": false,
      "input": 
         {"MOPAC": 
@@ -33,30 +30,17 @@
              "Solvation": "COSMO-CRS"
             },
          "ams": 
-            {"Task": "SinglePoint",
-             "System": {"Charge": 0}
+            {"System": {"Charge": 0}
             }
         }
     },
- "MOPAC single point":
-    {"description": "MOPAC (PM7) gas phase single point",
+ "MOPAC":
+    {"description": "MOPAC (PM7) gas phase calculation",
      "pickle": false,
      "input": 
         {"MOPAC": {"Model": "PM7"},
          "ams": 
-            {"Task": "SinglePoint",
-             "System": {"Charge": 0}
-            }
-        }
-    },
- "MOPAC geometry optimization":
-    {"description": "MOPAC (PM7) gas phase geometry optimization",
-     "pickle": false,
-     "input": 
-        {"MOPAC": {"Model": "PM7"},
-         "ams": 
-            {"Task": "GeometryOptimization",
-             "System": {"Charge": 0}
+            {"System": {"Charge": 0}
             }
         }
     }

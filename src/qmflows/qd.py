@@ -201,7 +201,7 @@ def prep_qd(qd_list, path, arg):
 
         for qd in qd_list:
             # top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
-            qd.properties.energy.BDE = QD_BDE.get_bde(qd)
+            qd.properties.energy.BDE = QD_BDE.init_bde(qd)
             # entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
             # entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
 

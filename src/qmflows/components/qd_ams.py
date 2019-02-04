@@ -8,13 +8,20 @@ from os.path import (dirname, join)
 
 import numpy as np
 
-from scm.plams.core.functions import (init, finish, add_to_class, config)
+from scm.plams import Molecule
+from scm.plams.core.functions import (init, finish, add_to_class)
 from scm.plams.core.jobrunner import JobRunner
 from scm.plams.core.settings import Settings
 from scm.plams.tools.kftools import KFFile
 from scm.plams.tools.units import Units
-from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
+
 from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
+from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
+from scm.plams.interfaces.adfsuite.adf import ADFJob
+from scm.plams.interfaces.thirdparty.orca import ORCAJob
+from scm.plams.interfaces.thirdparty.cp2k import Cp2kJob
+from scm.plams.interfaces.thirdparty.gamess import GamessJob
+from scm.plams.interfaces.thirdparty.dirac import DiracJob
 
 from ..templates.templates import get_template
 from .qd_import_export import export_mol
@@ -63,6 +70,18 @@ class CRSJob(SCMJob):
 
 
 @add_to_class(AMSResults)
+def get_rkf(self):
+    for item in self.files:
+        if 'rkf' in item and item != 'ams.rkf':
+            return self[item]
+
+@add_to_class(AMSResults)
+def get_energy(self, unit='kcal/mol'):
+    rkf = self.get_rkf()
+    return KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', unit)
+
+
+@add_to_class(AMSResults)
 def get_entropy(self, freqs, T=298.15):
     """
     Calculate the translational, vibrational and rotational entropy.
@@ -102,12 +121,11 @@ def get_entropy(self, freqs, T=298.15):
 
 
 @add_to_class(AMSResults)
-def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
+def get_thermo(self, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     """
     Extract and return Gibbs free energies, entropies and/or enthalpies from an AMS KF file.
     All vibrational frequencies smaller than 100 cm**-1 are set to 100 cm**-1.
     self <plams.AMSResults>: An AMSResults object resulting from a vibrational analysis
-    kf <str>: The name+extension of the AMS KF file containing energies and frequencies
     T <float>: The temperature in Kelvin
     export <list>[<str>]: An iterable containing strings of the to be exported energies:
         'E': Electronic energy
@@ -118,8 +136,10 @@ def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     unit <str>: The unit of the to be returned energies.
     Return <float> or <dict>[<float>]: An energy or dictionary of energies
     """
+    rkf = self.get_rkf()
+
     # Get frequencies; set all frequencies smaller than 100 cm**-1 to 100 cm**-1
-    freqs = np.array(KFFile(self[kf]).read('Vibrations', 'Frequencies[cm-1]'))
+    freqs = np.array(KFFile(rkf).read('Vibrations', 'Frequencies[cm-1]'))
     freqs[freqs < 100] = 100
     freqs *= 100 * Units.constants['c']
 
@@ -128,7 +148,7 @@ def get_thermo(self, kf, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     RT = 8.31445 * T  # Gas constant * temperature
 
     # Extract and/or calculate the various energies
-    E = KFFile(self[kf]).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', 'kj/mol')
+    E = KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', 'kj/mol')
     E *= 1000
     U = E + RT * (3.0 + sum(0.5 * hv_kT + hv_kT / np.expm1(hv_kT)))
     H = U + RT
@@ -149,7 +169,6 @@ def ams_job_mopac_sp(mol):
     return <plams.Molecule>: a PLAMS molecule with the surface, volume and logp properties.
     """
     # Run MOPAC
-    config.default_jobmanager.settings.hashing = None
     s = get_template('qd.json')['MOPAC single point']
     job = AMSJob(molecule=mol, settings=s, name='MOPAC')
     results = job.run()
@@ -248,7 +267,9 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
 
     # Prepare the job settings
     init(path=path, folder='Quantum_dot')
-    s = get_template('qd.json')['UFF constrained optimization']
+    s = Settings()
+    s.input = get_template('geometry.json')['specific']['ams']
+    s = get_template('qd.json')['UFF']
     s.input.ams.Constraints.Atom = constrains
     s.input.ams.System.BondOrders._1 = adf_connectivity(mol)
     s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
@@ -262,7 +283,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     mol.from_plams_mol(output_mol)
     if get_freq:
         results.wait()
-        mol.properties.energy = Settings(results.get_thermo('uff.rkf'))
+        mol.properties.energy = Settings(results.get_thermo())
 
     # Fix all O=C-O and H-C=C angles and continue the job
     if fix_angle:
@@ -284,3 +305,90 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     mol.properties.name = mol.properties.name.split('.opt')[0]
 
     return mol
+
+
+
+
+def job_to_template(job):
+    """ Transform a <type> object into a <str> """
+    job_dict = {ADFJob: 'adf', AMSJob: 'ams', DiracJob: 'dirac',
+                Cp2kJob: 'cp2k', GamessJob: 'gamess', ORCAJob: 'orca'}
+    try:
+        return job_dict[job]
+    except KeyError:
+        print(get_time() + 'No default settings present for job=' + str(job))
+
+
+@add_to_class(Molecule)
+def job_single_point(self, job, settings, name='Single_point'):
+    """ Function for running an arbritrary  <Job>, extracting total energies.
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    job <type>: A type object of a class derived from <Job>.
+    settings <Settings>: A settings object with containing the *job* settings.
+    name <str>: The name of the job.
+    """
+    # Grab the default settings for a specific job and update them with user provided settings
+    s = Settings()
+    s.input = get_template('singlepoint.json')['specific'][job_to_template(job)]
+    s.update(settings)
+    if job == AMSJob:
+        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+
+    # Run the job; extract energies
+    my_job = job(molecule=self, settings=s, name=name)
+    results = my_job.run()
+    results.wait()
+    self.properties.energy.E = results.get_energy()
+
+
+@add_to_class(Molecule)
+def job_geometry_opt(self, job, settings, name='Geometry_optimization'):
+    """ Function for running an arbritrary <Job>, extracting total energies and final geometries.
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    job <type>: A type object of a class derived from <Job>.
+    settings <Settings>: A settings object with containing the *job* settings.
+    name <str>: The name of the job.
+    """
+    # Grab the default settings for a specific job and update them with user provided settings
+    s = Settings()
+    s.input = get_template('geometry.json')['specific'][job_to_template(job)]
+    s.update(settings)
+    if job == AMSJob:
+        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+
+    # Run the job; extract geometries and energies
+    my_job = job(molecule=self, settings=s, name=name)
+    results = my_job.run()
+    results.wait()
+    self.properties.energy.E = results.get_energy()
+    self.from_plams_mol(results.get_main_molecule())
+
+
+@add_to_class(Molecule)
+def job_freq(self, job, settings, name='Frequency_analyses', opt=True):
+    """ Function for running an arbritrary <Job>, extracting total energies, final geometries and
+    thermochemical quantities derived from vibrational frequencies.
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    job <type>: A type object of a class derived from <Job>.
+    settings <Settings>: A settings object with containing the *job* settings.
+    name <str>: The name of the job.
+    """
+    # Grab the default settings for a specific job and update them with user provided settings
+    s = Settings()
+    if opt:
+        s.input = get_template('geometry.json')['specific'][job_to_template(job)]
+    s.input = get_template('freq.json')['specific'][job_to_template(job)]
+    s.update(settings)
+    if job == AMSJob:
+        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+
+    # Run the job; extract geometries and (Gibbs free) energies
+    my_job = job(molecule=self, settings=s, name=name)
+    results = my_job.run()
+    results.wait()
+    self.from_plams_mol(results.get_main_molecule())
+    self.properties.energy = results.get_thermo()
+
