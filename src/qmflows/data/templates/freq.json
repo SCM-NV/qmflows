@@ -6,7 +6,7 @@
                 "core": "None",
                 "type": "DZP"
                 },
-            "xc": {"__block_replace": true, "lda": ""}
+            "xc": {"__block_replace": true, "lda": ""},
             "numericalquality": "good",
             },
         "ams": {"ams": {
