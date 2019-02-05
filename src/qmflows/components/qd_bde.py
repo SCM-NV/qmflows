@@ -1,4 +1,6 @@
-__all__ = ['get_bde']
+__all__ = ['init_bde']
+
+from itertools import chain
 
 import numpy as np
 import pandas as pd
@@ -8,26 +10,40 @@ from scm.plams import (Molecule, Atom)
 from scm.plams.core.functions import (init, finish, config)
 from scm.plams.interfaces.adfsuite.ams import AMSJob
 
-from .qd_functions import to_atnum
-from .qd_ligand_rotate import rot_mol_angle
-from .qd_ams import ams_job_mopac_opt, ams_job_mopac_sp, ams_job_uff_opt
-from .qd_functions import merge_mol
+from .qd_ams import (job_single_point, job_geometry_opt, job_freq)
+from .qd_functions import (to_atnum, merge_mol)
 from .qd_dissociate import dissociate_ligand
+from .qd_ligand_rotate import rot_mol_angle
 
 from ..templates.templates import get_template
 
 
 def init_bde(mol, job1=None, job2=None, s1=None, s2=None):
+    """ Initialize the bond dissociation energy calculation; involves 4 distinct steps:
+    1.  Take two ligands X and another atom from the core Y (e.g. Cd) and create YX2.
+    2.  Create all n*2*(n-1) possible molecules where YX2 is dissociated.
+    3.  Calculate dE: the "electronic" component of the bond dissociation energy (BDE).
+    4.  Calculate ddG: the thermal and entropic component of the BDE.
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    job1 <type> & s1 <Settings>: A type object of a job and its settings; used in step 3.
+    job2 <type> & s2 <Settings>: A type object of a job and its settings; used in step 4.
+    return <pd.DataFrame>: A pandas dataframe with ligand residue numbers, Cd topology and BDEs.
+    """
+    # Ready YX2 and the YX2 dissociated quantum dots
     lig = get_cdx2(mol)
     core = dissociate_ligand(mol)
 
+    # Prepare the dataframe
     res_list1, idx_list, res_list2 = zip(*[mol.properties.mark for mol in core])
     df = pd.DataFrame({'Ligand Residue Num #1': res_list1,
                        'Cd Topology': get_topology(mol, idx_list),
                        'Ligand Residue Num #2': res_list2})
-    df['dE'] = get_bde_dE(mol, lig, core, job=job1, s=s1)
-    df['dG'], df['ddG'] = get_bde_ddG(mol, lig, core, job=job2, s=s2)
 
+    # Fill the dataframe with energies
+    df['dE kcal/mol'] = get_bde_dE(mol, lig, core, job=job1, s=s1)
+    df['ddG kcal/mol'] = get_bde_ddG(mol, lig, core, job=job2, s=s2)
+    df['dG kcal/mol'] = df['dE kcal/mol'] + df['ddG kcal/mol']
     return df
 
 
@@ -37,6 +53,7 @@ def get_bde_dE(tot, lig, core, job=None, s=None):
     init(path=tot.properties.path, folder='BDE_dE')
     config.default_jobmanager.settings.hashing = None
 
+    # Switch to default settings if no job & s are <None>
     if job is None and s is None:
         job = AMSJob
         s = get_template('qd.json')['MOPAC']
@@ -68,6 +85,7 @@ def get_bde_ddG(tot, lig, core, job=None, s=None):
     init(path=tot.properties.path, folder='BDE_ddG')
     config.default_jobmanager.settings.hashing = None
 
+    # Switch to default settings if no job & s are <None>
     if job is None and s is None:
         job = AMSJob
         s = get_template('qd.json')['UFF']
@@ -99,18 +117,20 @@ def get_bde_ddG(tot, lig, core, job=None, s=None):
     ddG = dG - ((E_lig + E_core) - E_tot)
     finish()
 
-    return np.array([dG, ddG])
+    return ddG
 
 
 def get_cdx2(mol, ion='Cd'):
     """ Takes a quantum dot with ligands (X) and an ion (Y) and turns it into YX2.
     Returns the total energy of YX2 at the MOPAC level of theory. """
     def get_anchor(mol):
+        """ Return an index and atom if marked with the properties.anchor attribute """
         for i, at in enumerate(mol.atoms):
             if at.properties.anchor:
                 return i, at
 
     def get_ligand(mol):
+        """ Extract a single ligand from *mol*. """
         at_list = []
         res = mol.atoms[-1].properties.pdb_info.ResidueNumber
         for at in reversed(mol.atoms):
@@ -119,6 +139,7 @@ def get_cdx2(mol, ion='Cd'):
             else:
                 ret = Molecule()
                 ret.atoms = at_list
+                ret.bonds = set(chain.from_iterable(at.bonds for at in at_list))
                 return ret.copy()
 
     # Translate the ligands to their final position
@@ -156,8 +177,8 @@ def get_cdx2(mol, ion='Cd'):
 def get_topology(mol, idx_list, max_dist=5.0):
     """ Return the topology of all atoms *idx_list*, a list of atomic indices. The returned topology
     is based on the number of atoms with a radius *max_dist* from a reference atom. Only atoms with
-    the same atomic number as those in *idx_list* will be considered, which in turn should only
-    contain atoms of a single element.
+    the same atomic number as those in *idx_list* will be considered, which in turn should all have
+    identical atomic symbols.
 
     mol <plams.Molecule>: A PLAMS molecule.
     idx_list <list>: A list of atomic indices.

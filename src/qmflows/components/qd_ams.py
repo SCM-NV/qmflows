@@ -1,31 +1,32 @@
 __all__ = ['check_sys_var', 'ams_job_mopac_crs', 'ams_job_mopac_opt', 'ams_job_mopac_sp',
            'ams_job_uff_opt']
 
+import os
 import math
 import shutil
-import os
 from os.path import (dirname, join)
 
 import numpy as np
 
 from scm.plams import Molecule
-from scm.plams.core.functions import (init, finish, add_to_class)
-from scm.plams.core.jobrunner import JobRunner
-from scm.plams.core.settings import Settings
-from scm.plams.tools.kftools import KFFile
-from scm.plams.tools.units import Units
 
-from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
+from scm.plams.tools.units import Units
+from scm.plams.tools.kftools import KFFile
+from scm.plams.core.settings import Settings
+from scm.plams.core.jobrunner import JobRunner
+from scm.plams.core.functions import (init, finish, add_to_class)
+
 from scm.plams.interfaces.adfsuite.ams import (AMSJob, AMSResults)
 from scm.plams.interfaces.adfsuite.adf import ADFJob
+from scm.plams.interfaces.adfsuite.scmjob import (SCMJob, SCMResults)
 from scm.plams.interfaces.thirdparty.orca import ORCAJob
 from scm.plams.interfaces.thirdparty.cp2k import Cp2kJob
-from scm.plams.interfaces.thirdparty.gamess import GamessJob
 from scm.plams.interfaces.thirdparty.dirac import DiracJob
+from scm.plams.interfaces.thirdparty.gamess import GamessJob
 
-from ..templates.templates import get_template
+from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_mol_other)
 from .qd_import_export import export_mol
-from .qd_functions import (adf_connectivity, fix_h, fix_carboxyl, get_time, from_plams_mol)
+from ..templates.templates import get_template
 
 
 def check_sys_var():
@@ -71,27 +72,41 @@ class CRSJob(SCMJob):
 
 @add_to_class(AMSResults)
 def get_rkf(self):
+    """ Find and return the .rkf belonging to a specific AMS library. """
     for item in self.files:
         if 'rkf' in item and item != 'ams.rkf':
             return self[item]
 
+
 @add_to_class(AMSResults)
 def get_energy(self, unit='kcal/mol'):
+    """ Return final bond energy, expressed in unit. """
     rkf = self.get_rkf()
     return KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', unit)
 
 
 @add_to_class(AMSResults)
-def get_entropy(self, freqs, T=298.15):
+def get_frequencies(self, unit='cm-1'):
+    """ Return the vibrational frequencies, expressed in unit. """
+    rkf = self.get_rkf()
+    freqs = np.array(KFFile(rkf).read('Vibrations', 'Frequencies[cm-1]'))
+    return freqs * Units.conversion_ratio('cm-1', unit)
+
+
+def get_entropy(mol, freqs, T=298.15):
     """
     Calculate the translational, vibrational and rotational entropy.
     All units and constants are in SI units.
-    self <plams.AMSResults>: An AMSResults object of a vibrational analysis
-    freqs <np.ndarray>: A numpy array containg vibrational frequencies in atomic units
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    freqs <np.ndarray>: An iterable consisting of vibrational frequencies in units of s**-1.
     T <float>: The temperature in Kelvin
     Return <np.ndarray>: A numpy array containing the translational, rotational and
         vibrational contributions to the entropy
     """
+    if not isinstance(freqs, np.ndarray):
+        freqs = np.array(freqs)
+
     # Define constants
     kT = 1.380648 * 10**-23 * T  # Boltzmann constant * temperature
     h = 6.6260701 * 10**-34  # Planck constant
@@ -101,7 +116,6 @@ def get_entropy(self, freqs, T=298.15):
     pi = math.pi
 
     # Extract atomic masses and coordinates
-    mol = self.get_main_molecule()
     m = np.array([at.mass for at in mol]) * 1.6605390 * 10**-27
     x, y, z = mol.as_array().T * 10**-10
 
@@ -120,12 +134,14 @@ def get_entropy(self, freqs, T=298.15):
     return R * np.array([S_trans, S_rot, S_vib])
 
 
-@add_to_class(AMSResults)
-def get_thermo(self, T=298.15, export=['E', 'G'], unit='kcal/mol'):
+def get_thermo(mol, freqs, E, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     """
     Extract and return Gibbs free energies, entropies and/or enthalpies from an AMS KF file.
     All vibrational frequencies smaller than 100 cm**-1 are set to 100 cm**-1.
-    self <plams.AMSResults>: An AMSResults object resulting from a vibrational analysis
+
+    mol <plams.Molecule>: A PLAMS molecule.
+    freqs <np.array>: An iterable consisting of vibrational frequencies in units of cm**-1.
+    E <float>: The eletronic energy in kcal/mol.
     T <float>: The temperature in Kelvin
     export <list>[<str>]: An iterable containing strings of the to be exported energies:
         'E': Electronic energy
@@ -136,10 +152,9 @@ def get_thermo(self, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     unit <str>: The unit of the to be returned energies.
     Return <float> or <dict>[<float>]: An energy or dictionary of energies
     """
-    rkf = self.get_rkf()
-
     # Get frequencies; set all frequencies smaller than 100 cm**-1 to 100 cm**-1
-    freqs = np.array(KFFile(rkf).read('Vibrations', 'Frequencies[cm-1]'))
+    if not isinstance(freqs, np.ndarray):
+        freqs = np.array(freqs)
     freqs[freqs < 100] = 100
     freqs *= 100 * Units.constants['c']
 
@@ -148,11 +163,9 @@ def get_thermo(self, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     RT = 8.31445 * T  # Gas constant * temperature
 
     # Extract and/or calculate the various energies
-    E = KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', 'kj/mol')
-    E *= 1000
     U = E + RT * (3.0 + sum(0.5 * hv_kT + hv_kT / np.expm1(hv_kT)))
     H = U + RT
-    S = sum(self.get_entropy(freqs, T=T))
+    S = sum(get_entropy(mol, freqs, T=T))
     G = H - T * S
 
     ret = {'E': E, 'U': U, 'H': H, 'S': S, 'G': G}
@@ -269,7 +282,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     init(path=path, folder='Quantum_dot')
     s = Settings()
     s.input = get_template('geometry.json')['specific']['ams']
-    s = get_template('qd.json')['UFF']
+    s.update(get_template('qd.json')['UFF'])
     s.input.ams.Constraints.Atom = constrains
     s.input.ams.System.BondOrders._1 = adf_connectivity(mol)
     s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
@@ -279,8 +292,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     # Run the job (pre-optimization)
     job = AMSJob(molecule=mol, settings=s, name='UFF_part1')
     results = job.run()
-    output_mol = results.get_main_molecule()
-    mol.from_plams_mol(output_mol)
+    mol.from_mol_other(results.get_main_molecule())
     if get_freq:
         results.wait()
         mol.properties.energy = Settings(results.get_thermo())
@@ -290,7 +302,7 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
         job = AMSJob(molecule=fix_carboxyl(fix_h(mol)), settings=s, name='UFF_part2')
         results = job.run()
         output_mol = results.get_main_molecule()
-        mol.from_plams_mol(output_mol)
+        mol.from_mol_other(output_mol)
     finish()
 
     # Copy the resulting .rkf and .out files and delete the PLAMS directory
@@ -307,30 +319,28 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     return mol
 
 
-
-
-def job_to_template(job):
-    """ Transform a <type> object into a <str> """
+def type_to_string(job):
+    """ Turn a <type> object into a <str> object. """
     job_dict = {ADFJob: 'adf', AMSJob: 'ams', DiracJob: 'dirac',
                 Cp2kJob: 'cp2k', GamessJob: 'gamess', ORCAJob: 'orca'}
     try:
         return job_dict[job]
     except KeyError:
-        print(get_time() + 'No default settings present for job=' + str(job))
+        print(get_time() + 'No default settings available for ' + str(job))
 
 
 @add_to_class(Molecule)
 def job_single_point(self, job, settings, name='Single_point'):
-    """ Function for running an arbritrary  <Job>, extracting total energies.
+    """ Function for running an arbritrary <Job>, extracting total energies.
 
     mol <plams.Molecule>: A PLAMS molecule.
-    job <type>: A type object of a class derived from <Job>.
-    settings <Settings>: A settings object with containing the *job* settings.
-    name <str>: The name of the job.
+    job <type>: A type object of a class derived from <Job>, e.g. AMSJob or Cp2kJob.
+    settings <Settings>: The settings for *job*.
+    name <str>: The name of *job*.
     """
     # Grab the default settings for a specific job and update them with user provided settings
     s = Settings()
-    s.input = get_template('singlepoint.json')['specific'][job_to_template(job)]
+    s.input = get_template('singlepoint.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
         s.input.ams.System.BondOrders._1 = adf_connectivity(self)
@@ -347,13 +357,13 @@ def job_geometry_opt(self, job, settings, name='Geometry_optimization'):
     """ Function for running an arbritrary <Job>, extracting total energies and final geometries.
 
     mol <plams.Molecule>: A PLAMS molecule.
-    job <type>: A type object of a class derived from <Job>.
-    settings <Settings>: A settings object with containing the *job* settings.
-    name <str>: The name of the job.
+    job <type>: A type object of a class derived from <Job>, e.g. AMSJob or Cp2kJob.
+    settings <Settings>: The settings for *job*.
+    name <str>: The name of *job*.
     """
     # Grab the default settings for a specific job and update them with user provided settings
     s = Settings()
-    s.input = get_template('geometry.json')['specific'][job_to_template(job)]
+    s.input = get_template('geometry.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
         s.input.ams.System.BondOrders._1 = adf_connectivity(self)
@@ -363,24 +373,27 @@ def job_geometry_opt(self, job, settings, name='Geometry_optimization'):
     results = my_job.run()
     results.wait()
     self.properties.energy.E = results.get_energy()
-    self.from_plams_mol(results.get_main_molecule())
+    self.from_mol_other(results.get_main_molecule())
 
 
 @add_to_class(Molecule)
-def job_freq(self, job, settings, name='Frequency_analyses', opt=True):
+def job_freq(self, job, settings, name='Frequency_analysis', opt=True):
     """ Function for running an arbritrary <Job>, extracting total energies, final geometries and
     thermochemical quantities derived from vibrational frequencies.
 
     mol <plams.Molecule>: A PLAMS molecule.
-    job <type>: A type object of a class derived from <Job>.
-    settings <Settings>: A settings object with containing the *job* settings.
-    name <str>: The name of the job.
+    job <type>: A type object of a class derived from <Job>, e.g. AMSJob or Cp2kJob.
+    settings <Settings>: The settings for *job*.
+    name <str>: The name of *job*.
+    opt <bool>: Preceed the frequency analysis with a geometry optimization.
     """
+    # Preceed the frequency analysis with a geometry optimization
+    if opt:
+        self.job_geometry_opt(job, settings)
+
     # Grab the default settings for a specific job and update them with user provided settings
     s = Settings()
-    if opt:
-        s.input = get_template('geometry.json')['specific'][job_to_template(job)]
-    s.input = get_template('freq.json')['specific'][job_to_template(job)]
+    s.input = get_template('freq.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
         s.input.ams.System.BondOrders._1 = adf_connectivity(self)
@@ -389,6 +402,5 @@ def job_freq(self, job, settings, name='Frequency_analyses', opt=True):
     my_job = job(molecule=self, settings=s, name=name)
     results = my_job.run()
     results.wait()
-    self.from_plams_mol(results.get_main_molecule())
+    self.from_mol_other(results.get_main_molecule())
     self.properties.energy = results.get_thermo()
-

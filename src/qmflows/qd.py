@@ -2,18 +2,17 @@ __all__ = ['prep']
 
 import itertools
 import time
-import pandas as pd
+from os.path import join
 
 from scm.plams import (Atom, MoleculeError)
 
-from .components import qd_functions as QD_scripts
-from .components import qd_database as QD_database
-from .components import qd_import_export as QD_inout
 from .components import qd_ams as QD_ams
+from .components import qd_bde as QD_BDE
+from .components import qd_database as QD_database
+from .components import qd_functions as QD_scripts
+from .components import qd_import_export as QD_inout
 from .components import qd_ligand_opt as QD_ligand_opt
 from .components import qd_ligand_rotate as QD_ligand_rotate
-from .components import qd_dissociate as QD_dissociate
-from .components import qd_bde as QD_BDE
 
 
 def prep(input_ligands, input_cores, path, arg):
@@ -163,6 +162,37 @@ def prep_ligand_2(ligand, database, arg):
     return ligand_list
 
 
+def get_job_settings(arg_dict, jobs=1):
+    """
+    """
+    if isinstance(arg_dict, bool):
+        ret = [None for i in range(jobs*2)]
+        print(QD_scripts.get_time() + 'No user-specified jobs & settings found for qd_dissociate, \
+              switching to defaults')
+    else:
+        try:
+            ret = [arg_dict[item] for item in arg_dict]
+            len_ret = len(ret)
+        except TypeError:
+            raise TypeError('Only booleans, dictiories or dictionary derived objects are \
+                            valid when defining jobs')
+
+        # Pad with <None> ret if is smaller than 2 * *jobs*
+        if len_ret < jobs*2:
+            for i in range(jobs*2 - len_ret):
+                ret.append(None)
+            print(QD_scripts.get_time() + 'No jobs & settings have been specified found for the \
+                  last ' + str(jobs - len_ret/2) + ' jobs, switching to defaults')
+        # Pop entries from ret if it is larger than 2 * *jobs*
+        elif len_ret > jobs*2:
+            ret = ret[0:jobs*2]
+            print(QD_scripts.get_time() + str(len_ret / 2) + ' jobs have been specified while the \
+                  argument only support ' + str(jobs) + ', the last ' + str(len_ret/2 - jobs) \
+                  + ' jobs and their settings will be ignored')
+
+    return ret
+
+
 def prep_qd(qd_list, path, arg):
     """
     Function that handles quantum dot (qd, i.e. core + all ligands) operations.
@@ -196,14 +226,15 @@ def prep_qd(qd_list, path, arg):
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of CdX2
     if arg['qd_dissociate']:
-        QD_ams.check_sys_var()
-        print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
+        # Extract input settings
+        job1, s1, job2, s2 = get_job_settings(arg['qd_dissociate'], jobs=2)
 
+        # Start the BDE calculation
+        print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
         for qd in qd_list:
-            # top_dict = QD_dissociate.get_topology_dict(qd, dist=4.5)
-            qd.properties.energy.BDE = QD_BDE.init_bde(qd)
-            # entries = QD_dissociate.diss_list_to_pd(diss_list, residue_list, top_dict)
-            # entries.to_excel(os.path.join(path, 'dissociate.xlsx'))
+            qd.properties.energy.BDE = QD_BDE.init_bde(qd, job1=job1, job2=job2, s1=s1, s2=s2)
+            df = qd.properties.energy.BDE
+            df.to_excel(join(path, qd.properties.name + '_BDE.xlsx'))
 
     # Write the new quantum dot results to the quantum dot database
     if arg['use_database']:
