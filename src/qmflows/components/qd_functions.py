@@ -1,8 +1,8 @@
 __all__ = ['find_substructure', 'find_substructure_split', 'merge_mol', 'qd_int',
-           'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_plams_mol', 'from_rdmol', 'get_time']
+           'adf_connectivity', 'fix_h', 'fix_carboxyl', 'from_mol_other', 'from_rdmol', 'get_time']
 
-import itertools
 import time
+import itertools
 
 from scm.plams import Atom, Molecule, Bond
 from scm.plams.core.functions import add_to_class
@@ -14,17 +14,14 @@ from rdkit.Chem import AllChem, rdMolTransforms
 
 
 def get_time():
-    """
-    Returns the current time as string.
-    """
+    """ Returns the current time as string. """
     return '[' + time.strftime('%H:%M:%S') + '] '
 
 
 @add_to_class(Molecule)
-def from_plams_mol(self, mol, atom_subset=None):
+def from_mol_other(self, mol, atom_subset=None):
     """ Update the atomic coordinates of *self* with coordinates from another PLAMS molecule.
-    Alternatively, update only a subset of atoms.
-    """
+    Alternatively, update only a subset of atoms. """
     atom_subset = atom_subset or self.atoms
     for at1, at2 in zip(atom_subset, mol):
         at1.coords = at2.coords
@@ -33,8 +30,7 @@ def from_plams_mol(self, mol, atom_subset=None):
 @add_to_class(Molecule)
 def from_rdmol(self, rdmol, atom_subset=None):
     """ Update the atomic coordinates of *self* with coordinates from an RDKit molecule.
-    Alternatively, update only a subset of atoms.
-    """
+    Alternatively, update only a subset of atoms. """
     atom_subset = atom_subset or self.atoms
     conf = rdmol.GetConformer()
     for at1, at2 in zip(atom_subset, rdmol.GetAtoms()):

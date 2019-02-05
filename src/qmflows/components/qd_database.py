@@ -1,6 +1,7 @@
 __all__ = ['read_database', 'compare_database', 'write_database']
 
 import os
+
 import pandas as pd
 
 import scm.plams.interfaces.molecule.rdkit as molkit

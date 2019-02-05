@@ -12,7 +12,8 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 
 from rdkit.Chem import AllChem
 
-from .qd_functions import (to_symbol, fix_carboxyl, get_time, get_bond_index, from_plams_mol, from_rdmol)
+from .qd_functions import (to_symbol, fix_carboxyl, get_time, get_bond_index,
+                           from_mol_other, from_rdmol)
 from .qd_ligand_rotate import (rot_mol_angle, sanitize_dim_2)
 from .qd_database import compare_database
 from .qd_import_export import export_mol
