@@ -9,7 +9,6 @@ from os.path import (dirname, join)
 import numpy as np
 
 from scm.plams import Molecule
-
 from scm.plams.tools.units import Units
 from scm.plams.tools.kftools import KFFile
 from scm.plams.core.settings import Settings
@@ -79,18 +78,18 @@ def get_rkf(self):
 
 
 @add_to_class(AMSResults)
-def get_energy(self, unit='kcal/mol'):
+def get_energy(self, unit='au'):
     """ Return final bond energy, expressed in unit. """
     rkf = self.get_rkf()
-    return KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('Hartree', unit)
+    return KFFile(rkf).read('AMSResults', 'Energy') * Units.conversion_ratio('au', unit)
 
 
 @add_to_class(AMSResults)
-def get_frequencies(self, unit='cm-1'):
+def get_frequencies(self, unit='cm^-1'):
     """ Return the vibrational frequencies, expressed in unit. """
     rkf = self.get_rkf()
     freqs = np.array(KFFile(rkf).read('Vibrations', 'Frequencies[cm-1]'))
-    return freqs * Units.conversion_ratio('cm-1', unit)
+    return freqs * Units.conversion_ratio('cm^-1', unit)
 
 
 def get_entropy(mol, freqs, T=298.15):
@@ -134,7 +133,7 @@ def get_entropy(mol, freqs, T=298.15):
     return R * np.array([S_trans, S_rot, S_vib])
 
 
-def get_thermo(mol, freqs, E, T=298.15, export=['E', 'G'], unit='kcal/mol'):
+def get_thermo(mol, freqs, E, T=298.15, export=['E', 'H', 'S', 'G'], unit='kcal/mol'):
     """
     Extract and return Gibbs free energies, entropies and/or enthalpies from an AMS KF file.
     All vibrational frequencies smaller than 100 cm**-1 are set to 100 cm**-1.
@@ -153,8 +152,7 @@ def get_thermo(mol, freqs, E, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     Return <float> or <dict>[<float>]: An energy or dictionary of energies
     """
     # Get frequencies; set all frequencies smaller than 100 cm**-1 to 100 cm**-1
-    if not isinstance(freqs, np.ndarray):
-        freqs = np.array(freqs)
+    freqs = np.array(freqs)
     freqs[freqs < 100] = 100
     freqs *= 100 * Units.constants['c']
 
@@ -163,6 +161,7 @@ def get_thermo(mol, freqs, E, T=298.15, export=['E', 'G'], unit='kcal/mol'):
     RT = 8.31445 * T  # Gas constant * temperature
 
     # Extract and/or calculate the various energies
+    E = E * Units.conversion_ratio('kcal/mol', 'kj/mol') * 1000
     U = E + RT * (3.0 + sum(0.5 * hv_kT + hv_kT / np.expm1(hv_kT)))
     H = U + RT
     S = sum(get_entropy(mol, freqs, T=T))
@@ -283,9 +282,9 @@ def ams_job_uff_opt(mol, maxiter=1000, get_freq=False, fix_angle=True):
     s = Settings()
     s.input = get_template('geometry.json')['specific']['ams']
     s.update(get_template('qd.json')['UFF'])
-    s.input.ams.Constraints.Atom = constrains
-    s.input.ams.System.BondOrders._1 = adf_connectivity(mol)
-    s.input.ams.GeometryOptimization.MaxIterations = int(maxiter / 2)
+    s.input.ams.constraints.atom = constrains
+    s.input.ams.system.bondorders._1 = adf_connectivity(mol)
+    s.input.ams.geometryoptimization.maxiterations = int(maxiter / 2)
     if get_freq:
         s.input.ams.Properties.NormalModes = 'Yes'
 
@@ -343,13 +342,13 @@ def job_single_point(self, job, settings, name='Single_point'):
     s.input = get_template('singlepoint.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
-        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+        s.input.ams.system.bondorders._1 = adf_connectivity(self)
 
     # Run the job; extract energies
     my_job = job(molecule=self, settings=s, name=name)
     results = my_job.run()
     results.wait()
-    self.properties.energy.E = results.get_energy()
+    self.properties.energy.E = results.get_energy(unit='kcal/mol')
 
 
 @add_to_class(Molecule)
@@ -366,13 +365,13 @@ def job_geometry_opt(self, job, settings, name='Geometry_optimization'):
     s.input = get_template('geometry.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
-        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+        s.input.ams.system.bondorders._1 = adf_connectivity(self)
 
     # Run the job; extract geometries and energies
     my_job = job(molecule=self, settings=s, name=name)
     results = my_job.run()
     results.wait()
-    self.properties.energy.E = results.get_energy()
+    self.properties.energy.E = results.get_energy(unit='kcal/mol')
     self.from_mol_other(results.get_main_molecule())
 
 
@@ -396,11 +395,13 @@ def job_freq(self, job, settings, name='Frequency_analysis', opt=True):
     s.input = get_template('freq.json')['specific'][type_to_string(job)]
     s.update(settings)
     if job == AMSJob:
-        s.input.ams.System.BondOrders._1 = adf_connectivity(self)
+        s.input.ams.system.bondorders._1 = adf_connectivity(self)
 
     # Run the job; extract geometries and (Gibbs free) energies
     my_job = job(molecule=self, settings=s, name=name)
     results = my_job.run()
     results.wait()
-    self.from_mol_other(results.get_main_molecule())
-    self.properties.energy = results.get_thermo()
+    self.properties.frequencies = results.get_frequencies()
+    self.properties.energy = get_thermo(self,
+                                        self.properties.frequencies,
+                                        results.get_energy(unit='kcal/mol'))

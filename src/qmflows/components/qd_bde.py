@@ -114,7 +114,10 @@ def get_bde_ddG(tot, lig, core, job=None, s=None):
 
     # Calculate and return dG and ddG
     dG = (G_lig + G_core) - G_tot
-    ddG = dG - ((E_lig + E_core) - E_tot)
+    dE = (E_lig + E_core) - E_tot
+    ddG = dG - dE
+
+    import pdb; pdb.set_trace()
     finish()
 
     return ddG
