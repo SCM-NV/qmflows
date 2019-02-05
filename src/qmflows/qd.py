@@ -193,6 +193,27 @@ def get_job_settings(arg_dict, jobs=1):
     return ret
 
 
+def lower_dict_keys(dic):
+    """ Turn all keys in a dictionary, or class derived from dictionary, to lowercase.
+    Dictionaries are searched recursivly. """
+    if isinstance(dic, dict):
+        for key in dic:
+            # Check if a key is lowercase; turn to lowercase if not
+            try:
+                key_lower = key.lower()
+                if key != key_lower:
+                    dic[key_lower] = dic[key]
+                    del dic[key]
+            except AttributeError:
+                pass
+
+            # Check if a value is a dictionary or a class derived from dictionary
+            if isinstance(dic[key_lower], dict):
+                dic[key_lower] = lower_dict_keys(dic[key_lower])
+
+    return dic
+
+
 def prep_qd(qd_list, path, arg):
     """
     Function that handles quantum dot (qd, i.e. core + all ligands) operations.
@@ -226,8 +247,9 @@ def prep_qd(qd_list, path, arg):
 
     # Calculate the interaction between ligands on the quantum dot surface upon removal of CdX2
     if arg['qd_dissociate']:
-        # Extract input settings
+        # Extract the job type and input settings
         job1, s1, job2, s2 = get_job_settings(arg['qd_dissociate'], jobs=2)
+        s1, s2 = lower_dict_keys(s1), lower_dict_keys(s2)
 
         # Start the BDE calculation
         print(QD_scripts.get_time() + 'calculating ligand dissociation energy...')
