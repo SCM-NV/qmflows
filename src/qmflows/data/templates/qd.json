@@ -1,5 +1,5 @@
 {"UFF":
-    {"description": "UFF calculation",
+    {"description": "UFF with the default forcefield",
      "pickle": false,
      "input":
         {"uff": {"Library": "UFF"},
@@ -22,7 +22,7 @@
         }
     },
  "COSMO-MOPAC":
-    {"description": "MOPAC (PM7) condensed phase (conductor) calculation",
+    {"description": "COSMO(crs)-MOPAC with PM7 parameters",
      "pickle": false,
      "input": 
         {"MOPAC": 
@@ -35,7 +35,7 @@
         }
     },
  "MOPAC":
-    {"description": "MOPAC (PM7) gas phase calculation",
+    {"description": "MOPAC (PM7) with PM7 parameters",
      "pickle": false,
      "input": 
         {"MOPAC": {"Model": "PM7"},
