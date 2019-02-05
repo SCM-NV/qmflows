@@ -2,11 +2,11 @@
     {"description": "UFF with the default forcefield",
      "pickle": false,
      "input":
-        {"uff": {"Library": "UFF"},
+        {"uff": {"library": "UFF"},
          "ams":
-            {"System": 
-                {"BondOrders": {"_1": null},
-                 "Charge": 0
+            {"system": 
+                {"bondorders": {"_1": null},
+                 "charge": 0
                 }
             }
         }
@@ -16,7 +16,7 @@
      "ignore_molecule": true,
      "pickle": false,
      "input": 
-        {"Property": {"_h": "Activitycoef"},
+        {"property": {"_h": "Activitycoef"},
          "Compound": {"_h": null},
          "compound": {"_h": null, "Frac1": 1.0}
         }
@@ -25,12 +25,12 @@
     {"description": "COSMO(crs)-MOPAC with PM7 parameters",
      "pickle": false,
      "input": 
-        {"MOPAC": 
-            {"Model": "PM7",
-             "Solvation": "COSMO-CRS"
+        {"mopac": 
+            {"model": "PM7",
+             "solvation": "COSMO-CRS"
             },
          "ams": 
-            {"System": {"Charge": 0}
+            {"system": {"charge": 0}
             }
         }
     },
@@ -38,9 +38,9 @@
     {"description": "MOPAC (PM7) with PM7 parameters",
      "pickle": false,
      "input": 
-        {"MOPAC": {"Model": "PM7"},
+        {"mopac": {"model": "PM7"},
          "ams": 
-            {"System": {"Charge": 0}
+            {"system": {"charge": 0}
             }
         }
     }
