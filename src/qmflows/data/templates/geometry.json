@@ -35,9 +35,6 @@
 			  "N_DIIS" : 7,
 			  "preconditioner": "full_single_inverse"
 		      }
-                  },
-                  "xc": {
-                      "xc_functional": "pbe"
                   }
               },
               "subsys": {
