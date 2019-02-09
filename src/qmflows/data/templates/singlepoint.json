@@ -3,10 +3,11 @@
         "adf": {
             "basis": {"type": "SZ"},
             "xc": {"__block_replace": true, "lda": ""},
-            "integration": {"accint": 4.0},
+            "numericalquality": "normal",
             "scf": {
         	"converge": 1e-6,
-        	"iterations": 100} },
+            "iterations": 100} },
+        "ams": {"ams": {"Task": "SinglePoint"} },
         "dftb": {
             "task": {"runtype": "SP"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },

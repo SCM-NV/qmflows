@@ -53,7 +53,7 @@ def test_overlay_adf_freq():
     """
     s = Settings()
     s.specific.adf.xc.gga = "bp86"
-    s.specific.adf.beckegrid.quality = "good"
+    s.specific.adf.numericalquality = "good"
     s.specific.adf.scf.iterations = "99"
     s.specific.adf.scf.converge = "0.0000001"
     s.specific.adf.analyticalfreq

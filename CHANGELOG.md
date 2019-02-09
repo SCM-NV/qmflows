@@ -1,3 +1,9 @@
+# 08/01/2019
+
+## Removed
+*  Quantum Dots builder functionality moved to [CAT](https://github.com/BvB93/CAT)
+
+
 
 # 19/10/2018
 

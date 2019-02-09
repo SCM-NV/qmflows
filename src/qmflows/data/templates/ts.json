@@ -3,7 +3,7 @@
         "adf": {
             "basis": {"type": "SZ"},
             "xc": {"__block_replace": true, "lda": ""},
-            "integration": {"accint": 6.0},
+            "numericalquality": "good",
             "scf": {
                 "converge": 1e-6,
                 "iterations": 100},

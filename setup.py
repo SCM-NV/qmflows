@@ -14,7 +14,7 @@ setup(
     description='Automation of computations in quantum chemistry',
     license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
-    author=['Felipe Zapata', 'Bas van Beek'],
+    author=['Felipe Zapata'],
     author_email='f.zapata@esciencecenter.nl',
     keywords='chemistry workflows simulation materials',
     long_description=readme(),
@@ -23,7 +23,6 @@ setup(
               "qmflows.components",
               "qmflows.data",
               "qmflows.data.dictionaries",
-              "qmflows.data.coskf",
               "qmflows.examples",
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
@@ -33,7 +32,7 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/templates/*json', 'data/dictionaries/*json', 'data/coskf/*coskf']
+        "qmflows": ['data/templates/*json', 'data/dictionaries/*json']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -43,7 +42,7 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
     install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2', 'pymonad',
-                      'pyparsing', 'filelock', 'openpyxl', 'pyyaml', 'xlrd', 'scipy'],
+                      'pyparsing', 'filelock'],
     dependency_links=[
         "git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2"],
 

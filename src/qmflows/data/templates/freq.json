@@ -6,8 +6,13 @@
                 "core": "None",
                 "type": "DZP"
                 },
-            "xc": {"__block_replace": true, "lda": ""}
+            "xc": {"__block_replace": true, "lda": ""},
+            "numericalquality": "good"
             },
+        "ams": {"ams": {
+                    "Task": "SinglePoint",
+                    "Properties": {"NormalModes": "Yes"} } 
+                },
         "dftb": {
             "task": {"runtype": "Frequencies"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
