@@ -19,7 +19,6 @@ install:
   # Install virtual enviroment
   - conda create --name qmflows python=3.6
   - source activate qmflows
-
   - conda install -c conda-forge h5py==2.8.0 rdkit==2018.03.4.0
 
   # Install qmflows package
