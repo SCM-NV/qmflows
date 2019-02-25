@@ -5,10 +5,9 @@
    :target: https://qmflows.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 .. image:: https://zenodo.org/badge/60843590.svg
-   :target: https://zenodo.org/badge/latestdoi/60843590	 
+   :target: https://zenodo.org/badge/latestdoi/60843590
 .. image:: https://img.shields.io/badge/python-3.6-blue.svg
 
-	   
 QMFlows
 #######
 See documentation_ for tutorials and documentation.
