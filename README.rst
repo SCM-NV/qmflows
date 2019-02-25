@@ -1,6 +1,9 @@
 
 .. image:: https://travis-ci.org/SCM-NV/qmflows.svg?branch=master
-   :target: https://travis-ci.org/SCM-NV/qmflows 
+   :target: https://travis-ci.org/SCM-NV/qmflows
+.. image:: https://readthedocs.org/projects/qmflows/badge/?version=latest
+   :target: https://qmflows.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status	    
 .. image:: https://img.shields.io/badge/python-3.6-blue.svg
 
 QMFlows

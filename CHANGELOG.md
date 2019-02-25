@@ -1,3 +1,10 @@
+# Version 0.4.0 (25/02/2019)
+
+## Changed
+
+  * Moved all the functionality to build and analysis quantum dot structures to [their own repo](https://github.com/BvB93/CAT)
+  * Moved `molkit` functionality to [PLAMS](https://github.com/SCM-NV/PLAMS)
+
 # 08/01/2019
 
 ## Removed

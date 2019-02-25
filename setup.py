@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='qmflows',
-    version='0.3.0',
+    version='0.4.0',
     description='Automation of computations in quantum chemistry',
     license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
