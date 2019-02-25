@@ -77,14 +77,9 @@ Dependencies installation
 Using the conda environment the following packages should be installed:    
 
 
-- install rdkit_ using conda:
+- install rdkit_ and HDF5_ using conda:
 
-  - ``conda install -y -q --name qmflows -c rdkit rdkit``
-
-- install HDF5_ using conda:
-
-  - ``conda install -y -q --name qmflows -c anaconda h5py``
-    
+  - ``  - conda install -y -q -c conda-forge h5py rdkit``
     
 .. _installation:
 

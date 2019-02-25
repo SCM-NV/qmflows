@@ -17,8 +17,7 @@ install:
   - conda info -a
 
   # Install virtual enviroment 
-  - conda install h5py==2.8.0
-  - conda install -c rdkit rdkit==2018.03.4.0
+  - conda install -c conda-forge h5py==2.8.0 rdkit==2018.03.4.0
 
   # Install qmflows package
   - pip install git+https://github.com/SCM-NV/PLAMS.git@master#egg=plams-1.2 --upgrade
