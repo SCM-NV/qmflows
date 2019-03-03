@@ -41,11 +41,8 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=[
-        'h5py', 'numpy', 'noodles==0.3.1',
-        'plams@git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2',
-        'pymonad',
-        'pyparsing', 'filelock'],
+    install_requires=['h5py', 'numpy', 'noodles==0.3.1', 'plams>=1.2', 'pymonad',
+                      'pyparsing', 'filelock'],
     dependency_links=[
         "git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2"],
 
