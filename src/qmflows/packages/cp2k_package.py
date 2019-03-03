@@ -64,10 +64,6 @@ class CP2K(Package):
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
 
-        # Add molecular coordinates
-        m = format_coord_xyz(mol) + '{:>8}'.format('&END')
-        cp2k_settings.input.force_eval.subsys['&COORD'] = m
-
         # Create a Plams job
         job = plams.interfaces.thirdparty.cp2k.Cp2kJob(
             name=job_name, settings=cp2k_settings, molecule=mol)
@@ -179,17 +175,6 @@ class CP2K_Result(Result):
         super().__init__(settings, molecule, job_name, plams_dir,
                          work_dir=work_dir, properties=properties,
                          status=status, warnings=warnings)
-
-
-def format_coord_xyz(mol):
-    """
-    Write xyz coordinates in the input file
-    """
-    xs = ''.join(
-        '{}  {: 12.8e}  {: 12.8e}  {: 12.8e}\n'.format(at.symbol, *at.coords)
-        for at in mol)
-
-    return '\n' + xs
 
 
 cp2k = CP2K()
