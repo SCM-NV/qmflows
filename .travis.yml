@@ -22,7 +22,6 @@ install:
   - conda install -c conda-forge h5py rdkit
 
   # Install qmflows package
-  - pip install git+https://github.com/SCM-NV/PLAMS.git@master#egg=plams-1.2 --upgrade
   - pip install .[test]
   
 script:
