@@ -79,7 +79,7 @@ Using the conda environment the following packages should be installed:
 
 - install rdkit_ and HDF5_ using conda:
 
-  - ``  - conda install -y -q -c conda-forge h5py rdkit``
+  - ``conda install -y -q -c conda-forge h5py rdkit``
     
 .. _installation:
 
