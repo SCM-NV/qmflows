@@ -9,8 +9,9 @@
                 "iterations": 100},
             "geometry": {"optim": "delocal"} },
         "ams": {"ams": {
-            "Task": "GeometryOptimization"},
-            "GeometryOptimization": {"MaxIterations": 500} },
+            "Task": "GeometryOptimization",
+            "GeometryOptimization": {"MaxIterations": 500} }
+	},
         "dftb": {
             "task": {"runtype": "GO"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
