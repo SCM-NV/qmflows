@@ -8,7 +8,9 @@
                 "converge": 1e-6,
                 "iterations": 100},
             "geometry": {"optim": "delocal"} },
-        "ams": {"ams": {"Task": "GeometryOptimization"} },
+        "ams": {"ams": {
+            "Task": "GeometryOptimization"},
+            "GeometryOptimization": {"MaxIterations": 500} },
         "dftb": {
             "task": {"runtype": "GO"},
             "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
@@ -16,7 +18,7 @@
         "cp2k" : {
 	    "motion": {
 		"geo_opt" : {"type": "minimization", "optimizer": "bfgs", "max_iter": 500}
-	    }, 
+	    },
           "force_eval": {
               "dft": {
                   "mgrid": {
@@ -49,7 +51,7 @@
               "run_type": "geometry_optimization"
           }
         },
-        
+
         "orca": {
             "method": {
                 "method": "dft",
