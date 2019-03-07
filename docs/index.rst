@@ -15,7 +15,6 @@ Contents:
    interactive_tutorial
    Further_reading
    documentation
-   qd_manual
 
 
 Indices and tables
@@ -24,4 +23,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
