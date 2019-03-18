@@ -104,8 +104,9 @@ class CP2K(Package):
                 ALPHA_BETA_GAMMA 81.250 86.560 89.800
               &END CELL
             """
-            angles = '{} {} {}'.format(*value)
-            s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
+            if value is not None:
+                angles = '{} {} {}'.format(*value)
+                s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
 
             return s
 
@@ -138,14 +139,14 @@ class CP2K(Package):
                 abc = [value] * 3
                 abc_cell = ' [angstrom] {} {} {}'.format(*abc)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc_cell
-            elif isinstance(value, list):
-                abc = ' [angstrom] {} {} {}'.format(*value)
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             elif isinstance(value[0], list):
                 a, b, c = value
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
+            elif isinstance(value, list):
+                abc = ' [angstrom] {} {} {}'.format(*value)
+                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
                 msg = "cell parameter:{}\nformat not recognized"
                 RuntimeError(msg)
