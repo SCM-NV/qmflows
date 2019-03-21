@@ -4,6 +4,9 @@ language: generic
 env:
   global:
     - COMMIT_AUTHOR_EMAIL: "f.zapata@esciencecenter.nl"
+  matrix:
+    - PYTHON_VERSION=3.6
+    - PYTHON_VERSION=3.7
 
 install:
   # Install python
@@ -17,7 +20,7 @@ install:
   - conda info -a
 
   # Install virtual enviroment
-  - conda create --name qmflows python=3.6
+  - conda create --name qmflows python=${PYTHON_VERSION}
   - source activate qmflows
   - conda install -c conda-forge h5py rdkit
 
