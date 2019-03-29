@@ -41,11 +41,8 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'numpy', 'noodles==0.3.3', 'plams>=1.2', 'pymonad',
+    install_requires=['h5py', 'numpy', 'noodles==0.3.3', 'plams==1.4', 'pymonad',
                       'pyparsing', 'filelock'],
-    dependency_links=[
-        "git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2"],
-
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
         'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
