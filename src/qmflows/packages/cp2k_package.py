@@ -6,7 +6,6 @@ from .packages import (
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from scm import plams
-from warnings import warn
 
 
 # ====================================<>=======================================
@@ -160,10 +159,7 @@ class CP2K(Package):
         f = funs.get(key)
 
         if f is not None:
-            return f(settings, value, mol, key)
-        else:
-            msg = 'Keyword ' + '"' + key + '"' + ' doesn\'t include anything in the input!'
-            warn(msg)
+            f(settings, value, mol, key)
 
 
 class CP2K_Result(Result):
