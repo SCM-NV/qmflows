@@ -332,7 +332,7 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     plams.config.log.stdout = 0
 
     if runner is None:
-        ret = call_default(job, **kwargs)
+        ret = call_default(job, kwargs.get('n_processes', 1))
     else:
         raise "Don't know runner: {}".format(runner)
 
@@ -341,14 +341,14 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     return ret
 
 
-def call_default(wf, n_processes=1, cache='cache.db'):
+def call_default(wf, n_processes=1):
     """
     Run locally using several threads.
     Caching can be turned off by specifying cache=None
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
-        db_file=cache, always_cache=False, echo_log=False)
+        db_file='cache.db', always_cache=True, echo_log=False)
 
 
 class SerMolecule(Serialiser):
