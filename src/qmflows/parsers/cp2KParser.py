@@ -282,7 +282,7 @@ def move_restart_coeff(path):
     os.chdir(root)
     # Split File into the old and new set of coefficients
     cmd = 'csplit -f coeffs -n 1 {} "/HOMO-LUMO/+2"'.format(file_name)
-    subprocess.call(cmd, shell=True)
+    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     # Move the new set of coefficients to the Log file
     os.rename('coeffs1', file_name)
     # Remove old set of coefficients
