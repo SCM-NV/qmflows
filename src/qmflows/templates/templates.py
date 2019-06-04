@@ -16,9 +16,8 @@ specific:
      numericalquality:
        normal
      scf:
-       converge:
-         1e-6
-     iterations: 100
+       converge: 1e-6
+       iterations: 100
   ams:
      ams:
        Task: SinglePoint
