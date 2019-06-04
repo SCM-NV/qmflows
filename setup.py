@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
 from setuptools import setup
+import os
+
+here = os.path.abspath(os.path.dirname(__file__))
+version = {}
+with open(os.path.join(here, '__version__.py')) as f:
+    exec(f.read(), version)
 
 
 def readme():
@@ -10,7 +16,7 @@ def readme():
 
 setup(
     name='qmflows',
-    version='0.4.0',
+    version=version['__version__'],
     description='Automation of computations in quantum chemistry',
     license='Apache 2.0',
     url='https://github.com/SCM-NV/qmflows',
@@ -45,6 +51,6 @@ setup(
                       'pyparsing', 'pyyaml==5.1', 'filelock'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
-        'doc': ['sphinx', 'sphinx_rtd_theme', 'nbsphinx']
+        'doc': ['sphinx', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )
