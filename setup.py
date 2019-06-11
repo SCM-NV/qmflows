@@ -48,7 +48,7 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
     install_requires=['h5py', 'numpy', 'noodles==0.3.3', 'plams==1.4', 'pymonad',
-                      'pyparsing', 'pyyaml==5.1', 'filelock'],
+                      'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
         'doc': ['sphinx', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
