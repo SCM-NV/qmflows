@@ -6,7 +6,8 @@
    :alt: Documentation Status
 .. image:: https://zenodo.org/badge/60843590.svg
    :target: https://zenodo.org/badge/latestdoi/60843590
-.. image:: https://img.shields.io/badge/python-3.6-blue.svg
+
+.. image:: qmflows.png
 
 QMFlows
 #######
@@ -86,12 +87,9 @@ Using the conda environment the following packages should be installed:
 Package installation
 --------------------
 Finally install the package:
-
-- Update PLAMS_ using pip:
-  - ``pip install git+https://github.com/SCM-NV/PLAMS@master#egg=plams-1.2``
     
 - Install **QMFlows** using pip:
-  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows-0.3.0``
+  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows``
 
 Now you are ready to use *qmflows*.  
 
