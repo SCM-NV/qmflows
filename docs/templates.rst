@@ -7,77 +7,87 @@ keywords.
 
 .. _templates:
 
-JSON format
-~~~~~~~~~~~
+YAML
+~~~~
 .. currentmodule:: qmflows.templates.templates
 
-The Java script object notation **JSON** is a widely used data format. This format is used together with the :mod:`json` module to implement the mechanism to load/unload the templates using the function :func:`~qmflows.templates.templates.get_template`.
+The YAML_ markdown format is used together with the :mod:`yaml` module to implement the mechanism to load the templates.
 
-For Example, the default parameter for a geometry optimization using ADF are given by: ::
-  
-	
-  {
-    "specific": {
-        "adf": {
-            "basis": {"type": "SZ"},
-            "xc": {"lda": ""},
-            "integration": {"accint": 4.0},
-            "scf": {
-        	"converge": 1e-6,
-        	"iterations": 100} },
-        "dftb": {
-            "task": {"runtype": "SP"},
-            "dftb": {"resourcesdir": "DFTB.org/3ob-3-1"} },
-        "cp2k" : {
-          "FORCE_EVAL": {
-              "DFT": {
-                  "BASIS_SET_FILE_NAME": "",
-                  "MGRID": {
-                      "CUTOFF": 400,
-                      "NGRIDS": 4
-                  },
-                  "POTENTIAL_FILE_NAME": "",
-                  "PRINT": {
-                      "MO": {
-                          "ADD_LAST"  : "NUMERIC",
-                          "EACH": {
-                              "QS_SCF": 0
-                          },
-                          "EIGENVALUES" : "",
-                          "EIGENVECTORS": "",
-                          "FILENAME": "./mo.data",
-                          "NDIGITS": 36,
-                          "OCCUPATION_NUMBERS": ""
-                      }
-                  },
-       ................
+.. _YAML: https://pyyaml.org/wiki/PyYAMLDocumentation
 
+For Example, the default parameter for a single point calculation for several package is:
 
-The templates in `JSON` format are translated to python dictionaries using the :func:`get_template`. This templates can be used by themselves in the calculations
-or more keywords can be attached to them modifying the default values. For example the default values to carry a single point calculation using the **ORCA** quantum
-package are: ::
+.. code-block:: python
 
-   from qmflows.templates import singlepoint
-   print(singlepoint.specific.orca)
+    specific:
+      adf:
+         basis:
+           type: SZ
+         xc:
+           __block_replace: true
+           lda: ""
+         numericalquality:
+           normal
+         scf:
+           converge: 1e-6
+           iterations: 100
+      ams:
+         ams:
+           Task: SinglePoint
+      dftb:
+        dftb:
+          resourcesdir:
+            "DFTB.org/3ob-3-1"
+        task:
+          runtype: SP
 
-   basis:
-         basis: 	sto_sz
-   method: 	
-         functional: 	lda
-          method: 	dft
+      cp2k:
+        force_eval:
+          dft:
+            mgrid:
+              cutoff: 400
+              ngrids: 4
+            print:
+              mo:
+                add_last: numeric
+                each:
+                  qs_scf: 0
+                eigenvalues: ""
+                eigenvectors: ""
+                filename: "./mo.data"
+                ndigits: 36
+                occupation_numbers: ""
+            qs:
+                method: gpw
+            scf:
+                eps_scf: 1e-06
+                max_scf: 200
+                scf_guess: restart
 
-We can easily replace the basis set just by updating the value in the |Settings| object that represent the single point calculation: ::
+          subsys:
+            cell:
+              periodic: xyz
+        global:
+          print_level: low
+          project: cp2k
+          run_type: energy
 
-   from qmflows.templates import singlepoint
-   singlepoint.specific.orca.basis.basis = 'DZP'
+      dirac:
+        DIRAC: WAVEFUNCTION
+        HAMILTONIAN: "LEVY-LEBLOND"
+        WAVE FUNCTION: SCF
 
-    print(singlepoint.specific.orca)
+      gamess:
+        basis:
+          gbasis: sto
+          ngauss: 3
+        contrl:
+          scftyp: rhf
+          dfttyp: pbe
 
-    basis: 	
-      basis: 	DZP
-    method: 	
-      functional: 	lda
-      method: 	dft
-	  
-
-.. autofunction:: get_template
+      orca:
+        method:
+            method: dft
+            functional: lda
+        basis:
+            basis: sto_sz

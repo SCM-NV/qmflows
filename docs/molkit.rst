@@ -1,7 +1,8 @@
-Molkit
+RDkit
 ======
 
-Molkit is module containing a set of functions to manipulate molecules.
+The `scm.plams.interfaces.molecule.rdkit` is a lightweight wrapper on RDKIT_,
+containing a set of functions to manipulate molecules.
 
 It allows easily building molecules from smiles, for which 3D coordinates are generated automatically.
 When specifying a forcefield for geometry refinement, please note that `Ebejer et al. 2012`__
@@ -16,8 +17,4 @@ There is also a function to partition a protein into capped fragments for MFCC_ 
 
 .. _MFCC: http://dx.doi.org/10.1063/1.2906128
 
-API
----
-
-.. automodule:: qmflows.molkit
-    :members:
+.. _RDKIT: https://www.rdkit.org/docs/api-docs.html

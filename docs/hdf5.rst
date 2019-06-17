@@ -9,15 +9,6 @@ HDF5_ is extremely optimized to perform fast I/O operations in large data set an
 implemented as a library with APIs to Python, C, C++, etc. The python interface is called
 pyh5_ and it was designed to run along with Numpy as Scipy. 
 
-To store numerical result in using pyh5_, there is a class :class:`~StoreasHDF5`
-
-
-
-API
-~~~
-
-.. autoclass:: StoreasHDF5
-   :members:	       
 
 .. _HDF5: https://www.hdfgroup.org/HDF5/
 

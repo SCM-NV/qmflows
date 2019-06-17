@@ -11,3 +11,4 @@ For a more detailed description of **QMFlows** read the documentation
    promise
    parsers
    hdf5
+   molkit
