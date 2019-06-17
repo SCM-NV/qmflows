@@ -1,3 +1,13 @@
+
+# Version 0.8.0 (17/06/2019)
+
+## Changed
+
+ * Used [pyyaml](https://pyyaml.org/wiki/PyYAMLDocumentation) for the [templates](https://github.com/SCM-NV/qmflows/blob/master/src/qmflows/templates/templates.py) instead of *JSON*
+ * Updated documentation
+ * Test wiht python 3.7
+
+
 # Version 0.4.0 (25/02/2019)
 
 ## Changed
