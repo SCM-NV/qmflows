@@ -49,6 +49,7 @@ class Result:
     """
     Class containing the result associated with a quantum chemistry simulation.
     """
+
     def __init__(self, settings, molecule, job_name, plams_dir=None,
                  work_dir=None, properties=None, status='done', warnings=None):
         """
@@ -167,6 +168,7 @@ class Package:
 
     Only two arguments are required
     """
+
     def __init__(self, pkg_name):
         self.pkg_name = pkg_name
 
@@ -191,7 +193,8 @@ class Package:
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
+                mol = molkit.from_rdmol(mol) if isinstance(
+                    mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -205,7 +208,8 @@ class Package:
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
-                warnings_tolerance = kwargs.get("terminate_job_in_case_of_warnings")
+                warnings_tolerance = kwargs.get(
+                    "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
                 if all(w is not None for w in [warnings_tolerance, output_warnings]):
@@ -332,7 +336,8 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     plams.config.log.stdout = 0
 
     if runner is None:
-        ret = call_default(job, kwargs.get('n_processes', 1))
+        ret = call_default(job, kwargs.get('n_processes', 1),
+                           kwargs.get('always_cache', True))
     else:
         raise "Don't know runner: {}".format(runner)
 
@@ -341,14 +346,14 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
     return ret
 
 
-def call_default(wf, n_processes=1):
+def call_default(wf, n_processes, always_cache):
     """
     Run locally using several threads.
     Caching can be turned off by specifying cache=None
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
-        db_file='cache.db', always_cache=True, echo_log=False)
+        db_file='cache.db', always_cache=always_cache, echo_log=False)
 
 
 class SerMolecule(Serialiser):
@@ -356,6 +361,7 @@ class SerMolecule(Serialiser):
     Based on the Plams molecule this class encode and decode the
     information related to the molecule using the JSON format.
     """
+
     def __init__(self):
         super(SerMolecule, self).__init__(plams.Molecule)
 
@@ -371,6 +377,7 @@ class SerMol(Serialiser):
     Based on the RDKit molecule this class encodes and decodes the
     information related to the molecule using a string.
     """
+
     def __init__(self):
         super(SerMol, self).__init__(Chem.Mol)
 
@@ -471,7 +478,8 @@ def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
     """
     output_files = list(find_file_pattern('*out', plams_dir))
     if not output_files:
-        msg = "job: {} has failed. check folder: {}".format(job_name, plams_dir)
+        msg = "job: {} has failed. check folder: {}".format(
+            job_name, plams_dir)
         warn(msg)
         return None
     else:
