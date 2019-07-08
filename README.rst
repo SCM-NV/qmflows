@@ -101,9 +101,9 @@ Now you are ready to use *qmflows*.
 
     
 .. _documentation: https://qmflows.readthedocs.io/en/latest/
-.. _miniconda: http://conda.pydata.org/miniconda.html
-.. _anaconda: https://www.continuum.io/downloads
-.. _installConda: http://conda.pydata.org/docs/install/quick.html
+.. _miniconda: https://docs.conda.io/en/latest/miniconda.html
+.. _anaconda: https://www.anaconda.com/distribution/#download-section
+.. _installConda: https://conda.io/projects/conda/en/latest/user-guide/install/index.html
 .. _Noodles: http://nlesc.github.io/noodles/
 .. _HDF5: http://www.h5py.org/ 
 .. _here: https://www.python.org/downloads/
