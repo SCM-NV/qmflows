@@ -4,9 +4,8 @@
 .. image:: https://readthedocs.org/projects/qmflows/badge/?version=latest
    :target: https://qmflows.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
-.. image:: https://zenodo.org/badge/60843590.svg
-   :target: https://zenodo.org/badge/latestdoi/60843590
-
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3274284.svg
+   :target: https://doi.org/10.5281/zenodo.3274284
 .. image:: qmflows.png
 
 QMFlows
