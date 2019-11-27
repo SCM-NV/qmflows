@@ -10,7 +10,7 @@ from collections import namedtuple
 from itertools import islice
 
 import numpy as np
-from more_itertools import chunked
+from more_itertools import (chunked, collapse)
 from pymonad import curry
 from pyparsing import (CaselessLiteral, Empty, FollowedBy, Group, Literal,
                        NotAny, OneOrMore, Optional, SkipTo, Suppress, Word,
@@ -18,7 +18,7 @@ from pyparsing import (CaselessLiteral, Empty, FollowedBy, Group, Literal,
                        srange)
 
 from ..common import (AtomBasisData, AtomBasisKey, InfoMO)
-from ..utils import (concat, zipWith, zipWith3)
+from ..utils import (zipWith, zipWith3)
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
@@ -344,10 +344,10 @@ def readCp2KBasis(path):
 
 def concatSwapCoeff(xss, m, n):
     if n == 0:
-        return concat(swapCoeff(m)(cs.coeffs[:] for cs in xss))
+        return list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss)))
     else:
-        xs = concat(swapCoeff(m)(cs.coeffs[:] for cs in xss[:-1]))
-        return xs + concat(swapCoeff(n)([list(xss[-1].lastCoeffs)]))
+        xs = list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss[:-1])))
+        return xs + list(collapse(swapCoeff(n)([list(xss[-1].lastCoeffs)])))
 
 
 @curry

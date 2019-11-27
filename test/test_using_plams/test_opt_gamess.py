@@ -1,20 +1,18 @@
-from qmflows import (Settings, templates)
-from qmflows.utils import (concat, zipWith)
+import operator
+
+import pytest
+from more_itertools import collapse
 from scm.plams import Molecule
 
-# User Defined imports
-from qmflows.packages.gamess import gamess
+from qmflows import Settings, templates
 from qmflows.packages import run
-
-import operator
-import pytest
+from qmflows.packages.gamess import gamess
+from qmflows.utils import zipWith
 
 
 @pytest.mark.slow
 def test_opt_gamess():
-    """
-    Test Optimization in Gamess using methanol in water.
-    """
+    """Test Optimization in Gamess using methanol in water."""
     methanol = Molecule('test/test_files/ion_methanol.xyz')
     methanol.properties['symmetry'] = 'Cs'
 
@@ -36,7 +34,7 @@ def test_opt_gamess():
 
     mol_opt = run(methanol_geometry.molecule)
 
-    coords = concat([a.coords for a in mol_opt.atoms])
+    coords = collapse([a.coords for a in mol_opt.atoms])
 
     expected_coords = [-0.9956983464, 0.9204754677, -0.0002616586, -0.72585581,
                        -0.0802380791, 2.18166e-05, 0.741292161, 0.0371204735,

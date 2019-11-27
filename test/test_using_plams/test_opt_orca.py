@@ -1,15 +1,17 @@
 # Default imports
+import operator
 from math import sqrt
-from qmflows import (Settings, templates)
-from qmflows.utils import (concat, zipWith)
+
+import pytest
+from more_itertools import collapse
 from scm.plams import Molecule
 
+from qmflows import Settings, templates
+from qmflows.packages import run
+from qmflows.packages.orca import orca
 # User Defined imports
 from qmflows.packages.SCM import dftb
-from qmflows.packages.orca import orca
-from qmflows.packages import run
-import operator
-import pytest
+from qmflows.utils import zipWith
 
 
 @pytest.mark.slow
@@ -63,7 +65,7 @@ def test_methanol_opt_orca():
                        -1.734877, 0.448868, 0.891460, -1.734894, 0.448881,
                        -0.891567, 0.460481, -0.857621, -0.000038]
 
-    coords = concat([a.coords for a in mol_opt.atoms])
+    coords = collapse([a.coords for a in mol_opt.atoms])
 
     assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
 
