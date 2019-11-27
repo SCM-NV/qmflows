@@ -1,6 +1,21 @@
-
 {
-    "energy" : {"parser": "generic_parsers",  "function": "extract_line_value", "file_ext": "out",
-	      "kwargs" : {"pattern": "Total energy", "pos": 2}},
-    "orbitals": {"parser": "cp2KParser", "function": "read_cp2k_coefficients", "file_pattern": "*MOLog"}
+    "energy": {
+        "parser": "generic_parsers",
+        "function": "extract_line_value",
+        "file_ext": "out",
+        "kwargs": {
+            "pattern": "Total energy",
+            "pos": 2
+        }
+    },
+    "orbitals": {
+        "parser": "cp2KParser",
+        "function": "read_cp2k_coefficients",
+        "file_pattern": "*MOLog"
+    },
+    "geometry": {
+        "parser": "cp2KParser",
+        "function": "read_xyz_file",
+        "file_pattern": "*-pos-1.xyz"
+    }
 }
