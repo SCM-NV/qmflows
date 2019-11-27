@@ -20,7 +20,7 @@ import subprocess
 from ..common import (AtomBasisData, AtomBasisKey, InfoMO)
 from .parser import (
     floatNumber, minusOrplus, natural, point, try_search_pattern)
-from .parser import xyzParser
+from .xyzParser import (manyXYZ, tuplesXYZ_to_plams)
 from ..utils import (chunksOf, concat, zipWith, zipWith3)
 
 # =========================<>=============================
@@ -43,10 +43,11 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 
 # =========>Parse Warnings
 
+
 def read_xyz_file(file_name: str):
-    """Read the last geometry from the output file"""
-    geometries = xyzParser.manyXYZ(file_name)
-    return  xyzParser.tuplesXYZ_to_plams(geometries[-1])
+    """Read the last geometry from the output file."""
+    geometries = manyXYZ(file_name)
+    return tuplesXYZ_to_plams(geometries[-1])
 
 
 def parse_cp2k_warnings(file_name, package_warnings):
@@ -223,6 +224,7 @@ def oddParserOverlap(n):
         return Group((Suppress(funOrbNumber(n)) +
                       funCoefficients(n)).setResultsName("lastCoeffs"))
 
+
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
@@ -288,7 +290,8 @@ def move_restart_coeff(path):
     os.chdir(root)
     # Split File into the old and new set of coefficients
     cmd = 'csplit -f coeffs -n 1 {} "/HOMO-LUMO/+2"'.format(file_name)
-    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL)
     # Move the new set of coefficients to the Log file
     os.rename('coeffs1', file_name)
     # Remove old set of coefficients
