@@ -1,12 +1,6 @@
 from pymonad import curry
-from qmflows.utils import (chunksOf, concat, concatMap, zipWith, zipWith3)
 
-
-def test_chunksOf():
-    """
-    chunksOf([0, 1, 2, 3], 1) == [[0], [1], [2], [3]]
-    """
-    assert list(chunksOf([0, 1, 2, 3], 1)) == [[0], [1], [2], [3]]
+from qmflows.utils import concat, concatMap, zipWith, zipWith3
 
 
 def test_concat():
@@ -21,7 +15,7 @@ def test_concatMap():
     """
     concatMap f == concat (map f)
     """
-    f = lambda x: [x * 2]
+    def f(x): return [x * 2]
     xs = [1, 2]
     assert concatMap(f, xs) == list(concat(map(f, xs)))
 
@@ -52,4 +46,5 @@ def test_zipwith3():
     ys = range(3, 6)
     zs = range(6, 9)
 
-    assert zipWith3(f)(xs)(ys)(zs) == [f(x, y, z) for (x, y, z) in zip(xs, ys, zs)]
+    assert zipWith3(f)(xs)(ys)(zs) == [f(x, y, z)
+                                       for (x, y, z) in zip(xs, ys, zs)]

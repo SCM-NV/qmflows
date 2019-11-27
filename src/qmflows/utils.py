@@ -1,19 +1,14 @@
+"""Miscellaneous utilities."""
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['chunksOf', 'concat', 'concatMap', 'dict2Setting',
+__all__ = ['concat', 'concatMap', 'dict2Setting',
            'settings2Dict', 'zipWith', 'zipWith3']
 
-# ======================> Python Standard  and third-party <===================
+
 from itertools import chain
 from pymonad import curry
 from .settings import Settings
-
-
-def chunksOf(xs, n):
-    """Yield successive n-sized chunks from xs"""
-    for i in range(0, len(xs), n):
-        yield xs[i:i + n]
 
 
 def concat(xss):

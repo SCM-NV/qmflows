@@ -7,11 +7,11 @@ from itertools import chain
 
 import numpy as np
 import pyparsing as pa
+from more_itertools import chunked
 from pyparsing import Group, OneOrMore, Word, alphanums
 from scm.plams import Atom, Molecule
 
 from qmflows.common import AtomBasisData, AtomBasisKey, InfoMO
-from qmflows.utils import chunksOf
 
 from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule, try_search_pattern)
@@ -55,17 +55,15 @@ def parse_molecule_traj(file_traj):
 
 
 def parse_hessian(file_hess: str, start: str = '$hessian') -> Matrix:
-    """
-    Read the hessian matrix in cartesian coordinates from the job_name.hess file.
+    """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
+
     :returns: Numpy array
     """
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
 def parse_normal_modes(file_hess: str) -> Matrix:
-    """
-    Returns the normal modes from the job_name.hess file
-    """
+    """Returns the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
@@ -100,15 +98,15 @@ def read_blocks_from_file(start: str, end: str, file_name: str) -> Matrix:
 
     # a block start with a line header then the data
     blocks = [read_block(block)
-              for block in chunksOf(lines, number_of_basis + 1)]
+              for block in chunked(lines, number_of_basis + 1)]
 
     return np.concatenate(blocks, axis=1)
 
 
 def read_block(lines):
-    """
-    Read a block containing the values of the block matrix in
-    a format similar to:
+    """Read a block containing the values of the block matrix.
+
+    The format is similar to:
 
               0          1          2          3          4          5
       0   0.752994  0.078644   0.000000  -0.134007   0.156950  -0.000000
@@ -144,7 +142,7 @@ def parse_molecular_orbitals(file_name: str) -> tuple:
 
     tuple_energies, tuple_coeffs = tuple(
         zip(*(read_column_orbitals(xs)
-              for xs in chunksOf(lines, block_lines))))
+              for xs in chunked(lines, block_lines))))
 
     return InfoMO(np.hstack(tuple_energies), np.hstack(tuple_coeffs))
 
@@ -219,7 +217,7 @@ def create_CGFs_per_atom(basis_name: str, xs: list) -> tuple:
 
 def create_parser_element():
     """Parser to read the basis set of a given element.
-    
+
     The format is:
 
     # Basis set for element : O
