@@ -51,7 +51,7 @@ setup(
                       'plams@git+https://github.com/SCM-NV/PLAMS@master',
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
-        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'pygraphviz'],
+        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx'],
         'doc': ['sphinx', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )
