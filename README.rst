@@ -37,16 +37,13 @@ automate the following tasks:
  1. Input generation.
  2. Handle tasks dependencies (Noodles_).
  3. Advanced molecular manipulation capabilities with (rdkit_).
- 4. Numerical data storage and manipulation (HDF5_).
- 5. Jobs failure detection and recovery.
- 6. Distribution in heterogeneous hardware platforms.    
+ 4. Jobs failure detection and recovery.
 
 Tutorial and Examples
 ---------------------
 A tutorial written as a jupyter-notebook_ is available from: tutorial-qmflows_. You can
 also access direclty more advanced examples_.
-    
- 
+
 Installation
 ============
 
@@ -77,9 +74,9 @@ Dependencies installation
 Using the conda environment the following packages should be installed:    
 
 
-- install rdkit_ and HDF5_ using conda:
+- install rdkit_ using conda:
 
-  - ``conda install -y -q -c conda-forge h5py rdkit``
+  - ``conda install -y -q -c conda-forge rdkit``
     
 .. _installation:
 
