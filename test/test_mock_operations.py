@@ -5,9 +5,9 @@ import numpy as np
 
 
 def generate_mocked_results(mocker, target, instances=10, expected=None):
-    """
-    Generate a list of mocked results with property `prop`. One of the results is
-    set to `expected`  and the rest are random values.
+    """Generate a list of mocked results with property `prop`.
+
+    One of the results is set to `expected`  and the rest are random values.
     """
 
     results = [mocker.patch(target) for _ in range(10)]
@@ -25,10 +25,9 @@ def generate_mocked_results(mocker, target, instances=10, expected=None):
 
 
 def test_select_max_list(mocker):
-    """
-    Test select_max using mocked results
-    """
-    results = generate_mocked_results(mocker, 'qmflows.packages.SCM.ADF_Result', expected=1e3)
+    """Test select_max using mocked results."""
+    results = generate_mocked_results(
+        mocker, 'qmflows.packages.SCM.ADF_Result', expected=1e3)
     wf = select_max(results, prop='prop')
     xs = run_single(wf)
 
@@ -36,10 +35,9 @@ def test_select_max_list(mocker):
 
 
 def test_select_min(mocker):
-    """
-    Test select_min using mocked results
-    """
-    results = generate_mocked_results(mocker, 'qmflows.packages.SCM.DFTB_Result', expected=-1e3)
+    """Test select_min using mocked results."""
+    results = generate_mocked_results(
+        mocker, 'qmflows.packages.SCM.DFTB_Result', expected=-1e3)
     wf = select_min(results, prop='prop')
 
     xs = run_single(wf)

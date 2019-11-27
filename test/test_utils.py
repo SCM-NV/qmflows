@@ -1,6 +1,4 @@
-from more_itertools import collapse
 from pymonad import curry
-
 from qmflows.utils import zipWith, zipWith3
 
 

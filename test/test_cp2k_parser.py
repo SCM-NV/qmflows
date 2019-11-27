@@ -3,8 +3,7 @@ import os
 
 
 def test_read_cp2k_coefficients():
-    """
-    """
+    """Test that the CP2K output coefficients are read properly."""
     path = "test/test_files/output_cp2k"
     mo_file = os.path.join(path, "mo_coeffs.log")
 

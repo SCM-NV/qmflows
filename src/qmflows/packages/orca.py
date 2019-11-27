@@ -57,7 +57,7 @@ class ORCA(Package):
         @schedule
         def inithess(value):
             """Generate an seperate file containing the initial Hessian matrix.
-            
+
             It is used as guess for the computation.
             """
             # Convert Hessian to numpy array
