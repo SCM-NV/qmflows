@@ -5,6 +5,7 @@
   * Use autopep to format the code
 
 ## Removed
+  * Interface to HDF5
   * Turbomol Parser
   * graphviz dependency
 

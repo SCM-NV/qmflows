@@ -33,7 +33,6 @@ setup(
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
               "qmflows.examples.FDE_Fragments",
-              "qmflows.hdf5",
               "qmflows.packages",
               "qmflows.parsers",
               "qmflows.templates"],
@@ -47,7 +46,7 @@ setup(
         'Intended Audience :: Science/Research',
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
-    install_requires=['h5py', 'more-itertools', 'numpy', 'noodles==0.3.3', 'pymonad',
+    install_requires=['more-itertools', 'numpy', 'noodles==0.3.3', 'pymonad',
                       'plams@git+https://github.com/SCM-NV/PLAMS@master',
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
