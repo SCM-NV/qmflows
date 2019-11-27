@@ -1,21 +1,19 @@
-
+"""Read Gamess output files."""
 __all__ = ['parse_dipole', 'parse_total_energy', 'parse_frequencies',
            'parse_gradient', 'parse_hessian', 'parse_molecule']
 
-from pyparsing import (alphanums, Group, Literal, OneOrMore, Regex, Suppress,
-                       Word)
+import numpy as np
+from pyparsing import (Group, Literal, OneOrMore, Regex, Suppress, Word,
+                       alphanums)
+
 from .parser import (floatNumber, integer, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule)
-
-import numpy as np
 
 string_array_to_float = np.vectorize(float)
 
 
 def parse_dollar_section(file_name, parser, start, trailing_lines=1):
-    """
-    Parse a Section starting with a $Header and ending with the $END token.
-    """
+    """Parse a Section starting with a $Header and ending with the $END token."""
     xs = parse_file(parse_section(start, '$END'), file_name)[0]
     # Skip first and last lines
     lines = xs.splitlines()[trailing_lines:-1]
@@ -25,9 +23,7 @@ def parse_dollar_section(file_name, parser, start, trailing_lines=1):
 
 
 def parse_molecule(file_name):
-    """
-    Parse the last available geometry from both the job_name.dat or job_name.log.
-    """
+    """Parse the last available geometry from both the job_name.dat or job_name.log."""
     # Header in .out
     header1 = Literal("COORDINATES OF ALL ATOMS ARE (ANGS)")
     # Header in .dat
@@ -44,9 +40,7 @@ def parse_molecule(file_name):
 
 
 def parse_dipole(file_name):
-    """
-    Parse dipole moment from the output.dat file.
-    """
+    """Parse dipole moment from the output.dat file."""
     lit = Literal('DIPOLE')
     p = skipSupress(lit) + OneOrMore(floatNumber)
     rs = parse_file(p, file_name).asList()
@@ -54,25 +48,19 @@ def parse_dipole(file_name):
 
 
 def parse_gradient(file_name):
-    """
-    Parse Gradient from the job_name.dat file.
-    """
+    """Parse Gradient from the job_name.dat file."""
     p = Suppress(Word(alphanums) + floatNumber) + OneOrMore(floatNumber)
     return parse_dollar_section(file_name, p, '$GRAD')
 
 
 def parse_hessian(file_name):
-    """
-    Parse the hessian from the job_name.dat produced by gamess.
-    """
+    """Parse the hessian from the job_name.dat produced by gamess."""
     p = Suppress(integer * 2) + OneOrMore(floatNumber)
     return parse_dollar_section(file_name, p, '$HESS')
 
 
 def parse_frequencies(file_name):
-    """
-    Parse frequencies and normal modes
-    """
+    """Parse frequencies and normal modes"""
     start = "START OF NORMAL MODES"
     end = "END OF NORMAL MODES"
     xs = parse_file(parse_section(start, end), file_name)[0]
@@ -91,9 +79,7 @@ def parse_frequencies(file_name):
 
 
 def parse_total_energy(file_name):
-    """
-    Parse Energy from the output file.
-    """
+    """Parse Energy from the output file."""
     skip = Literal('TOTAL ENERGY') + Regex('=')
     p = skipSupress(skip) + Suppress(skip) + floatNumber
 

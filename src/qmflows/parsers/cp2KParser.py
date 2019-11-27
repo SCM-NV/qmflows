@@ -3,25 +3,25 @@ __author__ = "Felipe Zapata"
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
            'read_cp2k_number_of_orbitals']
 
-# ==================> Standard libraries and third-party <=====================
-from collections import namedtuple
-from itertools import islice
-from pymonad import curry
-from pyparsing import (
-    alphanums, alphas, CaselessLiteral, Empty, FollowedBy, Group, Literal,
-    nums, NotAny, oneOf, OneOrMore, Optional, restOfLine, srange,
-    SkipTo, Suppress, Word, ZeroOrMore)
-
 import fnmatch
-import numpy as np
 import os
 import subprocess
-# ==================> Internal modules <====================
+from collections import namedtuple
+from itertools import islice
+
+import numpy as np
+from more_itertools import (chunked, collapse)
+from pymonad import curry
+from pyparsing import (CaselessLiteral, Empty, FollowedBy, Group, Literal,
+                       NotAny, OneOrMore, Optional, SkipTo, Suppress, Word,
+                       ZeroOrMore, alphanums, alphas, nums, oneOf, restOfLine,
+                       srange)
+
 from ..common import (AtomBasisData, AtomBasisKey, InfoMO)
-from .parser import (
-    floatNumber, minusOrplus, natural, point, try_search_pattern)
-from .xyzParser import (manyXYZ, tuplesXYZ_to_plams)
-from ..utils import (chunksOf, concat, zipWith, zipWith3)
+from ..utils import (zipWith, zipWith3)
+from .parser import (floatNumber, minusOrplus, natural, point,
+                     try_search_pattern)
+from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
@@ -149,7 +149,7 @@ def readCp2KCoeff(path, nOrbitals, nOrbFuns):
 
     # Split the list in chunks containing the orbitals info
     # in block cotaining a maximum of two columns of MOs
-    chunks = chunksOf(rs, nOrbFuns + 3)
+    chunks = chunked(rs, nOrbFuns + 3)
 
     eigenVals = np.empty(nOrbitals)
     coefficients = np.empty((nOrbFuns, nOrbitals))
@@ -344,10 +344,10 @@ def readCp2KBasis(path):
 
 def concatSwapCoeff(xss, m, n):
     if n == 0:
-        return concat(swapCoeff(m)(cs.coeffs[:] for cs in xss))
+        return list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss)))
     else:
-        xs = concat(swapCoeff(m)(cs.coeffs[:] for cs in xss[:-1]))
-        return xs + concat(swapCoeff(n)([list(xss[-1].lastCoeffs)]))
+        xs = list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss[:-1])))
+        return xs + list(collapse(swapCoeff(n)([list(xss[-1].lastCoeffs)])))
 
 
 @curry

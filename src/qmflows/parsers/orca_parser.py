@@ -1,22 +1,21 @@
-
+"""Read Orca output files."""
 __all__ = [
     'parse_basis_set', 'parse_hessian', 'parse_frequencies', 'parse_molecule',
     'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
 from itertools import chain
-from scm.plams import (Atom, Molecule)
-from pyparsing import (alphanums, Group, OneOrMore, Word)
-from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
-                     skipSupress, string_array_to_molecule, try_search_pattern)
-from qmflows.common import (AtomBasisData, AtomBasisKey, InfoMO)
-from qmflows.utils import chunksOf
-from .xyzParser import manyXYZ
 
 import numpy as np
 import pyparsing as pa
+from more_itertools import chunked
+from pyparsing import Group, OneOrMore, Word, alphanums
+from scm.plams import Atom, Molecule
 
-# Type hints
-from typing import (List, Tuple)
+from qmflows.common import AtomBasisData, AtomBasisKey, InfoMO
+
+from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
+                     skipSupress, string_array_to_molecule, try_search_pattern)
+from .xyzParser import manyXYZ
 
 Vector = np.ndarray
 Matrix = np.ndarray
@@ -55,18 +54,16 @@ def parse_molecule_traj(file_traj):
     return plams_mol
 
 
-def parse_hessian(file_hess: str, start: str='$hessian') -> Matrix:
-    """
-    Read the hessian matrix in cartesian coordinates from the job_name.hess file.
+def parse_hessian(file_hess: str, start: str = '$hessian') -> Matrix:
+    """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
+
     :returns: Numpy array
     """
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
 def parse_normal_modes(file_hess: str) -> Matrix:
-    """
-    Returns the normal modes from the job_name.hess file
-    """
+    """Returns the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
@@ -101,15 +98,15 @@ def read_blocks_from_file(start: str, end: str, file_name: str) -> Matrix:
 
     # a block start with a line header then the data
     blocks = [read_block(block)
-              for block in chunksOf(lines, number_of_basis + 1)]
+              for block in chunked(lines, number_of_basis + 1)]
 
     return np.concatenate(blocks, axis=1)
 
 
 def read_block(lines):
-    """
-    Read a block containing the values of the block matrix in
-    a format similar to:
+    """Read a block containing the values of the block matrix.
+
+    The format is similar to:
 
               0          1          2          3          4          5
       0   0.752994  0.078644   0.000000  -0.134007   0.156950  -0.000000
@@ -124,7 +121,7 @@ def read_block(lines):
     return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))
 
 
-def parse_molecular_orbitals(file_name: str) -> Tuple:
+def parse_molecular_orbitals(file_name: str) -> tuple:
     """
     Read the Molecular orbital from the orca output
     """
@@ -145,15 +142,15 @@ def parse_molecular_orbitals(file_name: str) -> Tuple:
 
     tuple_energies, tuple_coeffs = tuple(
         zip(*(read_column_orbitals(xs)
-              for xs in chunksOf(lines, block_lines))))
+              for xs in chunked(lines, block_lines))))
 
     return InfoMO(np.hstack(tuple_energies), np.hstack(tuple_coeffs))
 
 
-def read_column_orbitals(lines: List) -> Tuple:
-    """
-    Read a set of maximum 6 columns containing the Molecular orbitals in a
-      format similar to:
+def read_column_orbitals(lines: list) -> tuple:
+    """Read a set of maximum 6 columns containing the Molecular orbitals.
+
+    the format similar to:
                         0         1         2         3         4         5
                    -19.12661  -0.94591  -0.47899  -0.35256  -0.28216   0.00756
                      2.00000   2.00000   2.00000   2.00000   2.00000   0.00000
@@ -172,10 +169,10 @@ def read_column_orbitals(lines: List) -> Tuple:
     return energies, coefficients
 
 
-def parse_basis_set(file_name: str) -> Tuple:
-    """
-    Read the basis set used by Orca. It is printed by specifying the keyword:
-      !printbase
+def parse_basis_set(file_name: str) -> tuple:
+    """Read the basis set used by Orca.
+
+    It is printed by specifying the keyword: !printbase
     """
     parse_basis_name = skipSupress('Your calculation utilizes the basis: ') + \
         skipSupress(pa.Literal(':')) + pa.Suppress(pa.Literal(':')) + \
@@ -190,10 +187,8 @@ def parse_basis_set(file_name: str) -> Tuple:
     return create_basis_data(basis)
 
 
-def create_basis_data(basis: List) -> Tuple:
-    """
-    Convert the parse data into Contracted Gauss functions information
-    """
+def create_basis_data(basis: list) -> tuple:
+    """Convert the parse data into Contracted Gauss functions information."""
     basis_name = basis[0]
     atom_keys, atom_basis = zip(*[create_CGFs_per_atom(basis_name, xs)
                                   for xs in basis[1]])
@@ -201,10 +196,8 @@ def create_basis_data(basis: List) -> Tuple:
     return atom_keys, atom_basis
 
 
-def create_CGFs_per_atom(basis_name: str, xs: List) -> Tuple:
-    """
-    Create the structure of the CGFs for each atom
-    """
+def create_CGFs_per_atom(basis_name: str, xs: list) -> tuple:
+    """Create the structure of the CGFs for each atom."""
     atom_name = xs[0]
     formats, primitives = zip(*[((x[0], int(x[1])), x[2:]) for x in xs[1:]])
 
@@ -223,9 +216,9 @@ def create_CGFs_per_atom(basis_name: str, xs: List) -> Tuple:
 
 
 def create_parser_element():
-    """
-    Parser to read the basis set of a given element in
-    the following format:
+    """Parser to read the basis set of a given element.
+
+    The format is:
 
     # Basis set for element : O
       NewGTO O

@@ -1,12 +1,13 @@
+"""CP2K input/output handling."""
 __all__ = ['CP2K_Result', 'cp2k']
 
-from ..warnings_qmflows import cp2k_warnings
-from .packages import (
-    Package, package_properties, parse_output_warnings, Result)
-from ..parsers.cp2KParser import parse_cp2k_warnings
-from ..settings import Settings
 from scm import plams
 
+from ..parsers.cp2KParser import parse_cp2k_warnings
+from ..settings import Settings
+from ..warnings_qmflows import cp2k_warnings
+from .packages import (Package, Result, package_properties,
+                       parse_output_warnings)
 
 # ====================================<>=======================================
 charge_dict = {
@@ -24,13 +25,14 @@ __all__ = ['cp2k']
 
 
 class CP2K(Package):
-    """
-    This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
+    """This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
+
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
     **cp2k** function should be called.
     """
+
     def __init__(self):
         super(CP2K, self).__init__("cp2k")
         self.generic_dict_file = 'generic2CP2K.json'
@@ -83,8 +85,7 @@ class CP2K(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        """
-        Create the settings input for complex cp2k keys
+        """Create the settings input for complex cp2k keys.
 
         :param settings: Job Settings.
         :type settings: :class:`~qmflows.Settings`
@@ -94,8 +95,7 @@ class CP2K(Package):
         :type mol: plams Molecule
         """
         def write_cell_angles(s, value, mol, key):
-            """
-            The angles of the cell is a 3-dimensional list ::
+            """The angles of the cell is a 3-dimensional list.
 
             &SUBSYS
               &CELL
@@ -163,9 +163,8 @@ class CP2K(Package):
 
 
 class CP2K_Result(Result):
-    """
-    Class providing access to CP2K result.
-    """
+    """Class providing access to CP2K result."""
+
     def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
                  properties=package_properties['cp2k'],
                  status='successful', warnings=None):
@@ -174,4 +173,5 @@ class CP2K_Result(Result):
                          status=status, warnings=warnings)
 
 
+# instance
 cp2k = CP2K()

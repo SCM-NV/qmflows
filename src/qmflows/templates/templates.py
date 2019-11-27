@@ -1,3 +1,4 @@
+"""Default options to call some quantum packages."""
 
 __all__ = ['freq', 'geometry', 'singlepoint', 'ts']
 

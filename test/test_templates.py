@@ -1,16 +1,12 @@
 from qmflows.templates import (freq, geometry, singlepoint, ts)
 from qmflows.utils import (dict2Setting, settings2Dict)
-import pytest
 
 
 def fun(x):
-    """
-    Assert that the functions are the inverse of each other
-    """
+    """Assert that the functions are the inverse of each other."""
     return dict2Setting(settings2Dict(x))
 
 
-@pytest.mark.slow
 def test_templates():
     """
     Test that the JSON files are read properly.

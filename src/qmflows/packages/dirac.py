@@ -1,3 +1,4 @@
+"""Dirac input/output handling."""
 __all__ = ['dirac']
 
 from .packages import (Package, package_properties, Result)
@@ -7,8 +8,8 @@ from warnings import warn
 
 
 class DIRAC(Package):
-    """
-    """
+    """Manage the call and properties reading of a Dirac calculation."""
+
     def __init__(self):
         super().__init__("dirac")
         self.generic_dict_file = 'generic2Dirac.json'
@@ -37,9 +38,7 @@ class DIRAC(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        """
-        Create the settings input for complex Dirac keywords
-        """
+        """Create the settings input for complex Dirac keywords."""
         warn('Keyword ' + key + ' doesn\'t exist')
 
 
@@ -48,9 +47,8 @@ dirac = DIRAC()
 
 
 class DIRAC_Result(Result):
-    """
-    Class to access **DIRAC** Results.
-    """
+    """Class to access **DIRAC** Results."""
+
     def __init__(self, settings, molecule, job_name, plams_dir,
                  status='done', warnings=None):
         properties = package_properties['dirac']

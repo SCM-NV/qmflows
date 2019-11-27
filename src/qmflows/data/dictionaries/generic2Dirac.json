@@ -1,4 +1,11 @@
 {
-    "basis":      ["dirac", "MOLECULE", "DEFAULT"],
-    "hamiltonian": ["dirac", "HAMILTONIAN"]
+    "basis": [
+        "dirac",
+        "MOLECULE",
+        "DEFAULT"
+    ],
+    "hamiltonian": [
+        "dirac",
+        "HAMILTONIAN"
+    ]
 }

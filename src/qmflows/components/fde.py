@@ -1,13 +1,13 @@
 __all__ = ['mfcc', 'MFCC_Result', 'adf3fde', 'ADF3FDE_Result', 'Fragment', 'adf_fragmentsjob']
 
-from qmflows import templates
-from qmflows.settings import Settings
-from qmflows.packages import Result
-from qmflows.packages.SCM import adf
-from noodles import (gather, schedule)
+import numpy as np
+from noodles import gather, schedule
 from scm.plams import Molecule
 
-import numpy as np
+from qmflows import templates
+from qmflows.packages import Result
+from qmflows.packages.SCM import adf
+from qmflows.settings import Settings
 
 
 @schedule

@@ -1,23 +1,9 @@
+"""Common funcionality to call all the quantum packages"""
 
 __all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
-
-# ========>  Standard and third party Python Libraries <======
-from functools import partial
-from noodles import (schedule, has_scheduled_methods, serial)
-from noodles.serial.path import SerPath
-from noodles.run.threading.sqlite3 import run_parallel
-from noodles.serial import (Serialiser, Registry, AsDict)
-from noodles.serial.reasonable import SerReasonableObject
-from noodles.serial.numpy import (SerNumpyScalar, arrays_to_hdf5)
-from os.path import join
-from pathlib import Path
-from rdkit import Chem
-from scm import plams
-from typing import (Any, Callable, Dict, List)
-from warnings import warn
 
 import base64
 import fnmatch
@@ -25,15 +11,27 @@ import importlib
 import inspect
 import os
 import uuid
+from functools import partial
+from os.path import join
+from pathlib import Path
+from typing import Any, Callable
+from warnings import warn
+
 import numpy as np
 import pkg_resources as pkg
 import scm.plams.interfaces.molecule.rdkit as molkit
+from more_itertools import collapse
+from noodles import has_scheduled_methods, schedule, serial
+from noodles.run.threading.sqlite3 import run_parallel
+from noodles.serial import AsDict, Registry, Serialiser
+from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
+from noodles.serial.path import SerPath
+from noodles.serial.reasonable import SerReasonableObject
+from rdkit import Chem
+from scm import plams
 
-# ==================> Internal modules <====================
-from ..settings import Settings
 from ..fileFunctions import json2Settings
-from ..utils import concatMap
-
+from ..settings import Settings
 
 package_properties = {
     'adf': 'data/dictionaries/propertiesADF.json',
@@ -139,8 +137,8 @@ class Result:
         if file_pattern is None:
             file_pattern = '{}*.{}'.format(self.job_name, file_ext)
 
-        output_files = concatMap(partial(find_file_pattern, file_pattern),
-                                 [plams_dir, work_dir])
+        output_files = list(collapse(map(partial(find_file_pattern, file_pattern),
+                                         [plams_dir, work_dir])))
         if output_files:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
@@ -429,9 +427,7 @@ def registry():
 
 
 def import_parser(ds, module_root="qmflows.parsers"):
-    """
-    Import parser for the corresponding property.
-    """
+    """Import parser for the corresponding property."""
     module_sufix = ds['parser']
     module_name = module_root + '.' + module_sufix
 
@@ -453,7 +449,7 @@ def get_tmpfile_name():
     return tmpfolder + '/' + str(uuid.uuid4())
 
 
-def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
+def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
     """
     Inspect the signature of function `fun` and filter the keyword arguments,
     which are the ones that have a nonempty default value. Then extract
@@ -473,9 +469,7 @@ def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
 
 
 def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
-    """
-    Look out for warnings in the output file.
-    """
+    """Look out for warnings in the output file."""
     output_files = list(find_file_pattern('*out', plams_dir))
     if not output_files:
         msg = "job: {} has failed. check folder: {}".format(

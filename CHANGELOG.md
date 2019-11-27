@@ -1,4 +1,14 @@
 
+# Version 0.9.0 (27/11/2019)
+
+## Changed
+  * Use autopep to format the code
+
+## Removed
+  * Interface to HDF5
+  * Turbomol Parser
+  * graphviz dependency
+
 # Version 0.8.0 (17/06/2019)
 
 ## Changed

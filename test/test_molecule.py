@@ -1,10 +1,9 @@
 from qmflows import packages
-import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 
-@pytest.mark.slow
 def test_SerMolecule():
+    """Test molecule serialization."""
     mol = molkit.from_smiles("c1ccccc1CC")
     registry = packages.registry()
     encoded_molecule = registry.deep_encode(mol)

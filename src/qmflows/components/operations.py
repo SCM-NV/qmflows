@@ -22,7 +22,8 @@ def select_max(results, prop='energy'):
     :param prop:
     :return:
     """
-    filtered_results = [result for result in results if result and result.__getattr__(prop)]
+    filtered_results = [
+        result for result in results if result and result.__getattr__(prop)]
     if len(filtered_results) > 0:
         selected = max(filtered_results, key=lambda item: getattr(item, prop))
         return selected
@@ -40,7 +41,8 @@ def select_min(results, prop='energy'):
     :param prop:
     :return:
     """
-    filtered_results = [result for result in results if result and result.__getattr__(prop)]
+    filtered_results = [
+        result for result in results if result and result.__getattr__(prop)]
     if len(filtered_results) > 0:
         selected = min(filtered_results, key=lambda item: getattr(item, prop))
         return selected
