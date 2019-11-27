@@ -1,6 +1,6 @@
 from scm.plams import Molecule
 from qmflows import (Settings, templates, run)
-from qmflows.packages import (adf, dirac, dftb, gamess, orca)
+from qmflows.packages import (adf, dftb, gamess, orca)
 import os
 import pytest
 import shutil
@@ -34,20 +34,6 @@ def test_fail_scm():
     try:
         result = run(fail_adf.molecule, path=folder)
         print(result)
-        assert isNone(result)
-    finally:
-        remove(folder)
-
-
-@pytest.mark.xfail
-def test_fail_dirac():
-    """ Dirac package should return ``None`` if it fails """
-    folder = tempfile.mkdtemp(prefix="qmflows_")
-    mol = Molecule("test/test_files/h2.xyz")
-    s = Settings()
-    job = dirac(s, mol, job_name="fail_dirac")
-    try:
-        result = run(job.energy, path=folder)
         assert isNone(result)
     finally:
         remove(folder)
