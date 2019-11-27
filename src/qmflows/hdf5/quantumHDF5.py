@@ -1,6 +1,6 @@
 """Module to store data in the HDF5."""
 
-__all__ = ['StoreasHDF5', 'cp2k2hdf5', 'turbomole2hdf5']
+__all__ = ['StoreasHDF5', 'cp2k2hdf5']
 
 from functools import partial
 from os.path import join
