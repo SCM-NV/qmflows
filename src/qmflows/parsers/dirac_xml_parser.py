@@ -1,3 +1,4 @@
+"""Read Dirac xml output file."""
 
 __all__ = ['parse_xml']
 
@@ -6,9 +7,7 @@ import xml.etree.ElementTree as ET
 
 
 def get_text(xs, read):
-    """
-    Read a Numerical value from the Leaf of a tree
-    """
+    """Read a Numerical value from the Leaf of a tree."""
     if isinstance(xs, list):
         rs = list(map(lambda x: read(getattr(x, 'text')), xs))
     else:
@@ -18,8 +17,8 @@ def get_text(xs, read):
 
 
 def parse_xml(filename, section=None, select_value=None, parse_text=None):
-    """
-    Get a Property from the dirac xml output.
+    """Get a Property from the dirac xml output.
+
     :param filename: Name of the output file
     :param prop: Property to look up in the ouput
 

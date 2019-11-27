@@ -1,16 +1,17 @@
+"""Use the AWK command line to read output files."""
 
 __all__ = ['awk_file', 'extract_line_value']
-
-from pyparsing import (OneOrMore, SkipTo, Suppress)
-from qmflows.parsers.parser import parse_file
 
 import os
 import subprocess
 
+from pyparsing import OneOrMore, SkipTo, Suppress
+
+from qmflows.parsers.parser import parse_file
+
 
 def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
-    """awk_file(filename, script='', progfile=None, **kwargs)
-    Execute an AWK script on a file given by *filename*.
+    """Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
     the contents of the script (should be a single string) as a *script*
@@ -55,11 +56,10 @@ def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
 
 
 def extract_line_value(file_name, pattern=None, pos=0):
-    """
-    Get a field record from a file.
+    """Get a field record from a file.
+
     Search for lines containing `pattern` and return the last line
     containing that value.
-
     :returns: value at position `pos` in the last found line, containing pattern.
     """
     parse_Line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))

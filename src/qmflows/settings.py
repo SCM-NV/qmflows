@@ -1,3 +1,4 @@
+"""Settings use to describe the input of a Quantum chemistry package."""
 
 __all__ = ['Settings']
 
@@ -5,8 +6,8 @@ from scm import plams
 
 
 class Settings(plams.core.settings.Settings, ):
-    """
-    This is a subclass of the :class:`plams.core.settings.Settings`.
+    """This is a subclass of the :class:`plams.core.settings.Settings`.
+
     The difference with respect to plams' Settings are:
     - settings['a.b'] is equivalent to settings['a']['b'] = settings.a.b
     - in update(): settings.__block_replace = True results in removal of all

@@ -1,26 +1,28 @@
+"""Orca input/output bookkeeping."""
 __all__ = ['orca']
 
 from os.path import join
-from ..settings import Settings
-from .packages import (
-    Package, package_properties, Result, get_tmpfile_name)
-from ..parsers.orca_parser import parse_molecule
-from noodles import schedule
-from scm import plams
 from warnings import warn
 
 import numpy as np
+from noodles import schedule
+from scm import plams
+
+from ..parsers.orca_parser import parse_molecule
+from ..settings import Settings
+from .packages import Package, Result, get_tmpfile_name, package_properties
 
 # ============================= Orca ==========================================
 
 
 class ORCA(Package):
-    """
-    This class prepare the input to run a Orca job using both Plams and
-    templates. It also does the manangement of the input/output files resulting
+    """This class prepare the input to run a Orca job using both Plams and templates.
+
+    It also does the manangement of the input/output files resulting
     from running Orca and returns a Results object that containing the methods
     and data required to retrieve the output.
     """
+
     def __init__(self):
         super().__init__("orca")
         self.generic_dict_file = 'generic2ORCA.json'
@@ -51,14 +53,12 @@ class ORCA(Package):
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        """
-        Translate generic keywords to their corresponding Orca keywords.
-        """
+        """Translate generic keywords to their corresponding Orca keywords. """
         @schedule
         def inithess(value):
-            """
-            Generate an seperate file containing the initial Hessian matrix used as
-            guess for the computation.
+            """Generate an seperate file containing the initial Hessian matrix.
+            
+            It is used as guess for the computation.
             """
             # Convert Hessian to numpy array
             value = value if isinstance(value, np.ndarray) else np.array(value)
@@ -73,7 +73,8 @@ class ORCA(Package):
                 for i in range((dim - 1) // 6 + 1):
                     n_columns = min(6, dim - 6 * i)
                     ret += '         '
-                    ret += ' '.join('{:10d}'.format(v + 6 * i) for v in range(n_columns))
+                    ret += ' '.join('{:10d}'.format(v + 6 * i)
+                                    for v in range(n_columns))
                     ret += '\n'
                     for j in range(dim):
                         ret += '{:7d}     '.format(j)
@@ -121,9 +122,11 @@ class ORCA(Package):
                     if ks[0] == 'dist' and len(ks) == 3:
                         cons += '{{ B {:d} {:d} {:f} C }}'.format(*atoms, v)
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        cons += '{{ A {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
+                        cons += '{{ A {:d} {:d} {:d} {:f} C }}'.format(
+                            *atoms, v)
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(*atoms, v)
+                        cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(
+                            *atoms, v)
                     else:
                         warn('Invalid constraint key: ' + k)
             settings.specific.orca.geom.Constraints._end = cons

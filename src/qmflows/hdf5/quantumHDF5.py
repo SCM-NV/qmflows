@@ -1,12 +1,13 @@
+"""Module to store data in the HDF5."""
 
 __all__ = ['StoreasHDF5', 'cp2k2hdf5', 'turbomole2hdf5']
 
 from functools import partial
 from os.path import join
-from qmflows.parsers.cp2KParser import readCp2KBasis
-from qmflows.parsers.turbomoleParser import readTurbomoleBasis
 
 import numpy as np
+
+from qmflows.parsers.cp2KParser import readCp2KBasis
 
 
 class StoreasHDF5:
@@ -105,29 +106,5 @@ def cp2kOpts(file_h5, key):
     args = key.args
     name = key.name
     d = {"basis": partial(storeCp2k.saveBasis, readCp2KBasis)}
-
-    return d[name](*args)
-
-
-# ==================================================
-# TurboMol Interface
-
-
-def turbomole2hdf5(file_h5, keys):
-    for k in keys:
-        turbomoleOpts(file_h5, k)
-
-
-def turbomoleOpts(file_h5, key):
-    """
-    Read from text files numerical properties and store them in HDF5 format.
-    Available options:
-    - Basis set
-    - Molecular Orbitals
-    """
-    storeTurbo = StoreasHDF5(file_h5, "turbomole")
-    args = key.args
-    name = key.name
-    d = {"basis": partial(storeTurbo.saveBasis, readTurbomoleBasis)}
 
     return d[name](*args)

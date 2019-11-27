@@ -16,7 +16,7 @@ from os.path import join
 from pathlib import Path
 from rdkit import Chem
 from scm import plams
-from typing import (Any, Callable, Dict, List)
+from typing import (Any, Callable)
 from warnings import warn
 
 import base64
@@ -453,7 +453,7 @@ def get_tmpfile_name():
     return tmpfolder + '/' + str(uuid.uuid4())
 
 
-def ignored_unused_kwargs(fun: Callable, args: List, kwargs: Dict) -> Any:
+def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
     """
     Inspect the signature of function `fun` and filter the keyword arguments,
     which are the ones that have a nonempty default value. Then extract

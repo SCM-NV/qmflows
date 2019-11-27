@@ -1,23 +1,20 @@
-
+"""Interface to call the ADF KFReader."""
 __all__ = ['kfreader', 'extract_properties_rkf']
 
-from qmflows.settings import Settings
-from scm import plams
 import numpy as np
+from scm import plams
+
+from qmflows.settings import Settings
 
 
 def kfreader(path_t21, section=None, prop=None):
-    """
-    Use the plams KFfile to read the TAPE21 File.
-    """
+    """Use the plams KFfile to read the TAPE21 File.x"""
     kf = plams.tools.kftools.KFFile(path_t21)
     return kf.read(section, prop)
 
 
 def extract_properties_rkf(path_rkf, key=None, subkey=None):
-    """
-    Read result from a DFTB computation using the job_name.rkf file.
-    """
+    """Read result from a DFTB computation using the job_name.rkf file."""
     kf = plams.tools.kftools.KFFile(path_rkf).read
     props = Settings()
 

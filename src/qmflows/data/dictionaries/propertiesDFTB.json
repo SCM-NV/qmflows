@@ -1,14 +1,55 @@
 {
-    "dipole": {"parser": "generic_parsers", "function": "awk_file", "file_ext": "out",
-    	       "kwargs": {"script": "/Dipole/ {print $2; print $3; print $4}"}},
-    "frequencies": {"parser": "adf_parser",  "function": "kfreader", "file_ext": "rkf", 
-		    "kwargs": {"section": "Vibrations", "prop": "Frequencies[cm-1]"}},
-    "optcycles": {"parser": "adf_parser", "function": "kfreader", "file_ext": "rkf", 
-		  "kwargs": {"section": "History", "prop": "nEntries"}},
-    "energy": {"parser": "adf_parser", "function": "extract_properties_rkf", "file_ext": "rkf",
-	       "kwargs": {"key": "Energy", "subkey": "DFTB Final Energy"}},
-    "charges": {"parser": "adf_parser", "function": "extract_properties_rkf", "file_ext": "rkf",
-		"kwargs": {"key": "Atomic Charge", "subkey": "Net"}},
-    "hessian": {"parser": "adf_parser", "function": "extract_properties_rkf", "file_ext": "rkf",
-		"kwargs": {"key": "Hessian", "subkey": "Generic"}}
+  "dipole": {
+    "parser": "generic_parsers",
+    "function": "awk_file",
+    "file_ext": "out",
+    "kwargs": {
+      "script": "/Dipole/ {print $2; print $3; print $4}"
+    }
+  },
+  "frequencies": {
+    "parser": "adf_parser",
+    "function": "kfreader",
+    "file_ext": "rkf",
+    "kwargs": {
+      "section": "Vibrations",
+      "prop": "Frequencies[cm-1]"
+    }
+  },
+  "optcycles": {
+    "parser": "adf_parser",
+    "function": "kfreader",
+    "file_ext": "rkf",
+    "kwargs": {
+      "section": "History",
+      "prop": "nEntries"
+    }
+  },
+  "energy": {
+    "parser": "adf_parser",
+    "function": "extract_properties_rkf",
+    "file_ext": "rkf",
+    "kwargs": {
+      "key": "Energy",
+      "subkey": "DFTB Final Energy"
+    }
+  },
+  "charges": {
+    "parser": "adf_parser",
+    "function": "extract_properties_rkf",
+    "file_ext": "rkf",
+    "kwargs": {
+      "key": "Atomic Charge",
+      "subkey": "Net"
+    }
+  },
+  "hessian": {
+    "parser": "adf_parser",
+    "function": "extract_properties_rkf",
+    "file_ext": "rkf",
+    "kwargs": {
+      "key": "Hessian",
+      "subkey": "Generic"
+    }
+  }
 }

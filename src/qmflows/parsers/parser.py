@@ -1,14 +1,15 @@
-__author__ = "Felipe Zapata"
+"""General utilities to parse both input/out files."""
 
 __all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
            'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
 
 
-from scm.plams import (Atom, Molecule)
-from pyparsing import (CaselessKeyword, Combine, Literal, nums, Optional,
-                       ParseException, Regex, SkipTo, Suppress, Word)
-import numpy as np
 import re
+
+import numpy as np
+from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
+                       ParseException, Regex, SkipTo, Suppress, Word, nums)
+from scm.plams import Atom, Molecule
 
 # Literals
 point = Literal('.')
