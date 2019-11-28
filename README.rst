@@ -38,6 +38,7 @@ automate the following tasks:
  2. Handle tasks dependencies (Noodles_).
  3. Advanced molecular manipulation capabilities with (rdkit_).
  4. Jobs failure detection and recovery.
+ 5. Numerical data storage (h5py_).
 
 Tutorial and Examples
 ---------------------
@@ -74,9 +75,9 @@ Dependencies installation
 Using the conda environment the following packages should be installed:    
 
 
-- install rdkit_ using conda:
+- install rdkit_ and h5py_ using conda:
 
-  - ``conda install -y -q -c conda-forge rdkit``
+  - ``conda install -y -q -c conda-forge rdkit h5py``
     
 .. _installation:
 
@@ -101,7 +102,7 @@ Now you are ready to use *qmflows*.
 .. _anaconda: https://www.anaconda.com/distribution/#download-section
 .. _installConda: https://conda.io/projects/conda/en/latest/user-guide/install/index.html
 .. _Noodles: http://nlesc.github.io/noodles/
-.. _HDF5: http://www.h5py.org/ 
+.. _h5py: http://www.h5py.org/
 .. _here: https://www.python.org/downloads/
 .. _rdkit: http://www.rdkit.org
 .. _jupyter-notebook: http://jupyter.org/
