@@ -78,5 +78,8 @@ pytest*
 .DS_Store
 scripts/.DS_Store
 
+# mypy
+.mypy_cache/
+
 # vscode
 .vscode
