@@ -3,7 +3,7 @@ import pathlib
 from os.path import isdir
 
 from qmflows.utils import init_restart, InitRestart
-from scm.plams import init, finish, config
+from scm.plams import init, finish
 
 PATH = pathlib.Path('test') / 'test_files'
 
