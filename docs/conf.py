@@ -32,7 +32,6 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'nbsphinx',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
@@ -54,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'qmflows'
-copyright = '2019, F. Zapata, L. Ridder, B. F. van Beek'
+copyright = '2020, F. Zapata, L. Ridder, B. F. van Beek'
 author = 'F. Zapata, L. Ridder, B. F. van Beek'
 
 # The version info for the project you're documenting, acts as replacement for
