@@ -77,3 +77,6 @@ pytest*
 .ds_store
 .DS_Store
 scripts/.DS_Store
+
+# vscode
+.vscode
