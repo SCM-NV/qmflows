@@ -77,7 +77,26 @@ def init_restart(path: Union[None, AnyStr, os.PathLike] = None,
 
 
 class InitRestart(AbstractContextManager):
-    """A context manager wrapper around :func:`init_restart`."""
+    """A context manager wrapper around :func:`init_restart`.
+
+    Examples
+    --------
+    .. code:: python
+
+        >>> path = "path/to/my/workdir"
+        >>> with InitRestart(path):
+        ...     ...  # Run any PLAMS Jobs here
+
+    See Also
+    --------
+    :func:`init<scm.plams.core.functions.init>`:
+        Initialize PLAMS environment. Create global ``config`` and the default
+        :class:`JobManager<scm.plams.core.jobmanager.JobManager>`.
+
+    :func:`finish<scm.plams.core.functions.finish>`:
+        Wait for all threads to finish and clean the environment.
+
+    """
 
     def __init__(self, path: Union[None, AnyStr, os.PathLike] = None,
                  folder: Union[None, AnyStr, os.PathLike] = None,
