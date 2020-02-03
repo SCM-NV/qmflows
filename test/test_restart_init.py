@@ -19,6 +19,7 @@ def test_restart_init() -> None:
         init_restart(PATH)
         assert isdir(workdir)
         assert not isdir(f'{workdir}.002')
+        finish()
 
         with InitRestart(PATH):
             assert isdir(workdir)
