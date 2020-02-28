@@ -49,7 +49,7 @@ class Result:
     Class containing the result associated with a quantum chemistry simulation.
     """
 
-    def __init__(self, settings: Settings, molecule, job_name, dill_path, plams_dir=None,
+    def __init__(self, settings: Settings, molecule, job_name, dill_path=None, plams_dir=None,
                  work_dir=None, properties=None, status='done', warnings=None):
         """
         :param settings: Job Settings.
@@ -85,10 +85,10 @@ class Result:
 
     def __deepcopy__(self, memo):
         cls = type(self)
-        if not self._results_open:
+        if not self._results_open or self._results is None:
             dill_path = self._results
         else:
-            job = self.results.job
+            job = self._results.job
             dill_path = join(job.path, f"{job.name}.dill")
 
         return cls(self.settings,
@@ -194,6 +194,10 @@ class Result:
         """Helper method for :attr:`Results.results` for unpacking the pickled .dill file."""
         self._results_open = True
 
+        # Do not bother unpacking if None; i.e. if the job crashed
+        if self._results is None:
+            return
+
         # Ignore the Result.__getattr__() warnings for now
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
@@ -246,8 +250,7 @@ class Package:
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                mol = molkit.from_rdmol(mol) if isinstance(
-                    mol, Chem.Mol) else mol
+                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -261,8 +264,7 @@ class Package:
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
-                warnings_tolerance = kwargs.get(
-                    "terminate_job_in_case_of_warnings")
+                warnings_tolerance = kwargs.get("terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
                 if all(w is not None for w in [warnings_tolerance, output_warnings]):
@@ -274,13 +276,13 @@ class Package:
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
                         """)
-                        result = Result(None, None, job_name=job_name, properties=properties,
-                                        status='failed')
+                        result = Result(None, None, job_name=job_name, dill_path=None,
+                                        properties=properties, tatus='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
                 warn(f"Job {job_name} has failed.\n{err}")
-                result = Result(None, None, job_name=job_name,
+                result = Result(None, None, job_name=job_name, dill_path=None,
                                 properties=properties, status='failed')
         else:
             warn(f"""
@@ -289,7 +291,7 @@ class Package:
             """)
 
             # Send an empty object downstream
-            result = Result(None, None, job_name=job_name,
+            result = Result(None, None, job_name=job_name, dill_path=None,
                             properties=properties, status='failed')
 
         # Label this calculation as failed if there are not dependecies coming
