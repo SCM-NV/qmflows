@@ -1,6 +1,7 @@
 """Orca input/output bookkeeping."""
 __all__ = ['orca']
 
+from os import sep
 from os.path import join
 from warnings import warn
 
@@ -43,9 +44,12 @@ class ORCA(Package):
         result = job.run()
 
         # Relative job path
-        relative_plams_path = '/'.join(result.job.path.split('/')[-2:])
+        relative_plams_path = sep.join(result.job.path.split(sep)[-2:])
 
-        return ORCA_Result(orca_settings, mol, result.job.name,
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
+
+        return ORCA_Result(orca_settings, mol, result.job.name, dill_path,
                            plams_dir=relative_plams_path, status=job.status)
 
     def postrun(self):
@@ -128,7 +132,7 @@ class ORCA(Package):
                         cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(
                             *atoms, v)
                     else:
-                        warn('Invalid constraint key: ' + k)
+                        warn(f'Invalid constraint key: {k}')
             settings.specific.orca.geom.Constraints._end = cons
 
         def freeze(value):
@@ -147,8 +151,7 @@ class ORCA(Package):
 
         def selected_atoms(value):
             if not isinstance(value, list):
-                msg = 'selected_atoms ' + str(value) + ' is not a list'
-                raise RuntimeError(msg)
+                raise RuntimeError(f'selected_atoms {value} is not a list')
             cons = ''
             if isinstance(value[0], int):
                 for a in range(len(mol)):
@@ -168,17 +171,16 @@ class ORCA(Package):
         if key in functions:
             functions[key](value)
         else:
-            msg = 'Keyword ' + key + ' not implemented for package ORCA'
-            warn(msg)
+            warn(f'Keyword {key} not implemented for package ORCA')
 
 
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results"""
 
-    def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 status='done', warnings=None):
+    def __init__(self, settings, molecule, job_name, dill_path,
+                 plams_dir=None, status='done', warnings=None):
         properties = package_properties['orca']
-        super().__init__(settings, molecule, job_name=job_name,
+        super().__init__(settings, molecule, job_name, dill_path,
                          plams_dir=plams_dir, properties=properties,
                          status=status, warnings=warnings)
 

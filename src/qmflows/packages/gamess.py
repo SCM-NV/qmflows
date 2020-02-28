@@ -1,9 +1,12 @@
 __all__ = ['gamess']
 
+from os import sep
+from warnings import warn
+
+from scm import plams
+
 from .packages import (Package, package_properties, Result)
 from ..settings import Settings
-from scm import plams
-from warnings import warn
 
 
 class GAMESS(Package):
@@ -44,12 +47,14 @@ class GAMESS(Package):
         r = job.run()
 
         # Relative job path
-        relative_plams_path = '/'.join(r.job.path.split('/')[-2:])
+        relative_plams_path = sep.join(r.job.path.split(sep)[-2:])
 
-        result = Gamess_Result(gamess_settings, mol, r.job.name,
-                               plams_dir=relative_plams_path, work_dir=work_dir,
-                               status=job.status)
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
 
+        result = Gamess_Result(gamess_settings, mol, r.job.name, relative_plams_path,
+                               dill_path,
+                               work_dir=work_dir, status=job.status)
         return result
 
     def postrun(self):
@@ -141,7 +146,7 @@ class GAMESS(Package):
                         n = 'fvalue({:d})'.format(i)
                         s[n] = v
                     else:
-                        warn('Invalid constraint key: ' + k)
+                        warn(f'Invalid constraint key: {k}')
                     i += 1
                 settings.specific.gamess.zmat = s
         # Available translations
@@ -151,18 +156,17 @@ class GAMESS(Package):
         if key in functions:
             functions[key]()
         else:
-            msg = 'Generic keyword "' + key + '" not implemented for package Gamess.'
-            warn(msg)
+            warn(f'Generic keyword {key!r} not implemented for package Gamess.')
 
 
 class Gamess_Result(Result):
     """
     Class providing access to CP2K result.
     """
-    def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, status='done', warnings=None):
+    def __init__(self, settings, molecule, job_name, dill_path,
+                 plams_dir=None, work_dir=None, status='done', warnings=None):
         properties = package_properties['gamess']
-        super().__init__(settings, molecule, job_name, plams_dir,
+        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
                          work_dir=work_dir, properties=properties,
                          status=status, warnings=warnings)
 
@@ -177,12 +181,11 @@ class Gamess_Result(Result):
         """
         result = super().__getattr__(prop)
         if result is None:
-            msg = """
+            warn("""
             Maybe you need to provided to the gamess
             function the optional keyword 'work_dir' containing the path
             to the SCR folder where GAMESS stores the *.dat and other
-            output files"""
-            warn(msg)
+            output files""")
 
         return result
 

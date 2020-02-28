@@ -101,7 +101,7 @@ class ADF(Package):
         def selected_atoms():
             settings.specific.adf.geometry.optim = "cartesian"
             if not isinstance(value, list):
-                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                msg = f'selected_atoms {value} is not a list'
                 raise RuntimeError(msg)
             if isinstance(value[0], int):
                 for a in range(len(mol)):
@@ -140,7 +140,7 @@ class ADF(Package):
                                    int(ks[3]), int(ks[4]))
                         settings.specific.adf.constraints[name] = v
                     else:
-                        warn('Invalid constraint key: ' + k)
+                        warn(f'Invalid constraint key: {k}')
 
         # Available translations
         functions = {'freeze': freeze,
@@ -161,8 +161,10 @@ class ADF_Result(Result):
                  plams_dir=None, status='done', warnings=None):
         # Load available property parser from Json file.
         properties = package_properties['adf']
-        super().__init__(settings, molecule, job_name, dill_path, plams_dir=plams_dir,
-                         properties=properties, status=status, warnings=warnings)
+        super().__init__(settings, molecule, job_name, dill_path,
+                         plams_dir=plams_dir, properties=properties,
+                         status=status, warnings=warnings)
+
         # Create a KF reader instance
         self.kf = plams.KFFile(path_t21)
 
@@ -232,13 +234,15 @@ class DFTB(Package):
             job.status = 'failed'
             name = job_name
             path = None
-            msg = "job:{} has failed.\nRKF is corrupted"
-            print(msg.format(job_name))
+            warn(f"job:{job_name} has failed.\nRKF is corrupted")
 
         if job.status in ['failed', 'crashed']:
             plams.config.default_jobmanager.remove_job(job)
 
-        return DFTB_Result(dftb_settings, mol, name,
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
+
+        return DFTB_Result(dftb_settings, mol, name, dill_path,
                            plams_dir=path, status=job.status)
 
     def postrun(self):
@@ -252,8 +256,7 @@ class DFTB(Package):
         def freeze():
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
-                msg = 'freeze ' + str(value) + ' is not a list'
-                raise RuntimeError(msg)
+                raise RuntimeError(f'freeze {value} is not a list')
             if isinstance(value[0], int):
                 for a in value:
                     at = 'atom ' + str(a)
@@ -267,8 +270,7 @@ class DFTB(Package):
         def selected_atoms():
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
-                msg = 'selected_atoms ' + str(value) + ' is not a list'
-                raise RuntimeError(msg)
+                raise RuntimeError(f'selected_atoms {value} is not a list')
             if isinstance(value[0], int):
                 for a in range(len(mol)):
                     if a + 1 not in value:
@@ -298,7 +300,7 @@ class DFTB(Package):
                             int(ks[3]), int(ks[4]))
                         settings.specific.dftb.constraints[name] = v
                     else:
-                        warn('Invalid constraint key: ' + k)
+                        warn(f'Invalid constraint key: {k}')
 
         # Available translations
         functions = {'freeze': freeze,
@@ -307,21 +309,22 @@ class DFTB(Package):
         if key in functions:
             functions[key]()
         else:
-            msg = 'Generic keyword "' + key + '" not implemented for package DFTB.'
-            warn(msg)
+            warn(f'Generic keyword {key!r} not implemented for package DFTB.')
 
 
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results"""
 
-    def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 status='done', warnings=None):
+    def __init__(self, settings, molecule, job_name, dill_path,
+                 plams_dir=None, status='done', warnings=None):
         # Read available propiety parsers from a JSON file
         properties = package_properties['dftb']
-        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
-                         properties=properties, status=status, warnings=warnings)
+        super().__init__(settings, molecule, job_name, dill_path,
+                         plams_dir=plams_dir, properties=properties,
+                         status=status, warnings=warnings)
+
         if plams_dir is not None:
-            kf_filename = join(plams_dir, '{}.rkf'.format(job_name))
+            kf_filename = join(plams_dir, f'{job_name}.rkf')
             # create a kf reader instance
             self.kf = plams.KFFile(kf_filename)
         else:

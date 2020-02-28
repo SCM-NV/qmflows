@@ -1,6 +1,8 @@
 """CP2K input/output handling."""
 __all__ = ['CP2K_Result', 'cp2k']
 
+from os.path import join
+
 from scm import plams
 
 from ..parsers.cp2KParser import parse_cp2k_warnings
@@ -75,9 +77,11 @@ class CP2K(Package):
         warnings = parse_output_warnings(job_name, r.job.path,
                                          parse_cp2k_warnings, cp2k_warnings)
 
-        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path,
-                             work_dir, status=job.status, warnings=warnings)
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
 
+        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
+                             work_dir=work_dir, status=job.status, warnings=warnings)
         return result
 
     def postrun(self):
@@ -147,8 +151,7 @@ class CP2K(Package):
                 abc = ' [angstrom] {} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
-                msg = "cell parameter:{}\nformat not recognized"
-                RuntimeError(msg)
+                RuntimeError("cell parameter:{}\nformat not recognized")
 
             return s
 
@@ -165,10 +168,10 @@ class CP2K(Package):
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
 
-    def __init__(self, settings, molecule, job_name, plams_dir, work_dir=None,
-                 properties=package_properties['cp2k'],
+    def __init__(self, settings, molecule, job_name, plams_dir, dill_path,
+                 work_dir=None, properties=package_properties['cp2k'],
                  status='successful', warnings=None):
-        super().__init__(settings, molecule, job_name, plams_dir,
+        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
                          work_dir=work_dir, properties=properties,
                          status=status, warnings=warnings)
 

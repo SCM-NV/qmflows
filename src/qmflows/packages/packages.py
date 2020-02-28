@@ -35,12 +35,12 @@ from ..fileFunctions import json2Settings
 from ..settings import Settings
 
 package_properties = {
-    'adf': 'data/dictionaries/propertiesADF.json',
-    'dftb': 'data/dictionaries/propertiesDFTB.json',
-    'cp2k': 'data/dictionaries/propertiesCP2K.json',
-    'dirac': 'data/dictionaries/propertiesDIRAC.json',
-    'gamess': 'data/dictionaries/propertiesGAMESS.json',
-    'orca': 'data/dictionaries/propertiesORCA.json'
+    'adf': join('data', 'dictionaries', 'propertiesADF.json'),
+    'dftb': join('data', 'dictionaries', 'propertiesDFTB.json'),
+    'cp2k': join('data', 'dictionaries', 'propertiesCP2K.json'),
+    'dirac': join('data', 'dictionaries', 'propertiesDIRAC.json'),
+    'gamess': join('data', 'dictionaries', 'propertiesGAMESS.json'),
+    'orca': join('data', 'dictionaries', 'propertiesORCA.json')
 }
 
 
@@ -49,7 +49,7 @@ class Result:
     Class containing the result associated with a quantum chemistry simulation.
     """
 
-    def __init__(self, settings, molecule, job_name, results, plams_dir=None,
+    def __init__(self, settings: Settings, molecule, job_name, dill_path, plams_dir=None,
                  work_dir=None, properties=None, status='done', warnings=None):
         """
         :param settings: Job Settings.
@@ -58,8 +58,8 @@ class Result:
         :type molecule: plams Molecule
         :param job_name: Name of the computations
         :type job_name: str
-        :param results: The absolute path to the pickled .dill file.
-        :type results: str
+        :param dill_path: The absolute path to the pickled .dill file.
+        :type dill_path: str
         :param plams_dir: path to the ``Plams`` folder.
         :type plams_dir: str
         :param work_dir: scratch or another directory different from
@@ -81,13 +81,20 @@ class Result:
         self.warnings = warnings
 
         self._results_open = False
-        self.results = results
+        self._results = dill_path
 
     def __deepcopy__(self, memo):
         cls = type(self)
+        if not self._results_open:
+            dill_path = self._results
+        else:
+            job = self.results.job
+            dill_path = join(job.path, f"{job.name}.dill")
+
         return cls(self.settings,
                    self._molecule,
                    self.job_name,
+                   dill_path,
                    plams_dir=self.archive['plams_dir'],
                    work_dir=self.archive['work_dir'],
                    status=self.status,
@@ -110,8 +117,9 @@ class Result:
 
         elif not (has_crashed or is_private or prop in self.prop_dict):
             if self._results_open:
-                # Do not issue this warning of the Results object is still pickled
                 warn(f"Generic property {prop!r} not defined")
+
+            # Do not issue this warning if the Results object is still pickled
             else:  # Unpickle the Results instance and try again
                 self._unpack_results()
                 return self.__getattr__(prop)
@@ -164,20 +172,10 @@ class Result:
             work_dir {work_dir}\n
             """)
 
-    @staticmethod
-    def _get_dill(path: Union[AnyStr, os.PathLike]) -> str:
-        """Search for the .dill file in **path** and return its absolute path."""
-        for file in os.listdir(path):
-            _, ext = os.path.splitext(file)
-            if ext == '.dill':
-                return os.path.join(path, file)
-        raise FileNotFoundError(f"No .dill file in {path!r}")
-
     @property
     def results(self) -> plams.Results:
-        """Getter and setter for :attr:`Result.results`.
+        """Getter for :attr:`Result.results`.
 
-        Set will assign the object;
         Get will load the .dill file and add all of its class attributes to this instance,
         barring the following three exceptions:
 
@@ -192,10 +190,6 @@ class Result:
             self._unpack_results()
             return self._results
 
-    @results.setter
-    def results(self, value: Union[AnyStr, os.PathLike, plams.Results]) -> None:
-        self._results = value
-
     def _unpack_results(self) -> None:
         """Helper method for :attr:`Results.results` for unpacking the pickled .dill file."""
         self._results_open = True
@@ -205,15 +199,15 @@ class Result:
             warnings.simplefilter("ignore", category=UserWarning)
 
             # Unpickle the results
-            self.results = results = plams.load(self._results).results
+            self._results = results = plams.load(self._results).results
 
             attr_set = set(dir(self))
             for name in dir(results):
                 if name.startswith('_') or name in attr_set:
                     continue  # Skip methods which are either private, magic or preexisting
 
-                func = getattr(results, name)
-                setattr(self, name, func)
+                results_func = getattr(results, name)
+                setattr(self, name, results_func)
 
 
 @has_scheduled_methods
@@ -275,28 +269,24 @@ class Package:
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
-                        msg = """
+                        warn(f"""
                         The Following Warning are rendered unacceptable in the Current
-                        Workflow: {}\n
-                        The results from Job: {} are discarded.
-                        """.format(issues, job_name)
+                        Workflow: {issues}\n
+                        The results from Job: {job_name} are discarded.
+                        """)
                         result = Result(None, None, job_name=job_name, properties=properties,
                                         status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
-                msg = "Job {} has failed.\n{}".format(job_name, err)
-                warn(msg)
+                warn(f"Job {job_name} has failed.\n{err}")
                 result = Result(None, None, job_name=job_name,
                                 properties=properties, status='failed')
-            # except Exception as e:
-            #     print("Exception e: ", type(e), e.args)
         else:
-            msg = """
-            Job {} has failed. Either the Settings or Molecule
+            warn(f"""
+            Job {job_name} has failed. Either the Settings or Molecule
             objects are None, probably due to a previous calculation failure
-            """.format(job_name)
-            warn(msg)
+            """)
 
             # Send an empty object downstream
             result = Result(None, None, job_name=job_name,
@@ -356,7 +346,7 @@ class Package:
         Loads the JSON file containing the translation from generic to
         the specific keywords of ``self.pkg_name``.
         """
-        path = join("data/dictionaries", self.generic_dict_file)
+        path = join("data", "dictionaries", self.generic_dict_file)
         str_json = pkg.resource_string("qmflows", path)
 
         return json2Settings(str_json)
@@ -373,17 +363,15 @@ class Package:
         """
         This method should be implemented by the child class.
         """
-        msg = "trying to call an abstract method"
-        raise NotImplementedError(msg)
+        raise NotImplementedError("trying to call an abstract method")
 
     @staticmethod
     def run_job(settings, mol, job_name=None, work_dir=None, **kwargs):
         """
         This method should be implemented by the child class.
         """
-        msg = "The class representing a given quantum packages should \
-        implement this method"
-        raise NotImplementedError(msg)
+        raise NotImplementedError("The class representing a given quantum packages "
+                                  "should implement this method")
 
 
 def run(job, runner=None, path=None, folder=None, **kwargs):
@@ -402,7 +390,7 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
         ret = call_default(job, kwargs.get('n_processes', 1),
                            kwargs.get('always_cache', True))
     else:
-        raise "Don't know runner: {}".format(runner)
+        raise ValueError(f"Don't know runner: {runner}")
 
     plams.finish()
 
@@ -508,10 +496,10 @@ def find_file_pattern(pat, folder):
 
 
 def get_tmpfile_name():
-    tmpfolder = plams.config.jm.workdir + '/tmpfiles'
+    tmpfolder = join(plams.config.jm.workdir, 'tmpfiles')
     if not os.path.exists(tmpfolder):
         os.mkdir(tmpfolder)
-    return tmpfolder + '/' + str(uuid.uuid4())
+    return join(tmpfolder, str(uuid.uuid4()))
 
 
 def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
@@ -537,9 +525,7 @@ def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
     """Look out for warnings in the output file."""
     output_files = list(find_file_pattern('*out', plams_dir))
     if not output_files:
-        msg = "job: {} has failed. check folder: {}".format(
-            job_name, plams_dir)
-        warn(msg)
+        warn(f"job: {job_name} has failed. check folder: {plams_dir}")
         return None
     else:
         return parser(output_files[0], package_warnings)
