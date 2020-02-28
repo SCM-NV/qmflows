@@ -11,10 +11,11 @@ import importlib
 import inspect
 import os
 import uuid
+import warnings
 from functools import partial
 from os.path import join
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any, Callable, Union, AnyStr
 from warnings import warn
 
 import numpy as np
@@ -48,7 +49,7 @@ class Result:
     Class containing the result associated with a quantum chemistry simulation.
     """
 
-    def __init__(self, settings, molecule, job_name, plams_dir=None,
+    def __init__(self, settings, molecule, job_name, results, plams_dir=None,
                  work_dir=None, properties=None, status='done', warnings=None):
         """
         :param settings: Job Settings.
@@ -57,6 +58,8 @@ class Result:
         :type molecule: plams Molecule
         :param job_name: Name of the computations
         :type job_name: str
+        :param results: The absolute path to the pickled .dill file.
+        :type results: str
         :param plams_dir: path to the ``Plams`` folder.
         :type plams_dir: str
         :param work_dir: scratch or another directory different from
@@ -77,15 +80,19 @@ class Result:
         self.status = status
         self.warnings = warnings
 
+        self._results_open = False
+        self.results = results
+
     def __deepcopy__(self, memo):
-        return Result(self.settings,
-                      self._molecule,
-                      self.job_name,
-                      plams_dir=self.archive['plams_dir'],
-                      work_dir=self.archive['work_dir'],
-                      status=self.status,
-                      warnings=self.warnings
-                      )
+        cls = type(self)
+        return cls(self.settings,
+                   self._molecule,
+                   self.job_name,
+                   plams_dir=self.archive['plams_dir'],
+                   work_dir=self.archive['work_dir'],
+                   status=self.status,
+                   warnings=self.warnings
+                   )
 
     def __getattr__(self, prop):
         """Returns a section of the results.
@@ -95,25 +102,29 @@ class Result:
         ..
             dipole = result.dipole
         """
-        crash_status = ['failed', 'crashed']
         is_private = prop.startswith('__') and prop.endswith('__')
-        # if self.status == 'successful':
-        if self.status not in crash_status and prop in self.prop_dict:
+        has_crashed = self.status in {'failed', 'crashed'}
+
+        if not has_crashed and prop in self.prop_dict:
             return self.get_property(prop)
-        elif (self.status not in crash_status and not is_private and
-              prop not in self.prop_dict):
-            msg = "Generic property '" + str(prop) + "' not defined"
-            warn(msg)
-            return None
-        elif (self.status in crash_status) and not is_private:
-            warn("""
-            It is not possible to retrieve property: '{}'
-            Because Job: '{}' has {}. Check the output.\n
+
+        elif not (has_crashed or is_private or prop in self.prop_dict):
+            if self._results_open:
+                # Do not issue this warning of the Results object is still pickled
+                warn(f"Generic property {prop!r} not defined")
+            else:  # Unpickle the Results instance and try again
+                self._unpack_results()
+                return self.__getattr__(prop)
+
+        elif has_crashed and not is_private:
+            warn(f"""
+            It is not possible to retrieve property: {prop!r}
+            Because Job: {self.job_name!r} has {self.status}. Check the output.\n
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """.format(prop, self.job_name, self.status))
-            return None
+            """)
+        return None
 
     def get_property(self, prop):
         """
@@ -147,12 +158,62 @@ class Result:
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = """
-            Property {} not found. No output file called: {}. Folder used:
-            plams_dir = {}\n
-            work_dir {}\n
-            """.format(prop, file_pattern, plams_dir, work_dir)
-            raise FileNotFoundError(msg)
+            raise FileNotFoundError(f"""
+            Property {prop} not found. No output file called: {file_pattern}. Folder used:
+            plams_dir = {plams_dir}\n
+            work_dir {work_dir}\n
+            """)
+
+    @staticmethod
+    def _get_dill(path: Union[AnyStr, os.PathLike]) -> str:
+        """Search for the .dill file in **path** and return its absolute path."""
+        for file in os.listdir(path):
+            _, ext = os.path.splitext(file)
+            if ext == '.dill':
+                return os.path.join(path, file)
+        raise FileNotFoundError(f"No .dill file in {path!r}")
+
+    @property
+    def results(self) -> plams.Results:
+        """Getter and setter for :attr:`Result.results`.
+
+        Set will assign the object;
+        Get will load the .dill file and add all of its class attributes to this instance,
+        barring the following three exceptions:
+
+        * Private attributes/methods.
+        * Magic methods.
+        * Methods/attributes with names already contained within this instance.
+
+        """
+        if self._results_open:
+            return self._results
+        else:
+            self._unpack_results()
+            return self._results
+
+    @results.setter
+    def results(self, value: Union[AnyStr, os.PathLike, plams.Results]) -> None:
+        self._results = value
+
+    def _unpack_results(self) -> None:
+        """Helper method for :attr:`Results.results` for unpacking the pickled .dill file."""
+        self._results_open = True
+
+        # Ignore the Result.__getattr__() warnings for now
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+
+            # Unpickle the results
+            self.results = results = plams.load(self._results).results
+
+            attr_set = set(dir(self))
+            for name in dir(results):
+                if name.startswith('_') or name in attr_set:
+                    continue  # Skip methods which are either private, magic or preexisting
+
+                func = getattr(results, name)
+                setattr(self, name, func)
 
 
 @has_scheduled_methods
@@ -302,6 +363,10 @@ class Package:
 
     def __str__(self):
         return self.pkg_name
+
+    def __repr__(self):
+        vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
+        return f'{self.__class__.__name__}({vars_str})'
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
