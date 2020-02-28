@@ -89,7 +89,7 @@ class Result:
         plams_dir = None if plams_dir is None else Path(plams_dir)
         self.settings = settings
         self._molecule = molecule
-        xs = pkg.resource_string("qmflows", properties)
+        xs = pkg.resource_string("qmflows", str(properties))
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": plams_dir,
                         'work_dir': work_dir}
