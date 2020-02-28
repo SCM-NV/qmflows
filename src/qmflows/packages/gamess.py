@@ -48,14 +48,13 @@ class GAMESS(Package):
         r = job.run()
 
         # Relative job path
-        relative_plams_path = sep.join(r.job.path.split(sep)[-2:])
+        relative_plams_path = join(*str(r.job.path).split(sep)[-2:])
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
         result = Gamess_Result(gamess_settings, mol, r.job.name, relative_plams_path,
-                               dill_path,
-                               work_dir=work_dir, status=job.status)
+                               dill_path, work_dir=work_dir, status=job.status)
         return result
 
     def postrun(self):

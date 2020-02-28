@@ -44,7 +44,7 @@ class ORCA(Package):
         result = job.run()
 
         # Relative job path
-        relative_plams_path = sep.join(result.job.path.split(sep)[-2:])
+        relative_plams_path = join(*str(result.job.path).split(sep)[-2:])
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')

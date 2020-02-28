@@ -59,7 +59,7 @@ class ADF(Package):
         relative_path_t21 = sep.join(path_t21.split(sep)[-3:])
 
         # Relative job path
-        relative_plams_path = sep.join(result.job.path.split(sep)[-2:])
+        relative_plams_path = join(*str(result.job.path).split(sep)[-2:])
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
