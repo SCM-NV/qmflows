@@ -1,6 +1,7 @@
 __all__ = ['gamess']
 
 from os import sep
+from os.path import join
 from warnings import warn
 
 from scm import plams
