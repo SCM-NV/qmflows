@@ -83,3 +83,6 @@ scripts/.DS_Store
 
 # vscode
 .vscode
+
+# Spyder
+.spyproject/
