@@ -1,9 +1,8 @@
-"""Common funcionality to call all the quantum packages"""
+"""Common funcionality to call all the quantum packages."""
 
 __all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
-
 
 import base64
 import fnmatch
@@ -15,7 +14,7 @@ import warnings
 from functools import partial
 from os.path import join
 from pathlib import Path
-from typing import Any, Callable, Union, AnyStr
+from typing import Any, Callable
 from warnings import warn
 
 import numpy as np
@@ -45,13 +44,12 @@ package_properties = {
 
 
 class Result:
-    """
-    Class containing the result associated with a quantum chemistry simulation.
-    """
+    """Class containing the result associated with a quantum chemistry simulation."""
 
     def __init__(self, settings: Settings, molecule, job_name, dill_path=None, plams_dir=None,
                  work_dir=None, properties=None, status='done', warnings=None):
-        """
+        """Initialize :class:`Result`.
+
         :param settings: Job Settings.
         :type settings: :class:`~qmflows.Settings`
         :param molecule: molecular Geometry
@@ -68,6 +66,7 @@ class Result:
         :param properties: path to the `JSON` file containing the data to
                            load the parser on the fly.
         :type properties: str
+
         """
         plams_dir = None if plams_dir is None else Path(plams_dir)
         self.settings = settings
@@ -84,6 +83,7 @@ class Result:
         self._results = dill_path
 
     def __deepcopy__(self, memo):
+        """Return a deep copy of this instance."""
         cls = type(self)
         if not self._results_open or self._results is None:
             dill_path = self._results
@@ -102,12 +102,17 @@ class Result:
                    )
 
     def __getattr__(self, prop):
-        """Returns a section of the results.
+        """Return a section of the results.
 
-        Example:
+        For example:
 
-        ..
-            dipole = result.dipole
+        ..code:: python
+
+            >>> from qmflows.packages.packages import Results
+
+            >>> result = Result(...)
+            >>> dipole = result.dipole
+
         """
         is_private = prop.startswith('__') and prop.endswith('__')
         has_crashed = self.status in {'failed', 'crashed'}
@@ -135,10 +140,7 @@ class Result:
         return None
 
     def get_property(self, prop):
-        """
-        Look for the optional arguments to parse a property, which are stored
-        in the properties dictionary.
-        """
+        """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
         # Read the JSON dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
@@ -191,7 +193,7 @@ class Result:
             return self._results
 
     def _unpack_results(self) -> None:
-        """Helper method for :attr:`Results.results` for unpacking the pickled .dill file."""
+        """Unpack the pickled .dill file for :attr:`Results.results`."""
         self._results_open = True
 
         # Do not bother unpacking if None; i.e. if the job crashed
@@ -216,14 +218,14 @@ class Result:
 
 @has_scheduled_methods
 class Package:
-    """
-    |Package| is the base class to handle the invocation to different
-    quantum package.
+    """|Package| is the base class to handle the invocation to different quantum package.
+
     The only relevant attribute of this class is ``self.pkg_name`` which is a
     string representing the quantum package name that is going to be used to
     carry out the compuation.
 
     Only two arguments are required
+
     """
 
     def __init__(self, pkg_name):
@@ -233,14 +235,13 @@ class Package:
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
     def __call__(self, settings, mol, job_name='', **kwargs):
-        """
-        This function performs a job with the package specified by
-        self.pkg_name
+        """Perform a job with the package specified by :attr:`Package.pkg_name`.
 
         :parameter settings: user settings
         :type settings: |Settings|
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
+
         """
         properties = package_properties[self.pkg_name]
 
@@ -302,7 +303,8 @@ class Package:
         return result
 
     def generic2specific(self, settings, mol=None):
-        """
+        """Traverse ``settings`` and convert generic into package specific keys.
+
         Traverse all the key, value pairs of the ``settings``, translating
         the generic keys into package specific keys as defined in the specific
         dictionary. If one key is not in the specific dictionary an error
@@ -344,46 +346,37 @@ class Package:
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self):
-        """
-        Loads the JSON file containing the translation from generic to
-        the specific keywords of ``self.pkg_name``.
-        """
+        """Load the JSON file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
         path = join("data", "dictionaries", self.generic_dict_file)
         str_json = pkg.resource_string("qmflows", path)
 
         return json2Settings(str_json)
 
-    def __str__(self):
-        return self.pkg_name
-
     def __repr__(self):
+        """Return a :class:`str` representation of this instance."""
         vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
     @staticmethod
     def handle_special_keywords(settings, key, value, mol):
-        """
-        This method should be implemented by the child class.
-        """
+        """Abstract method; should be implemented by the child class."""
         raise NotImplementedError("trying to call an abstract method")
 
     @staticmethod
     def run_job(settings, mol, job_name=None, work_dir=None, **kwargs):
-        """
-        This method should be implemented by the child class.
-        """
+        """Abstract method; should be implemented by the child class."""
         raise NotImplementedError("The class representing a given quantum packages "
                                   "should implement this method")
 
 
 def run(job, runner=None, path=None, folder=None, **kwargs):
-    """
-    Pickup a runner and initialize it.
+    """Pickup a runner and initialize it.
 
     :params job: computation to run
     :type job: Promise Object
     :param runner: Type of runner to use
     :type runner: String
+
     """
     plams.init(path=path, folder=folder)
     plams.config.log.stdout = 0
@@ -400,9 +393,10 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
 
 
 def call_default(wf, n_processes, always_cache):
-    """
-    Run locally using several threads.
-    Caching can be turned off by specifying cache=None
+    """Run locally using several threads.
+
+    Caching can be turned off by specifying ``cache=None``.
+
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
@@ -410,10 +404,7 @@ def call_default(wf, n_processes, always_cache):
 
 
 class SerMolecule(Serialiser):
-    """
-    Based on the Plams molecule this class encode and decode the
-    information related to the molecule using the JSON format.
-    """
+    """Based on the Plams molecule this class encode and decode the information related to the molecule using the JSON format."""  # noqa
 
     def __init__(self):
         super(SerMolecule, self).__init__(plams.Molecule)
@@ -426,10 +417,7 @@ class SerMolecule(Serialiser):
 
 
 class SerMol(Serialiser):
-    """
-    Based on the RDKit molecule this class encodes and decodes the
-    information related to the molecule using a string.
-    """
+    """Based on the RDKit molecule this class encodes and decodes the information related to the molecule using a string."""  # noqa
 
     def __init__(self):
         super(SerMol, self).__init__(Chem.Mol)
@@ -442,10 +430,7 @@ class SerMol(Serialiser):
 
 
 class SerSettings(Serialiser):
-    """
-    Class to encode and decode the ~qmflows.Settings class using
-    its internal dictionary structure.
-    """
+    """Class to encode and decode the :class:`~qmflows.Settings` class using its internal dictionary structure."""  # noqa
 
     def __init__(self):
         super(SerSettings, self).__init__(Settings)
@@ -458,12 +443,12 @@ class SerSettings(Serialiser):
 
 
 def registry():
-    """
-    This function pass to the noodles infrascture all the information
-    related to the Structure of the Package object that is schedule.
+    """Pass to the noodles infrastructure all the information related to the structure of the :class:`Package` object that is scheduled.
+
     This *Registry* class contains hints that help Noodles to encode
     and decode this Package object.
-    """
+
+    """  # noqa
     return Registry(
         parent=serial.base() + arrays_to_hdf5(),
         types={
@@ -505,10 +490,11 @@ def get_tmpfile_name():
 
 
 def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
-    """
-    Inspect the signature of function `fun` and filter the keyword arguments,
-    which are the ones that have a nonempty default value. Then extract
-    from the dict `kwargs` those key-value pairs ignoring the rest.
+    """Inspect the signature of function `fun` and filter the keyword arguments.
+
+    Searches for the keyword arguments which have a nonempty default values
+    and then the dict `kwargs` those key-value pairs ignoring the rest.
+
     """
     ps = inspect.signature(fun).parameters
 
