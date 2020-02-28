@@ -2,6 +2,7 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 
 # =======>  Standard and third party Python Libraries <======
 
+from os import sep
 from os.path import join
 from warnings import warn
 from scm import plams
@@ -55,13 +56,16 @@ class ADF(Package):
         path_t21 = result._kf.path
 
         # Relative path to the CWD
-        relative_path_t21 = '/'.join(path_t21.split('/')[-3:])
+        relative_path_t21 = sep.join(path_t21.split(sep)[-3:])
 
         # Relative job path
-        relative_plams_path = '/'.join(result.job.path.split('/')[-2:])
+        relative_plams_path = sep.join(result.job.path.split(sep)[-2:])
+
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
 
         adf_result = ADF_Result(
-            adf_settings, mol, result.job.name, relative_path_t21,
+            adf_settings, mol, result.job.name, relative_path_t21, dill_path,
             plams_dir=relative_plams_path, status=job.status)
 
         return adf_result
@@ -153,24 +157,14 @@ class ADF(Package):
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results"""
 
-    def __init__(self, settings, molecule, job_name, path_t21, plams_dir=None,
-                 status='done', warnings=None):
+    def __init__(self, settings, molecule, job_name, path_t21, dill_path,
+                 plams_dir=None, status='done', warnings=None):
         # Load available property parser from Json file.
         properties = package_properties['adf']
-        super().__init__(settings, molecule, job_name, plams_dir=plams_dir,
+        super().__init__(settings, molecule, job_name, dill_path, plams_dir=plams_dir,
                          properties=properties, status=status, warnings=warnings)
         # Create a KF reader instance
         self.kf = plams.KFFile(path_t21)
-
-    def __deepcopy__(self, memo):
-        return ADF_Result(self.settings,
-                          self._molecule,
-                          self.job_name,
-                          self.kf.path,
-                          plams_dir=self.archive['plams_dir'],
-                          status=self.status,
-                          warnings=self.warnings
-                          )
 
     def get_property_kf(self, prop, section=None):
         return self.kf.read(section, prop)
