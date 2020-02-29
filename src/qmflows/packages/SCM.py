@@ -2,12 +2,14 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 
 # =======>  Standard and third party Python Libraries <======
 
-from os import sep
+import os
 from os.path import join
 from warnings import warn
+from typing import Optional, Union, Any
+
 from scm import plams
 from ..settings import Settings
-from .packages import (Package, package_properties, Result, get_tmpfile_name)
+from .packages import (Package, package_properties, Result, get_tmpfile_name, WarnMap)
 
 import struct
 
@@ -15,23 +17,24 @@ import struct
 
 
 class ADF(Package):
-    """
+    """:class:`Package<qmflows.packages.Package>` subclass for ADF.
+
     This class takes care of calling the *ADF* quantum package.
     it uses both Plams and the Templates module to create the input
     files, while Plams takes care of running the Job.
     It returns a ``ADF_Result`` object containing the output data.
+
     """
-    def __init__(self):
+
+    def __init__(self) -> None:
         super(ADF, self).__init__("adf")
         self.generic_dict_file = 'generic2ADF.json'
 
-    def prerun(self):
-        pass
-
     @staticmethod
-    def run_job(settings, mol, job_name='ADFjob', nproc=None):
-        """
-        Execute ADF job.
+    def run_job(settings: Settings, mol: plams.Molecule,
+                job_name: str = 'ADFjob', nproc: Optional[int] = None,
+                **kwargs: Any) -> 'ADF_Result':
+        """Execute ADF job.
 
         :param settings: user input settings.
         :type settings: |Settings|
@@ -44,6 +47,7 @@ class ADF(Package):
                                   job output.
         :type out_file_name: String
         :returns: :class:`~qmflows.packages.SCM.ADF_Result`
+
         """
         adf_settings = Settings()
         if nproc:
@@ -56,10 +60,10 @@ class ADF(Package):
         path_t21 = result._kf.path
 
         # Relative path to the CWD
-        relative_path_t21 = sep.join(path_t21.split(sep)[-3:])
+        relative_path_t21 = join(*str(path_t21).split(os.sep)[-3:])
 
         # Relative job path
-        relative_plams_path = join(*str(result.job.path).split(sep)[-2:])
+        relative_plams_path = join(*str(result.job.path).split(os.sep)[-2:])
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
@@ -70,20 +74,20 @@ class ADF(Package):
 
         return adf_result
 
-    def postrun(self):
-        pass
-
     @staticmethod
-    def handle_special_keywords(settings, key, value, mol):
-        """
-        some keywords provided by the user do not have a straightforward
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
+        """Handle special ADF-specific keywords.
+
+        Some keywords provided by the user do not have a straightforward
         translation to *ADF* input and require some hooks that handles the
         special behaviour of the following keywords:
 
         * ``freeze``
         * ``selected_atoms``
+
         """
-        def freeze():
+        def freeze() -> None:
             settings.specific.adf.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 msg = 'freeze ' + str(value) + ' is not a list'
@@ -98,7 +102,7 @@ class ADF(Package):
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
-        def selected_atoms():
+        def selected_atoms() -> None:
             settings.specific.adf.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 msg = f'selected_atoms {value} is not a list'
@@ -114,13 +118,13 @@ class ADF(Package):
                         at = 'atom ' + str(a + 1)
                         settings.specific.adf.constraints[at] = ""
 
-        def inithess():
+        def inithess() -> None:
             hess_path = get_tmpfile_name()
             hess_file = open(hess_path, "w")
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
             settings.specific.adf.geometry.inithess = hess_path
 
-        def constraint():
+        def constraint() -> None:
             if isinstance(value, Settings):
                 for k, v in value.items():
                     ks = k.split()
@@ -155,26 +159,38 @@ class ADF(Package):
 
 
 class ADF_Result(Result):
-    """Class providing access to PLAMS ADFJob result results"""
+    """Class providing access to PLAMS ADFJob result results."""
 
-    def __init__(self, settings, molecule, job_name, path_t21, dill_path,
-                 plams_dir=None, status='done', warnings=None):
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 path_t21: Union[str, os.PathLike],
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
         # Load available property parser from Json file.
-        properties = package_properties['adf']
         super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=properties,
+                         plams_dir=plams_dir, properties=package_properties['adf'],
                          status=status, warnings=warnings)
 
         # Create a KF reader instance
         self.kf = plams.KFFile(path_t21)
 
-    def get_property_kf(self, prop, section=None):
+    def get_property_kf(self, prop: str, section: Optional[str] = None) -> Any:
+        """Interface for :meth:`plams.KFFile.read()<scm.plams.tools.kftools.KFFile.read>`."""
         return self.kf.read(section, prop)
 
     @property
-    def molecule(self, unit='bohr', internal=False, n=1):
-        """WARNING: Cheap copy from PLAMS, do not keep this!!!"""
-        m = self._molecule.copy()
+    def molecule(self, unit: str = 'bohr',
+                 internal: bool = False,
+                 n: int = 1) -> Optional[plams.Molecule]:
+        """WARNING: Cheap copy from PLAMS, do not keep this!!!."""
+        try:
+            m = self._molecule.copy()
+        except AttributeError:
+            return None  # self._molecule can be None
         natoms = len(m)
         # Find out correct location
         coords = self.kf.read('Geometry', 'xyz InputOrder')
@@ -192,20 +208,18 @@ class ADF_Result(Result):
 
 
 class DFTB(Package):
-    """
-    Add some documentation to this class
-    """
-    def __init__(self):
+    """:class:`Package<qmflows.packages.Package>` subclass for DFTB."""
+
+    def __init__(self) -> None:
         super().__init__("dftb")
         self.generic_dict_file = 'generic2DFTB.json'
 
-    def prerun(self):
-        pass
-
     @staticmethod
-    def run_job(settings, mol, job_name='DFTBjob', nproc=None):
-        """
-        Execute an DFTB job with the *ADF* quantum package.
+    def run_job(settings: Settings, mol: plams.Molecule,
+                job_name: str = 'DFTBjob',
+                nproc: Optional[int] = None,
+                **kwargs: Any) -> 'DFTB_Result':
+        """Execute an DFTB job with the *ADF* quantum package.
 
         :param settings: user input settings.
         :type settings: |Settings|
@@ -218,6 +232,7 @@ class DFTB(Package):
                                  job output.
         :type out_file_name: String
         :returns: :class:`~qmflows.packages.SCM.DFTB_Result`
+
         """
         dftb_settings = Settings()
         if nproc:
@@ -245,15 +260,11 @@ class DFTB(Package):
         return DFTB_Result(dftb_settings, mol, name, dill_path,
                            plams_dir=path, status=job.status)
 
-    def postrun(self):
-        pass
-
     @staticmethod
-    def handle_special_keywords(settings, key, value, mol):
-        """
-        Translate generic keywords to their corresponding Orca keywords.
-        """
-        def freeze():
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
+        """Translate generic keywords to their corresponding Orca keywords."""
+        def freeze() -> None:
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 raise RuntimeError(f'freeze {value} is not a list')
@@ -267,7 +278,7 @@ class DFTB(Package):
                         at = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[at] = ""
 
-        def selected_atoms():
+        def selected_atoms() -> None:
             settings.specific.dftb.geometry.optim = "cartesian"
             if not isinstance(value, list):
                 raise RuntimeError(f'selected_atoms {value} is not a list')
@@ -282,7 +293,7 @@ class DFTB(Package):
                         name = 'atom ' + str(a + 1)
                         settings.specific.dftb.constraints[name] = ""
 
-        def constraint():
+        def constraint() -> None:
             if isinstance(value, Settings):
                 for k, v in value.items():
                     ks = k.split()
@@ -313,14 +324,19 @@ class DFTB(Package):
 
 
 class DFTB_Result(Result):
-    """Class providing access to PLAMS DFTBJob result results"""
+    """Class providing access to PLAMS DFTBJob result results."""
 
-    def __init__(self, settings, molecule, job_name, dill_path,
-                 plams_dir=None, status='done', warnings=None):
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
         # Read available propiety parsers from a JSON file
-        properties = package_properties['dftb']
         super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=properties,
+                         plams_dir=plams_dir, properties=package_properties['dftb'],
                          status=status, warnings=warnings)
 
         if plams_dir is not None:
@@ -331,7 +347,9 @@ class DFTB_Result(Result):
             self.kf = None
 
     @property
-    def molecule(self, unit='bohr', internal=False, n=1):
+    def molecule(self, unit: str = 'bohr',
+                 internal: bool = False,
+                 n: int = 1) -> plams.Molecule:
         m = self._molecule.copy()
         natoms = len(m)
         coords = self.kf.read('Molecule', 'Coords')

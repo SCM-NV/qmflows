@@ -7,6 +7,7 @@ import inspect
 import os
 import uuid
 import warnings
+from abc import abstractmethod, ABC
 from types import ModuleType
 from pathlib import Path
 from functools import partial
@@ -36,18 +37,18 @@ __all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
            'SerMolecule', 'SerSettings']
 
-base_path = Path('data') / 'dictionaries'
+_BASE_PATH = Path('data') / 'dictionaries'
 
 #: A dictionary mapping package names to .json files.
 package_properties: Dict[str, Path] = {
-    'adf': base_path / 'propertiesADF.json',
-    'dftb': base_path / 'propertiesDFTB.json',
-    'cp2k': base_path / 'propertiesCP2K.json',
-    'dirac': base_path / 'propertiesDIRAC.json',
-    'gamess': base_path / 'propertiesGAMESS.json',
-    'orca': base_path / 'propertiesORCA.json'
+    'adf': _BASE_PATH / 'propertiesADF.json',
+    'dftb': _BASE_PATH / 'propertiesDFTB.json',
+    'cp2k': _BASE_PATH / 'propertiesCP2K.json',
+    'dirac': _BASE_PATH / 'propertiesDIRAC.json',
+    'gamess': _BASE_PATH / 'propertiesGAMESS.json',
+    'orca': _BASE_PATH / 'propertiesORCA.json'
 }
-del base_path
+del _BASE_PATH
 
 WarnMap = Mapping[str, Type[Warning]]
 WarnDict = Dict[str, Type[Warning]]
@@ -202,11 +203,9 @@ class Result:
         * Methods/attributes with names already contained within this instance.
 
         """
-        if self._results_open:
-            return self._results
-        else:
+        if not self._results_open:
             self._unpack_results()
-            return self._results
+        return self._results
 
     def _unpack_results(self) -> None:
         """Unpack the pickled .dill file for :attr:`Results.results`."""
@@ -221,13 +220,13 @@ class Result:
             warnings.simplefilter("ignore", category=UserWarning)
 
             # Unpickle the results
-            file_err = None
             try:
                 results = plams.load(self._results).results
                 assert results is not None, f'Failed to unpickle {self._results}'
             except (AssertionError, plams.FileError) as ex:
-                file_err = ex
+                file_exc = ex
             else:
+                file_exc = None
                 attr_set = set(dir(self))
                 for name in dir(results):
                     if name.startswith('_') or name in attr_set:
@@ -237,15 +236,14 @@ class Result:
                     setattr(self, name, results_func)
 
         # Failed to find or unpickle the .dill file; issue a warning
-        if file_err is not None:
-            self._results = None
-            warn(str(file_err))
+        if file_exc is not None:
+            warn(str(file_exc))
         else:
             self._results = results
 
 
 @has_scheduled_methods
-class Package:
+class Package(ABC):
     """|Package| is the base class to handle the invocation to different quantum package.
 
     The only relevant attribute of this class is :attr:`Package.pkg_name` which is a
@@ -257,7 +255,7 @@ class Package:
     def __init__(self, pkg_name: str) -> None:
         """Initialize a :class:`Package` instance."""
         self.pkg_name = pkg_name
-        self.generic_dict_file = None  # will raise a NotImplementedError if .generic_dict_file
+        self.generic_dict_file: Optional[str] = None  # will raise a NotImplementedError if .generic_dict_file
 
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
@@ -401,14 +399,15 @@ class Package:
         pass
 
     @staticmethod
+    @abstractmethod
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Abstract method; should be implemented by the child class."""
         raise NotImplementedError("trying to call an abstract method")
 
     @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
-                job_name: Optional[str] = None,
+    @abstractmethod
+    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> Result:
         """Abstract method; should be implemented by the child class."""

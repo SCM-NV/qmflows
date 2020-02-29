@@ -1,9 +1,10 @@
 """Orca input/output bookkeeping."""
 __all__ = ['orca']
 
-from os import sep
+import os
 from os.path import join
 from warnings import warn
+from typing import Any, Union, Optional
 
 import numpy as np
 from noodles import schedule
@@ -11,7 +12,7 @@ from scm import plams
 
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from .packages import Package, Result, get_tmpfile_name, package_properties
+from .packages import Package, Result, get_tmpfile_name, package_properties, WarnMap
 
 # ============================= Orca ==========================================
 
@@ -22,18 +23,18 @@ class ORCA(Package):
     It also does the manangement of the input/output files resulting
     from running Orca and returns a Results object that containing the methods
     and data required to retrieve the output.
+
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("orca")
         self.generic_dict_file = 'generic2ORCA.json'
 
-    def prerun(self):
-        pass
-
     @staticmethod
-    def run_job(
-            settings, mol, job_name="ORCAjob", work_dir=None, **kwargs):
+    def run_job(settings: Settings, mol: plams.Molecule,
+                job_name: str = "ORCAjob",
+                work_dir: Union[None, str, os.PathLike] = None,
+                **kwargs: Any) -> 'ORCA_Result':
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
@@ -44,7 +45,7 @@ class ORCA(Package):
         result = job.run()
 
         # Relative job path
-        relative_plams_path = join(*str(result.job.path).split(sep)[-2:])
+        relative_plams_path = join(*str(result.job.path).split(os.sep)[-2:])
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
@@ -52,17 +53,16 @@ class ORCA(Package):
         return ORCA_Result(orca_settings, mol, result.job.name, dill_path,
                            plams_dir=relative_plams_path, status=job.status)
 
-    def postrun(self):
-        pass
-
     @staticmethod
-    def handle_special_keywords(settings, key, value, mol):
-        """Translate generic keywords to their corresponding Orca keywords. """
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
+        """Translate generic keywords to their corresponding Orca keywords."""
         @schedule
-        def inithess(value):
+        def inithess(value: Any) -> Settings:
             """Generate an seperate file containing the initial Hessian matrix.
 
             It is used as guess for the computation.
+
             """
             # Convert Hessian to numpy array
             value = value if isinstance(value, np.ndarray) else np.array(value)
@@ -72,7 +72,7 @@ class ORCA(Package):
                 return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
             def format_hessian(dim, hess):
-                """ Format numpy array to Orca matrix format """
+                """Format numpy array to Orca matrix format."""
                 ret = ''
                 for i in range((dim - 1) // 6 + 1):
                     n_columns = min(6, dim - 6 * i)
@@ -117,7 +117,7 @@ class ORCA(Package):
 
             return settings
 
-        def constraint(value):
+        def constraint(value: Any) -> None:
             cons = ''
             if isinstance(value, Settings):
                 for k, v in value.items():
@@ -135,7 +135,7 @@ class ORCA(Package):
                         warn(f'Invalid constraint key: {k}')
             settings.specific.orca.geom.Constraints._end = cons
 
-        def freeze(value):
+        def freeze(value: Any) -> None:
             if not isinstance(value, list):
                 msg = 'selected_atoms ' + str(value) + ' is not a list'
                 raise RuntimeError(msg)
@@ -149,7 +149,7 @@ class ORCA(Package):
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def selected_atoms(value):
+        def selected_atoms(value: Any) -> None:
             if not isinstance(value, list):
                 raise RuntimeError(f'selected_atoms {value} is not a list')
             cons = ''
@@ -175,21 +175,26 @@ class ORCA(Package):
 
 
 class ORCA_Result(Result):
-    """Class providing access to PLAMS OrcaJob results"""
+    """Class providing access to PLAMS OrcaJob results."""
 
-    def __init__(self, settings, molecule, job_name, dill_path,
-                 plams_dir=None, status='done', warnings=None):
-        properties = package_properties['orca']
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
         super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=properties,
+                         plams_dir=plams_dir, properties=package_properties['orca'],
                          status=status, warnings=warnings)
 
     @property
-    def molecule(self):
-        """ Retrieve the molecule from the output file"""
+    def molecule(self) -> Optional[plams.Molecule]:
+        """Retrieve the molecule from the output file."""
         if self.status not in ['crashed', 'failed']:
             plams_dir = self.archive["plams_dir"]
-            file_name = join(plams_dir, '{}.out'.format(self.job_name))
+            file_name = join(plams_dir, f'{self.job_name}.out')
             return parse_molecule(file_name, self._molecule)
         else:
             return None

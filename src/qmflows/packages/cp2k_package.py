@@ -1,7 +1,9 @@
 """CP2K input/output handling."""
 __all__ = ['CP2K_Result', 'cp2k']
 
+import os
 from os.path import join
+from typing import Optional, Union, Any, Dict
 
 from scm import plams
 
@@ -9,10 +11,10 @@ from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
 from .packages import (Package, Result, package_properties,
-                       parse_output_warnings)
+                       parse_output_warnings, WarnMap)
 
 # ====================================<>=======================================
-charge_dict = {
+charge_dict: Dict[str, int] = {
     'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 3, 'C': 4, 'N': 5, 'O': 6, 'F': 7,
     'Ne': 8, 'Na': 9, 'Mg': 10, 'Al': 3, 'Si': 4, 'P': 5, 'S': 6, 'Cl': 7,
     'Ar': 8, 'K': 9, 'Ca': 10, 'Sc': 11, 'Ti': 12, 'V': 13, 'Cr': 14, 'Mn': 15,
@@ -33,20 +35,20 @@ class CP2K(Package):
     and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
     **cp2k** function should be called.
+
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize this instance."""
         super(CP2K, self).__init__("cp2k")
         self.generic_dict_file = 'generic2CP2K.json'
 
-    def prerun(self):
-        pass
-
     @staticmethod
-    def run_job(settings, mol, job_name='cp2k_job',
-                work_dir=None, **kwargs):
-        """
-        Call the Cp2K binary using plams interface.
+    def run_job(settings: Settings, mol: plams.Molecule,
+                job_name: str = 'cp2k_job',
+                work_dir: Union[None, str, os.PathLike] = None,
+                **kwargs: Any) -> 'CP2K_Result':
+        """Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
         :type settings: :class:`~qmflows.Settings`
@@ -60,6 +62,7 @@ class CP2K(Package):
         :type out_file_name: String
         :param store_in_hdf5: wether to store the output arrays in HDF5 format.
         :type store_in_hdf5: Bool
+
         """
         # Yet another work directory
 
@@ -84,11 +87,9 @@ class CP2K(Package):
                              work_dir=work_dir, status=job.status, warnings=warnings)
         return result
 
-    def postrun(self):
-        pass
-
     @staticmethod
-    def handle_special_keywords(settings, key, value, mol):
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
         """Create the settings input for complex cp2k keys.
 
         :param settings: Job Settings.
@@ -97,8 +98,10 @@ class CP2K(Package):
         :param value: Value store in ``settings``.
         :param mol: molecular Geometry
         :type mol: plams Molecule
+
         """
-        def write_cell_angles(s, value, mol, key):
+        def write_cell_angles(s: Settings, value: Any,
+                              mol: plams.Molecule, key: str) -> Settings:
             """The angles of the cell is a 3-dimensional list.
 
             &SUBSYS
@@ -106,6 +109,7 @@ class CP2K(Package):
                 ABC [angstrom] 5.958 7.596 15.610
                 ALPHA_BETA_GAMMA 81.250 86.560 89.800
               &END CELL
+
             """
             if value is not None:
                 angles = '{} {} {}'.format(*value)
@@ -113,10 +117,11 @@ class CP2K(Package):
 
             return s
 
-        def write_cell_parameters(s, value, mol, key):
-            """
-            The cell parameter can be a list of lists containing the
-            ABC parameter like ::
+        def write_cell_parameters(s: Settings, value: Any,
+                                  mol: plams.Molecule, key: str) -> Settings:
+            """The cell parameter can be a list of lists containing the ABC parameter.
+
+            For example: ::
 
             &SUBSYS
                &CELL
@@ -134,6 +139,7 @@ class CP2K(Package):
             ABC [angstrom] 12.74 12.74 12.74
             PERIODIC NONE
             &END CELL
+
             """
             def fun(xs):
                 return '{} {} {}'.format(*xs)
@@ -168,11 +174,17 @@ class CP2K(Package):
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
 
-    def __init__(self, settings, molecule, job_name, plams_dir, dill_path,
-                 work_dir=None, properties=package_properties['cp2k'],
-                 status='successful', warnings=None):
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'successful',
+                 warnings: Optional[WarnMap] = None) -> None:
+        """Initialize this instance."""
         super().__init__(settings, molecule, job_name, plams_dir, dill_path,
-                         work_dir=work_dir, properties=properties,
+                         work_dir=work_dir, properties=package_properties['cp2k'],
                          status=status, warnings=warnings)
 
 
