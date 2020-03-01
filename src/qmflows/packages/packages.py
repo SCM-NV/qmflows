@@ -1,9 +1,4 @@
-"""Common funcionality to call all the quantum packages"""
-
-__all__ = ['package_properties',
-           'Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
-
+"""Common funcionality to call all the quantum packages."""
 
 import base64
 import fnmatch
@@ -11,17 +6,22 @@ import importlib
 import inspect
 import os
 import uuid
+import warnings
+from abc import abstractmethod, ABC
+from types import ModuleType
+from pathlib import Path
 from functools import partial
 from os.path import join
-from pathlib import Path
-from typing import Any, Callable
 from warnings import warn
+from typing import (Any, Callable, Optional, Dict, Union,
+                    Iterable, Mapping, Iterator, Type)
 
 import numpy as np
 import pkg_resources as pkg
 import scm.plams.interfaces.molecule.rdkit as molkit
 from more_itertools import collapse
 from noodles import has_scheduled_methods, schedule, serial
+from noodles.interface import PromisedObject
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import AsDict, Registry, Serialiser
 from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
@@ -33,30 +33,50 @@ from scm import plams
 from ..fileFunctions import json2Settings
 from ..settings import Settings
 
-package_properties = {
-    'adf': 'data/dictionaries/propertiesADF.json',
-    'dftb': 'data/dictionaries/propertiesDFTB.json',
-    'cp2k': 'data/dictionaries/propertiesCP2K.json',
-    'dirac': 'data/dictionaries/propertiesDIRAC.json',
-    'gamess': 'data/dictionaries/propertiesGAMESS.json',
-    'orca': 'data/dictionaries/propertiesORCA.json'
+__all__ = ['package_properties',
+           'Package', 'run', 'registry', 'Result',
+           'SerMolecule', 'SerSettings']
+
+_BASE_PATH = Path('data') / 'dictionaries'
+
+#: A dictionary mapping package names to .json files.
+package_properties: Dict[str, Path] = {
+    'adf': _BASE_PATH / 'propertiesADF.json',
+    'dftb': _BASE_PATH / 'propertiesDFTB.json',
+    'cp2k': _BASE_PATH / 'propertiesCP2K.json',
+    'dirac': _BASE_PATH / 'propertiesDIRAC.json',
+    'gamess': _BASE_PATH / 'propertiesGAMESS.json',
+    'orca': _BASE_PATH / 'propertiesORCA.json'
 }
+del _BASE_PATH
+
+WarnMap = Mapping[str, Type[Warning]]
+WarnDict = Dict[str, Type[Warning]]
+ParserFunc = Callable[[str, WarnMap], Optional[WarnDict]]
 
 
 class Result:
-    """
-    Class containing the result associated with a quantum chemistry simulation.
-    """
+    """Class containing the results associated with a quantum chemistry simulation."""
 
-    def __init__(self, settings, molecule, job_name, plams_dir=None,
-                 work_dir=None, properties=None, status='done', warnings=None):
-        """
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 properties: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
+        """Initialize a :class:`Result` instance.
+
         :param settings: Job Settings.
         :type settings: :class:`~qmflows.Settings`
         :param molecule: molecular Geometry
         :type molecule: plams Molecule
         :param job_name: Name of the computations
         :type job_name: str
+        :param dill_path: The absolute path to the pickled .dill file.
+        :type dill_path: str
         :param plams_dir: path to the ``Plams`` folder.
         :type plams_dir: str
         :param work_dir: scratch or another directory different from
@@ -65,11 +85,12 @@ class Result:
         :param properties: path to the `JSON` file containing the data to
                            load the parser on the fly.
         :type properties: str
+
         """
         plams_dir = None if plams_dir is None else Path(plams_dir)
         self.settings = settings
         self._molecule = molecule
-        xs = pkg.resource_string("qmflows", properties)
+        xs = pkg.resource_string("qmflows", str(properties))
         self.prop_dict = json2Settings(xs)
         self.archive = {"plams_dir": plams_dir,
                         'work_dir': work_dir}
@@ -77,49 +98,68 @@ class Result:
         self.status = status
         self.warnings = warnings
 
-    def __deepcopy__(self, memo):
-        return Result(self.settings,
-                      self._molecule,
-                      self.job_name,
-                      plams_dir=self.archive['plams_dir'],
-                      work_dir=self.archive['work_dir'],
-                      status=self.status,
-                      warnings=self.warnings
-                      )
+        self._results_open = False
+        self._results = dill_path
 
-    def __getattr__(self, prop):
-        """Returns a section of the results.
+    def __deepcopy__(self, memo: Any) -> 'Result':
+        """Return a deep copy of this instance."""
+        cls = type(self)
+        if not self._results_open or self._results is None:
+            dill_path = self._results
+        else:
+            job = self._results.job
+            dill_path = join(job.path, f"{job.name}.dill")
 
-        Example:
+        return cls(self.settings,
+                   self._molecule,
+                   self.job_name,
+                   dill_path,
+                   plams_dir=self.archive['plams_dir'],
+                   work_dir=self.archive['work_dir'],
+                   status=self.status,
+                   warnings=self.warnings
+                   )
 
-        ..
-            dipole = result.dipole
+    def __getattr__(self, prop: str) -> Any:
+        """Return a section of the results.
+
+        For example:
+
+        ..code:: python
+
+            >>> from qmflows.packages.packages import Results
+
+            >>> result = Result(...)
+            >>> dipole = result.dipole
+
         """
-        crash_status = ['failed', 'crashed']
         is_private = prop.startswith('__') and prop.endswith('__')
-        # if self.status == 'successful':
-        if self.status not in crash_status and prop in self.prop_dict:
+        has_crashed = self.status in {'failed', 'crashed'}
+
+        if not has_crashed and prop in self.prop_dict:
             return self.get_property(prop)
-        elif (self.status not in crash_status and not is_private and
-              prop not in self.prop_dict):
-            msg = "Generic property '" + str(prop) + "' not defined"
-            warn(msg)
-            return None
-        elif (self.status in crash_status) and not is_private:
-            warn("""
-            It is not possible to retrieve property: '{}'
-            Because Job: '{}' has {}. Check the output.\n
+
+        elif not (has_crashed or is_private or prop in self.prop_dict):
+            if self._results_open:
+                warn(f"Generic property {prop!r} not defined")
+
+            # Do not issue this warning if the Results object is still pickled
+            else:  # Unpickle the Results instance and try again
+                self._unpack_results()
+                return self.__getattr__(prop)
+
+        elif has_crashed and not is_private:
+            warn(f"""
+            It is not possible to retrieve property: {prop!r}
+            Because Job: {self.job_name!r} has {self.status}. Check the output.\n
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """.format(prop, self.job_name, self.status))
-            return None
+            """)
+        return None
 
-    def get_property(self, prop):
-        """
-        Look for the optional arguments to parse a property, which are stored
-        in the properties dictionary.
-        """
+    def get_property(self, prop: str) -> Any:
+        """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
         # Read the JSON dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
@@ -133,9 +173,7 @@ class Result:
         plams_dir = self.archive['plams_dir']
 
         # Search for the specified output file in the folders
-        file_pattern = ds.get('file_pattern')
-        if file_pattern is None:
-            file_pattern = '{}*.{}'.format(self.job_name, file_ext)
+        file_pattern = ds.get('file_pattern', f'{self.job_name}*.{file_ext}')
 
         output_files = list(collapse(map(partial(find_file_pattern, file_pattern),
                                          [plams_dir, work_dir])))
@@ -143,45 +181,95 @@ class Result:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
             # Read the keywords arguments from the properties dictionary
-            kwargs = ds.get('kwargs') if ds.get('kwargs') is not None else {}
+            kwargs = ds.get('kwargs', {})
             kwargs['plams_dir'] = plams_dir
             return ignored_unused_kwargs(fun, [file_out], kwargs)
         else:
-            msg = """
-            Property {} not found. No output file called: {}. Folder used:
-            plams_dir = {}\n
-            work_dir {}\n
-            """.format(prop, file_pattern, plams_dir, work_dir)
-            raise FileNotFoundError(msg)
+            raise FileNotFoundError(f"""
+            Property {prop} not found. No output file called: {file_pattern}. Folder used:
+            plams_dir = {plams_dir}\n
+            work_dir {work_dir}\n
+            """)
+
+    @property
+    def results(self) -> plams.Results:
+        """Getter for :attr:`Result.results`.
+
+        Get will load the .dill file and add all of its class attributes to this instance,
+        barring the following three exceptions:
+
+        * Private attributes/methods.
+        * Magic methods.
+        * Methods/attributes with names already contained within this instance.
+
+        """
+        if not self._results_open:
+            self._unpack_results()
+        return self._results
+
+    def _unpack_results(self) -> None:
+        """Unpack the pickled .dill file for :attr:`Results.results`."""
+        self._results_open = True
+
+        # Do not bother unpacking if None; i.e. if the job crashed
+        if self._results is None:
+            return
+
+        # Ignore the Result.__getattr__() warnings for now
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+
+            # Unpickle the results
+            try:
+                results = plams.load(self._results).results
+                assert results is not None, f'Failed to unpickle {self._results}'
+            except (AssertionError, plams.FileError) as ex:
+                file_exc = ex
+            else:
+                file_exc = None
+                attr_set = set(dir(self))
+                for name in dir(results):
+                    if name.startswith('_') or name in attr_set:
+                        continue  # Skip methods which are either private, magic or preexisting
+
+                    results_func = getattr(results, name)
+                    setattr(self, name, results_func)
+
+        # Failed to find or unpickle the .dill file; issue a warning
+        if file_exc is not None:
+            warn(str(file_exc))
+        else:
+            self._results = results
 
 
 @has_scheduled_methods
-class Package:
-    """
-    |Package| is the base class to handle the invocation to different
-    quantum package.
-    The only relevant attribute of this class is ``self.pkg_name`` which is a
+class Package(ABC):
+    """|Package| is the base class to handle the invocation to different quantum package.
+
+    The only relevant attribute of this class is :attr:`Package.pkg_name` which is a
     string representing the quantum package name that is going to be used to
     carry out the compuation.
 
-    Only two arguments are required
     """
 
-    def __init__(self, pkg_name):
+    def __init__(self, pkg_name: str) -> None:
+        """Initialize a :class:`Package` instance."""
         self.pkg_name = pkg_name
+        self.generic_dict_file: Optional[str] = None  # will raise a NotImplementedError if .generic_dict_file
 
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
-    def __call__(self, settings, mol, job_name='', **kwargs):
-        """
-        This function performs a job with the package specified by
-        self.pkg_name
+    def __call__(self, settings: Settings,
+                 mol: Union[plams.Molecule, Chem.Mol],
+                 job_name: str = '', **kwargs: Any) -> Result:
+        """Perform a job with the package specified by :attr:`Package.pkg_name`.
 
         :parameter settings: user settings
         :type settings: |Settings|
         :parameter mol: Molecule to run the calculation.
         :type mol: plams Molecule
+
         """
         properties = package_properties[self.pkg_name]
 
@@ -191,8 +279,7 @@ class Package:
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                mol = molkit.from_rdmol(mol) if isinstance(
-                    mol, Chem.Mol) else mol
+                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -206,50 +293,45 @@ class Package:
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
-                warnings_tolerance = kwargs.get(
-                    "terminate_job_in_case_of_warnings")
+                warnings_tolerance = kwargs.get("terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
                 if all(w is not None for w in [warnings_tolerance, output_warnings]):
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
-                        msg = """
+                        warn(f"""
                         The Following Warning are rendered unacceptable in the Current
-                        Workflow: {}\n
-                        The results from Job: {} are discarded.
-                        """.format(issues, job_name)
-                        result = Result(None, None, job_name=job_name, properties=properties,
-                                        status='failed')
+                        Workflow: {issues}\n
+                        The results from Job: {job_name} are discarded.
+                        """)
+                        result = Result(None, None, job_name=job_name, dill_path=None,
+                                        properties=properties, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
-                msg = "Job {} has failed.\n{}".format(job_name, err)
-                warn(msg)
-                result = Result(None, None, job_name=job_name,
+                warn(f"Job {job_name} has failed.\n{err}")
+                result = Result(None, None, job_name=job_name, dill_path=None,
                                 properties=properties, status='failed')
-            # except Exception as e:
-            #     print("Exception e: ", type(e), e.args)
         else:
-            msg = """
-            Job {} has failed. Either the Settings or Molecule
+            warn(f"""
+            Job {job_name} has failed. Either the Settings or Molecule
             objects are None, probably due to a previous calculation failure
-            """.format(job_name)
-            warn(msg)
+            """)
 
             # Send an empty object downstream
-            result = Result(None, None, job_name=job_name,
+            result = Result(None, None, job_name=job_name, dill_path=None,
                             properties=properties, status='failed')
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
-
         self.postrun()
-
         return result
 
-    def generic2specific(self, settings, mol=None):
-        """
+    def generic2specific(self, settings: Settings,
+                         mol: Optional[plams.Molecule] = None) -> Settings:
+        """Traverse ``settings`` and convert generic into package specific keys.
+
         Traverse all the key, value pairs of the ``settings``, translating
         the generic keys into package specific keys as defined in the specific
         dictionary. If one key is not in the specific dictionary an error
@@ -290,45 +372,60 @@ class Package:
                         specific_from_generic_settings, k, v, mol)
         return settings.overlay(specific_from_generic_settings)
 
-    def get_generic_dict(self):
-        """
-        Loads the JSON file containing the translation from generic to
-        the specific keywords of ``self.pkg_name``.
-        """
-        path = join("data/dictionaries", self.generic_dict_file)
-        str_json = pkg.resource_string("qmflows", path)
+    def get_generic_dict(self) -> Settings:
+        """Load the JSON file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
+        try:
+            path = join("data", "dictionaries", self.generic_dict_file)
+        except TypeError as ex:
+            if self.generic_dict_file is None:
+                raise NotImplementedError("The `Package.generic_dict_file` attribute "
+                                          "should be implemented by Package subclasses")
+            raise ex
 
+        str_json = pkg.resource_string("qmflows", path)
         return json2Settings(str_json)
 
-    def __str__(self):
-        return self.pkg_name
+    def __repr__(self) -> str:
+        """Return a :class:`str` representation of this instance."""
+        vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
+        return f'{self.__class__.__name__}({vars_str})'
+
+    def prerun(self) -> None:
+        """Run a set of tasks before running the actual job."""
+        pass
+
+    def postrun(self) -> None:
+        """Run a set of tasks after running the actual job."""
+        pass
 
     @staticmethod
-    def handle_special_keywords(settings, key, value, mol):
-        """
-        This method should be implemented by the child class.
-        """
-        msg = "trying to call an abstract method"
-        raise NotImplementedError(msg)
+    @abstractmethod
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
+        """Abstract method; should be implemented by the child class."""
+        raise NotImplementedError("trying to call an abstract method")
 
     @staticmethod
-    def run_job(settings, mol, job_name=None, work_dir=None, **kwargs):
-        """
-        This method should be implemented by the child class.
-        """
-        msg = "The class representing a given quantum packages should \
-        implement this method"
-        raise NotImplementedError(msg)
+    @abstractmethod
+    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+                work_dir: Union[None, str, os.PathLike] = None,
+                **kwargs: Any) -> Result:
+        """Abstract method; should be implemented by the child class."""
+        raise NotImplementedError("The class representing a given quantum packages "
+                                  "should implement this method")
 
 
-def run(job, runner=None, path=None, folder=None, **kwargs):
-    """
-    Pickup a runner and initialize it.
+def run(job: PromisedObject, runner: Optional[str] = None,
+        path: Union[None, str, os.PathLike] = None,
+        folder: Union[None, str, os.PathLike] = None,
+        **kwargs: Any) -> Result:
+    """Pickup a runner and initialize it.
 
     :params job: computation to run
     :type job: Promise Object
     :param runner: Type of runner to use
     :type runner: String
+
     """
     plams.init(path=path, folder=folder)
     plams.config.log.stdout = 0
@@ -337,17 +434,17 @@ def run(job, runner=None, path=None, folder=None, **kwargs):
         ret = call_default(job, kwargs.get('n_processes', 1),
                            kwargs.get('always_cache', True))
     else:
-        raise "Don't know runner: {}".format(runner)
+        raise ValueError(f"Don't know runner: {runner}")
 
     plams.finish()
-
     return ret
 
 
-def call_default(wf, n_processes, always_cache):
-    """
-    Run locally using several threads.
-    Caching can be turned off by specifying cache=None
+def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Result:
+    """Run locally using several threads.
+
+    Caching can be turned off by specifying ``cache=None``.
+
     """
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
@@ -355,10 +452,7 @@ def call_default(wf, n_processes, always_cache):
 
 
 class SerMolecule(Serialiser):
-    """
-    Based on the Plams molecule this class encode and decode the
-    information related to the molecule using the JSON format.
-    """
+    """Based on the Plams molecule this class encode and decode the information related to the molecule using the JSON format."""  # noqa
 
     def __init__(self):
         super(SerMolecule, self).__init__(plams.Molecule)
@@ -371,10 +465,7 @@ class SerMolecule(Serialiser):
 
 
 class SerMol(Serialiser):
-    """
-    Based on the RDKit molecule this class encodes and decodes the
-    information related to the molecule using a string.
-    """
+    """Based on the RDKit molecule this class encodes and decodes the information related to the molecule using a string."""  # noqa
 
     def __init__(self):
         super(SerMol, self).__init__(Chem.Mol)
@@ -387,10 +478,7 @@ class SerMol(Serialiser):
 
 
 class SerSettings(Serialiser):
-    """
-    Class to encode and decode the ~qmflows.Settings class using
-    its internal dictionary structure.
-    """
+    """Class to encode and decode the :class:`~qmflows.Settings` class using its internal dictionary structure."""  # noqa
 
     def __init__(self):
         super(SerSettings, self).__init__(Settings)
@@ -402,58 +490,62 @@ class SerSettings(Serialiser):
         return Settings(data)
 
 
-def registry():
-    """
-    This function pass to the noodles infrascture all the information
-    related to the Structure of the Package object that is schedule.
+#: A :class:`Registry` instance to-be returned by :func:`registry`.
+REGISTRY: Registry = Registry(
+    parent=serial.base() + arrays_to_hdf5(),
+    types={
+        Package: AsDict(Package),
+        Path: SerPath(),
+        plams.Molecule: SerMolecule(),
+        Chem.Mol: SerMol(),
+        Result: AsDict(Result),
+        Settings: SerSettings(),
+        plams.KFFile: SerReasonableObject(plams.KFFile),
+        plams.KFReader: SerReasonableObject(plams.KFReader),
+        np.floating: SerNumpyScalar(),
+        np.integer: SerNumpyScalar()
+    }
+)
+
+
+def registry() -> Registry:
+    """Pass to the noodles infrastructure all the information related to the structure of the :class:`Package` object that is scheduled.
+
     This *Registry* class contains hints that help Noodles to encode
     and decode this Package object.
-    """
-    return Registry(
-        parent=serial.base() + arrays_to_hdf5(),
-        types={
-            Package: AsDict(Package),
-            Path: SerPath(),
-            plams.Molecule: SerMolecule(),
-            Chem.Mol: SerMol(),
-            Result: AsDict(Result),
-            Settings: SerSettings(),
-            plams.KFFile: SerReasonableObject(plams.KFFile),
-            plams.KFReader: SerReasonableObject(plams.KFReader),
-            np.floating: SerNumpyScalar(),
-            np.integer: SerNumpyScalar()
-        }
-    )
+
+    """  # noqa
+    return REGISTRY
 
 
-def import_parser(ds, module_root="qmflows.parsers"):
+def import_parser(ds: Mapping[str, str], module_root: str = "qmflows.parsers") -> ModuleType:
     """Import parser for the corresponding property."""
     module_sufix = ds['parser']
     module_name = module_root + '.' + module_sufix
-
     return importlib.import_module(module_name)
 
 
-def find_file_pattern(pat, folder):
+def find_file_pattern(path: Union[str, os.PathLike],
+                      folder: Union[None, str, os.PathLike] = None) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
-        return map(lambda x: join(folder, x),
-                   fnmatch.filter(os.listdir(folder), pat))
+        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
     else:
-        return []
+        return iter([])
 
 
-def get_tmpfile_name():
-    tmpfolder = plams.config.jm.workdir + '/tmpfiles'
+def get_tmpfile_name() -> str:
+    tmpfolder = join(plams.config.jm.workdir, 'tmpfiles')
     if not os.path.exists(tmpfolder):
         os.mkdir(tmpfolder)
-    return tmpfolder + '/' + str(uuid.uuid4())
+    return join(tmpfolder, str(uuid.uuid4()))
 
 
-def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
-    """
-    Inspect the signature of function `fun` and filter the keyword arguments,
-    which are the ones that have a nonempty default value. Then extract
-    from the dict `kwargs` those key-value pairs ignoring the rest.
+def ignored_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
+    """Inspect the signature of function `fun` and filter the keyword arguments.
+
+    Searches for the keyword arguments which have a nonempty default values
+    and then the dict `kwargs` those key-value pairs ignoring the rest.
+
     """
     ps = inspect.signature(fun).parameters
 
@@ -468,13 +560,14 @@ def ignored_unused_kwargs(fun: Callable, args: list, kwargs: dict) -> Any:
         return fun(*args, **d)
 
 
-def parse_output_warnings(job_name, plams_dir, parser, package_warnings):
+def parse_output_warnings(job_name: str,
+                          plams_dir: Union[None, str, os.PathLike],
+                          parser: ParserFunc,
+                          package_warnings: WarnMap) -> Optional[WarnDict]:
     """Look out for warnings in the output file."""
-    output_files = list(find_file_pattern('*out', plams_dir))
-    if not output_files:
-        msg = "job: {} has failed. check folder: {}".format(
-            job_name, plams_dir)
-        warn(msg)
+    output_files = find_file_pattern('*out', plams_dir)
+    try:
+        return parser(next(output_files), package_warnings)
+    except StopIteration:
+        warn(f"job: {job_name} has failed. check folder: {plams_dir}")
         return None
-    else:
-        return parser(output_files[0], package_warnings)
