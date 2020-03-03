@@ -1,5 +1,6 @@
 import shutil
-from os.path import isdir
+from os import remove
+from os.path import isdir, isfile
 from pathlib import Path
 
 import pytest
@@ -34,9 +35,13 @@ def test_package_wrapper() -> None:
     try:
         job1 = PackageWrapper(AMSJob)(s1, mol, name='amsjob')
         result1 = run(job1, path=PATH, folder='workdir')
+        assert isinstance(result1, ResultWrapper), f'{type(result1)!r} != {ResultWrapper!r}'
+        assert result1.results.job.status == 'successful', f"{result1.results.job.status!r} != 'successful'"  # noqa
 
-        assert isinstance(result1, ResultWrapper)
-        assert result1.results.job.status == 'success'
+    except Exception as ex:
+        if isfile('cache.db'):
+            remove('cache.db')
+        raise ex
     finally:
         if isdir(workdir):
             shutil.rmtree(workdir)
@@ -44,9 +49,11 @@ def test_package_wrapper() -> None:
     try:
         job2 = PackageWrapper(ADFJob)(s2, mol, name='adfjob')
         result2 = run(job2, path=PATH, folder='workdir')
+        assert isinstance(result2, ADF_Result), f'{type(result2)!r} != {ADF_Result!r}'
+        assert result2.results.job.status == 'successful', f"{result2.results.job.status!r} != 'successful'"  # noqa
 
-        assert isinstance(result2, ADF_Result)
-        assert result2.results.job.status == 'success'
     finally:
         if isdir(workdir):
             shutil.rmtree(workdir)
+        if isfile('cache.db'):
+            remove('cache.db')
