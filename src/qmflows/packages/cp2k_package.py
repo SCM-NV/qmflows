@@ -4,6 +4,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 import os
 from os.path import join
 from typing import Optional, Union, Any, Dict, ClassVar
+from warnings import warn
 
 from scm import plams
 
@@ -169,6 +170,8 @@ class CP2K(Package):
 
         if f is not None:
             f(settings, value, mol, key)
+        else:
+            warn(f'Generic keyword {key!r} not implemented for package CP2K')
 
 
 class CP2K_Result(Result):
