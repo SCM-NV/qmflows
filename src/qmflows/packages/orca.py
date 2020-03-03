@@ -172,7 +172,7 @@ class ORCA(Package):
         if key in functions:
             functions[key](value)
         else:
-            warn(f'Keyword {key!r} not implemented for package ORCA')
+            warn(f'Generic keyword {key!r} not implemented for package ORCA')
 
 
 class ORCA_Result(Result):
