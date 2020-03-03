@@ -4,7 +4,7 @@ __all__ = ['gamess']
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, ClassVar
 
 from scm import plams
 
@@ -22,9 +22,10 @@ class GAMESS(Package):
 
     """
 
+    generic_dict_file: ClassVar[str] = 'generic2gamess.json'
+
     def __init__(self) -> None:
-        super(GAMESS, self).__init__("gamess")
-        self.generic_dict_file = 'generic2gamess.json'
+        super().__init__("gamess")
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,

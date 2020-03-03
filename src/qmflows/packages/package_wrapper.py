@@ -1,33 +1,75 @@
-from typing import Type, Mapping
+import os
+from os.path import join
+from typing import Type, Mapping, Optional, TypeVar, Union, ClassVar, Any
 
 from scm import plams
+from rdkit import Chem
+from noodles import has_scheduled_methods, schedule
+from qmflows.packages.packages import Package, Result, WarnMap, package_properties
+from qmflows import Settings, orca, adf, dftb, cp2k, gamess
+
 plams.Job = plams.core.basejob.Job
 plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
 
-from qmflows.packages.packages import Package
+__all__ = []
 
-JOB_MAP: Mapping[Type[plams.Job], str] = {
-    plams.Cp2kJob: 'generic2CP2K.json',
-    plams.ADFJob: 'generic2ADF.json',
-    plams.DFTBJob: 'generic2DFTB',
-    plams.GamessJob: 'generic2gamess.json',
-    plams.ORCAJob: 'generic2ORCA.sjon'
+#: Map a PLAMS Job type to an appropiate packages instance.
+JOB_MAP: Mapping[Type[plams.Job], Package] = {
+    plams.Cp2kJob: cp2k,
+    plams.ADFJob: adf,
+    plams.DFTBJob: dftb,
+    plams.GamessJob: gamess,
+    plams.ORCAJob: orca
 }
 
+#: TypeVar for Result objects and its subclasses.
+RT = TypeVar('RT', bound=Result)
 
-class PackageWrapper(Package):
-    def __init__(self, job_type: Type[plams.Job], pkg_name: Optional[str] = None) -> None:
+
+class ResultWrapper(Result):
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'successful',
+                 warnings: Optional[WarnMap] = None) -> None:
         """Initialize this instance."""
-        if pkg_name is None:
-            pkg_name = job_type.__class__.__name__.lower().rstrip('job')
-        super(CP2K, self).__init__(pkg_name)
-        self.generic_dict_file = JOB_MAP.get(job_type, 'generic2None.json')
+        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
+                         work_dir=work_dir, properties=package_properties[None],
+                         status=status, warnings=warnings)
+
+
+@has_scheduled_methods
+class PackageWrapper(Package):
+    generic_dict_file: ClassVar[str] = 'generic2None.json'
+    generic_package: ClassVar[bool] = True
+
+    def __init__(self, job_type: Type[plams.Job]) -> None:
+        """Initialize this instance."""
+        pkg_name = job_type.__class__.__name__.lower().rstrip('job')
+        super().__init__(pkg_name)
+        self.job_type = job_type
+
+    @schedule(display="Running {self.pkg_name} {job_name}...",
+              store=True, confirm=True)
+    def __call__(self, settings: Settings,
+                 mol: Union[plams.Molecule, Chem.Mol],
+                 job_name: str = '', **kwargs: Any) -> RT:
+        """Call one of the appropiate Package.__call__ methods if possible."""
+        try:
+            package_obj = JOB_MAP[self.job_type]
+            return package_obj(settings, mol, job_name, **kwargs)
+        except KeyError:
+            return super().__call__(settings, mol, job_name, **kwargs)
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
-                job_name: str = 'cp2k_job',
+                job_type: Type[plams.Job],
+                job_name: str = 'job',
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> 'CP2K_Result':
+                **kwargs: Any) -> ResultWrapper:
         """Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
@@ -44,108 +86,25 @@ class PackageWrapper(Package):
         :type store_in_hdf5: Bool
 
         """
-        # Yet another work directory
-
         # Input modifications
-        cp2k_settings = Settings()
-        cp2k_settings.input = settings.specific.cp2k
+        settings = Settings()
+        settings.input = settings
 
         # Create a Plams job
-        job = plams.interfaces.thirdparty.cp2k.Cp2kJob(
-            name=job_name, settings=cp2k_settings, molecule=mol)
+        job = job_type(name=job_name, settings=settings, molecule=mol)
         r = job.run()
 
+        # Extract the working directory
         work_dir = work_dir if work_dir is not None else job.path
-
-        warnings = parse_output_warnings(job_name, r.job.path,
-                                         parse_cp2k_warnings, cp2k_warnings)
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        result = CP2K_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
-                             work_dir=work_dir, status=job.status, warnings=warnings)
+        result = ResultWrapper(settings, mol, job_name, r.job.path, dill_path,
+                               work_dir=work_dir, status=job.status, warnings=None)
         return result
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
-        """Create the settings input for complex cp2k keys.
-
-        :param settings: Job Settings.
-        :type settings: :class:`~qmflows.Settings`
-        :param key: Special key declared in ``settings``.
-        :param value: Value store in ``settings``.
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-
-        """
-        def write_cell_angles(s: Settings, value: Any,
-                              mol: plams.Molecule, key: str) -> Settings:
-            """The angles of the cell is a 3-dimensional list.
-
-            &SUBSYS
-              &CELL
-                ABC [angstrom] 5.958 7.596 15.610
-                ALPHA_BETA_GAMMA 81.250 86.560 89.800
-              &END CELL
-
-            """
-            if value is not None:
-                angles = '{} {} {}'.format(*value)
-                s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
-
-            return s
-
-        def write_cell_parameters(s: Settings, value: Any,
-                                  mol: plams.Molecule, key: str) -> Settings:
-            """The cell parameter can be a list of lists containing the ABC parameter.
-
-            For example: ::
-
-            &SUBSYS
-               &CELL
-               A  16.11886919    0.07814137      -0.697284243
-               B  -0.215317662   4.389405268     1.408951791
-               C  -0.216126961   1.732808365     9.748961085
-               PERIODIC XYZ
-               &END
-            .....
-
-            The cell parameter can also be a scalar for ABC like ::
-
-            &SUBSYS
-            &CELL
-            ABC [angstrom] 12.74 12.74 12.74
-            PERIODIC NONE
-            &END CELL
-
-            """
-            def fun(xs):
-                return '{} {} {}'.format(*xs)
-
-            if not isinstance(value, list):
-                abc = [value] * 3
-                abc_cell = ' [angstrom] {} {} {}'.format(*abc)
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc_cell
-            elif isinstance(value[0], list):
-                a, b, c = value
-                s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
-                s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
-                s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
-            elif isinstance(value, list):
-                abc = ' [angstrom] {} {} {}'.format(*value)
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
-            else:
-                raise RuntimeError("cell parameter:{}\nformat not recognized")
-
-            return s
-
-        funs = {'cell_parameters': write_cell_parameters,
-                'cell_angles': write_cell_angles}
-
-        # Function that handles the special keyword
-        f = funs.get(key)
-
-        if f is not None:
-            f(settings, value, mol, key)
+        return None

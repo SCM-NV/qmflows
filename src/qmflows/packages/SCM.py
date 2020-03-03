@@ -5,7 +5,7 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 import os
 from os.path import join
 from warnings import warn
-from typing import Optional, Union, Any
+from typing import Optional, Union, Any, ClassVar
 
 from scm import plams
 from ..settings import Settings
@@ -26,9 +26,10 @@ class ADF(Package):
 
     """
 
+    generic_dict_file: ClassVar[str] = 'generic2ADF.json'
+
     def __init__(self) -> None:
         super(ADF, self).__init__("adf")
-        self.generic_dict_file = 'generic2ADF.json'
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,

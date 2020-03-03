@@ -4,7 +4,7 @@ __all__ = ['orca']
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional
+from typing import Any, Union, Optional, ClassVar
 
 import numpy as np
 from noodles import schedule
@@ -26,9 +26,10 @@ class ORCA(Package):
 
     """
 
+    generic_dict_file: ClassVar[str] = 'generic2ORCA.json'
+
     def __init__(self) -> None:
         super().__init__("orca")
-        self.generic_dict_file = 'generic2ORCA.json'
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,

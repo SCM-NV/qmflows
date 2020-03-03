@@ -13,7 +13,7 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Dict, Union,
+from typing import (Any, Callable, Optional, Dict, Union, ClassVar,
                     Iterable, Mapping, Iterator, Type)
 
 import numpy as np
@@ -40,7 +40,8 @@ __all__ = ['package_properties',
 _BASE_PATH = Path('data') / 'dictionaries'
 
 #: A dictionary mapping package names to .json files.
-package_properties: Dict[str, Path] = {
+package_properties: Dict[Optional[str], Path] = {
+    None: _BASE_PATH / 'propertiesNone.json',
     'adf': _BASE_PATH / 'propertiesADF.json',
     'dftb': _BASE_PATH / 'propertiesDFTB.json',
     'cp2k': _BASE_PATH / 'propertiesCP2K.json',
@@ -252,10 +253,17 @@ class Package(ABC):
 
     """
 
+    #: The name of the generic .json file.
+    #: Should be implemented by ``Package`` subclasses.
+    generic_dict_file: ClassVar[str] = NotImplemented
+
+    #: A special flag for used by the ``PakageWrapper`` subclass.
+    #: Used for denoting Job types without any generic .json files.
+    generic_package: ClassVar[bool] = False
+
     def __init__(self, pkg_name: str) -> None:
         """Initialize a :class:`Package` instance."""
         self.pkg_name = pkg_name
-        self.generic_dict_file: Optional[str] = None  # will raise a NotImplementedError if .generic_dict_file
 
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
@@ -271,7 +279,10 @@ class Package(ABC):
         :type mol: plams Molecule
 
         """
-        properties = package_properties[self.pkg_name]
+        if self.generic_package:
+            properties = package_properties[None]
+        else:
+            properties = package_properties[self.pkg_name]
 
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
@@ -377,7 +388,7 @@ class Package(ABC):
         try:
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
-            if self.generic_dict_file is None:
+            if self.generic_dict_file is NotImplemented:
                 raise NotImplementedError("The `Package.generic_dict_file` attribute "
                                           "should be implemented by Package subclasses")
             raise ex

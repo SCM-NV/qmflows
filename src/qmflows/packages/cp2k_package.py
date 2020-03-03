@@ -3,7 +3,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Optional, Union, Any, Dict
+from typing import Optional, Union, Any, Dict, ClassVar
 
 from scm import plams
 
@@ -38,10 +38,10 @@ class CP2K(Package):
 
     """
 
+    generic_dict_file: ClassVar[str] = 'generic2CP2K.json'
+
     def __init__(self) -> None:
-        """Initialize this instance."""
-        super(CP2K, self).__init__("cp2k")
-        self.generic_dict_file = 'generic2CP2K.json'
+        super().__init__("cp2k")
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
