@@ -359,28 +359,31 @@ class Package(ABC):
 
         specific_from_generic_settings = Settings()
         for k, v in settings.items():
-            if k != "specific":
-                key = generic_dict.get(k)
-                if key:
-                    if isinstance(key, list):
-                        if isinstance(key[1], dict):
-                            value = key[1][v]
-                        else:
-                            value = {key[1]: v}
-                        if value:
-                            v = value
-                        key = key[0]
-                    if v:
-                        if isinstance(v, dict):
-                            v = Settings(v)
-                        specific_from_generic_settings \
-                            .specific[self.pkg_name][key] = v
-                    else:
-                        specific_from_generic_settings \
-                            .specific[self.pkg_name][key]
+            if k == "specific":
+                continue
+
+            key = generic_dict.get(k)
+            if not key:
+                self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
+                continue
+
+            if isinstance(key, list):
+                if isinstance(key[1], dict):
+                    value = key[1][v]
                 else:
-                    self.handle_special_keywords(
-                        specific_from_generic_settings, k, v, mol)
+                    value = {key[1]: v}
+                if value:
+                    v = value
+                key = key[0]
+
+            if v:
+                if isinstance(v, dict):
+                    v = Settings(v)
+                specific_from_generic_settings.specific[self.pkg_name][key] = v
+            else:
+                #: TODO Is there any point to this statement?
+                specific_from_generic_settings.specific[self.pkg_name][key]
+
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self) -> Settings:
@@ -389,8 +392,8 @@ class Package(ABC):
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
             if self.generic_dict_file is NotImplemented:
-                raise NotImplementedError("The `Package.generic_dict_file` attribute "
-                                          "should be implemented by Package subclasses")
+                raise NotImplementedError("The `Package.generic_dict_file` attribute should "
+                                          "be implemented by `Package` subclasses") from ex
             raise ex
 
         str_json = pkg.resource_string("qmflows", path)
