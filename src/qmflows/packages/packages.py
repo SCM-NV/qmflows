@@ -361,6 +361,9 @@ class Package(ABC):
         for k, v in settings.items():
             if k == "specific":
                 continue
+            elif k == 'input':  # Allow for PLAMS-style input; i.e. settings.input.blablabla
+                specific_from_generic_settings.specific[self.pkg_name].update(v)
+                continue
 
             key = generic_dict.get(k)
             if not key:
