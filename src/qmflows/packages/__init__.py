@@ -7,6 +7,13 @@ from .SCM import (adf, dftb)
 from .orca import orca
 from .gamess import gamess
 
-__all__ = ['Package', 'Result', 'SerMolecule', 'SerSettings',
-           'adf', 'cp2k', 'dftb', 'gamess', 'orca',
-           'package_properties', 'run', 'registry']
+from .package_wrapper import PackageWrapper
+
+__all__ = [
+    'Package', 'Result', 'SerMolecule', 'SerSettings', 'package_properties', 'run', 'registry',
+    'cp2k',
+    'adf', 'dftb',
+    'orca',
+    'gamess',
+    'PackageWrapper'
+]

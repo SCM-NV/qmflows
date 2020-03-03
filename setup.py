@@ -51,6 +51,6 @@ setup(
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx'],
-        'doc': ['sphinx', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
+        'doc': ['sphinx>=2.1', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )

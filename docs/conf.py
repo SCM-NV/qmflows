@@ -26,7 +26,7 @@
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-# needs_sphinx = '1.0'
+needs_sphinx = '2.1'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
@@ -37,7 +37,10 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages',
+    'sphinx.ext.autosummary',
+    'sphinx.ext.napoleon'
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -175,10 +178,30 @@ texinfo_documents = [
 ]
 
 
+# Output is processed with HTML4 writer.
+# Default is False.
+html4_writer = True
+
+
+# True to use the .. admonition:: directive for the Example and Examples sections.
+# False to use the .. rubric:: directive instead. One may look better than the other depending on what HTML theme is used.
+# Defaults to False.
+napoleon_use_admonition_for_examples = True
 
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {'https://docs.python.org/': None}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/', None),
+    'plams': ('https://www.scm.com/doc/plams/', None)
+}
+
+
+# This value controls how to represents typehints. The setting takes the following values:
+#     'signature' – Show typehints as its signature (default)
+#     'none' – Do not show typehints
+# New in version 2.1.
+autodoc_typehints = 'none'
+
 
 rst_epilog = """
 .. |Package| replace:: :class:`~qmflows.packages.Package`

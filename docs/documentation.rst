@@ -12,3 +12,4 @@ For a more detailed description of **QMFlows** read the documentation
    parsers
    hdf5
    molkit
+   package_wrapper
