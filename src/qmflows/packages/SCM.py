@@ -155,8 +155,7 @@ class ADF(Package):
         if key in functions:
             functions[key]()
         else:
-            msg = 'Generic keyword "' + key + '" not implemented for package ADF.'
-            warn(msg)
+            warn(f'Generic keyword {key!r} not implemented for package ADF')
 
 
 class ADF_Result(Result):
@@ -321,7 +320,7 @@ class DFTB(Package):
         if key in functions:
             functions[key]()
         else:
-            warn(f'Generic keyword {key!r} not implemented for package DFTB.')
+            warn(f'Generic keyword {key!r} not implemented for package DFTB')
 
 
 class DFTB_Result(Result):

@@ -160,7 +160,7 @@ class GAMESS(Package):
         if key in functions:
             functions[key]()
         else:
-            warn(f'Generic keyword {key!r} not implemented for package Gamess.')
+            warn(f'Generic keyword {key!r} not implemented for package Gamess')
 
 
 class Gamess_Result(Result):
