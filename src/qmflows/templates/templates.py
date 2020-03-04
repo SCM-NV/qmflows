@@ -2,9 +2,10 @@
 
 __all__ = ['freq', 'geometry', 'singlepoint', 'ts']
 
-
-from qmflows.settings import Settings
 import yaml
+
+from ..settings import Settings
+
 
 singlepoint = Settings(yaml.load("""
 specific:
