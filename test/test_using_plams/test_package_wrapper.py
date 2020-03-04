@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 from noodles.interface import PromisedObject
-from scm.plams import ADFJob, AMSJob, from_smiles, load
+from scm.plams import ADFJob, AMSJob, from_smiles
 from scm.plams.core.basejob import Job
 
 from qmflows import PackageWrapper, run, Settings
