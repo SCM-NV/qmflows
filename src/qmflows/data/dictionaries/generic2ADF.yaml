@@ -1,0 +1,78 @@
+basis:
+    - basis
+    - type
+charge: charge
+functional:
+    - xc
+    -   b1lyp:
+            hybrid: B1LYP
+        b1pw91:
+            hybrid: B1PW91
+        b3lyp:
+            hybrid: B3LYP
+        b3lyp*:
+            hybrid: B3LYP*
+        bee:
+            gga: BEE
+        bhandh:
+            hybrid: BHandH
+        bhandhlyp:
+            hybrid: BHandHLYP
+        blyp:
+            gga: BLYP
+        bp:
+            gga: BP
+        bp86:
+            gga: BP86
+        camy-b3lyp:
+            Xcfun: ''
+            hybrid: CAMY-B3LYP
+        hf: hartreefock
+        kmlyp:
+            hybrid: KMLYP
+        kt1:
+            gga: KT1
+        kt2:
+            gga: KT2
+        lb94:
+            gga: LB94
+        mpbe:
+            gga: mPBE
+        mpw:
+            gga: mPW
+        mpw1k:
+            hybrid: MPW1K
+        mpw1pw:
+            hybrid: MPW1PW
+        o3lyp:
+            hybrid: O3LYP
+        olyp:
+            gga: OLYP
+        opbe:
+            gga: OPBE
+        opbe0:
+            hybrid: OPBE0
+        pbe:
+            gga: PBE
+        pbe0:
+            hybrid: PBE0
+        pw91:
+            gga: PW91
+        revpbe:
+            gga: revPBE
+        rpbe:
+            gga: RPBE
+        s12g:
+            gga: S12g
+        ssb-d:
+            gga: SSB-D
+        x3lyp:
+            hybrid: X3LYP
+        xlyp:
+            gga: XLYP
+optimize:
+    - geometry
+    - optim
+ts:
+    - geometry
+    - transitionstate

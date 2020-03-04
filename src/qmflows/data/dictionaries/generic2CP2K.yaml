@@ -1,0 +1,5 @@
+functional:
+    - force_eval
+    - dft
+    - xc
+    - xcfunctional

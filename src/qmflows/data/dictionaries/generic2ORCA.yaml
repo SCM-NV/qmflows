@@ -1,0 +1,13 @@
+basis:
+    - basis
+    - basis
+functional:
+    - method
+    - functional
+optimize:
+    - method
+    - runtyp
+    - opt
+ts:
+    - main
+    - OptTS

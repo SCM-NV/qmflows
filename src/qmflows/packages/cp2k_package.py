@@ -39,7 +39,7 @@ class CP2K(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2CP2K.json'
+    generic_dict_file: ClassVar[str] = 'generic2CP2K.yaml'
 
     def __init__(self) -> None:
         super().__init__("cp2k")

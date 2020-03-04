@@ -1,0 +1,15 @@
+energy:
+    file_ext: out
+    function: extract_line_value
+    kwargs:
+        pattern: Total energy
+        pos: 2
+    parser: generic_parsers
+geometry:
+    file_pattern: '*-pos-1.xyz'
+    function: read_xyz_file
+    parser: cp2KParser
+orbitals:
+    file_pattern: '*MOLog'
+    function: read_cp2k_coefficients
+    parser: cp2KParser

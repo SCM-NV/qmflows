@@ -26,7 +26,7 @@ class ORCA(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2ORCA.json'
+    generic_dict_file: ClassVar[str] = 'generic2ORCA.yaml'
 
     def __init__(self) -> None:
         super().__init__("orca")

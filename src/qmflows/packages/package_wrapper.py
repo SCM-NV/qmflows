@@ -195,7 +195,7 @@ class PackageWrapper(Package):
 
     """  # noqa
 
-    generic_dict_file: ClassVar[str] = 'generic2None.json'
+    generic_dict_file: ClassVar[str] = 'generic2None.yaml'
     generic_package: ClassVar[bool] = True
 
     def __init__(self, job_type: Type[plams.Job]) -> None:

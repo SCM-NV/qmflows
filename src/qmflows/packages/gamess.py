@@ -22,7 +22,7 @@ class GAMESS(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2gamess.json'
+    generic_dict_file: ClassVar[str] = 'generic2gamess.yaml'
 
     def __init__(self) -> None:
         super().__init__("gamess")

@@ -1,0 +1,58 @@
+charges:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /ATOM       NA         ZA/ {getline; while ($0 != "") {print $5;getline}}
+    parser: generic_parsers
+dipole:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /Total Dipole Moment/ {print $5; print $6; print $7}
+    parser: generic_parsers
+energy:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /FINAL SINGLE POINT ENERGY/ {energy = $5} END {print energy}
+    parser: generic_parsers
+enthalpy:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /Total enthalpy/ {enthalpy = $4} END {print enthalpy}
+    parser: generic_parsers
+free_energy:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /Final Gibbs free enthalpy/ {energy = $6} END {print energy}
+    parser: generic_parsers
+frequencies:
+    file_ext: hess
+    function: parse_frequencies
+    parser: orca_parser
+hessian:
+    file_ext: hess
+    function: parse_hessian
+    parser: orca_parser
+normal_modes:
+    file_ext: hess
+    function: parse_normal_modes
+    parser: orca_parser
+optcycles:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /GEOMETRY OPTIMIZATION CYCLE/ {ncycles = $5} END {print ncycles}
+    parser: generic_parsers
+orbitals:
+    file_ext: out
+    function: parse_molecular_orbitals
+    parser: orca_parser
+runtime:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /Sum of individual times/ {runtime = $6} END {print runtime}
+    parser: generic_parsers

@@ -30,7 +30,7 @@ from noodles.serial.reasonable import SerReasonableObject
 from rdkit import Chem
 from scm import plams
 
-from ..fileFunctions import json2Settings
+from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 
 __all__ = ['package_properties',
@@ -39,15 +39,15 @@ __all__ = ['package_properties',
 
 _BASE_PATH = Path('data') / 'dictionaries'
 
-#: A dictionary mapping package names to .json files.
+#: A dictionary mapping package names to .yaml files.
 package_properties: Dict[Optional[str], Path] = {
-    None: _BASE_PATH / 'propertiesNone.json',
-    'adf': _BASE_PATH / 'propertiesADF.json',
-    'dftb': _BASE_PATH / 'propertiesDFTB.json',
-    'cp2k': _BASE_PATH / 'propertiesCP2K.json',
-    'dirac': _BASE_PATH / 'propertiesDIRAC.json',
-    'gamess': _BASE_PATH / 'propertiesGAMESS.json',
-    'orca': _BASE_PATH / 'propertiesORCA.json'
+    None: _BASE_PATH / 'propertiesNone.yaml',
+    'adf': _BASE_PATH / 'propertiesADF.yaml',
+    'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
+    'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
+    'dirac': _BASE_PATH / 'propertiesDIRAC.yaml',
+    'gamess': _BASE_PATH / 'propertiesGAMESS.yaml',
+    'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
 del _BASE_PATH
 
@@ -83,7 +83,7 @@ class Result:
         :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
-        :param properties: path to the `JSON` file containing the data to
+        :param properties: path to the `yaml` file containing the data to
                            load the parser on the fly.
         :type properties: str
 
@@ -92,7 +92,7 @@ class Result:
         self.settings = settings
         self._molecule = molecule
         xs = pkg.resource_string("qmflows", str(properties))
-        self.prop_dict = json2Settings(xs)
+        self.prop_dict = yaml2Settings(xs)
         self.archive = {"plams_dir": plams_dir,
                         'work_dir': work_dir}
         self.job_name = job_name
@@ -161,7 +161,7 @@ class Result:
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
-        # Read the JSON dictionary than contains the parsers names
+        # Read the .yaml dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
         # extension of the output file containing the property value
@@ -253,12 +253,12 @@ class Package(ABC):
 
     """
 
-    #: The name of the generic .json file.
+    #: The name of the generic .yaml file.
     #: Should be implemented by ``Package`` subclasses.
     generic_dict_file: ClassVar[str] = NotImplemented
 
     #: A special flag for used by the ``PakageWrapper`` subclass.
-    #: Used for denoting Job types without any generic .json files.
+    #: Used for denoting Job types without any generic .yaml files.
     generic_package: ClassVar[bool] = False
 
     def __init__(self, pkg_name: str) -> None:
@@ -390,7 +390,7 @@ class Package(ABC):
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self) -> Settings:
-        """Load the JSON file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
+        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
         try:
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
@@ -399,8 +399,8 @@ class Package(ABC):
                                           "be implemented by `Package` subclasses") from ex
             raise ex
 
-        str_json = pkg.resource_string("qmflows", path)
-        return json2Settings(str_json)
+        str_yaml = pkg.resource_string("qmflows", path)
+        return yaml2Settings(str_yaml)
 
     def __repr__(self) -> str:
         """Return a :class:`str` representation of this instance."""
