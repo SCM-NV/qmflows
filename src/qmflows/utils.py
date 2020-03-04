@@ -62,12 +62,16 @@ def init_restart(path: Union[None, AnyStr, os.PathLike] = None,
     """
     with open(os.devnull, 'w') as f, redirect_stdout(f):  # Temporary supress printing
         init(path, folder)
-    shutil.rmtree(config.default_jobmanager.workdir)  # Remove the freshly created workdir
 
     # Parse variables
     path_ = os.getcwd() if path is None else os.path.abspath(path)
     folder_ = 'plams_workdir' if folder is None else os.path.normpath(folder)
     workdir = os.path.join(path_, folder_)
+
+    if config.default_jobmanager.workdir == workdir:
+        return
+    else:
+        shutil.rmtree(config.default_jobmanager.workdir)  # Remove the freshly created workdir
 
     # Update the files and folders in the default JobManager
     config.default_jobmanager.foldername = folder_

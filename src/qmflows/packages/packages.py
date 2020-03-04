@@ -13,7 +13,7 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Dict, Union,
+from typing import (Any, Callable, Optional, Dict, Union, ClassVar,
                     Iterable, Mapping, Iterator, Type)
 
 import numpy as np
@@ -40,7 +40,8 @@ __all__ = ['package_properties',
 _BASE_PATH = Path('data') / 'dictionaries'
 
 #: A dictionary mapping package names to .json files.
-package_properties: Dict[str, Path] = {
+package_properties: Dict[Optional[str], Path] = {
+    None: _BASE_PATH / 'propertiesNone.json',
     'adf': _BASE_PATH / 'propertiesADF.json',
     'dftb': _BASE_PATH / 'propertiesDFTB.json',
     'cp2k': _BASE_PATH / 'propertiesCP2K.json',
@@ -252,10 +253,17 @@ class Package(ABC):
 
     """
 
+    #: The name of the generic .json file.
+    #: Should be implemented by ``Package`` subclasses.
+    generic_dict_file: ClassVar[str] = NotImplemented
+
+    #: A special flag for used by the ``PakageWrapper`` subclass.
+    #: Used for denoting Job types without any generic .json files.
+    generic_package: ClassVar[bool] = False
+
     def __init__(self, pkg_name: str) -> None:
         """Initialize a :class:`Package` instance."""
         self.pkg_name = pkg_name
-        self.generic_dict_file: Optional[str] = None  # will raise a NotImplementedError if .generic_dict_file
 
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
@@ -271,7 +279,10 @@ class Package(ABC):
         :type mol: plams Molecule
 
         """
-        properties = package_properties[self.pkg_name]
+        if self.generic_package:
+            properties = package_properties[None]
+        else:
+            properties = package_properties[self.pkg_name]
 
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
@@ -348,28 +359,34 @@ class Package(ABC):
 
         specific_from_generic_settings = Settings()
         for k, v in settings.items():
-            if k != "specific":
-                key = generic_dict.get(k)
-                if key:
-                    if isinstance(key, list):
-                        if isinstance(key[1], dict):
-                            value = key[1][v]
-                        else:
-                            value = {key[1]: v}
-                        if value:
-                            v = value
-                        key = key[0]
-                    if v:
-                        if isinstance(v, dict):
-                            v = Settings(v)
-                        specific_from_generic_settings \
-                            .specific[self.pkg_name][key] = v
-                    else:
-                        specific_from_generic_settings \
-                            .specific[self.pkg_name][key]
+            if k == "specific":
+                continue
+            elif k == 'input':  # Allow for PLAMS-style input; i.e. settings.input.blablabla
+                specific_from_generic_settings.specific[self.pkg_name].update(v)
+                continue
+
+            key = generic_dict.get(k)
+            if not key:
+                self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
+                continue
+
+            if isinstance(key, list):
+                if isinstance(key[1], dict):
+                    value = key[1][v]
                 else:
-                    self.handle_special_keywords(
-                        specific_from_generic_settings, k, v, mol)
+                    value = {key[1]: v}
+                if value:
+                    v = value
+                key = key[0]
+
+            if v:
+                if isinstance(v, dict):
+                    v = Settings(v)
+                specific_from_generic_settings.specific[self.pkg_name][key] = v
+            else:
+                #: TODO Is there any point to this statement?
+                specific_from_generic_settings.specific[self.pkg_name][key]
+
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self) -> Settings:
@@ -377,9 +394,9 @@ class Package(ABC):
         try:
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
-            if self.generic_dict_file is None:
-                raise NotImplementedError("The `Package.generic_dict_file` attribute "
-                                          "should be implemented by Package subclasses")
+            if self.generic_dict_file is NotImplemented:
+                raise NotImplementedError("The `Package.generic_dict_file` attribute should "
+                                          "be implemented by `Package` subclasses") from ex
             raise ex
 
         str_json = pkg.resource_string("qmflows", path)
