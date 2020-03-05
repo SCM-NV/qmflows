@@ -126,8 +126,8 @@ class InitRestart(AbstractContextManager):
 
     """
 
-    def __init__(self, path: Union[None, AnyStr, os.PathLike] = None,
-                 folder: Union[None, AnyStr, os.PathLike] = None,
+    def __init__(self, path: Union[None, str, os.PathLike] = None,
+                 folder: Union[None, str, os.PathLike] = None,
                  otherJM: Optional[Iterable[JobManager]] = None,
                  load_jobs: bool = False) -> None:
         """Initialize the context manager, assign the path, folder and jobmanagers."""
