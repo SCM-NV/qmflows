@@ -75,29 +75,32 @@ def init_restart(path: Union[None, str, os.PathLike] = None,
     folder_ = 'plams_workdir' if folder is None else normpath(folder)
     workdir = join(path_, folder_)
 
+    # The JobManager instance
+    jobmanager = config.default_jobmanager
+
     # There is no previously existing workdir; move along
-    if config.default_jobmanager.workdir == workdir:
+    if jobmanager.workdir == workdir:
         return
 
     # There is an actual preexisting workdir;
     # Remove the freshly created workdir and change to the previously created one
     else:
-        shutil.rmtree(config.default_jobmanager.workdir)
+        shutil.rmtree(jobmanager.workdir)
 
     # Update the files and folders in the default JobManager
-    config.default_jobmanager.foldername = folder_
-    config.default_jobmanager.workdir = workdir
-    config.default_jobmanager.logfile = join(workdir, 'logfile')
-    config.default_jobmanager.input = join(workdir, 'input')
+    jobmanager.foldername = folder_
+    jobmanager.workdir = workdir
+    jobmanager.logfile = join(workdir, 'logfile')
+    jobmanager.input = join(workdir, 'input')
 
     # Update JobManager.names
     folder_iterator = (splitext(f)[0] for f in os.listdir(workdir))
-    config.default_jobmanager.names = dict(Counter(folder_iterator))
+    jobmanager.names = dict(Counter(folder_iterator))
 
     # Load all previously pickled .dill files into the JobManager
     # NOTE: This can be quite slow if a large number of (large) jobs is stored therein
     if load_jobs:
-        load_all(workdir, config.default_jobmanager)
+        load_all(workdir, jobmanager)
 
 
 class InitRestart(AbstractContextManager):
