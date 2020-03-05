@@ -1,6 +1,6 @@
 """Default options to call some quantum packages."""
 
-__all__ = ['freq', 'geometry', 'singlepoint', 'ts']
+__all__ = ['freq', 'geometry', 'singlepoint', 'ts', 'md']
 
 import yaml
 
@@ -231,4 +231,50 @@ specific:
         nosym: 1
       force:
         method: seminum
+""", Loader=yaml.FullLoader))
+
+
+# moleculair dynamics template
+md = Settings(yaml.load("""
+specific:
+    cp2k_mm:
+        force_eval:
+            method: FIST
+            mm:
+                forcefield:
+                    ei_scale14: 1.0
+                    vdw_scale14: 1.0
+                    ignore_missing_critical_params: ''
+                    parmtype: CHM
+                    do_nonbonded: ''
+                    shift_cutoff: .TRUE.
+                    spline:
+                        r0_nb: 0.25
+                poisson:
+                    periodic: NONE
+                    ewald:
+                        ewald_type: NONE
+            subsys:
+                cell:
+                    abc: '[angstrom] 50.0 50.0 50.0'
+                    periodic: NONE
+                topology:
+                    coord_file_format: 'OFF'
+                    center_coordinates:
+                        center_point: 0.0 0.0 0.0
+        motion:
+            md:
+                ensemble: NVT
+                temperature: 300.0
+                timestep: 1.0
+                steps: 10000
+                thermostat:
+                    type: CSVR
+                    csvr:
+                        timecon: 1250
+        global:
+            print_level: low
+            project: cp2k
+            run_type: MD
+
 """, Loader=yaml.FullLoader))
