@@ -158,7 +158,7 @@ class CP2K(Package):
                 abc = ' [angstrom] {} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
-                raise RuntimeError("cell parameter:{}\nformat not recognized")
+                raise RuntimeError(f"cell parameter:{value!r}\nformat not recognized")
 
             return s
 
