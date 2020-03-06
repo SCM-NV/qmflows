@@ -374,22 +374,31 @@ class Package(ABC):
                 self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
                 continue
 
+            # The `key` variable can have four types of values:
+            # * None
+            # * A string
+            # * A list with two elements; the second one being a dict
+            # * A list of arbitrary length
+
             if isinstance(key, list):
-                if isinstance(key[1], dict):
-                    value = key[1][v]
+                initial_key, *final_keys = key
+
+                if isinstance(final_keys[0], dict):
+                    v_tmp = final_keys[0].get(v)
                 else:
-                    value = {key[1]: v}
-                if value:
-                    v = value
-                key = key[0]
+                    v_tmp = Settings()
+                    v_tmp.set_nested(final_keys, v)
+
+                if v_tmp:
+                    v = v_tmp
+                key = initial_key
 
             if v:
                 if isinstance(v, dict):
                     v = Settings(v)
                 specific_from_generic_settings.specific[self.pkg_name][key] = v
             else:
-                #: TODO Is there any point to this statement?
-                specific_from_generic_settings.specific[self.pkg_name][key]
+                specific_from_generic_settings.specific[self.pkg_name][key] = Settings()
 
         return settings.overlay(specific_from_generic_settings)
 
