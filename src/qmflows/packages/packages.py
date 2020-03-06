@@ -286,6 +286,7 @@ class Package(ABC):
 
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
+        output_warnings = None
         if all(x is not None for x in [settings, mol]):
             #  Check if plams finishes normally
             try:
@@ -299,7 +300,7 @@ class Package(ABC):
                 job_settings = self.generic2specific(settings, mol)
 
                 # Run the job
-                self.prerun()
+                self.prerun(job_settings, mol, **kwargs)
                 result = self.run_job(job_settings, mol, **kwargs)
 
                 # Check if there are warnings in the output that render the calculation
@@ -336,7 +337,7 @@ class Package(ABC):
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
-        self.postrun()
+        self.postrun(result, output_warnings, job_settings, mol, **kwargs)
         return result
 
     def generic2specific(self, settings: Settings,
@@ -407,11 +408,12 @@ class Package(ABC):
         vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
-    def prerun(self) -> None:
+    def prerun(self, job_settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
         pass
 
-    def postrun(self) -> None:
+    def postrun(self, result: Result, output_warnings: Optional[WarnMap],
+                job_settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks after running the actual job."""
         pass
 
