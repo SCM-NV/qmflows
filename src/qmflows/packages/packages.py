@@ -284,14 +284,17 @@ class Package(ABC):
         else:
             properties = package_properties[self.pkg_name]
 
+        # Ensure that these variables have an actual value
+        # Precaution against passing unbound variables to self.postrun()
+        output_warnings = plams_mol = job_settings = None
+
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
-        output_warnings = None
         if all(x is not None for x in [settings, mol]):
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
+                plams_mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -300,8 +303,8 @@ class Package(ABC):
                 job_settings = self.generic2specific(settings, mol)
 
                 # Run the job
-                self.prerun(job_settings, mol, **kwargs)
-                result = self.run_job(job_settings, mol, **kwargs)
+                self.prerun(job_settings, plams_mol, **kwargs)
+                result = self.run_job(job_settings, plams_mol, **kwargs)
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
@@ -337,7 +340,7 @@ class Package(ABC):
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
-        self.postrun(result, output_warnings, job_settings, mol, **kwargs)
+        self.postrun(result, output_warnings, job_settings, plams_mol, **kwargs)
         return result
 
     def generic2specific(self, settings: Settings,
@@ -408,12 +411,15 @@ class Package(ABC):
         vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
-    def prerun(self, job_settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
+    def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
         pass
 
-    def postrun(self, result: Result, output_warnings: Optional[WarnMap],
-                job_settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
+    def postrun(self, result: Result,
+                output_warnings: Optional[WarnMap] = None,
+                settings: Optional[Settings] = None,
+                mol: Optional[plams.Molecule] = None,
+                **kwargs: Any) -> None:
         """Run a set of tasks after running the actual job."""
         pass
 
