@@ -1,38 +1,28 @@
-"""
+"""A :class:`Package` subclass for classical CP2K calculations.
 
 Index
 -----
 .. currentmodule:: qmflows.packages.cp2k_mm
 .. autosummary::
     CP2KMM
-    CP2K_KEYS_ALIAS
 
 API
 ---
 .. autoclass:: CP2KMM
-.. autodata:: CP2K_KEYS_ALIAS
-    :annotation: : dict[str, tuple[str, ...]]
-
-    .. code:: python
-
-        >>> from typing import Dict, Tuple
-
-{cp2k_keys_alias}
 
 """
 
 import os
-import textwrap
 from os.path import join
-from typing import Optional, Union, Any, Dict, ClassVar, Mapping, Sequence, Tuple, List
-from warnings import warn
+from typing import Optional, Union, Any, ClassVar, Mapping
 
 from scm import plams
 
+from qmflows.cp2k_utils import set_prm, CP2K_KEYS_ALIAS
 from qmflows.parsers.cp2KParser import parse_cp2k_warnings
 from qmflows.settings import Settings
 from qmflows.warnings_qmflows import cp2k_warnings
-from qmflows.packages.packages import (package_properties, parse_output_warnings, WarnMap)
+from qmflows.packages.packages import parse_output_warnings
 from qmflows.packages.cp2k_package import CP2K_Result, CP2K
 
 __all__ = ['cp2k_mm']
@@ -116,14 +106,19 @@ class CP2KMM(CP2K):
         """
         funs = {'psf': _parse_psf,
                 'prm': _parse_prm}
+        for k in CP2K_KEYS_ALIAS:
+            funs[k] = set_prm
 
         # Function that handles the special keyword
-        try:
-            f = funs[key]
-        except KeyError:  # Plan B: fall back to the CP2K super-class
-            super().handle_special_keywords(settings, key, value, mol)
-        else:
+        if isinstance(key, tuple):
+            f = set_prm
             f(settings, value, mol, key)
+        else:
+            try:
+                f = funs[key]
+                f(settings, value, mol, key)
+            except KeyError:  # Plan B: fall back to the CP2K super-class
+                super().handle_special_keywords(settings, key, value, mol)
 
 
 def _parse_psf(settings: Settings, key: str,
