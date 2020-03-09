@@ -89,7 +89,7 @@ class LengthError(ValueError):
 
 
 def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
-            value: Union[MappingScalar, MappingSequence],
+            value: Union[MappingScalar, List[MappingScalar], MappingSequence],
             mol: plams.Molecule) -> None:
     """Assign a set of forcefield parameters to *settings* as specific keys.
 
@@ -102,24 +102,23 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     .. code:: python
 
-        >>> prm_map1 = {  # Example 1
-        ...     'param': ('epsilon', 'sigma'),
-        ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
-        ...     'Cs': (1, 1),
-        ...     'Cd': (2, 2),
-        ...     'O': (3, 3),
-        ...     'H': (4, 4)
-        ... }
+    >>> prm_map1 = {  # Example 1
+    ...     'param': ('epsilon', 'sigma'),
+    ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
+    ...     'Cs': (1, 1),
+    ...     'Cd': (2, 2),
+    ...     'O': (3, 3),
+    ...     'H': (4, 4)
+    ... }
 
-
-        >>> prm_map2 = {  # Example 2
-        ...     'param': 'epsilon',
-        ...     'unit': 'kcalmol',  # An optional key
-        ...     'Cs': 1,
-        ...     'Cd': 2,
-        ...     'O': 3,
-        ...     'H': 4
-        ... }
+    >>> prm_map2 = {  # Example 2
+    ...     'param': 'epsilon',
+    ...     'unit': 'kcalmol',  # An optional key
+    ...     'Cs': 1,
+    ...     'Cd': 2,
+    ...     'O': 3,
+    ...     'H': 4
+    ... }
 
 
     Warning
@@ -156,7 +155,12 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         A dictionary mapping ``key_path`` aliases to the actual keys.
 
     """  # noqa
-    prm_map = value.copy()
+    if isinstance(value, list):
+        for prm_map in value:
+            set_prm(settings, key, value, mol)
+    else:
+        prm_map = value.copy()
+
     try:
         prm_key = prm_map.pop('param')
     except KeyError as ex:
