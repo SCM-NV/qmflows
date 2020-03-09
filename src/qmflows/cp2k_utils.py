@@ -102,38 +102,38 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     .. code:: python
 
-    >>> prm_map1 = {  # Example 1
-    ...     'param': ('epsilon', 'sigma'),
-    ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
-    ...     'Cs': (1, 1),
-    ...     'Cd': (2, 2),
-    ...     'O': (3, 3),
-    ...     'H': (4, 4)
-    ... }
+        >>> prm_map1 = {  # Example 1
+        ...     'param': ('epsilon', 'sigma'),
+        ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
+        ...     'Cs': (1, 1),
+        ...     'Cd': (2, 2),
+        ...     'O': (3, 3),
+        ...     'H': (4, 4)
+        ... }
 
-    >>> prm_map2 = {  # Example 2
-    ...     'param': 'epsilon',
-    ...     'unit': 'kcalmol',  # An optional key
-    ...     'Cs': 1,
-    ...     'Cd': 2,
-    ...     'O': 3,
-    ...     'H': 4
-    ... }
+        >>> prm_map2 = {  # Example 2
+        ...     'param': 'epsilon',
+        ...     'unit': 'kcalmol',  # An optional key
+        ...     'Cs': 1,
+        ...     'Cd': 2,
+        ...     'O': 3,
+        ...     'H': 4
+        ... }
 
-    >>> prm_map3 = [  # Example 3
-    ... {'param': 'epsilon',
-    ...  'unit': 'kcalmol',  # An optional key
-    ...  'Cs': 1,
-    ...  'Cd': 2,
-    ...  'O': 3,
-    ...  'H': 4},
-    ... {'param': 'sigma',
-    ...  'unit': 'angstrom',  # An optional key
-    ...  'Cs': 1,
-    ...  'Cd': 2,
-    ...  'O': 3,
-    ...  'H': 4}
-    ... ]
+        >>> prm_map3 = [  # Example 3
+        ... {'param': 'epsilon',
+        ...  'unit': 'kcalmol',  # An optional key
+        ...  'Cs': 1,
+        ...  'Cd': 2,
+        ...  'O': 3,
+        ...  'H': 4},
+        ... {'param': 'sigma',
+        ...  'unit': 'angstrom',  # An optional key
+        ...  'Cs': 1,
+        ...  'Cd': 2,
+        ...  'O': 3,
+        ...  'H': 4}
+        ... ]
 
 
     Warning
