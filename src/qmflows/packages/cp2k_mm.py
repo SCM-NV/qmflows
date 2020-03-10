@@ -14,11 +14,11 @@ API
 
 import os
 from os.path import join
-from typing import Optional, Union, Any, ClassVar, Mapping
+from typing import Optional, Union, Any, ClassVar, Mapping, Dict, Callable
 
 from scm import plams
 
-from qmflows.cp2k_utils import set_prm, CP2K_KEYS_ALIAS
+from qmflows.cp2k_utils import set_prm, map_psf_atoms, CP2K_KEYS_ALIAS
 from qmflows.parsers.cp2KParser import parse_cp2k_warnings
 from qmflows.settings import Settings
 from qmflows.warnings_qmflows import cp2k_warnings
@@ -26,6 +26,36 @@ from qmflows.packages.packages import parse_output_warnings
 from qmflows.packages.cp2k_package import CP2K_Result, CP2K
 
 __all__ = ['cp2k_mm']
+
+
+def _parse_psf(settings: Settings, key: str,
+               value: Any, mol: plams.Molecule) -> None:
+    """Assign a .psf file."""
+    subsys = settings.specific.cp2k.force_eval.subsys
+    if value is None:
+        subsys.topology.use_element_as_kind = '.TRUE.'
+        return
+
+    symbol_map = map_psf_atoms(value)
+    for custom_symbol, symbol in symbol_map.items():
+        subsys[f'kind {custom_symbol}'].element = symbol
+    subsys.topology.conn_file_format = 'PSF'
+    subsys.topology.conn_file_name = value
+
+
+def _parse_prm(settings: Settings, key: str,
+               value: Any, mol: plams.Molecule) -> None:
+    """Assign a CHARMM-style .prm file."""
+    settings.specific.cp2k.force_eval.mm.forcefield.parmtype = 'CHM'
+    settings.specific.cp2k.force_eval.mm.forcefield.parm_file_name = value
+
+
+SpecialFunc = Callable[[Settings, str, Any, plams.Molecule], None]
+
+#: A :class:`dict` mapping special keywords to the appropiate function.
+SPECIAL_FUNCS: Dict[str, SpecialFunc] = {'psf': _parse_psf, 'prm': _parse_prm}
+for k in CP2K_KEYS_ALIAS:
+    SPECIAL_FUNCS[k] = set_prm
 
 
 class CP2KMM(CP2K):
@@ -43,13 +73,11 @@ class CP2KMM(CP2K):
     def __init__(self) -> None:
         super().__init__()
 
-    def prerun(self, job_settings: Settings, mol: plams.Molecule,
-               symbol_map: Optional[Mapping[str, str]],
-               **kwargs: Any) -> None:
+    def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
-        if symbol_map is None:
-            symbol_map = {at.symbol: at.symbol for at in mol}
-        _set_kinds(job_settings, symbol_map)
+        cp2k = settings.specific.cp2k
+        if not cp2k.get('psf'):
+            cp2k.psf = None
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
@@ -104,35 +132,15 @@ class CP2KMM(CP2K):
         :type mol: plams Molecule
 
         """
-        funs = {'psf': _parse_psf,
-                'prm': _parse_prm}
-        for k in CP2K_KEYS_ALIAS:
-            funs[k] = set_prm
-
         # Function that handles the special keyword
         if isinstance(key, tuple):
-            f = set_prm
-            f(settings, value, mol, key)
+            set_prm(settings, value, mol, key)
         else:
             try:
-                f = funs[key]
+                f = SPECIAL_FUNCS[key]
                 f(settings, value, mol, key)
             except KeyError:  # Plan B: fall back to the CP2K super-class
                 super().handle_special_keywords(settings, key, value, mol)
-
-
-def _parse_psf(settings: Settings, key: str,
-               value: Any, mol: plams.Molecule) -> None:
-    """Assign a .psf file."""
-    settings.specific.cp2k.force_eval.subsys.topology.conn_file_format = 'PSF'
-    settings.specific.cp2k.force_eval.subsys.topology.conn_file_name = value
-
-
-def _parse_prm(settings: Settings, key: str,
-               value: Any, mol: plams.Molecule) -> None:
-    """Assign a CHARMM-style .prm file."""
-    settings.specific.cp2k.force_eval.mm.forcefield.parmtype = 'CHM'
-    settings.specific.cp2k.force_eval.mm.forcefield.parm_file_name = value
 
 
 def _set_kinds(s: Settings, symbol_map: Mapping[str, str]) -> None:

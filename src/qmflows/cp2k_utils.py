@@ -5,11 +5,13 @@ Index
 .. currentmodule:: qmflows.cp2k_utils
 .. autosummary::
     set_prm
+    map_psf_atoms
     CP2K_KEYS_ALIAS
 
 API
 ---
 .. autofunction:: set_prm
+.. autofunction:: map_psf_atoms
 .. autodata:: CP2K_KEYS_ALIAS
     :annotation: : dict[str, tuple[str, ...]]
 
@@ -22,26 +24,21 @@ API
 """
 
 import textwrap
+from os import PathLike
+from io import TextIOBase
 from functools import singledispatch
-from itertools import repeat
+from itertools import repeat, islice
 from collections import abc
-from typing import Union, Optional, List, Dict, Tuple, overload, MutableMapping, Sequence
+from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping,
+                    Sequence, Any, AnyStr)
 
 import pandas as pd
 
 from scm import plams
 from qmflows.settings import Settings
+from qmflows.backports import nullcontext, Literal
 
-try:  # Plan A; Literal was added to the typing module in Python 3.8
-    from typing import Literal
-except ImportError:
-    try:  # Plan B
-        from typing_extensions import Literal
-    except ImportError:  # Plan C
-        class Literal:
-            def __getitem__(self, name): return Union[name, name]
-
-__all__ = ['set_prm', 'CP2K_KEYS_ALIAS']
+__all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
 _BASE_PATH = ('specific', 'cp2k', 'force_eval', 'mm', 'forcefield')
 
@@ -102,7 +99,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     .. code:: python
 
-        >>> prm_map1 = {  # Example 1
+        >>> lennard_jones = {  # Example 1
         ...     'param': ('epsilon', 'sigma'),
         ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
         ...     'Cs': (1, 1),
@@ -111,7 +108,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         ...     'H': (4, 4)
         ... }
 
-        >>> prm_map2 = {  # Example 2
+        >>> lennard_jones = {  # Example 2
         ...     'param': 'epsilon',
         ...     'unit': 'kcalmol',  # An optional key
         ...     'Cs': 1,
@@ -120,7 +117,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         ...     'H': 4
         ... }
 
-        >>> prm_map3 = [  # Example 3
+        >>> lennard_jones = [  # Example 3
         ... {'param': 'epsilon',
         ...  'unit': 'kcalmol',  # An optional key
         ...  'Cs': 1,
@@ -370,6 +367,90 @@ def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
             raise RuntimeError(f"{key!r} section: no alias available for {key!r}") from ex
     else:
         return key
+
+
+def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
+                  **kwargs: Any) -> Dict[str, str]:
+    r"""Take a .psf file and construct a :class:`dict` mapping atom types to atom names.
+
+    Examples
+    --------
+    .. code:: python
+
+        >>> from io import StringIO
+        >>> from qmflows.cp2k_utils import map_psf_atoms
+
+        >>> file = StringIO('''
+        ... PSF EXT
+        ...
+        ...         10 !NATOM
+        ...          1 MOL1     1        LIG      C        C331   -0.272182       12.010600        0
+        ...          2 MOL1     1        LIG      C        C321   -0.282182       12.010600        0
+        ...          3 MOL1     1        LIG      C        C2O3    0.134065       12.010600        0
+        ...          4 MOL1     1        LIG      O        O2D2   -0.210848       15.999400        0
+        ...          5 MOL1     1        LIG      O        O2D2   -0.210848       15.999400        0
+        ...          6 MOL1     1        LIG      H        HGA2    0.087818        1.007980        0
+        ...          7 MOL1     1        LIG      H        HGA2    0.087818        1.007980        0
+        ...          8 MOL1     1        LIG      H        HGA3    0.087818        1.007980        0
+        ...          9 MOL1     1        LIG      H        HGA3    0.087818        1.007980        0
+        ...         10 MOL1     1        LIG      H        HGA3    0.087818        1.007980        0
+        ... ''')
+
+        >>> atom_map = map_psf_atoms(file)
+        >>> print(atom_map)
+        {'C331': 'C', 'C321': 'C', 'C2O3': 'C', 'O2D2': 'O', 'HGA2': 'H', 'HGA3': 'H'}
+
+
+    Parameters
+    ----------
+    file : :class:`str`, :class:`PathLike<os.PathLike>` or :class:`TextIOBase<io.TextIOBase>`
+        A path-like or file-like object containing the .psf file.
+        Note that passed file-like objects should return strings (not bytes) upon iteration.
+
+    /**kwargs : :data:`Any<typing.Any>`
+        Further keyword arguments for :func:`open`.
+        Only relevant when *file* is a path-like object.
+
+    Returns
+    -------
+    :class:`dict` [:class:`str`, :class:`str`]
+        A dictionary mapping atom types to atom names.
+        Atom types/names are extracted from the passed .psf file.
+
+    """
+    try:
+        context_manager = open(file, **kwargs)  # path-like object
+    except TypeError as ex:
+        cls_name = file.__class__.__name__
+        if cls_name == 'PSFContainer':  # i.e. the FOX.PSFContainer class
+            return {k: v for v, k in zip(file.atom_type, file.atom_name)}
+        elif not isinstance(file, abc.Iterator):
+            raise TypeError("'file' expected a file- or path-like object; "
+                            f"observed type: {cls_name!r}") from ex
+        context_manager = nullcontext(file)  # a file-like object (hopefully)
+
+    with context_manager as f:
+        # A quick check to see *f* is not opened in bytes mode or something similar
+        i = next(f)
+        if not isinstance(i, str):
+            raise TypeError(f"Iteration through {f!r} should yield a string; "
+                            f"observed type: {i.__class__.__name__!r}")
+
+        for i in f:
+            if '!NATOM' in i:  # Find the !NATOM block
+                break
+        else:
+            raise ValueError(f"failed to identify the '!NATOM' substring in {f!r}")
+
+        # Identify rows 4 & 5 which contain, respectivelly,
+        # the `atom name` and `atom type` blocks
+        atom_count = int(i.split()[0])
+        iterator = (j.split()[4:6] for j in islice(f, 0, atom_count))
+        try:
+            return {k: v for v, k in iterator}
+        except ValueError as ex:
+            raise ValueError("Failed to identify the 'atom name'- and "
+                             f"'atom type'-containing rows in {f!r};\n{ex}") from ex
 
 
 def _cp2k_keys_alias(indent: str = f"{8 * ' '}... {4 * ' '}") -> str:
