@@ -1,4 +1,4 @@
-"""A module with backports."""
+"""A module with backports of objects added after Python 3.6."""
 
 from typing import Union
 from contextlib import AbstractContextManager
@@ -39,9 +39,9 @@ except ImportError:
         from typing_extensions import Literal
     except ImportError:  # Plan C
         class _Literal:
-            """Return ``typing.Union[name, name]`` when calling ``.__getitem__(name)``."""
+            """Return *name* or the type of *name* when calling :meth:`.__getitem__`."""
 
             def __getitem__(self, name):
-                return Union[name, name]
+                return name if isinstance(name, type) else type(name)
 
         Literal = _Literal()
