@@ -138,9 +138,10 @@ class CP2KMM(CP2K):
         else:
             try:
                 f = SPECIAL_FUNCS[key]
-                f(settings, value, mol, key)
             except KeyError:  # Plan B: fall back to the CP2K super-class
                 super().handle_special_keywords(settings, key, value, mol)
+            else:
+                f(settings, value, mol, key)
 
 
 def _set_kinds(s: Settings, symbol_map: Mapping[str, str]) -> None:
