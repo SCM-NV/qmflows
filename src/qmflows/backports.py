@@ -1,9 +1,8 @@
 """A module with backports of objects added after Python 3.6."""
 
-from typing import Union
 from contextlib import AbstractContextManager
 
-__all__ = ['nullcontext', 'Literal']
+__all__ = ['nullcontext']
 
 try:
     from contextlib import nullcontext
@@ -30,18 +29,3 @@ except ImportError:  # nullcontext was added in python 3.7
 
         def __exit__(self, exc_type, exc_value, traceback):
             pass
-
-
-try:  # Literal was added to the typing module in Python 3.8
-    from typing import Literal
-except ImportError:
-    try:  # It was available in the third-party `typing_extensions` module prior to 3.8
-        from typing_extensions import Literal
-    except ImportError:  # Plan C
-        class _Literal:
-            """Return *name* or the type of *name* when calling :meth:`.__getitem__`."""
-
-            def __getitem__(self, name):
-                return name if isinstance(name, type) else type(name)
-
-        Literal = _Literal()

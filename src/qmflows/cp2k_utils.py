@@ -30,13 +30,13 @@ from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
 from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping,
-                    Sequence, Any, AnyStr)
+                    Sequence, Any, AnyStr, Iterable)
 
 import pandas as pd
 
 from scm import plams
 from qmflows.settings import Settings
-from qmflows.backports import nullcontext, Literal
+from qmflows.backports import nullcontext
 
 __all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
@@ -92,7 +92,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     Examples
     --------
-    *value* should be a dictionary whose values either:
+    *value* should be a dictionary whose values:
 
     * Entirelly consist of scalars.
     * Entirelly consist of Sequences.
@@ -106,15 +106,6 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         ...     'Cd': (2, 2),
         ...     'O': (3, 3),
         ...     'H': (4, 4)
-        ... }
-
-        >>> lennard_jones = {  # Example 2
-        ...     'param': 'epsilon',
-        ...     'unit': 'kcalmol',  # An optional key
-        ...     'Cs': 1,
-        ...     'Cd': 2,
-        ...     'O': 3,
-        ...     'H': 4
         ... }
 
         >>> lennard_jones = [  # Example 3
@@ -170,6 +161,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     if isinstance(value, abc.Sequence):
         for prm_map in value:
             set_prm(settings, key, value, mol)
+        return
     else:
         prm_map = value.copy()
 
@@ -177,9 +169,8 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         prm_key = prm_map.pop('param')
     except KeyError as ex:
         raise RuntimeError(f"{key!r} section: 'param' has not been specified") from ex
-
-    # Extract the key path
-    key_path = _get_key_path(key)
+    else:  # Extract the key path
+        key_path = _get_key_path(key)
 
     # Get the list of settings located at **key_path**
     settings_base = settings.get_nested(key_path)
@@ -196,38 +187,33 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     args = atom_map, settings_base, atom_key
     try:
-        if isinstance(prm_key, str):
-            return set_prm_values(prm_key, prm_map, *args, iterable=False)
-        elif isinstance(prm_key, abc.Iterable):
-            return set_prm_values(tuple(prm_key), prm_map, *args, iterable=True)
+        if isinstance(prm_key, abc.Iterable):
+            return set_prm_values(prm_key, prm_map, *args)
         raise TypeError(f"'param' expected a string or a sequence of strings;\n"
                         f"observed type: {prm_key.__class__.__name__!r}")
 
-    except TypeError as ex:
-        raise RuntimeError(f'{key!r} section: {ex}') from ex
     except LengthError as ex:
         raise RuntimeError(f'{key!r} section: {ex}') from ex.__cause__
+    except Exception as ex:
+        raise RuntimeError(f'{key!r} section: {ex}') from ex
 
 
 @overload
 def set_prm_values(prm_key: str, prm_map: MappingScalar,
                    atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str,
-                   iterable: Literal[False]) -> None:
+                   settings_base: List[Settings], atom_key: str) -> None:
     ...
 
 
 @overload
 def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
                    atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str,
-                   iterable: Literal[True]) -> None:
+                   settings_base: List[Settings], atom_key: str) -> None:
     ...
 
 
 def set_prm_values(prm_key, prm_map, atom_map,
-                   settings_base, atom_key,
-                   iterable=False) -> None:
+                   settings_base, atom_key) -> None:
     """Assign the actual values specified in :func:`set_prm`.
 
     Parameters
@@ -253,19 +239,13 @@ def set_prm_values(prm_key, prm_map, atom_map,
         Its value should be either ``"atoms"`` or ``"atom"`` depending on the parameter type
         of interest.
 
-    iterable : :class:`bool`
-        Whether *prm_key* and *prm_map* values will consist of scalars or sequences.
-
     """
     try:  # Read and parse the unit
         unit = prm_map.pop('unit')
     except KeyError:
         unit_iter = repeat('{}')
     else:
-        if not iterable:
-            unit_iter = (f'[{unit}] {{}}',) if unit is not None else ('{}',)
-        else:
-            unit_iter = [(f'[{u}] {{}}' if u is not None else '{}') for u in unit]
+        unit_iter = _parse_unit(unit)
 
     # Construct a DataFrame of parameters
     df = _construct_df(prm_key, prm_map)
@@ -275,20 +255,45 @@ def set_prm_values(prm_key, prm_map, atom_map,
     for atoms, prm in df.iterrows():
         prm_new = {k: unit.format(v) for unit, k, v in zip(unit_iter, df.columns, prm)}
         try:
-            i = atom_map[atoms]
+            i: int = atom_map[atoms]
         except KeyError:
-            settings_base.append(Settings({atom_key: atoms}) + prm_new)
+            s = Settings(prm_new)
+            s[atom_key] = atoms
+            settings_base.append(s)
             atom_map[atoms] = len(settings_base)
         else:
-            settings_base[i] += prm_new
+            settings_base[i].update(prm_new)
+
+
+@singledispatch
+def _parse_unit(unit: Iterable[Optional[str]]) -> List[str]:
+    """Convert *unit* into a to-be formatted string.
+
+    *unit* can be eiher ``None``/ a string or an iterable consisting
+    of aforementioned objects.
+
+    """
+    return [(f'[{u}] {{}}' if u is not None else '{}') for u in unit]
+
+
+@_parse_unit.register(str)
+@_parse_unit.register(type(None))
+def _(unit: Optional[str]) -> List[str]:
+    if unit is None:
+        return ['{}']
+    else:
+        return [f'[{unit}] {{}}']
 
 
 @singledispatch
 def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame:
     """Convert *prm_map* into a :class:`pandas.DataFrame` of strings with *columns* as columns.
 
-    The main purpose of this function, and the DataFrame transformation, is to catch any errors
+    The main purpose of the DataFrame construction is to catch any errors
     due to an incorrect shape of either the *columns* or the *prm_map* values.
+
+    *columns* and the *prm_map* values should be either both scalars or sequences.
+    Scalars and sequences **cannot** be freely mixed.
 
     See :func:`set_prm_values`.
 
@@ -359,14 +364,27 @@ def _validate_unit(unit_iter: Union[repeat, Sequence[str]], columns: Sequence[st
 
 
 def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
-    """Extract a value from :data:`CP2K_KEYS_ALIAS` if *key* is not a :class:`tuple`; return *key* otherwise."""  # noqa
-    if not isinstance(key, tuple):
-        try:
-            return CP2K_KEYS_ALIAS[key]
-        except KeyError as ex:
-            raise RuntimeError(f"{key!r} section: no alias available for {key!r}") from ex
-    else:
-        return key
+    """Extract a value from :data:`CP2K_KEYS_ALIAS` if *key* is not a :class:`tuple`; return *key* otherwise.
+
+    Id *key* is a :class:`tuple` it can have one of the three following structures:
+
+    * The first key is ``"input"`` followed by the key path.
+    * The first two keys are ``"specific"`` and ``"cp2k"`` followed by the key path.
+    * *key* is equivalent to the key path, lacking any prepended keys.
+
+    """  # noqa
+    if isinstance(key, tuple):  # It's a tuple with the key path alias
+        if key[0] == 'input':
+            return ('specific', 'cp2k') + key[1:]
+        elif not key[0:2] != ('specific', 'cp2k'):
+            return ('specific', 'cp2k') + key
+        else:
+            return key
+
+    try:  # It's an alias for a pre-defined key path (probably)
+        return CP2K_KEYS_ALIAS[key]
+    except KeyError as ex:
+        raise RuntimeError(f"{key!r} section: no alias available for {key!r}") from ex
 
 
 def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
@@ -417,7 +435,7 @@ def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
         A dictionary mapping atom types to atom names.
         Atom types/names are extracted from the passed .psf file.
 
-    """
+    """  # noqa
     try:
         context_manager = open(file, **kwargs)  # path-like object
     except TypeError as ex:
@@ -453,18 +471,18 @@ def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
                              f"'atom type'-containing rows in {f!r};\n{ex}") from ex
 
 
-def _cp2k_keys_alias(indent: str = f"{8 * ' '}... {4 * ' '}") -> str:
+def _cp2k_keys_alias(indent: str = f"{8 * ' '}") -> str:
     """Create a :class:`str` representations of :data:`CP2K_KEYS_ALIAS`.
 
-    Use for constructing the module-level docstring.
+    Used for constructing the module-level docstring.
 
     """
     width = 4 + max(len(k) for k in CP2K_KEYS_ALIAS)
     _mid = ',\n'.join(f'{(repr(k)+":"):{width}}{v!r}' for k, v in CP2K_KEYS_ALIAS.items())
 
-    mid = textwrap.indent(_mid, indent)
-    top = '        >>> CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {\n'
-    bot = f'\n{indent[:-4]}' + '}'
+    top = '{indent}>>> CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {\n'
+    mid = textwrap.indent(_mid, f'{indent}...     ')
+    bot = f'\n{indent}... ' + '}'
     return f'{top}{mid}{bot}'
 
 
