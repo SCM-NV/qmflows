@@ -14,11 +14,11 @@ API
 
 import os
 from os.path import join
-from typing import Optional, Union, Any, ClassVar, Mapping, Dict, Callable
+from typing import Union, Any, ClassVar, Mapping, Dict, Callable
 
 from scm import plams
 
-from qmflows.cp2k_utils import set_prm, map_psf_atoms, CP2K_KEYS_ALIAS
+from qmflows.cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from qmflows.parsers.cp2KParser import parse_cp2k_warnings
 from qmflows.settings import Settings
 from qmflows.warnings_qmflows import cp2k_warnings
@@ -36,7 +36,7 @@ def _parse_psf(settings: Settings, key: str,
         subsys.topology.use_element_as_kind = '.TRUE.'
         return
 
-    symbol_map = map_psf_atoms(value)
+    symbol_map = _map_psf_atoms(None, key, value, None)
     for custom_symbol, symbol in symbol_map.items():
         subsys[f'kind {custom_symbol}'].element = symbol
     subsys.topology.conn_file_format = 'PSF'

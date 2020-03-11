@@ -2,12 +2,14 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['dict2Setting', 'settings2Dict', 'zipWith', 'zipWith3', 'init_restart', 'InitRestart']
+__all__ = ['dict2Setting', 'settings2Dict', 'zipWith', 'zipWith3', 'to_runtime_error',
+           'init_restart', 'InitRestart']
 
 import os
 import shutil
+from functools import wraps
 from os.path import abspath, normpath, join, splitext
-from typing import Union, Optional, Iterable
+from typing import Union, Optional, Iterable, Callable
 from contextlib import redirect_stdout, AbstractContextManager
 from collections import Counter
 
@@ -53,6 +55,40 @@ def dict2Setting(d):
             r[k] = v
 
     return r
+
+
+def to_runtime_error(func: Callable) -> Callable:
+    """Decorate a `specific` function, translating any Exceptions into a :exc:`RuntimeError`.
+
+    The Exception message is furthermore prepended with *key*.
+
+    Examples
+    --------
+    .. code:: python
+
+        >>> def func1(settings, key, value, mol):
+        ...     raise Exception('error')
+
+        >>> @to_runtime_error
+        >>> def func2(settings, key, value, mol):
+        ...     raise Exception('error')
+
+        >>> func1(None, 'func1', None, None)
+        Exception('error')
+
+        >>> func1(None, 'func2', None, None)
+        Exception('"func2" section: error')
+
+    """
+    @wraps(func)
+    def wrapper(settings, key, value, mol, **kwargs):
+        try:
+            return func(settings, key, value, mol, *kwargs)
+        except Exception as ex:
+            if isinstance(ex, RuntimeError):
+                raise ex
+            raise RuntimeError(f"{key!r} section: {ex}") from ex
+    return wrapper
 
 
 def init_restart(path: Union[None, str, os.PathLike] = None,

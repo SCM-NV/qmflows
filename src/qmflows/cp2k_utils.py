@@ -29,14 +29,16 @@ from io import TextIOBase
 from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
-from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping,
+from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping, NoReturn,
                     Sequence, Any, AnyStr, Iterable)
 
+import numpy as np
 import pandas as pd
 
 from scm import plams
 from qmflows.settings import Settings
 from qmflows.backports import nullcontext
+from qmflows.utils import to_runtime_error
 
 __all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
@@ -85,306 +87,12 @@ class LengthError(ValueError):
     """A :exc:`ValueError` subclass for exceptions caused by incorrect lengths of a :class:`Mapping<collections.abc.Mapping>` or :class:`Sequence<collections.abc.Sequence>`."""  # noqa
 
 
-def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
-            value: Union[MappingScalar, Sequence[MappingScalar], MappingSequence],
-            mol: plams.Molecule) -> None:
-    """Assign a set of forcefield parameters to *settings* as specific keys.
-
-    Examples
-    --------
-    *value* should be a dictionary whose values:
-
-    * Entirelly consist of scalars.
-    * Entirelly consist of Sequences.
-
-    .. code:: python
-
-        >>> lennard_jones = {  # Example 1
-        ...     'param': ('epsilon', 'sigma'),
-        ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
-        ...     'Cs': (1, 1),
-        ...     'Cd': (2, 2),
-        ...     'O': (3, 3),
-        ...     'H': (4, 4)
-        ... }
-
-        >>> lennard_jones = [  # Example 3
-        ... {'param': 'epsilon',
-        ...  'unit': 'kcalmol',  # An optional key
-        ...  'Cs': 1,
-        ...  'Cd': 2,
-        ...  'O': 3,
-        ...  'H': 4},
-        ... {'param': 'sigma',
-        ...  'unit': 'angstrom',  # An optional key
-        ...  'Cs': 1,
-        ...  'Cd': 2,
-        ...  'O': 3,
-        ...  'H': 4}
-        ... ]
-
-
-    Warning
-    -------
-    Scalars and sequences **cannot** be freely mixed in the values of *value*;
-    it should be one or the other.
-
-    Parameters
-    ----------
-    settings : :class:`qmflows.Settings<qmflows.settings.Settings>`
-        The input CP2K settings.
-
-    key : :class:`str` or :class:`tuple` [:class:`str`, ...]
-        A path of CP2K keys or an alias for a pre-defined path (see :data:`CP2K_KEYS_ALIAS`).
-
-    value : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ``T`` or :class:`Sequence<collections.abc.Sequence>` [``T``]]
-        A dictionary with the to-be added parameters.
-        Scalars and sequences **cannot** be freely mixed in the dictionary values;
-        it should be one or the other.
-
-        See the Examples section for more details.
-
-    mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`
-        A dummy argument in order to ensure signature compatiblity.
-
-    Raises
-    ------
-    :exc:`RuntimeError`
-        Raised when issues are encountered parsing either *key* or *value*.
-
-    See Also
-    --------
-    :data:`CP2K_KEYS_ALIAS` : :class:`dict` [:class:`str`, :class:`tuple` [:class:`str`, ...]]
-        A dictionary mapping ``key_path`` aliases to the actual keys.
-
-    """  # noqa
-    if isinstance(value, abc.Sequence):
-        for prm_map in value:
-            set_prm(settings, key, value, mol)
-        return
-    else:
-        prm_map = value.copy()
-
-    try:
-        prm_key = prm_map.pop('param')
-    except KeyError as ex:
-        raise RuntimeError(f"{key!r} section: 'param' has not been specified") from ex
-    else:  # Extract the key path
-        key_path = _get_key_path(key)
-
-    # Get the list of settings located at **key_path**
-    settings_base = settings.get_nested(key_path)
-    if not isinstance(settings_base, list):  # Ensure it's a list of Settings
-        settings_base = [settings_base]
-        settings.set_nested(key_path, settings_base)
-
-    # charge, dipole and quadrupole is the only ff parameter assigned to a single atom,
-    # rather than a sequence of n atoms
-    atom_key = 'atom' if key in {'charge', 'dipole', 'quadrupole'} else 'atoms'
-
-    # Map each pre-existing atom(-pair) to a list index in **prm_base**
-    atom_map = {item.get(atom_key, None): i for i, item in enumerate(settings_base)}
-
-    args = atom_map, settings_base, atom_key
-    try:
-        if isinstance(prm_key, abc.Iterable):
-            return set_prm_values(prm_key, prm_map, *args)
-        raise TypeError(f"'param' expected a string or a sequence of strings;\n"
-                        f"observed type: {prm_key.__class__.__name__!r}")
-
-    except LengthError as ex:
-        raise RuntimeError(f'{key!r} section: {ex}') from ex.__cause__
-    except Exception as ex:
-        raise RuntimeError(f'{key!r} section: {ex}') from ex
-
-
-@overload
-def set_prm_values(prm_key: str, prm_map: MappingScalar,
-                   atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None:
-    ...
-
-
-@overload
-def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
-                   atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None:
-    ...
-
-
-def set_prm_values(prm_key, prm_map, atom_map,
-                   settings_base, atom_key) -> None:
-    """Assign the actual values specified in :func:`set_prm`.
-
-    Parameters
-    ----------
-    prm_key : :class:`str` or :class:`Sequence<collections.abc.Sequence>` [:class:`str`]
-        The name(s) of the to-be set CP2K key(s), *e.g.* ``"sigma"`` and/or ``"epsilon"``.
-        If ``iterable=False`` then this value should be a string;
-        a sequence of strings is expected otherwise.
-
-    prm_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ...]
-        A dictionary containing the to-be set values.
-        If ``iterable=False`` then its values should be scalars;
-        sequences are expected otherwise.
-
-    atom_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, :class:`int`]
-        A dictionary for keeping track of which *atom_key* blocks are present in *settings_base*.
-
-    settings_base : :class:`list` [:class:`qmflows.Settings<qmflows.settings.Settings>`]
-        A list of Settings to-be updated by *prm_map*.
-
-    atom_key : :class:`str`
-        The name of the CP2K atom key.
-        Its value should be either ``"atoms"`` or ``"atom"`` depending on the parameter type
-        of interest.
-
-    """
-    try:  # Read and parse the unit
-        unit = prm_map.pop('unit')
-    except KeyError:
-        unit_iter = repeat('{}')
-    else:
-        unit_iter = _parse_unit(unit)
-
-    # Construct a DataFrame of parameters
-    df = _construct_df(prm_key, prm_map)
-    _validate_unit(unit_iter, df.columns)
-
-    # Assign new parameters to the list of settings
-    for atoms, prm in df.iterrows():
-        prm_new = {k: unit.format(v) for unit, k, v in zip(unit_iter, df.columns, prm)}
-        try:
-            i: int = atom_map[atoms]
-        except KeyError:
-            s = Settings(prm_new)
-            s[atom_key] = atoms
-            settings_base.append(s)
-            atom_map[atoms] = len(settings_base)
-        else:
-            settings_base[i].update(prm_new)
-
-
-@singledispatch
-def _parse_unit(unit: Iterable[Optional[str]]) -> List[str]:
-    """Convert *unit* into a to-be formatted string.
-
-    *unit* can be eiher ``None``/ a string or an iterable consisting
-    of aforementioned objects.
-
-    """
-    return [(f'[{u}] {{}}' if u is not None else '{}') for u in unit]
-
-
-@_parse_unit.register(str)
-@_parse_unit.register(type(None))
-def _(unit: Optional[str]) -> List[str]:
-    if unit is None:
-        return ['{}']
-    else:
-        return [f'[{unit}] {{}}']
-
-
-@singledispatch
-def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame:
-    """Convert *prm_map* into a :class:`pandas.DataFrame` of strings with *columns* as columns.
-
-    The main purpose of the DataFrame construction is to catch any errors
-    due to an incorrect shape of either the *columns* or the *prm_map* values.
-
-    *columns* and the *prm_map* values should be either both scalars or sequences.
-    Scalars and sequences **cannot** be freely mixed.
-
-    See :func:`set_prm_values`.
-
-    """
-    try:
-        return pd.DataFrame(prm_map, index=columns, dtype=str).T
-
-    except ValueError as ex:
-        msg = str(ex)
-        column_count = len(columns)
-
-        # There are 2 types of ValueErrors which can be raised by incorrect column/values length
-        if msg == 'setting an array element with a sequence':
-            pass
-        elif msg.startswith(f'{column_count} columns passed, passed data had'):
-            pass
-        else:
-            raise ex  # a ValueError was raised due to some other unforseen reason
-
-        # One of the values in *prm_map* is of incorrect length; figure out which one
-        for k, v in prm_map.items():
-            if len(v) != column_count:
-                break
-        else:
-            raise ex  # This line should technically never be reached, but just in case
-
-        elements = 'elements' if column_count > 1 else 'element'
-        raise LengthError(f"{k!r} expected a sequence with {column_count} {elements}; "
-                          f"observed length: {len(v)}") from ex
-
-
-@_construct_df.register(str)
-def _(columns: str, prm_map: MappingScalar) -> pd.DataFrame:
-    try:
-        return pd.Series(prm_map, name=columns, dtype=str).to_frame()
-
-    except ValueError as ex:
-        msg = str(ex)
-
-        # There is 1 type of ValueErrors which can be raised by incorrect column/values length
-        if msg == 'setting an array element with a sequence':
-            pass
-        else:
-            raise ex  # a ValueError was raised due to some other unforseen reason
-
-        # One of the values in *prm_map* is an tierable while it shouldn't be
-        for k, v in prm_map.items():
-            if isinstance(v, abc.Iterable) and not isinstance(v, str):
-                break
-        else:
-            raise ex  # This line should technically never be reached, but just in case
-
-        raise TypeError(f"{k!r} expected a scalar; observed type: "
-                        f"{v.__class__.__name__!r}") from ex
-
-
-def _validate_unit(unit_iter: Union[repeat, Sequence[str]], columns: Sequence[str]) -> None:
-    """Check if *unit_str* and *columns* in :func:`set_prm_values` are of the same length."""
-    column_count = len(columns)
-    if isinstance(unit_iter, repeat):
-        return  # It's in infinite Iterator; this is fine
-
-    elif len(unit_iter) != column_count:
-        elements = 'elements' if column_count > 1 else 'element'
-        ex = ValueError(f"'unit' expected a sequence with {column_count} {elements}; "
-                        f"observed length: {len(unit_iter)}")
-        raise LengthError(str(ex)) from ex
-
-
-def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
-    """Extract a value from :data:`CP2K_KEYS_ALIAS` if *key* is not a :class:`tuple`; return *key* otherwise.
-
-    Id *key* is a :class:`tuple` it can have one of the three following structures:
-
-    * The first key is ``"input"`` followed by the key path.
-    * The first two keys are ``"specific"`` and ``"cp2k"`` followed by the key path.
-    * *key* is equivalent to the key path, lacking any prepended keys.
-
-    """  # noqa
-    if isinstance(key, tuple):  # It's a tuple with the key path alias
-        if key[0] == 'input':
-            return ('specific', 'cp2k') + key[1:]
-        elif not key[0:2] != ('specific', 'cp2k'):
-            return ('specific', 'cp2k') + key
-        else:
-            return key
-
-    try:  # It's an alias for a pre-defined key path (probably)
-        return CP2K_KEYS_ALIAS[key]
-    except KeyError as ex:
-        raise RuntimeError(f"{key!r} section: no alias available for {key!r}") from ex
+@to_runtime_error
+def _map_psf_atoms(settings: None, key: str,
+                   value: Union[AnyStr, PathLike, TextIOBase],
+                   mol: None, **kwargs: Any) -> Dict[str, str]:
+    """A small wrapper around :func:`map_psf_atoms`."""
+    return map_psf_atoms(value, **kwargs)
 
 
 def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
@@ -471,7 +179,322 @@ def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
                              f"'atom type'-containing rows in {f!r};\n{ex}") from ex
 
 
-def _cp2k_keys_alias(indent: str = f"{8 * ' '}") -> str:
+@to_runtime_error
+def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
+            value: Union[MappingScalar, Sequence[MappingScalar], MappingSequence],
+            mol: Optional[plams.Molecule]) -> None:
+    """Assign a set of forcefield parameters to *settings* as specific keys.
+
+    Examples
+    --------
+    *value* should be a dictionary whose values:
+
+    * Entirelly consist of scalars.
+    * Entirelly consist of Sequences.
+
+    .. code:: python
+
+        >>> lennard_jones = {  # Example 1
+        ...     'param': ('epsilon', 'sigma'),
+        ...     'unit': ('kcalmol', 'angstrom'),  # An optional key
+        ...     'Cs': (1, 1),
+        ...     'Cd': (2, 2),
+        ...     'O': (3, 3),
+        ...     'H': (4, 4)
+        ... }
+
+        >>> lennard_jones = [  # Example 3
+        ... {'param': 'epsilon',
+        ...  'unit': 'kcalmol',  # An optional key
+        ...  'Cs': 1,
+        ...  'Cd': 2,
+        ...  'O': 3,
+        ...  'H': 4},
+        ... {'param': 'sigma',
+        ...  'unit': 'angstrom',  # An optional key
+        ...  'Cs': 1,
+        ...  'Cd': 2,
+        ...  'O': 3,
+        ...  'H': 4}
+        ... ]
+
+
+    Warning
+    -------
+    Scalars and sequences **cannot** be freely mixed in the values of *value*;
+    it should be one or the other.
+
+    Parameters
+    ----------
+    settings : :class:`qmflows.Settings<qmflows.settings.Settings>`
+        The input CP2K settings.
+
+    key : :class:`str` or :class:`tuple` [:class:`str`, ...]
+        A path of CP2K keys or an alias for a pre-defined path (see :data:`CP2K_KEYS_ALIAS`).
+
+    value : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ``T`` or :class:`Sequence<collections.abc.Sequence>` [``T``]]
+        A dictionary with the to-be added parameters.
+        Scalars and sequences **cannot** be freely mixed in the dictionary values;
+        it should be one or the other.
+
+        See the Examples section for more details.
+
+    mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`, optional
+        A dummy argument in order to ensure signature compatiblity.
+
+    Raises
+    ------
+    :exc:`RuntimeError`
+        Raised when issues are encountered parsing either *key* or *value*.
+
+    See Also
+    --------
+    :data:`CP2K_KEYS_ALIAS` : :class:`dict` [:class:`str`, :class:`tuple` [:class:`str`, ...]]
+        A dictionary mapping ``key_path`` aliases to the actual keys.
+
+    """  # noqa
+    if isinstance(value, abc.Sequence):
+        for prm_map in value:
+            set_prm(settings, key, prm_map, mol)
+        return
+    else:
+        prm_map = value.copy()
+
+    try:
+        prm_key = prm_map.pop('param')
+    except KeyError as ex:
+        raise KeyError(f"'param' has not been specified") from ex
+    else:  # Extract the key path
+        key_path = _get_key_path(key)
+
+    # Get the list of settings located at **key_path**
+    settings_base = settings.get_nested(key_path)
+    if not isinstance(settings_base, list):  # Ensure it's a list of Settings
+        settings_base = [settings_base]
+        settings.set_nested(key_path, settings_base)
+
+    # charge, dipole and quadrupole is the only ff parameter assigned to a single atom,
+    # rather than a sequence of n atoms
+    atom_key = 'atom' if key in {'charge', 'dipole', 'quadrupole'} else 'atoms'
+
+    # Map each pre-existing atom(-pair) to a list index in **prm_base**
+    atom_map = {item.get(atom_key, None): i for i, item in enumerate(settings_base)}
+
+    args = atom_map, settings_base, atom_key
+    if isinstance(prm_key, abc.Iterable):
+        return set_prm_values(prm_key, prm_map, *args)
+    raise TypeError(f"'param' expected a string or a sequence of strings;\n"
+                    f"observed type: {prm_key.__class__.__name__!r}")
+
+
+@overload
+def set_prm_values(prm_key: str, prm_map: MappingScalar,
+                   atom_map: MutableMapping[Optional[str], int],
+                   settings_base: List[Settings], atom_key: str) -> None: ...
+
+
+@overload
+def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
+                   atom_map: MutableMapping[Optional[str], int],
+                   settings_base: List[Settings], atom_key: str) -> None: ...
+
+
+def set_prm_values(prm_key, prm_map, atom_map,
+                   settings_base, atom_key) -> None:
+    """Assign the actual values specified in :func:`set_prm`.
+
+    Parameters
+    ----------
+    prm_key : :class:`str` or :class:`Sequence<collections.abc.Sequence>` [:class:`str`]
+        The name(s) of the to-be set CP2K key(s), *e.g.* ``"sigma"`` and/or ``"epsilon"``.
+        If ``iterable=False`` then this value should be a string;
+        a sequence of strings is expected otherwise.
+
+    prm_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ...]
+        A dictionary containing the to-be set values.
+        If ``iterable=False`` then its values should be scalars;
+        sequences are expected otherwise.
+
+    atom_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, :class:`int`]
+        A dictionary for keeping track of which *atom_key* blocks are present in *settings_base*.
+
+    settings_base : :class:`list` [:class:`qmflows.Settings<qmflows.settings.Settings>`]
+        A list of Settings to-be updated by *prm_map*.
+
+    atom_key : :class:`str`
+        The name of the CP2K atom key.
+        Its value should be either ``"atoms"`` or ``"atom"`` depending on the parameter type
+        of interest.
+
+    """
+    try:  # Read and parse the unit
+        unit = prm_map.pop('unit')
+    except KeyError:
+        unit_iter = repeat('{}')
+    else:
+        unit_iter = _parse_unit(unit)
+
+    # Construct a DataFrame of parameters
+    df = _construct_df(prm_key, prm_map)
+    _validate_unit(unit_iter, df.columns)
+
+    # Assign new parameters to the list of settings
+    for atoms, prm in df.iterrows():
+        prm_new = {k: unit.format(v) for unit, k, v in zip(unit_iter, df.columns, prm)}
+        try:
+            i: int = atom_map[atoms]
+        except KeyError:
+            s = Settings(prm_new)
+            s[atom_key] = atoms
+            settings_base.append(s)
+            atom_map[atoms] = len(settings_base)
+        else:
+            settings_base[i].update(prm_new)
+
+
+@singledispatch
+def _parse_unit(unit: Iterable[Optional[str]]) -> List[str]:
+    """Convert *unit* into a to-be formatted string.
+
+    *unit* can be eiher ``None``/ a string or an iterable consisting
+    of aforementioned objects.
+
+    """
+    return [(f'[{u}] {{}}' if u is not None else '{}') for u in unit]
+
+
+@_parse_unit.register(str)
+@_parse_unit.register(type(None))
+def _(unit: Optional[str]) -> List[str]:
+    if unit is None:
+        return ['{}']
+    else:
+        return [f'[{unit}] {{}}']
+
+
+@overload
+def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame: ...
+
+
+@overload
+def _construct_df(columns: str, prm_map: MappingScalar) -> pd.DataFrame: ...
+
+
+def _construct_df(columns, prm_map) -> pd.DataFrame:
+    """Convert *prm_map* into a :class:`pandas.DataFrame` of strings with *columns* as columns.
+
+    The main purpose of the DataFrame construction is to catch any errors
+    due to an incorrect shape of either the *columns* or the *prm_map* values.
+
+    *columns* and the *prm_map* values should be either both scalars or sequences.
+    Scalars and sequences **cannot** be freely mixed.
+
+    See :func:`set_prm_values`.
+
+    """
+    try:
+        data = np.array([v for v in prm_map.values()], dtype=str)
+        if data.ndim == 1:
+            data.shape = -1, 1
+            columns_ = [columns]
+        else:
+            columns_ = columns
+        return pd.DataFrame(data, columns=columns_, index=prm_map.keys())
+
+    except TypeError as ex:
+        msg = str(ex)
+        if msg.startswith('Index(...) must be called with a collection of some kind'):
+            _raise_df_exc_scalar(columns, prm_map, ex)
+        raise ex
+
+    except ValueError as ex:
+        _raise_df_exc_seq(columns, prm_map, ex)
+
+
+def _raise_df_exc_seq(columns: Sequence[str], prm_map: MappingSequence, ex: Exception) -> NoReturn:
+    """Raise an exception for :func:`_construct_df` using a sequence-based input."""
+    msg = str(ex)
+    column_count = len(columns)
+    elements = 'elements' if column_count > 1 else 'element'
+
+    # There are 2 types of ValueErrors which can be raised by incorrect column/values length
+    if msg == 'setting an array element with a sequence':
+        pass
+    elif msg.startswith('Shape of passed values is '):
+        pass
+    else:
+        raise ex  # an Exception was raised due to some other unforseen reason
+
+    try:
+        for k, v in prm_map.items():
+            if len(v) != column_count:  # Will raise a TypeError if it's an integer
+                break
+        else:
+            raise ex  # This line should technically never be reached, but just in case
+
+    except TypeError as ex2:
+        raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
+                        f"observed type: {v.__class__.__name__!r}") from ex2
+    else:
+        if not (isinstance(v, abc.Sequence) or hasattr(v, '__array__')):
+            raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
+                            f"observed type: {v.__class__.__name__!r}") from ex
+
+        raise LengthError(f"{k!r} expected a sequence with {column_count} {elements}; "
+                          f"observed length: {len(v)}") from ex
+
+
+def _raise_df_exc_scalar(columns: str, prm_map: MappingScalar, ex: Exception) -> NoReturn:
+    """Raise an exception for :func:`_construct_df` using a scalar-based input."""
+    # One of the values in *prm_map* is an iterable while it shouldn't be
+    for k, v in prm_map.items():
+        if isinstance(v, abc.Iterable) and not isinstance(v, str):
+            break
+    else:
+        raise ex  # This line should technically never be reached, but just in case
+
+    raise TypeError(f"{k!r} expected a scalar; observed type: "
+                    f"{v.__class__.__name__!r}") from ex
+
+
+def _validate_unit(unit_iter: Union[repeat, Sequence[str]], columns: Sequence[str]) -> None:
+    """Check if *unit_str* and *columns* in :func:`set_prm_values` are of the same length."""
+    column_count = len(columns)
+    if isinstance(unit_iter, repeat):
+        return  # It's a itertools.repeat instance; this is fine
+
+    elif len(unit_iter) != column_count:
+        elements = 'elements' if column_count > 1 else 'element'
+        ex = ValueError(f"'unit' expected a sequence with {column_count} {elements}; "
+                        f"observed length: {len(unit_iter)}")
+        raise LengthError(ex) from ex
+
+
+def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
+    """Extract a value from :data:`CP2K_KEYS_ALIAS` if *key* is not a :class:`tuple`; return *key* otherwise.
+
+    Id *key* is a :class:`tuple` it can have one of the three following structures:
+
+    * The first key is ``"input"`` followed by the key path.
+    * The first two keys are ``"specific"`` and ``"cp2k"`` followed by the key path.
+    * *key* is equivalent to the key path, lacking any prepended keys.
+
+    """  # noqa
+    if isinstance(key, tuple):  # It's a tuple with the key path alias
+        if key[0] == 'input':
+            return ('specific', 'cp2k') + key[1:]
+        elif key[0:2] != ('specific', 'cp2k'):
+            return ('specific', 'cp2k') + key
+        else:
+            return key
+
+    try:  # It's an alias for a pre-defined key path (probably)
+        return CP2K_KEYS_ALIAS[key]
+    except KeyError as ex:
+        raise KeyError(f"{key!r} section: no alias available for {key!r}") from ex
+
+
+def _cp2k_keys_alias(indent: str = 8 * ' ') -> str:
     """Create a :class:`str` representations of :data:`CP2K_KEYS_ALIAS`.
 
     Used for constructing the module-level docstring.
