@@ -282,7 +282,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     args = atom_map, settings_base, atom_key
     if isinstance(prm_key, abc.Iterable):
-        return set_prm_values(prm_key, prm_map, *args)
+        set_prm_values(prm_key, prm_map, *args)
     raise TypeError(f"'param' expected a string or a sequence of strings;\n"
                     f"observed type: {prm_key.__class__.__name__!r}")
 
