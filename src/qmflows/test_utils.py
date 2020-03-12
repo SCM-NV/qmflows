@@ -97,6 +97,7 @@ def _del_all_workdir(workdir: Union[str, os.PathLike]) -> None:
         else:
             break
 
+
 def get_mm_settings() -> Settings:
     """Construct and return CP2K settings for classical forcefield calculations.
 
@@ -107,23 +108,27 @@ def get_mm_settings() -> Settings:
     charge.param = 'charge'
     charge.Cd = 0.9768
     charge.Se = -0.9768
-    charge.O_1 = -0.4704
-    charge.C_1 = 0.4524
+    charge.O2D2 = -0.4704
+    charge.C2O3 = 0.4524
 
     lj = Settings()
     lj.param = 'epsilon', 'sigma'
-    lj.unit = 'kjmol', 'nm'
-    lj['Cd Cd'] = 0.3101, 0.1234
-    lj['Cd O_1'] = 1.8340, 0.2471
-    lj['Cd Se'] = 1.5225, 0.2940
-    lj['Se C_1'] = 1.6135, 0.3526
-    lj['Se Se'] = 0.4266, 0.4852
-    lj['H Se'] = 0.4734, 0.3297
-    lj['H Cd'] = 0.4191, 0.2554
+    lj.unit = 'kcalmol', 'angstrom'
+
+    lj['Cd Cd  '] = 0.0741, 1.2340
+    lj['Cd O2D2'] = 0.4383, 2.4710
+    lj['Cd Se  '] = 0.3639, 2.9400
+    lj['Se O2D2'] = 0.3856, 3.5260
+    lj['Se Se  '] = 0.1020, 4.8520
+
+    lj['Cd C331'] = lj['Cd C2O3'] = 0.1547, 2.9841
+    lj['Se C331'] = lj['Se C2O3'] = 0.1748, 3.5885
+    lj['Cd HGA3'] = 0.1002, 2.5542
+    lj['Se HGA3'] = 0.1132, 3.1587
 
     s = Settings()
-    s.psf = PATH / 'Cd68Se55_26COO.psf'
-    s.prm = PATH / 'Cd68Se55_26COO.prm'
+    s.psf = PATH / 'Cd68Cl26Se55__26_acetate.psf'
+    s.prm = PATH / 'Cd68Cl26Se55__26_acetate.prm'
     s.charge = charge
     s.lennard_jones = lj
     return s
