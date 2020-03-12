@@ -257,41 +257,7 @@ specific:
 
     cp2k: Null
 
-    cp2k_mm:
-        force_eval:
-            method: FIST
-            mm:
-                print:
-                    ff_info low:
-                        spline_data: .FALSE.
-                        spline_info: .FALSE.
-                forcefield:
-                    ei_scale14: 1.0
-                    vdw_scale14: 1.0
-                    ignore_missing_critical_params: ''
-                    do_nonbonded: ''
-                    shift_cutoff: .TRUE.
-                    spline:
-                        r0_nb: 0.25
-                poisson:
-                    periodic: NONE
-                    ewald:
-                        ewald_type: NONE
-            subsys:
-                cell:
-                    abc: '[angstrom] 50.0 50.0 50.0'
-                    periodic: NONE
-                topology:
-                    coord_file_format: 'OFF'
-                    center_coordinates:
-                        center_point: 0.0 0.0 0.0
-        vibrational_analysis:
-            intensities: .TRUE.
-            thermochemistry: .TRUE.
-        global:
-            print_level: low
-            project: cp2k
-            run_type: VIBRATIONAL_ANALYSIS
+    cp2k_mm: Null
 
     orca:
         method:
@@ -334,7 +300,40 @@ specific:
 
     cp2k : Null
 
-    cp2k_mm: Null
+    cp2k_mm:
+        force_eval:
+            method: FIST
+            mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
+                forcefield:
+                    ei_scale14: 1.0
+                    vdw_scale14: 1.0
+                    ignore_missing_critical_params: ''
+                    do_nonbonded: ''
+                    shift_cutoff: .TRUE.
+                    spline:
+                        r0_nb: 0.25
+                poisson:
+                    periodic: NONE
+                    ewald:
+                        ewald_type: NONE
+            subsys:
+                cell:
+                    abc: '[angstrom] 50.0 50.0 50.0'
+                    periodic: NONE
+                topology:
+                    coord_file_format: 'OFF'
+                    center_coordinates:
+                        center_point: 0.0 0.0 0.0
+        vibrational_analysis:
+            thermochemistry: .TRUE.
+        global:
+            print_level: low
+            project: cp2k
+            run_type: VIBRATIONAL_ANALYSIS
 
     orca:
         method:
@@ -361,6 +360,16 @@ specific:
 # moleculair dynamics template
 md = Settings(yaml.load("""
 specific:
+    adf: Null
+
+    ams: Null
+
+    cp2k: Null
+
+    orca: Null
+
+    gamess: Null
+
     cp2k_mm:
         force_eval:
             method: FIST
