@@ -87,7 +87,7 @@ def to_runtime_error(func: Callable) -> Callable:
         except Exception as ex:
             if isinstance(ex, RuntimeError):
                 raise ex
-            raise RuntimeError(f"{key!r} section: {ex}") from ex
+            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(ex.__traceback__) from ex
     return wrapper
 
 
