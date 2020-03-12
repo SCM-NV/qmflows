@@ -193,7 +193,7 @@ class Result:
             """)
 
     @property
-    def results(self) -> plams.Results:
+    def results(self) -> Optional[plams.Results]:
         """Getter for :attr:`Result.results`.
 
         Get will load the .dill file and add all of its class attributes to this instance,
@@ -202,6 +202,8 @@ class Result:
         * Private attributes/methods.
         * Magic methods.
         * Methods/attributes with names already contained within this instance.
+
+        This attribute's value is set to ``None`` if the unpickling process fails.
 
         """
         if not self._results_open:
@@ -223,7 +225,7 @@ class Result:
             # Unpickle the results
             try:
                 results = plams.load(self._results).results
-                assert results is not None, f'Failed to unpickle {self._results}'
+                assert results is not None, f'Failed to unpickle {self._results!r}'
             except (AssertionError, plams.FileError) as ex:
                 file_exc = ex
             else:
@@ -238,7 +240,8 @@ class Result:
 
         # Failed to find or unpickle the .dill file; issue a warning
         if file_exc is not None:
-            warn(str(file_exc))
+            self._results = None
+            warn(f"{file_exc}, setting value to 'None'")
         else:
             self._results = results
 
@@ -300,10 +303,10 @@ class Package(ABC):
                     kwargs['job_name'] = job_name
 
                 # Settings transformations
+                self.prerun(settings, plams_mol, **kwargs)
                 job_settings = self.generic2specific(settings, mol)
 
                 # Run the job
-                self.prerun(job_settings, plams_mol, **kwargs)
                 result = self.run_job(job_settings, plams_mol, **kwargs)
 
                 # Check if there are warnings in the output that render the calculation
