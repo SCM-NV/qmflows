@@ -149,7 +149,7 @@ def test_construct_df() -> None:
 
 def test_set_prm() -> None:
     """Tests for :func:`set_prm`."""
-    ref = Settings({'specific': {'cp2k': {'force_eval': {'mm': {'forcefield': {'nonbonded': {'lennard-jones': [{}, {'epsilon': '[kcalmol] 1', 'atoms': 'Cs', 'sigma': '[angstrom] 1'}, {'epsilon': '[kcalmol] 2', 'atoms': 'Cd', 'sigma': '[angstrom] 2'}, {'epsilon': '[kcalmol] 3', 'atoms': 'O', 'sigma': '[angstrom] 3'}, {'epsilon': '[kcalmol] 4', 'atoms': 'H', 'sigma': '[angstrom] 4'}]}}}}}}})  # noqa
+    ref = Settings({'specific': {'cp2k': {'force_eval': {'mm': {'forcefield': {'nonbonded': {'lennard-jones': [{'epsilon': '[kcalmol] 1', 'sigma': '[angstrom] 1', 'atoms': 'Cs'}, {'epsilon': '[kcalmol] 2', 'sigma': '[angstrom] 2', 'atoms': 'Cd'}, {'epsilon': '[kcalmol] 3', 'sigma': '[angstrom] 3', 'atoms': 'O'}, {'epsilon': '[kcalmol] 4', 'sigma': '[angstrom] 4', 'atoms': 'H'}]}}}}}}})  # noqa
 
     key = 'lennard_jones'
 
