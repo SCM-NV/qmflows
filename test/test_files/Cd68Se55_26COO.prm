@@ -1,0 +1,26 @@
+ATOMS
+MASS  -1  H_1        1.00800 ! Renamed HGR52, aldehyde H, formamide H (RCOH); nonpolar H, neutral 5-mem planar ring C adjacent to heteroatom or + charge
+MASS  -1  C_1       12.01100 ! Renamed CG2O3, carbonyl C: [negative] carboxylates
+MASS  -1  O_1       15.99940 ! Renamed OG2D2, carbonyl O: negative groups: carboxylates, carbonate
+
+BONDS
+C_1    O_1     525.00     1.2600 ! PROT adm jr. 7/23/91, acetic acid
+C_1    H_1     238.00     1.1422 ! FORA, formate, kevo
+
+ANGLES
+O_1    C_1    O_1     100.00    128.00   70.00   2.25870 ! PROT adm jr. 7/23/91, correction, ACETATE (KK)
+O_1    C_1    H_1      45.00    116.00 ! FORA, formate, kevo (sum=360)
+
+NONBONDED nbxmod  5 atom cdiel fshift vatom vdistance vfswitch -
+cutnb 14.0 ctofnb 12.0 ctonnb 10.0 eps 1.0 e14fac 1.0 wmin 1.5
+
+H_1      0.0       -0.0460     0.9000 ! adm jr., 6/27/90, his
+C_1      0.0       -0.0700     2.0000 ! acetate heat of solvation
+O_1      0.0       -0.1200     1.7000 ! PROT
+
+HBOND CUTHB 0.5
+
+IMPROPERS
+C_1    O_1    O_1    H_1       67.0000  0     0.00 ! FORA, formate, sz
+
+END
