@@ -3,6 +3,7 @@ from pathlib import Path
 from itertools import repeat
 
 import numpy as np
+import pandas as pd
 
 from assertionlib import assertion
 from qmflows import Settings
@@ -169,7 +170,27 @@ def test_set_prm() -> None:
         {'param': 'sigma', 'unit': 'angstrom', 'Cs': 1, 'Cd': 2, 'O': 3, 'H': 4}
     ]
 
+    s3 = Settings()
+    value3 = pd.DataFrame({
+        'param': ('epsilon', 'sigma'),
+        'unit': ('kcalmol', 'angstrom'),
+        'Cs': (1, 1),
+        'Cd': (2, 2),
+        'O': (3, 3),
+        'H': (4, 4)
+    })
+
+    s4 = Settings()
+    value4 = [
+        pd.Series({'param': 'epsilon', 'unit': 'kcalmol', 'Cs': 1, 'Cd': 2, 'O': 3, 'H': 4}),
+        pd.Series({'param': 'sigma', 'unit': 'angstrom', 'Cs': 1, 'Cd': 2, 'O': 3, 'H': 4})
+    ]
+
     set_prm(s1, key, value1, None)
     set_prm(s2, key, value2, None)
+    set_prm(s3, key, value3, None)
+    set_prm(s4, key, value4, None)
     assertion.eq(s1, ref)
     assertion.eq(s2, ref)
+    assertion.eq(s3, ref)
+    assertion.eq(s4, ref)

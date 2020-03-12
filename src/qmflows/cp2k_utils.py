@@ -373,6 +373,9 @@ def _(unit: Optional[str]) -> List[str]:
         return [f'[{unit}] {{}}']
 
 
+NDFrame: type = pd.DataFrame.__bases__[0]
+
+
 @overload
 def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame: ...
 
@@ -394,7 +397,10 @@ def _construct_df(columns, prm_map) -> pd.DataFrame:
 
     """
     try:
-        data = np.array([v for v in prm_map.values()], dtype=str)
+        if isinstance(prm_map, NDFrame):
+            data = prm_map.values.T
+        else:
+            data = np.array([v for v in prm_map.values()], dtype=str)
         if data.ndim == 1:
             data.shape = -1, 1
             columns_ = [columns]
