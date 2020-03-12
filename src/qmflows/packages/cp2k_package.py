@@ -162,8 +162,13 @@ class CP2K(Package):
 
             return s
 
+        def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
+            """Set the keyword for periodic calculations"""
+            s.specific.cp2k.force_eval.subsys.cell.periodic = value
+
         funs = {'cell_parameters': write_cell_parameters,
-                'cell_angles': write_cell_angles}
+                'cell_angles': write_cell_angles,
+                'periodic': write_periodic}
 
         # Function that handles the special keyword
         f = funs.get(key)
