@@ -13,7 +13,7 @@ API
 """
 
 import os
-from os.path import join
+from os.path import join, abspath
 from typing import Union, Any, ClassVar, Mapping, Dict, Callable
 
 from scm import plams
@@ -40,14 +40,14 @@ def _parse_psf(settings: Settings, key: str,
     for custom_symbol, symbol in symbol_map.items():
         subsys[f'kind {custom_symbol}'].element = symbol
     subsys.topology.conn_file_format = 'PSF'
-    subsys.topology.conn_file_name = value
+    subsys.topology.conn_file_name = abspath(value)
 
 
 def _parse_prm(settings: Settings, key: str,
                value: Any, mol: plams.Molecule) -> None:
     """Assign a CHARMM-style .prm file."""
     settings.specific.cp2k.force_eval.mm.forcefield.parmtype = 'CHM'
-    settings.specific.cp2k.force_eval.mm.forcefield.parm_file_name = value
+    settings.specific.cp2k.force_eval.mm.forcefield.parm_file_name = abspath(value)
 
 
 SpecialFunc = Callable[[Settings, str, Any, plams.Molecule], None]
@@ -75,9 +75,8 @@ class CP2KMM(CP2K):
 
     def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
-        cp2k = settings.specific.cp2k
-        if not cp2k.get('psf'):
-            cp2k.psf = None
+        if not settings.get('psf'):
+            settings.psf = None
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
@@ -134,14 +133,15 @@ class CP2KMM(CP2K):
         """
         # Function that handles the special keyword
         if isinstance(key, tuple):
-            set_prm(settings, value, mol, key)
+            set_prm(settings, key, value, mol)
         else:
             try:
                 f = SPECIAL_FUNCS[key]
             except KeyError:  # Plan B: fall back to the CP2K super-class
-                super().handle_special_keywords(settings, key, value, mol)
+                # Oddly enough this doesn't work with super() when using pytest
+                CP2K.handle_special_keywords(settings, key, value, mol)
             else:
-                f(settings, value, mol, key)
+                f(settings, key, value, mol)
 
 
 def _set_kinds(s: Settings, symbol_map: Mapping[str, str]) -> None:

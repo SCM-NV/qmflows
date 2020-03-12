@@ -270,7 +270,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     # Get the list of settings located at **key_path**
     settings_base = settings.get_nested(key_path)
     if not isinstance(settings_base, list):  # Ensure it's a list of Settings
-        settings_base = [settings_base]
+        settings_base = [settings_base] if settings_base else []
         settings.set_nested(key_path, settings_base)
 
     # charge, dipole and quadrupole is the only ff parameter assigned to a single atom,
@@ -283,7 +283,8 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     args = atom_map, settings_base, atom_key
     if isinstance(prm_key, abc.Iterable):
         set_prm_values(prm_key, prm_map, *args)
-    raise TypeError(f"'param' expected a string or a sequence of strings;\n"
+        return
+    raise TypeError(f"'param' expected a string or a sequence of strings; "
                     f"observed type: {prm_key.__class__.__name__!r}")
 
 
