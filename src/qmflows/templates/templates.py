@@ -67,11 +67,14 @@ specific:
         force_eval:
             method: FIST
             mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
                 forcefield:
                     ei_scale14: 1.0
                     vdw_scale14: 1.0
                     ignore_missing_critical_params: ''
-                    parmtype: CHM
                     do_nonbonded: ''
                     shift_cutoff: .TRUE.
                     spline:
@@ -176,11 +179,14 @@ specific:
         force_eval:
             method: FIST
             mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
                 forcefield:
                     ei_scale14: 1.0
                     vdw_scale14: 1.0
                     ignore_missing_critical_params: ''
-                    parmtype: CHM
                     do_nonbonded: ''
                     shift_cutoff: .TRUE.
                     spline:
@@ -255,11 +261,14 @@ specific:
         force_eval:
             method: FIST
             mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
                 forcefield:
                     ei_scale14: 1.0
                     vdw_scale14: 1.0
                     ignore_missing_critical_params: ''
-                    parmtype: CHM
                     do_nonbonded: ''
                     shift_cutoff: .TRUE.
                     spline:
@@ -325,6 +334,8 @@ specific:
 
     cp2k : Null
 
+    cp2k_mm: Null
+
     orca:
         method:
             method: dft
@@ -354,11 +365,14 @@ specific:
         force_eval:
             method: FIST
             mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
                 forcefield:
                     ei_scale14: 1.0
                     vdw_scale14: 1.0
                     ignore_missing_critical_params: ''
-                    parmtype: CHM
                     do_nonbonded: ''
                     shift_cutoff: .TRUE.
                     spline:
