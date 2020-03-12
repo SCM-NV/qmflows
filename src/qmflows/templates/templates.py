@@ -206,7 +206,7 @@ specific:
         motion:
             geo_opt:
                 type: minimization
-                optimizer: bfgs
+                optimizer: lbfgs
                 max_iter: 500
         global:
             print_level: low
