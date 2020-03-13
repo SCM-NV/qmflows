@@ -72,11 +72,6 @@ For Example, the default parameter for a single point calculation for several pa
           project: cp2k
           run_type: energy
 
-      dirac:
-        DIRAC: WAVEFUNCTION
-        HAMILTONIAN: "LEVY-LEBLOND"
-        WAVE FUNCTION: SCF
-
       gamess:
         basis:
           gbasis: sto
