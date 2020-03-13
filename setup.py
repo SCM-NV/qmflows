@@ -5,7 +5,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 version = {}
-with open(os.path.join(here, '__version__.py')) as f:
+with open(os.path.join(here, 'src', 'qmflows', '__version__.py')) as f:
     exec(f.read(), version)
 
 
@@ -37,7 +37,7 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/dictionaries/*json']
+        "qmflows": ['data/dictionaries/*yaml']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
@@ -50,7 +50,7 @@ setup(
                       'plams@git+https://github.com/SCM-NV/PLAMS@master',
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
-        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx'],
+        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'nbsphinx', 'assertionlib'],
         'doc': ['sphinx>=2.1', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )

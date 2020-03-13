@@ -1,31 +1,34 @@
 Extracting numerical properties from output files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Quantum packages simulations generate output file in different formats. For examples the SCM_ simulation suite
-(``ADF`` and ``DFTB`` in *Qmflows*) generate binary outputs, while other packages like ``CP2K``, ``Gamess-US`` and ``Orca``
-generate ascii text files.  Some other packages like ``Dirac`` generate a structure text output like *XML*.
+(:class:`~qmflows.packages.SCM.ADF` and :class:`~qmflows.packages.SCM.DFTB` in *QMFlows*) generate binary outputs,
+while other packages like :class:`~qmflows.packages.cp2k_package.CP2K`, :class:`~qmflows.packages.gamess.GAMESS`
+and :class:`~qmflows.packages.orca.ORCA` generate ascii text files.
 
-*Qmflows* abstract away all the different commmunication protocols with the different output formats, allowing the user to
-extract the desire property by using the convention::
+*QMFlows* abstract away all the different commmunication protocols with the different output formats, allowing the user to
+extract the desire property by using the convention:
 
-  result = job.property
+.. code:: python
+
+    >>> result = job.property
 
 where job is the simulation perform with a given package and property is the numerical value of interest (scalar or array).
 
 
-The  *Qmflows* implementation of the aforemention mechanism search in the JSON  files located at ``qmflows/data/dictionaries/``
+The  *QMFlows* implementation of the aforemention mechanism search in the YAML files located at ``qmflows/data/dictionaries/``
 for instructions about how to read that given property from the output file. Nevertheless, *Not all the properties for a given
 pacakge are implemented*. **If the property of your interest is not available you can request it in the Qmflows issues page**.
 
 
 Parsers
 ~~~~~~~
-Internally *Qmflows* uses different mechanism to extract different properties from the output files. In the case of the ``ADF`` and
-``DFTB`` packages, *Qmflows* take advantages of the python interface to kftools_ files developed by the SCM_. In the case of *XML* output,
-*Qmflows* direcltly uses the python built-in xml_ reader. For the output files in text format *Qmflows* uses a mixuture of awk_ and
+Internally *QMFlows* uses different mechanism to extract different properties from the output files. In the case of the :class:`~qmflows.packages.SCM.ADF` and
+:class:`~qmflows.packages.SCM.DFTB` packages, *QMFlows* take advantages of the python interface to kftools_ files developed by the SCM_. In the case of *XML* output,
+*QMFlows* direcltly uses the python built-in xml_ reader. For the output files in text format *Qmflows* uses a mixuture of awk_ and
 *parsers*.
 
 Parsers are a robust alternative to regular expressions, parsers are modular and reusable, while
-|regex| tends to be abstruse and difficult to reuse. A parser is a function that decomposes a string (or binary) into its syntactic components using some predefined rules or grammar. 
+|regex| tends to be abstruse and difficult to reuse. A parser is a function that decomposes a string (or binary) into its syntactic components using some predefined rules or grammar.
 The library  pyparsing_ offers all the functionality to parse strings, some detail explanation about the library can be found at docs_.
 
 

@@ -30,7 +30,7 @@ from noodles.serial.reasonable import SerReasonableObject
 from rdkit import Chem
 from scm import plams
 
-from ..fileFunctions import json2Settings
+from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 
 __all__ = ['package_properties',
@@ -39,15 +39,15 @@ __all__ = ['package_properties',
 
 _BASE_PATH = Path('data') / 'dictionaries'
 
-#: A dictionary mapping package names to .json files.
+#: A dictionary mapping package names to .yaml files.
 package_properties: Dict[Optional[str], Path] = {
-    None: _BASE_PATH / 'propertiesNone.json',
-    'adf': _BASE_PATH / 'propertiesADF.json',
-    'dftb': _BASE_PATH / 'propertiesDFTB.json',
-    'cp2k': _BASE_PATH / 'propertiesCP2K.json',
-    'dirac': _BASE_PATH / 'propertiesDIRAC.json',
-    'gamess': _BASE_PATH / 'propertiesGAMESS.json',
-    'orca': _BASE_PATH / 'propertiesORCA.json'
+    None: _BASE_PATH / 'propertiesNone.yaml',
+    'adf': _BASE_PATH / 'propertiesADF.yaml',
+    'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
+    'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
+    'dirac': _BASE_PATH / 'propertiesDIRAC.yaml',
+    'gamess': _BASE_PATH / 'propertiesGAMESS.yaml',
+    'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
 del _BASE_PATH
 
@@ -83,7 +83,7 @@ class Result:
         :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
-        :param properties: path to the `JSON` file containing the data to
+        :param properties: path to the `yaml` file containing the data to
                            load the parser on the fly.
         :type properties: str
 
@@ -92,7 +92,7 @@ class Result:
         self.settings = settings
         self._molecule = molecule
         xs = pkg.resource_string("qmflows", str(properties))
-        self.prop_dict = json2Settings(xs)
+        self.prop_dict = yaml2Settings(xs)
         self.archive = {"plams_dir": plams_dir,
                         'work_dir': work_dir}
         self.job_name = job_name
@@ -161,7 +161,7 @@ class Result:
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
-        # Read the JSON dictionary than contains the parsers names
+        # Read the .yaml dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
         # extension of the output file containing the property value
@@ -193,7 +193,7 @@ class Result:
             """)
 
     @property
-    def results(self) -> plams.Results:
+    def results(self) -> Optional[plams.Results]:
         """Getter for :attr:`Result.results`.
 
         Get will load the .dill file and add all of its class attributes to this instance,
@@ -202,6 +202,8 @@ class Result:
         * Private attributes/methods.
         * Magic methods.
         * Methods/attributes with names already contained within this instance.
+
+        This attribute's value is set to ``None`` if the unpickling process fails.
 
         """
         if not self._results_open:
@@ -223,7 +225,7 @@ class Result:
             # Unpickle the results
             try:
                 results = plams.load(self._results).results
-                assert results is not None, f'Failed to unpickle {self._results}'
+                assert results is not None, f'Failed to unpickle {self._results!r}'
             except (AssertionError, plams.FileError) as ex:
                 file_exc = ex
             else:
@@ -238,7 +240,8 @@ class Result:
 
         # Failed to find or unpickle the .dill file; issue a warning
         if file_exc is not None:
-            warn(str(file_exc))
+            self._results = None
+            warn(f"{file_exc}, setting value to 'None'")
         else:
             self._results = results
 
@@ -253,12 +256,12 @@ class Package(ABC):
 
     """
 
-    #: The name of the generic .json file.
+    #: The name of the generic .yaml file.
     #: Should be implemented by ``Package`` subclasses.
     generic_dict_file: ClassVar[str] = NotImplemented
 
     #: A special flag for used by the ``PakageWrapper`` subclass.
-    #: Used for denoting Job types without any generic .json files.
+    #: Used for denoting Job types without any generic .yaml files.
     generic_package: ClassVar[bool] = False
 
     def __init__(self, pkg_name: str) -> None:
@@ -284,23 +287,27 @@ class Package(ABC):
         else:
             properties = package_properties[self.pkg_name]
 
+        # Ensure that these variables have an actual value
+        # Precaution against passing unbound variables to self.postrun()
+        output_warnings = plams_mol = job_settings = None
+
         # There are not data from previous nodes in the dependecy trees
         # because of a failure upstream or the user provided None as argument
         if all(x is not None for x in [settings, mol]):
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
+                plams_mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
 
                 # Settings transformations
+                self.prerun(settings, plams_mol, **kwargs)
                 job_settings = self.generic2specific(settings, mol)
 
                 # Run the job
-                self.prerun()
-                result = self.run_job(job_settings, mol, **kwargs)
+                result = self.run_job(job_settings, plams_mol, **kwargs)
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
@@ -336,7 +343,7 @@ class Package(ABC):
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
-        self.postrun()
+        self.postrun(result, output_warnings, job_settings, plams_mol, **kwargs)
         return result
 
     def generic2specific(self, settings: Settings,
@@ -370,27 +377,36 @@ class Package(ABC):
                 self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
                 continue
 
+            # The `key` variable can have four types of values:
+            # * None
+            # * A string
+            # * A list with two elements; the second one being a dict
+            # * A list of arbitrary length
+
             if isinstance(key, list):
-                if isinstance(key[1], dict):
-                    value = key[1][v]
+                initial_key, *final_keys = key
+
+                if isinstance(final_keys[0], dict):
+                    v_tmp = final_keys[0].get(v)
                 else:
-                    value = {key[1]: v}
-                if value:
-                    v = value
-                key = key[0]
+                    v_tmp = Settings()
+                    v_tmp.set_nested(final_keys, v)
+
+                if v_tmp:
+                    v = v_tmp
+                key = initial_key
 
             if v:
                 if isinstance(v, dict):
                     v = Settings(v)
                 specific_from_generic_settings.specific[self.pkg_name][key] = v
             else:
-                #: TODO Is there any point to this statement?
-                specific_from_generic_settings.specific[self.pkg_name][key]
+                specific_from_generic_settings.specific[self.pkg_name][key] = Settings()
 
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self) -> Settings:
-        """Load the JSON file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
+        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
         try:
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
@@ -399,19 +415,23 @@ class Package(ABC):
                                           "be implemented by `Package` subclasses") from ex
             raise ex
 
-        str_json = pkg.resource_string("qmflows", path)
-        return json2Settings(str_json)
+        str_yaml = pkg.resource_string("qmflows", path)
+        return yaml2Settings(str_yaml)
 
     def __repr__(self) -> str:
         """Return a :class:`str` representation of this instance."""
         vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
-    def prerun(self) -> None:
+    def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
         pass
 
-    def postrun(self) -> None:
+    def postrun(self, result: Result,
+                output_warnings: Optional[WarnMap] = None,
+                settings: Optional[Settings] = None,
+                mol: Optional[plams.Molecule] = None,
+                **kwargs: Any) -> None:
         """Run a set of tasks after running the actual job."""
         pass
 

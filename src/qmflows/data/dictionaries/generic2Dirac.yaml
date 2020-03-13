@@ -1,0 +1,7 @@
+basis:
+    - dirac
+    - MOLECULE
+    - DEFAULT
+hamiltonian:
+    - dirac
+    - HAMILTONIAN

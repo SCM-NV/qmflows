@@ -1,4 +1,12 @@
 
+# Version 0.10.0 (XX/03/2020)
+
+## Added
+  * Introduced the ``CP2KMM`` class for classical forcefield calculations with CP2K: [qmflows/pull/150](https://github.com/SCM-NV/qmflows/pull/150).
+  * Introduced the ``PackageWrapper`` class: [qmflows/pull/149](https://github.com/SCM-NV/qmflows/pull/149).
+  * Introduced updates and code-style improvements to the ``Package`` and ``Result`` classes: [qmflows/pull/146](https://github.com/SCM-NV/qmflows/pull/146).
+
+
 # Version 0.9.0 (27/11/2019)
 
 ## Changed
@@ -8,6 +16,7 @@
   * Interface to HDF5
   * Turbomol Parser
   * graphviz dependency
+
 
 # Version 0.8.0 (17/06/2019)
 
@@ -36,7 +45,7 @@
 
 ## Added
  * Quantum Dots builder functionality
- 
+
 ## Changed
 
  * Use [noodles==0.3.0](https://github.com/NLeSC/noodles/releases)
@@ -54,15 +63,15 @@
 ## Fixed
 
  * Job manager issue when removing a SCM job
- 
- 
+
+
 
 # 02/12/2018
 
 ## Added
  * Ligand MOPAC+COSMO-RS property calculation
  * Inter-ligand activation strain analysis have been (UFF)
- 
+
 ## Changed
 
  * Ligand optimization has been overhauled

@@ -26,7 +26,7 @@ class ADF(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2ADF.json'
+    generic_dict_file: ClassVar[str] = 'generic2ADF.yaml'
 
     def __init__(self) -> None:
         super(ADF, self).__init__("adf")
@@ -170,7 +170,7 @@ class ADF_Result(Result):
                  work_dir: Union[None, str, os.PathLike] = None,
                  status: str = 'done',
                  warnings: Optional[WarnMap] = None) -> None:
-        # Load available property parser from Json file.
+        # Load available property parser from yaml file.
         super().__init__(settings, molecule, job_name, dill_path,
                          plams_dir=plams_dir, properties=package_properties['adf'],
                          status=status, warnings=warnings)
@@ -212,7 +212,7 @@ class DFTB(Package):
 
     def __init__(self) -> None:
         super().__init__("dftb")
-        self.generic_dict_file = 'generic2DFTB.json'
+        self.generic_dict_file = 'generic2DFTB.yaml'
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
@@ -334,7 +334,7 @@ class DFTB_Result(Result):
                  work_dir: Union[None, str, os.PathLike] = None,
                  status: str = 'done',
                  warnings: Optional[WarnMap] = None) -> None:
-        # Read available propiety parsers from a JSON file
+        # Read available propiety parsers from a yaml file
         super().__init__(settings, molecule, job_name, dill_path,
                          plams_dir=plams_dir, properties=package_properties['dftb'],
                          status=status, warnings=warnings)

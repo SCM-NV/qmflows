@@ -1,0 +1,76 @@
+charges:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: AtomCharge Mulliken
+        section: Properties
+    parser: adf_parser
+dipole:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Dipole
+        section: Properties
+    parser: adf_parser
+energy:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Bond Energy
+        section: Energy
+    parser: adf_parser
+enthalpy:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Enthalpy
+        section: Thermodynamics
+    parser: adf_parser
+free_energy:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Gibbs free Energy
+        section: Thermodynamics
+    parser: adf_parser
+frequencies:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Frequencies
+        section: Freq
+    parser: adf_parser
+hessian:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: Analytical Hessian
+        section: Hessian
+    parser: adf_parser
+homo:
+    file_ext: out
+    function: extract_line_value
+    kwargs:
+        pattern: HOMO
+        pos: 4
+    parser: generic_parsers
+lumo:
+    file_ext: out
+    function: extract_line_value
+    kwargs:
+        pattern: LUMO
+        pos: 4
+    parser: generic_parsers
+optcycles:
+    file_ext: t21
+    function: kfreader
+    kwargs:
+        prop: nr of geometries
+        section: History
+    parser: adf_parser
+runtime:
+    file_ext: out
+    function: awk_file
+    kwargs:
+        script: /Total Used/ {runtime = $9} END {print runtime}
+    parser: generic_parsers

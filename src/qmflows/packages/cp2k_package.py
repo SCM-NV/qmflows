@@ -39,7 +39,7 @@ class CP2K(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2CP2K.json'
+    generic_dict_file: ClassVar[str] = 'generic2CP2K.yaml'
 
     def __init__(self) -> None:
         super().__init__("cp2k")
@@ -158,12 +158,17 @@ class CP2K(Package):
                 abc = ' [angstrom] {} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
-                raise RuntimeError("cell parameter:{}\nformat not recognized")
+                raise RuntimeError(f"cell parameter:{value!r}\nformat not recognized")
 
             return s
 
+        def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
+            """Set the keyword for periodic calculations"""
+            s.specific.cp2k.force_eval.subsys.cell.periodic = value
+
         funs = {'cell_parameters': write_cell_parameters,
-                'cell_angles': write_cell_angles}
+                'cell_angles': write_cell_angles,
+                'periodic': write_periodic}
 
         # Function that handles the special keyword
         f = funs.get(key)
