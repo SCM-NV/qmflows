@@ -96,11 +96,6 @@ specific:
             project: cp2k
             run_type: energy
 
-    dirac:
-        DIRAC: WAVEFUNCTION
-        HAMILTONIAN: "LEVY-LEBLOND"
-        WAVE FUNCTION: SCF
-
     gamess:
         basis:
             gbasis: sto
@@ -143,8 +138,6 @@ specific:
             runtype: GO
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
-
-    dirac: Null
 
     cp2k:
         motion:
@@ -253,8 +246,6 @@ specific:
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
 
-    dirac: Null
-
     cp2k: Null
 
     cp2k_mm: Null
@@ -295,8 +286,6 @@ specific:
             runtype: Frequencies
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
-
-    dirac: Null
 
     cp2k : Null
 
