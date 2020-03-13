@@ -1,6 +1,6 @@
-__author__ = "Felipe Zapata"
+"""Utilities to read cp2k out files."""
 
-__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'readCp2KOverlap',
+__all__ = ['readCp2KBasis', 'read_cp2k_coefficients',
            'read_cp2k_number_of_orbitals']
 
 import fnmatch
@@ -10,15 +10,14 @@ from collections import namedtuple
 from itertools import islice
 
 import numpy as np
-from more_itertools import (chunked, collapse)
+from more_itertools import chunked
 from pymonad import curry
-from pyparsing import (CaselessLiteral, Empty, FollowedBy, Group, Literal,
-                       NotAny, OneOrMore, Optional, SkipTo, Suppress, Word,
-                       ZeroOrMore, alphanums, alphas, nums, oneOf, restOfLine,
-                       srange)
+from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
+                       SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
+                       nums, oneOf, restOfLine, srange)
 
-from ..common import (AtomBasisData, AtomBasisKey, InfoMO)
-from ..utils import (zipWith, zipWith3)
+from ..common import AtomBasisData, AtomBasisKey, InfoMO
+from ..utils import zipWith, zipWith3
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
@@ -41,8 +40,6 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     5     1 cd  3px      -0.0013339995106232    -0.0100914249163043
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
-# =========>Parse Warnings
-
 
 def read_xyz_file(file_name: str):
     """Read the last geometry from the output file."""
@@ -51,9 +48,7 @@ def read_xyz_file(file_name: str):
 
 
 def parse_cp2k_warnings(file_name, package_warnings):
-    """
-    Parse All the warnings found in an output file
-    """
+    """Parse All the warnings found in an output file."""
     p = ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
 
     # Return dict of Warnings
@@ -69,10 +64,7 @@ def parse_cp2k_warnings(file_name, package_warnings):
 
 
 def assign_warning(package_warnings, msg):
-    """
-    Assign an specific Warning from the ``package_warnings``
-    or a generic warnings
-    """
+    """Assign an specific Warning from the ``package_warnings`` or a generic warnings."""
     warnings = [w for k, w in package_warnings.items() if k in msg]
 
     if not warnings:
@@ -81,13 +73,10 @@ def assign_warning(package_warnings, msg):
         return warnings[0]
 
 
-# ===========>Parse Coefficient
-floatArray = np.vectorize(float)
-
-
 def read_cp2k_coefficients(path_mos, plams_dir=None):
-    """
-    Read the number of ``Orbitals`` and ``Orbital`` functions from the
+    """Read the MO's from the CP2K output.
+
+    First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
     cp2k output and then read the molecular orbitals.
 
     :returns: NamedTuple containing the Eigenvalues and the Coefficients
@@ -112,20 +101,19 @@ def read_cp2k_coefficients(path_mos, plams_dir=None):
     return readCp2KCoeff(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
 
 
-def readCp2KCoeff(path, nOrbitals, nOrbFuns):
-    """
+def readCp2KCoeff(path, nOrbitals: int, nOrbFuns: int):
+    """Read the coefficients from the plain text output.
+
     MO coefficients are stored in Column-major order.
 
     :parameter path: Path to the file containing the MO coefficients
     :type path: String
     :parameter nOrbitals: Number of MO to read
-    :type nOrbitals: Int
     :param nOrbFuns: Number of orbital functions
-    :type nOrbFuns: Int
     :returns: Molecular orbitals and orbital energies
     """
     def remove_trailing(xs):
-        "Remove the last lines of the MOs output"
+        "Remove the last lines of the MOs output."
         words = ['Fermi', 'HOMO-LUMO']
         if any([x in words for x in xs[-1]]):
             xs.pop(-1)
@@ -197,32 +185,14 @@ orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 
 
 def funCoefficients(x):
-    """Parser Coeffcients"""
+    """Parser Coeffcients."""
     fun = OneOrMore(Suppress(orbInfo) + floatNumber * x)
     return fun.setResultsName("coeffs")
 
 
 def funOrbNumber(x):
-    """
-    Orbital Occupation Number. There is min 1 max 4.
-    """
+    """Parse Orbital Occupation Number. There is min 1 max 4."""
     return natural * x
-
-
-# ==================> Overlap Matrix <=====================
-
-headerOverlap = CaselessLiteral("OVERLAP MATRIX")
-
-topParserOverlap = Suppress(headerOverlap) + \
-    OneOrMore(Group(Suppress(funOrbNumber(4)) + funCoefficients(4)))
-
-
-def oddParserOverlap(n):
-    if n == 0:
-        return Empty()
-    else:
-        return Group((Suppress(funOrbNumber(n)) +
-                      funCoefficients(n)).setResultsName("lastCoeffs"))
 
 
 # ====================> Basis File <==========================
@@ -253,9 +223,7 @@ topParseBasis = OneOrMore(Suppress(comment)) + \
 # Parsing From File
 
 def read_mos_data_input(path_input):
-    """
-    Try to read the added_mos parameter and the range of printed MOs
-    """
+    """Try to read the added_mos parameter and the range of printed MOs."""
     properties = ["ADDED_MOS", "MO_INDEX_RANGE"]
     l1, l2 = [try_search_pattern(x, path_input) for x in properties]
     added_mos = l1.split()[-1] if l1 is not None else None
@@ -265,9 +233,7 @@ def read_mos_data_input(path_input):
 
 
 def read_cp2k_number_of_orbitals(file_name):
-    """
-    Look for the line ' Number of molecular orbitals:'
-    """
+    """Look for the line ' Number of molecular orbitals:'."""
     def fun_split(l):
         return l.split()[-1]
 
@@ -280,9 +246,7 @@ def read_cp2k_number_of_orbitals(file_name):
 
 
 def move_restart_coeff(path):
-    """
-    Rename Molecular Orbital Coefficients and EigenValues
-    """
+    """Rename Molecular Orbital Coefficients and EigenValues."""
     root, file_name = os.path.split(path)
     # Current work directory
     cwd = os.path.realpath('.')
@@ -300,29 +264,8 @@ def move_restart_coeff(path):
     os.chdir(cwd)
 
 
-def readCp2KOverlap(path, nOrbitals):
-    """
-    Read Cp2K Overlap Matrix and store it in the HDF5 file.
-
-    :parameter path: Path to the file containing the MO coefficients
-    :type      path: String
-    :parameter nOrbitals: Number of MO to read
-    :type      nOrbitals: Int
-    """
-    n = nOrbitals % 4
-    parser = topParserOverlap + oddParserOverlap(n)
-    xss = parser.parseFile(path)
-    rss = concatSwapCoeff(xss, 4, n)
-    return floatArray(rss)
-
-
-def readCp2KBasis(path):
-    """
-    Read the Contracted Gauss function primitives format from a text file.
-
-    :param path: Path to the file containing the basis.
-    :type path: String
-    """
+def readCp2KBasis(path: str) -> tuple:
+    """Read the Contracted Gauss function primitives format from a text file."""
     bss = topParseBasis.parseFile(path)
     atoms = [''.join(xs.atom[:]).lower() for xs in bss]
     names = [' '.join(xs.basisName[:]).upper() for xs in bss]
@@ -338,17 +281,6 @@ def readCp2KBasis(path):
 
     return (basiskey, basisData)
 
-# ============================<>=======================================
-# Auxiliar functions
-
-
-def concatSwapCoeff(xss, m, n):
-    if n == 0:
-        return list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss)))
-    else:
-        xs = list(collapse(swapCoeff(m)(cs.coeffs[:] for cs in xss[:-1])))
-        return xs + list(collapse(swapCoeff(n)([list(xss[-1].lastCoeffs)])))
-
 
 @curry
 def swapCoeff2(n, rs):
@@ -358,18 +290,8 @@ def swapCoeff2(n, rs):
         return [rs[i::n] for i in range(n)]
 
 
-@curry
-def swapCoeff(n, rss):
-    if n == 1:
-        return [rss]
-    else:
-        return [[rs[i::n] for i in range(n)] for rs in rss]
-
-
 def headTail(xs):
-    """
-    Return the head and tail from a list.
-    """
+    """Return the head and tail from a list."""
     it = iter(xs)
     head = next(it)
     tail = list(it)
