@@ -18,7 +18,7 @@ from .packages import Package, Result, get_tmpfile_name, package_properties, War
 
 
 class ORCA(Package):
-    """This class prepare the input to run a Orca job using both Plams and templates.
+    """This class prepare the input to run a Orca job using both PLAMS and templates.
 
     It also does the manangement of the input/output files resulting
     from running Orca and returns a Results object that containing the methods

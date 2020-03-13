@@ -13,14 +13,14 @@ from ..settings import Settings
 
 
 class GAMESS(Package):
-    """This class setup the requirement to run a Gamess-US Job <http://www.msg.ameslab.gov/gamess/>.
+    """This class setup the requirement to run a `Gamess-US Job <http://www.msg.ameslab.gov/gamess/>`_.
 
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the ``rungms`` script.
     This class is not intended to be called directly by the user, instead the
-    **gamess** function should be called.
+    :data:`gamess` function should be called.
 
-    """
+    """  # noqa
 
     generic_dict_file: ClassVar[str] = 'generic2gamess.yaml'
 

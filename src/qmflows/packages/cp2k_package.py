@@ -30,12 +30,12 @@ __all__ = ['cp2k']
 
 
 class CP2K(Package):
-    """This class setup the requirement to run a CP2K Job <https://www.cp2k.org/>.
+    """This class setup the requirement to run a `CP2K Job <https://www.cp2k.org/>`_.
 
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
-    **cp2k** function should be called.
+    :data:`cp2k` function should be called.
 
     """
 

@@ -7,9 +7,9 @@ and, upon calling :class:`pkg = PackageWrapper(...); pkg()<PackageWrapper.__call
 appropiate instance of Package subclas instance is called.
 
 For example, passing :class:`plams.ADFJob<scm.plams.interfaces.adfsuite.adf.ADFJob>` will
-automatically call :data:`qmflows.adf<qmflows.packages.SCM.adf>`,
+automatically call :data:`adf<qmflows.packages.SCM.adf>`,
 :class:`plams.Cp2kJob<scm.plams.interfaces.thirdparty.cp2k.Cp2kJob>` will
-call :data:`qmflows.cp2k<qmflows.packages.cp2k_package.cp2k>`, *etc*.
+call :data:`cp2k<qmflows.packages.cp2k_package.cp2k>`, *etc*.
 
 When no appropiate Package is found, let's say after passing the :class:`MyFancyJob` type,
 the PackageWrapper class will still run the job as usual and return the matching
@@ -51,6 +51,7 @@ Index
 .. currentmodule:: qmflows.packages.package_wrapper
 .. autosummary::
     PackageWrapper
+    PackageWrapper.__init__
     PackageWrapper.__call__
     PackageWrapper.run_job
     PackageWrapper.handle_special_keywords
@@ -60,6 +61,7 @@ Index
 API
 ---
 .. autoclass:: PackageWrapper
+.. automethod:: PackageWrapper.__init__
 .. automethod:: PackageWrapper.__call__
 .. automethod:: PackageWrapper.run_job
 .. automethod:: PackageWrapper.handle_special_keywords
@@ -143,7 +145,7 @@ class ResultWrapper(Result):
 
 @has_scheduled_methods
 class PackageWrapper(Package):
-    """A :class:`Package<qmflows.packages.packages.Package>` subclass for processing arbitrary PLAMS :class:`Job<scm.plams.core.basejob.Job>` types.
+    """A :class:`Package<qmflows.packages.packages.Package>` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
 
     Will automatically convert the passed Job type into the appropiate
     Package instance upon calling :meth:`PackageWrapper.__call__`.

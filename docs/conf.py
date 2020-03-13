@@ -193,7 +193,9 @@ napoleon_use_admonition_for_examples = True
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
-    'plams': ('https://www.scm.com/doc/plams/', None)
+    'plams': ('https://www.scm.com/doc/plams/', None),
+    'noodles': ('https://noodles.readthedocs.io/en/latest/', None),
+    'rdkit': ('https://www.rdkit.org/docs/', None)
 }
 
 

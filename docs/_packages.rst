@@ -3,19 +3,37 @@ qmflows.packages
 
 The :class:`~qmflows.packages.packages.Package` (sub-)classes of QMFlows.
 
-Index
------
+Package-related Functions
+-------------------------
+.. currentmodule:: qmflows.packages.packages
+.. autosummary::
+    run
+
+The Package Class
+-----------------
+.. autosummary::
+    Package
+    Package.__init__
+    Package.__repr__
+    Package.__call__
+    Package.prerun
+    Package.run_job
+    Package.postrun
+    Package.generic2specific
+    Package.get_generic_dict
+    Package.handle_special_keywords
+
+Package Subclasses
+------------------
 .. currentmodule:: qmflows.packages
 .. autosummary::
-    packages.run
-    packages.Package
-    SCM.ADF
-    SCM.DFTB
-    cp2k_package.CP2K
-    cp2k_mm.CP2KMM
-    gamess.GAMESS
-    orca.ORCA
-    package_wrapper.PackageWrapper
+    ~SCM.ADF
+    ~SCM.DFTB
+    ~cp2k_package.CP2K
+    ~cp2k_mm.CP2KMM
+    ~gamess.GAMESS
+    ~orca.ORCA
+    ~package_wrapper.PackageWrapper
 
 API
 ---
@@ -24,10 +42,17 @@ API
 |
 
 .. autoclass:: qmflows.packages.packages.Package
-    :members:
-    :private-members:
-    :special-members:
-    :exclude-members: __weakref__
+    :members: generic_dict_file, generic_package, pkg_name
+
+.. automethod:: qmflows.packages.packages.Package.__init__
+.. automethod:: qmflows.packages.packages.Package.__repr__
+.. automethod:: qmflows.packages.packages.Package.__call__
+.. automethod:: qmflows.packages.packages.Package.prerun
+.. automethod:: qmflows.packages.packages.Package.run_job
+.. automethod:: qmflows.packages.packages.Package.postrun
+.. automethod:: qmflows.packages.packages.Package.generic2specific
+.. automethod:: qmflows.packages.packages.Package.get_generic_dict
+.. automethod:: qmflows.packages.packages.Package.handle_special_keywords
 
 |
 
