@@ -17,12 +17,13 @@ import struct
 
 
 class ADF(Package):
-    """:class:`Package<qmflows.packages.Package>` subclass for ADF.
+    """:class:`~qmflows.packages.packages.Package` subclass for ADF.
 
     This class takes care of calling the *ADF* quantum package.
     it uses both Plams and the Templates module to create the input
-    files, while Plams takes care of running the Job.
-    It returns a ``ADF_Result`` object containing the output data.
+    files, while Plams takes care of running
+    the :class:`plams.ADFJob<scm.plams.interfaces.adfsuite.adf.ADFJob>`.
+    It returns a :class:`ADF_Result` instance containing the output data.
 
     """
 
@@ -208,7 +209,7 @@ class ADF_Result(Result):
 
 
 class DFTB(Package):
-    """:class:`Package<qmflows.packages.Package>` subclass for DFTB."""
+    """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
     def __init__(self) -> None:
         super().__init__("dftb")
