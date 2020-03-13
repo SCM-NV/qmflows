@@ -1,4 +1,6 @@
-import operator
+"""Test the Gamess funcionality."""
+
+import math
 
 import pytest
 from more_itertools import collapse
@@ -7,7 +9,6 @@ from scm.plams import Molecule
 from qmflows import Settings, templates
 from qmflows.packages import run
 from qmflows.packages.gamess import gamess
-from qmflows.utils import zipWith
 
 
 @pytest.mark.slow
@@ -42,7 +43,9 @@ def test_opt_gamess():
                        1.1448447102, 0.562978981, 0.9027182521,
                        1.1454516521, -0.9993402516, 1.04943e-05]
 
-    assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
+    diff = [math.isclose(real - expected, 1e-7)
+            for (real, expected) in zip(coords, expected_coords)]
+    assert all(diff)
 
 
 if __name__ == "__main__":

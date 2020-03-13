@@ -1,5 +1,6 @@
-# Default imports
-import operator
+"""Tests for Orca functionality."""
+
+import math
 from math import sqrt
 
 import pytest
@@ -9,16 +10,12 @@ from scm.plams import Molecule
 from qmflows import Settings, templates
 from qmflows.packages import run
 from qmflows.packages.orca import orca
-# User Defined imports
 from qmflows.packages.SCM import dftb
-from qmflows.utils import zipWith
 
 
 @pytest.mark.slow
 def test_opt_orca():
-    """
-    Test Orca input generation and run functions.
-    """
+    """Test Orca input generation and run functions."""
     h2o = Molecule('test/test_files/h2o.xyz', 'xyz', charge=0, multiplicity=1)
 
     h2o_geometry = dftb(templates.geometry, h2o)
@@ -67,7 +64,9 @@ def test_methanol_opt_orca():
 
     coords = collapse([a.coords for a in mol_opt.atoms])
 
-    assert abs(sum(zipWith(operator.sub)(coords)(expected_coords))) < 1e-7
+    diff = [math.isclose(real - expected, 1e-7)
+            for (real, expected) in zip(coords, expected_coords)]
+    assert all(diff)
 
 
 if __name__ == "__main__":

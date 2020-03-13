@@ -2,7 +2,7 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['dict2Setting', 'settings2Dict', 'zipWith', 'zipWith3', 'to_runtime_error',
+__all__ = ['dict2Setting', 'settings2Dict', 'to_runtime_error',
            'init_restart', 'InitRestart']
 
 import os
@@ -13,24 +13,9 @@ from typing import Union, Optional, Iterable, Callable
 from contextlib import redirect_stdout, AbstractContextManager
 from collections import Counter
 
-from pymonad import curry
 from scm.plams import config, init, finish, JobManager, load_all
 
 from .settings import Settings
-
-
-@curry
-def zipWith(f, xs, ys):
-    """zipWith generalises zip by zipping with the function given as the first argument"""
-    return [f(*rs) for rs in zip(xs, ys)]
-
-
-@curry
-def zipWith3(f, xs, ys, zs):
-    """The zipWith3 function takes a function which combines three elements,
-    as well as three lists and returns a list of their point-wise combination.
-    """
-    return [f(*rs) for rs in zip(xs, ys, zs)]
 
 
 def settings2Dict(s):
@@ -87,7 +72,8 @@ def to_runtime_error(func: Callable) -> Callable:
         except Exception as ex:
             if isinstance(ex, RuntimeError):
                 raise ex
-            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(ex.__traceback__) from ex
+            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(
+                ex.__traceback__) from ex
     return wrapper
 
 
@@ -177,7 +163,8 @@ class InitRestart(AbstractContextManager):
 
     def __enter__(self) -> None:
         """Enter the context manager, call :func:`init_restart`."""
-        init_restart(path=self.path, folder=self.folder, load_jobs=self.load_jobs)
+        init_restart(path=self.path, folder=self.folder,
+                     load_jobs=self.load_jobs)
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         """Exit the context manager, call :func:`finish<scm.plams.core.functions.finish>`."""
