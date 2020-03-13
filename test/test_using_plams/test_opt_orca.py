@@ -1,6 +1,6 @@
 """Tests for Orca functionality."""
 
-import operator
+import math
 from math import sqrt
 
 import pytest
@@ -64,8 +64,9 @@ def test_methanol_opt_orca():
 
     coords = collapse([a.coords for a in mol_opt.atoms])
 
-    assert abs(sum(real - expected for (real, expected)
-                   in zip(coords, expected_coords))) < 1e-7
+    diff = [math.isclose(real - expected, 1e-7)
+            for (real, expected) in zip(coords, expected_coords)]
+    assert all(diff)
 
 
 if __name__ == "__main__":
