@@ -166,18 +166,6 @@ class PackageWrapper(Package):
         >>> result_adf: ADF_Result = run(pkg_adf(...), ...)
         >>> result_ams: ResultWrapper = run(pkg_ams(...), ...)
 
-
-    Parameters
-    ----------
-    job_type : :class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`]
-        The to-be executed :class:`plams.Job<scm.plams.core.basejob.Job>` type.
-        Will be automatically translated, when possible, into to the appropiate
-        :class:`Package<qmflows.packages.packages.Package>` instance upon calling
-        :meth:`PackageWrapper.__call__`.
-        If not, default to the more bare-bones implementation within this class
-        and the matching :class:`ResultWrapper` instance.
-        See also :attr:`PackageWrapper.job_type`.
-
     Attributes
     ----------
     job_type : :class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`]
@@ -199,7 +187,20 @@ class PackageWrapper(Package):
     generic_package: ClassVar[bool] = True
 
     def __init__(self, job_type: Type[plams.Job]) -> None:
-        """Initialize this instance."""
+        """Initialize this instance.
+
+        Parameters
+        ----------
+        job_type : :class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`]
+            The to-be executed :class:`plams.Job<scm.plams.core.basejob.Job>` type.
+            Will be automatically translated, when possible, into to the appropiate
+            :class:`Package<qmflows.packages.packages.Package>` instance upon calling
+            :meth:`PackageWrapper.__call__`.
+            If not, default to the more bare-bones implementation within this class
+            and the matching :class:`ResultWrapper` instance.
+            See also :attr:`PackageWrapper.job_type`.
+
+        """
         pkg_name = job_type.__class__.__name__.lower().rstrip('job')
         super().__init__(pkg_name)
         self.job_type = job_type

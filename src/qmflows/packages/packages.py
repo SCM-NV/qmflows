@@ -256,16 +256,28 @@ class Package(ABC):
 
     """
 
-    #: The name of the generic .yaml file.
-    #: Should be implemented by ``Package`` subclasses.
+    #: A class variable with the name of the generic .yaml file.
+    #: Should be implemented by :class:`Package` subclasses.
     generic_dict_file: ClassVar[str] = NotImplemented
 
-    #: A special flag for used by the ``PakageWrapper`` subclass.
+    #: A class variable with a special flag for used by the
+    #: :class:`~qmflows.packages.package_wrapper.PakageWrapper` subclass.
     #: Used for denoting Job types without any generic .yaml files.
     generic_package: ClassVar[bool] = False
 
+    #: An instance variable with the name of the respective quantum chemical package.
+    pkg_name: str
+
     def __init__(self, pkg_name: str) -> None:
-        """Initialize a :class:`Package` instance."""
+        """Initialize a :class:`Package` instance.
+
+        Parameters
+        ----------
+        pkg_name : :class:`str`
+            The name of the respective quantum chemical package.
+            See :attr:`Package.pkg_name`.
+
+        """
         self.pkg_name = pkg_name
 
     @schedule(
@@ -274,12 +286,24 @@ class Package(ABC):
     def __call__(self, settings: Settings,
                  mol: Union[plams.Molecule, Chem.Mol],
                  job_name: str = '', **kwargs: Any) -> Result:
-        """Perform a job with the package specified by :attr:`Package.pkg_name`.
+        r"""Perform a job with the package specified by :attr:`Package.pkg_name`.
 
-        :parameter settings: user settings
-        :type settings: |Settings|
-        :parameter mol: Molecule to run the calculation.
-        :type mol: plams Molecule
+        Paramters
+        ---------
+        settings : :class:`~qmflows.settings.Settings`
+            The user settings.
+        mol : :class:`~scm.plams.mol.molecule.Molecule` or :class:`~rdkit.Chem.rdchem.Mol`
+            A PLAMS or RDKit molecule to-be passed to the calculation.
+        job_name : :class:`str`
+            The name of the job.
+        /**kwargs : :data:`~typing.Any`
+            Further keyword arguments to-be passed to :meth:`Package.prerun`,
+            :meth:`Package.run_job` and :meth:`Package.post_run`.
+
+        Returns
+        -------
+        :class:`Result`
+            A new Result instance.
 
         """
         if self.generic_package:
@@ -348,18 +372,25 @@ class Package(ABC):
 
     def generic2specific(self, settings: Settings,
                          mol: Optional[plams.Molecule] = None) -> Settings:
-        """Traverse ``settings`` and convert generic into package specific keys.
+        """Traverse *settings* and convert generic into package specific keys.
 
-        Traverse all the key, value pairs of the ``settings``, translating
+        Traverse all the key, value pairs of the *settings*, translating
         the generic keys into package specific keys as defined in the specific
         dictionary. If one key is not in the specific dictionary an error
         is raised. These new specific settings take preference over existing
         specific settings.
 
-        :parameter settings: Settings provided by the user.
-        :type      settings: Settings
-        :parameter mol: Molecule to run the calculation.
-        :type mol: plams Molecule
+        Parameters
+        ----------
+        settings : :class:`~qmflows.settings.Settings`
+            Settings provided by the user.
+        mol : :class:`~scm.plams.mol.molecule.Molecule`, optional
+            A PLAMS molecule to-be passed to the calculation.
+
+        Returns
+        -------
+        :class:`~qmflows.settings.Settings`
+            A new settings instance without any generic keys.
 
         """
         generic_dict = self.get_generic_dict()
@@ -406,7 +437,14 @@ class Package(ABC):
         return settings.overlay(specific_from_generic_settings)
 
     def get_generic_dict(self) -> Settings:
-        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Pacakge.self.pkg_name``."""  # noqa
+        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Pacakge.pkg_name`.
+
+        Returns
+        -------
+        :class:`~qmflows.settings.Settings`
+            A new Settings instance specific to :attr:`Pacakge.pkg_name`.
+
+        """  # noqa
         try:
             path = join("data", "dictionaries", self.generic_dict_file)
         except TypeError as ex:
@@ -419,12 +457,31 @@ class Package(ABC):
         return yaml2Settings(str_yaml)
 
     def __repr__(self) -> str:
-        """Return a :class:`str` representation of this instance."""
+        """Create a string representation of this instance.
+
+        Returns
+        -------
+        :class:`str`
+            A string representation of this instnce.
+
+        """
         vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
     def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
-        """Run a set of tasks before running the actual job."""
+        """Run a set of tasks before running the actual job.
+
+        Parameters
+        ----------
+        settings : :class:`~qmflows.settings.Settings`
+            Settings provided by the user.
+            Note that these settings can still contain generic keywords.
+        mol : :class:`~scm.plams.mol.molecule.Molecule`, optional
+            A PLAMS molecule to-be passed to the calculation.
+        /**kwargs : :data:`~typing.Any`
+            Further keyword arguments to-be passed to :meth:`Package.run_job`.
+
+        """
         pass
 
     def postrun(self, result: Result,
@@ -432,14 +489,47 @@ class Package(ABC):
                 settings: Optional[Settings] = None,
                 mol: Optional[plams.Molecule] = None,
                 **kwargs: Any) -> None:
-        """Run a set of tasks after running the actual job."""
+        """Run a set of tasks after running the actual job.
+
+        Parameters
+        ----------
+        result : :class:`Result`
+            A Result instance.
+        output_warnings : :class:`collections.abc.Mapping` [:class:`str`, :class:`type` [:exc:`Warning`]], optional
+            A Mapping which maps an error messages to Warning types.
+        settings : :class:`~qmflows.settings.Settings`, optional
+            User-provided Settings as processed by :meth:`Package.generic2specific`.
+            Will be ``None`` if an error occured before this point.
+        mol : :class:`~scm.plams.mol.molecule.Molecule`, optional
+            A PLAMS molecule as passed to the calculation.
+            Will be ``None`` if an error occured before
+            the molecule was parsed in :meth:`PackageWrapper.__call__`.
+        /**kwargs : :data:`~typing.Any`
+            Further keyword arguments to-be passed to :meth:`Package.run_job`.
+
+        """  # noqa
         pass
 
     @staticmethod
     @abstractmethod
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
-        """Abstract method; should be implemented by the child class."""
+        """Abstract method; should be implemented by the child class.
+
+        A method providing additional processing for :class:`Package` dependant generic keywords.
+
+        Parameters
+        ----------
+        settings : :class:`~qmflows.settings.Settings`, optional
+            User-provided Settings as being processed by :meth:`Package.generic2specific`.
+        key : :class:`str`
+            The key associated with the special keyword
+        value : :data:`~typing.Any`
+            The value associated with the special *key*.
+        mol : :class:`~scm.plams.mol.molecule.Molecule`
+            A PLAMS molecule to-be passed to the calculation.
+
+        """
         raise NotImplementedError("trying to call an abstract method")
 
     @staticmethod
@@ -447,7 +537,30 @@ class Package(ABC):
     def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> Result:
-        """Abstract method; should be implemented by the child class."""
+        """Abstract method; should be implemented by the child class.
+
+        A method which handles the running of
+        the actual PLAMS :class:`~scm.plams.core.basejob.Job`.
+
+        Parameters
+        ----------
+        settings : :class:`~qmflows.settings.Settings`, optional
+            User-provided Settings as processed by :meth:`Package.generic2specific`.
+        mol : :class:`~scm.plams.mol.molecule.Molecule`
+            A PLAMS molecule to-be passed to the calculation.
+        job_name : :class:`str`
+            The name of the job.
+        workdir : :class:`str` or :class:`~os.PathLike`, optional
+            The path+folder name of the PLAMS working directory.
+        /**kwargs : :data:`~typing.Any`
+            Further keyword arguments.
+
+        Returns
+        -------
+        :class:`Result`
+            A new Result instance.
+
+        """
         raise NotImplementedError("The class representing a given quantum packages "
                                   "should implement this method")
 
@@ -458,10 +571,26 @@ def run(job: PromisedObject, runner: Optional[str] = None,
         **kwargs: Any) -> Result:
     """Pickup a runner and initialize it.
 
-    :params job: computation to run
-    :type job: Promise Object
-    :param runner: Type of runner to use
-    :type runner: String
+    Parameters
+    ----------
+    job : :class:`~noodles.interface.decorator.PromisedObject`
+        The computation to run; see :meth:`Package.__call__`.
+    runner : :class:`str`, optional
+        The job runner.
+        Note that this value should be left at ``None``.
+    path : :class:`str` or :class:`~os.PathLike`, optional
+        The path where the PLAMS working directory will be created.
+        Will default to the current working directory if ``None``.
+    folder : :class:`str` or :class:`~os.PathLike`, optional
+        The name of the new PLAMS working directory.``
+        Will default to ``"plams_workdir"`` if ``None``.
+    \**kwargs : :data:`~typing.Any`
+        Further keyword arguments to-be passed to :func:`call_default`.
+
+    Returns
+    -------
+    :class:`Result`
+        A new Result instance.
 
     """
     plams.init(path=path, folder=folder)
