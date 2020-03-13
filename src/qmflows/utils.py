@@ -2,7 +2,7 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['dict2Setting', 'settings2Dict', 'zipWith', 'zipWith3', 'to_runtime_error',
+__all__ = ['dict2Setting', 'settings2Dict', 'to_runtime_error',
            'init_restart', 'InitRestart']
 
 import os
@@ -13,21 +13,9 @@ from typing import Union, Optional, Iterable, Callable
 from contextlib import redirect_stdout, AbstractContextManager
 from collections import Counter
 
-from pymonad import curry
 from scm.plams import config, init, finish, JobManager, load_all
 
 from .settings import Settings
-
-
-@curry
-def zipWith(f, xs, ys):
-    """zipWith generalises zip by zipping with the function given as the first argument"""
-    return [f(*rs) for rs in zip(xs, ys)]
-
-
-def zipWith3(f, xs, ys, zs):
-    """Apply a ternary function `f` to each element of the `xs`, `ys` and `zs` iterables."""
-    return [f(*rs) for rs in zip(xs, ys, zs)]
 
 
 def settings2Dict(s):

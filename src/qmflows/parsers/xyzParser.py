@@ -1,6 +1,7 @@
 """XYZ file format readers."""
 
-__all__ = ['parse_string_xyz', 'readXYZ', 'manyXYZ', "string_to_plams_Molecule"]
+__all__ = ['parse_string_xyz', 'readXYZ',
+           'manyXYZ', "string_to_plams_Molecule"]
 
 from pyparsing import (Group, LineEnd, OneOrMore, Suppress, Word, alphas,
                        restOfLine)
@@ -8,7 +9,6 @@ from scm.plams import Atom, Molecule
 
 from qmflows.common import AtomXYZ
 from qmflows.parsers.parser import floatNumber, natural
-from qmflows.utils import zipWith
 
 # =============================================================================
 
@@ -25,9 +25,8 @@ parser_xyz = Suppress(header) + OneOrMore(Group(atomParser))
 # ==============================<>====================================
 
 
-def parse_string_xyz(xs):
-    """
-    Read a molecula geometry in XYZ format from a string.
+def parse_string_xyz(xs: str) -> list:
+    """Read a molecula geometry in XYZ format from a string.
 
     :param: xs
     :type:  string
@@ -37,9 +36,8 @@ def parse_string_xyz(xs):
     return createAtoms(rs)
 
 
-def readXYZ(pathXYZ):
-    """
-    Parse molecular geometry in XYZ format from a file.
+def readXYZ(pathXYZ: str) -> list:
+    """Parse molecular geometry in XYZ format from a file.
 
     :param: pathXYZ
     :type:  string
@@ -49,9 +47,8 @@ def readXYZ(pathXYZ):
     return createAtoms(xs)
 
 
-def manyXYZ(pathXYZ):
-    """
-    Read one or more molecular geometries in XYZ format from a file.
+def manyXYZ(pathXYZ: str) -> list:
+    """Read one or more molecular geometries in XYZ format from a file.
 
     :param: pathXYZ
     :type:  string
@@ -66,7 +63,7 @@ def createAtoms(xs):
     """Create an AtomXYZ tuple from a string."""
     ls = [a.label.lower() for a in xs]
     rs = [list(map(float, a.xyz)) for a in xs]
-    return zipWith(AtomXYZ)(ls)(rs)
+    return [AtomXYZ(*args) for args in zip(ls, rs)]
 
 
 def tuplesXYZ_to_plams(xs):

@@ -11,13 +11,11 @@ from itertools import islice
 
 import numpy as np
 from more_itertools import chunked
-from pymonad import curry
 from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
                        nums, oneOf, restOfLine, srange)
 
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
-from ..utils import zipWith
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
@@ -273,8 +271,8 @@ def readCp2KBasis(path: str) -> tuple:
     # for example 2 0 3 7 3 3 2 1 there are sum(3 3 2 1) =9 Lists
     # of Coefficients + 1 lists of exponents
     nCoeffs = [int(sum(xs[4:]) + 1) for xs in formats]
-    rss = zipWith(swapCoeff2)(nCoeffs)(list(map(float, cs.coeffs[:]))
-                                       for cs in bss)
+    coefficients = [list(map(float, cs.coeffs[:])) for cs in bss]
+    rss = [swapCoeff(*args) for args in zip(nCoeffs, coefficients)]
     tss = [headTail(xs) for xs in rss]
     basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
     basiskey = [AtomBasisKey(*rs) for rs in zip(atoms, names, formats)]
@@ -282,8 +280,7 @@ def readCp2KBasis(path: str) -> tuple:
     return (basiskey, basisData)
 
 
-@curry
-def swapCoeff2(n, rs):
+def swapCoeff(n, rs):
     if n == 1:
         return rs
     else:
