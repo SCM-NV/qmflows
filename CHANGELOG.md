@@ -6,6 +6,7 @@
   * Introduced the ``PackageWrapper`` class: [qmflows/pull/149](https://github.com/SCM-NV/qmflows/pull/149).
   * Introduced updates and code-style improvements to the ``Package`` and ``Result`` classes: [qmflows/pull/146](https://github.com/SCM-NV/qmflows/pull/146).
   * [Removed references to Dirac](https://github.com/SCM-NV/qmflows/issues/152)
+  * [Removed Pymonad](https://github.com/SCM-NV/qmflows/issues/156)
 
 
 # Version 0.9.0 (27/11/2019)
