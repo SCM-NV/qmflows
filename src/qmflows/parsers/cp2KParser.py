@@ -17,7 +17,7 @@ from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        nums, oneOf, restOfLine, srange)
 
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
-from ..utils import zipWith, zipWith3
+from ..utils import zipWith
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
@@ -277,7 +277,7 @@ def readCp2KBasis(path: str) -> tuple:
                                        for cs in bss)
     tss = [headTail(xs) for xs in rss]
     basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
-    basiskey = zipWith3(AtomBasisKey)(atoms)(names)(formats)
+    basiskey = [AtomBasisKey(*rs) for rs in zip(atoms, names, formats)]
 
     return (basiskey, basisData)
 

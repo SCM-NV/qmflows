@@ -25,11 +25,8 @@ def zipWith(f, xs, ys):
     return [f(*rs) for rs in zip(xs, ys)]
 
 
-@curry
 def zipWith3(f, xs, ys, zs):
-    """The zipWith3 function takes a function which combines three elements,
-    as well as three lists and returns a list of their point-wise combination.
-    """
+    """Apply a ternary function `f` to each element of the `xs`, `ys` and `zs` iterables."""
     return [f(*rs) for rs in zip(xs, ys, zs)]
 
 
@@ -87,7 +84,8 @@ def to_runtime_error(func: Callable) -> Callable:
         except Exception as ex:
             if isinstance(ex, RuntimeError):
                 raise ex
-            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(ex.__traceback__) from ex
+            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(
+                ex.__traceback__) from ex
     return wrapper
 
 
@@ -177,7 +175,8 @@ class InitRestart(AbstractContextManager):
 
     def __enter__(self) -> None:
         """Enter the context manager, call :func:`init_restart`."""
-        init_restart(path=self.path, folder=self.folder, load_jobs=self.load_jobs)
+        init_restart(path=self.path, folder=self.folder,
+                     load_jobs=self.load_jobs)
 
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         """Exit the context manager, call :func:`finish<scm.plams.core.functions.finish>`."""
