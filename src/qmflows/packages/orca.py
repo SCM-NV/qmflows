@@ -10,9 +10,10 @@ import numpy as np
 from noodles import schedule
 from scm import plams
 
+from .packages import Package, Result, get_tmpfile_name, package_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from .packages import Package, Result, get_tmpfile_name, package_properties, WarnMap
+from ..type_hints import WarnMap
 
 # ============================= Orca ==========================================
 

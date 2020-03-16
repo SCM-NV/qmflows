@@ -3,15 +3,16 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 # =======>  Standard and third party Python Libraries <======
 
 import os
+import struct
 from os.path import join
 from warnings import warn
 from typing import Optional, Union, Any, ClassVar
 
 from scm import plams
-from ..settings import Settings
-from .packages import (Package, package_properties, Result, get_tmpfile_name, WarnMap)
 
-import struct
+from .packages import Package, package_properties, Result, get_tmpfile_name
+from ..settings import Settings
+from ..type_hints import WarnMap
 
 # ========================= ADF ============================
 

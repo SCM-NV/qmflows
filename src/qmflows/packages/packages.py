@@ -14,7 +14,7 @@ from functools import partial
 from os.path import join
 from warnings import warn
 from typing import (Any, Callable, Optional, Dict, Union, ClassVar,
-                    Iterable, Mapping, Iterator, Type)
+                    Iterable, Mapping, Iterator)
 
 import numpy as np
 import pkg_resources as pkg
@@ -32,6 +32,7 @@ from scm import plams
 
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
+from ..type_hints import WarnMap, WarnDict, WarnParser
 
 __all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
@@ -49,10 +50,6 @@ package_properties: Dict[Optional[str], Path] = {
     'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
 del _BASE_PATH
-
-WarnMap = Mapping[str, Type[Warning]]
-WarnDict = Dict[str, Type[Warning]]
-ParserFunc = Callable[[str, WarnMap], Optional[WarnDict]]
 
 
 class Result:
@@ -766,7 +763,7 @@ def ignored_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any
 
 def parse_output_warnings(job_name: str,
                           plams_dir: Union[None, str, os.PathLike],
-                          parser: ParserFunc,
+                          parser: WarnParser,
                           package_warnings: WarnMap) -> Optional[WarnDict]:
     """Look out for warnings in the output file."""
     output_files = find_file_pattern('*out', plams_dir)

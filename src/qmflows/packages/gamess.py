@@ -8,8 +8,9 @@ from typing import Any, Union, Optional, ClassVar
 
 from scm import plams
 
-from .packages import (Package, package_properties, Result, WarnMap)
+from .packages import Package, package_properties, Result
 from ..settings import Settings
+from ..type_hints import WarnMap
 
 
 class GAMESS(Package):

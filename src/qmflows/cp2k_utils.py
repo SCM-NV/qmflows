@@ -36,9 +36,11 @@ import numpy as np
 import pandas as pd
 
 from scm import plams
-from qmflows.settings import Settings
-from qmflows.backports import nullcontext
-from qmflows.utils import to_runtime_error
+
+from .settings import Settings
+from .backports import nullcontext
+from .utils import to_runtime_error
+from .type_hints import MappingScalar, MappingSequence
 
 __all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
@@ -77,10 +79,6 @@ CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {
     'williams14': _BASE_PATH + ('nonbonded14', 'williams'),
 }
 del _BASE_PATH
-
-
-MappingScalar = MutableMapping[str, Union[Optional[str], float]]
-MappingSequence = MutableMapping[str, Union[Sequence[Optional[str]], Sequence[float]]]
 
 
 class LengthError(ValueError):

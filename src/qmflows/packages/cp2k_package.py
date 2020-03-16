@@ -8,11 +8,13 @@ from warnings import warn
 
 from scm import plams
 
+from .packages import Package, Result, package_properties, parse_output_warnings
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from .packages import (Package, Result, package_properties,
-                       parse_output_warnings, WarnMap)
+from ..type_hints import WarnMap
+
+__all__ = ['cp2k']
 
 # ====================================<>=======================================
 charge_dict: Dict[str, int] = {
@@ -26,7 +28,6 @@ charge_dict: Dict[str, int] = {
     'Hf': 12, 'Ta': 13, 'W': 14, 'Re': 15, 'Os': 16, 'Ir': 17, 'Pt': 18,
     'Au': 11, 'Hg': 12, 'Tl': 13, 'Pb': 4, 'Bi': 5, 'Po': 6, 'At': 7, 'Rn': 8}
 # ======================================<>====================================
-__all__ = ['cp2k']
 
 
 class CP2K(Package):

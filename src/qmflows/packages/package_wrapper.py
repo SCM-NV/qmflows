@@ -100,12 +100,13 @@ from scm import plams
 from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
-from .packages import Package, Result, WarnMap, package_properties
+from .packages import Package, Result, package_properties
 from .SCM import adf, dftb
 from .orca import orca
 from .gamess import gamess
 from .cp2k_package import cp2k
 from ..settings import Settings
+from ..type_hints import WarnMap
 
 plams.Job = plams.core.basejob.Job
 plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
