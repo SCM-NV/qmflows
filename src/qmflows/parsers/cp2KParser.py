@@ -8,6 +8,8 @@ import os
 import subprocess
 from collections import namedtuple
 from itertools import islice
+from typing import Type
+from typing import Optional as Optional_
 
 import numpy as np
 from more_itertools import chunked
@@ -15,10 +17,10 @@ from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
                        nums, oneOf, restOfLine, srange)
 
-from ..common import AtomBasisData, AtomBasisKey, InfoMO
-from .parser import (floatNumber, minusOrplus, natural, point,
-                     try_search_pattern)
+from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+from ..common import AtomBasisData, AtomBasisKey, InfoMO
+from ..type_hints import WarnMap, WarnDict, PathLike
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
@@ -39,13 +41,14 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
 
-def read_xyz_file(file_name: str):
+def read_xyz_file(file_name: PathLike):
     """Read the last geometry from the output file."""
     geometries = manyXYZ(file_name)
     return tuplesXYZ_to_plams(geometries[-1])
 
 
-def parse_cp2k_warnings(file_name, package_warnings):
+def parse_cp2k_warnings(file_name: PathLike,
+                        package_warnings: WarnMap) -> Optional_[WarnDict]:
     """Parse All the warnings found in an output file."""
     p = ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
 
@@ -61,14 +64,14 @@ def parse_cp2k_warnings(file_name, package_warnings):
         return warnings
 
 
-def assign_warning(package_warnings, msg):
+def assign_warning(package_warnings: WarnMap, msg: str) -> Type[Warning]:
     """Assign an specific Warning from the ``package_warnings`` or a generic warnings."""
-    warnings = [w for k, w in package_warnings.items() if k in msg]
+    warnings = (w for k, w in package_warnings.items() if k in msg)
 
-    if not warnings:
+    try:
+        return next(warnings)
+    except StopIteration:
         return RuntimeWarning
-    else:
-        return warnings[0]
 
 
 def read_cp2k_coefficients(path_mos, plams_dir=None):
