@@ -4,8 +4,8 @@ from qmflows.parsers.orca_parser import (
 from scm import plams
 from qmflows.test_utils import PATH
 
-path_trj = PATH / "ORCAjob.trj"
-path_opt = PATH / "ORCAjob.opt"
+path_trj = PATH / "orca_output" / "ORCAjob.trj"
+path_opt = PATH / "orca_output" / "ORCAjob.opt"
 
 
 def test_orca_mol_trj():

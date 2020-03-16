@@ -10,7 +10,7 @@ from qmflows import Settings
 from qmflows.cp2k_utils import (CP2K_KEYS_ALIAS, LengthError, _construct_df,
                                 _get_key_path, _parse_unit, _validate_unit,
                                 map_psf_atoms, set_prm)
-from qmflows.test_utils import PATH
+from qmflows.test_utils import PATH_MOLECULES
 
 PSF_STR = """
 PSF EXT
@@ -50,7 +50,7 @@ def test_map_psf_atoms() -> None:
     """Tests for :func:`map_psf_atoms`."""
     ref = {'C331': 'C', 'C321': 'C', 'C2O3': 'C', 'O2D2': 'O', 'HGA2': 'H', 'HGA3': 'H'}
 
-    path_like = PATH / 'mol.psf'
+    path_like = PATH_MOLECULES / 'mol.psf'
     file_like = StringIO(PSF_STR)
     assertion.eq(map_psf_atoms(path_like), ref)
     assertion.eq(map_psf_atoms(file_like), ref)
