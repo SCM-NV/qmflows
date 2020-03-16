@@ -23,6 +23,9 @@ API
 .. autodata:: WarnParser
     :annotation: = Callable[[str, WarnMap], Optional[WarnDict]]
 
+.. autodata:: WarnParseMap
+    :annotation: = Mapping[Type[Warning], Callable[[str], Optional[str]]]
+
 .. autodata:: MappingScalar
     :annotation: = MutableMapping[str, Union[None, str, float]]
 
@@ -38,14 +41,16 @@ API
 """
 
 from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Union,
-                    Sequence, Any, AnyStr, Union, TextIO, TYPE_CHECKING)
+                    Sequence, Any, AnyStr, NamedTuple, TYPE_CHECKING)
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
+    from pyparsing import ParserElement
     from scm.plams import Molecule
     from .settings import Settings
 else:
     _PathLike = 'os.PathLike'
+    ParserElement = 'pyparsing.ParserElement'
     Molecule = 'scm.plams.mol.molecule.Molecule'
     Settings = 'qmflows.settings.Settings'
 
@@ -53,12 +58,19 @@ __all__ = [
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
-    'PathLike'
+    'PathLike',
+    'ParseWarning'
 ]
 
 
+class ParseWarning(NamedTuple):
+    warn_type: Type[Warning]
+    parser: ParserElement
+    func: Callable[[str], Optional[str]]
+
+
 #: A Mapping which maps a :class:`str` to a :exc:`Warning` type.
-WarnMap = Mapping[str, Type[Warning]]
+WarnMap = Mapping[str, ParseWarning]
 
 #: A dictionary which maps a :class:`str` to a :exc:`Warning` type.
 WarnDict = Dict[str, Type[Warning]]
