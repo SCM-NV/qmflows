@@ -29,6 +29,7 @@ __all__ = ['delete_output', 'get_mm_settings', 'PATH']
 
 #: The path to the ``tests/test_files`` directory.
 PATH = Path('test') / 'test_files'
+PATH_MOLECULES = PATH / "molecules"
 
 
 def delete_output(delete_db: Union[Callable, bool] = True,
@@ -83,7 +84,8 @@ def delete_output(delete_db: Union[Callable, bool] = True,
         return decorator
 
 
-delete_output.__doc__ = delete_output.__doc__.format(workdir=PATH / 'plams_workdir')
+delete_output.__doc__ = delete_output.__doc__.format(
+    workdir=PATH / 'plams_workdir')
 
 
 def _del_all_workdir(workdir: Union[str, os.PathLike]) -> None:
