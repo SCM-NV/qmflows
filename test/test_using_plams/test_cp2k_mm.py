@@ -1,7 +1,6 @@
-from os import PathLike
 from io import TextIOBase
 from itertools import islice
-from typing import Union, AnyStr, Any
+from typing import Union, Any
 from collections import abc
 
 import numpy as np
@@ -10,14 +9,17 @@ from assertionlib import assertion
 from scm.plams import Molecule, add_to_instance, add_to_class, Units, Cp2kJob
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
+from qmflows.type_hints import PathLike
 from qmflows.backports import nullcontext
 from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
+
+#: Example input Settings for CP2K mm calculations.
 SETTINGS: Settings = get_mm_settings()
 
 
-def get_frequencies(file: Union[AnyStr, PathLike, TextIOBase],
+def get_frequencies(file: Union[PathLike, TextIOBase],
                     unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
     """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
     try:
@@ -77,12 +79,6 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
     rotmat = V @ rotmat @ Ut
 
     return xyz1 @ rotmat.T
-
-
-@add_to_class(Cp2kJob)
-def get_runscript(self):
-    inp, out = self._filename('inp'), self._filename('out')
-    return f'cp2k.ssmp -i {inp} -o {out}'
 
 
 def get_energy(self, index: int = -1, unit: str = 'Hartree') -> float:
