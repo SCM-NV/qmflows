@@ -7,13 +7,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        version: [3.7, 3.8]
+
     steps:
     - uses: actions/checkout@master
     - name: Setup conda
       uses: s-weigand/setup-conda@master
       with:
         update-conda: true
-        python-version: 3.7
+        python-version: ${{ matrix.version }}
         conda-channels: anaconda
     - run: conda --version
     - run: which python
