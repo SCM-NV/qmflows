@@ -1,9 +1,10 @@
+"""Test reactivity utilities."""
 from qmflows import Settings
 from qmflows.components import reactivity
 from scm.plams import Molecule
-# import numpy as np
+from qmflows.test_utils import PATH_MOLECULES
 
-mol = Molecule("test/test_files/ethylene.xyz")
+mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
 
 def test_Distance():

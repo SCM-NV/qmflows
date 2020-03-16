@@ -1,3 +1,4 @@
+"""Mock utilities."""
 from noodles import (run_single)
 from pytest_mock import mocker
 from qmflows.components.operations import (select_max, select_min)

@@ -11,14 +11,14 @@ from scm.plams import Molecule, add_to_instance, add_to_class, Units, Cp2kJob
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
 from qmflows.backports import nullcontext
-from qmflows.test_utils import delete_output, get_mm_settings, PATH
+from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
-MOL = Molecule(PATH / 'Cd68Cl26Se55__26_acetate.xyz')
+MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 SETTINGS: Settings = get_mm_settings()
 
 
 def get_frequencies(file: Union[AnyStr, PathLike, TextIOBase],
-                   unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
+                    unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
     """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
     try:
         context_manager = open(file, **kwargs)  # path-like object
@@ -34,18 +34,21 @@ def get_frequencies(file: Union[AnyStr, PathLike, TextIOBase],
             if '[Atoms]' in item:
                 break
         else:
-            raise ValueError(f"failed to identify the '[Atoms]' substring in {f!r}")
+            raise ValueError(
+                f"failed to identify the '[Atoms]' substring in {f!r}")
 
         # Find the end of the [Atoms] block, i.e. the start of the [FREQ] block
         for atom_count, item in enumerate(f, 0):
             if '[FREQ]' in item:
                 break
         else:
-            raise ValueError(f"failed to identify the '[FREQ]' substring in {f!r}")
+            raise ValueError(
+                f"failed to identify the '[FREQ]' substring in {f!r}")
 
         # Identify the vibrational degrees of freedom
         if not atom_count:
-            raise ValueError(f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
+            raise ValueError(
+                f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
         elif atom_count in {1, 2}:
             count = atom_count - 1
         else:
@@ -133,7 +136,7 @@ def test_geometry() -> None:
     assertion.isclose(energy, ref, rel_tol=10**-4)
 
     # Compare geometries
-    xyz_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.npy')
+    xyz_ref = np.load(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.npy')
     _xyz = Molecule(plams_results['cp2k-pos-1.xyz'], geometry=500).as_array()
     _xyz -= _xyz.mean(axis=0)[None, ...]
     xyz = overlap_coords(_xyz, xyz_ref)
@@ -144,7 +147,8 @@ def test_geometry() -> None:
 @delete_output(delete_workdir=True)
 def test_freq() -> None:
     """Test CP2K frequency calculations with the :class:`CP2K_MM` class."""
-    mol = Molecule(PATH / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
+    mol = Molecule(
+        PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
     s = SETTINGS.copy()
     s.specific.cp2k += freq.specific.cp2k_mm
 
@@ -163,7 +167,8 @@ def test_freq() -> None:
 @delete_output(delete_workdir=True)
 def test_md() -> None:
     """Test CP2K frequency calculations with the :class:`CP2K_MM` class."""
-    mol = Molecule(PATH / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
+    mol = Molecule(
+        PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
     s = SETTINGS.copy()
     s.specific.cp2k += md.specific.cp2k_mm
     s.specific.cp2k.motion.md.steps = 1000

@@ -1,10 +1,12 @@
+"""Test merging of the Settings."""
 from qmflows import (Settings, templates)
 
 
 def test_overlay_cp2k_singlepoint():
-    """
-    Test if the merging with the CP2K templates produces the same Settings that
-    writing it by hand.
+    """Test Settings merge methods.
+
+    Check thatthe merging with the CP2K templates produces
+    the same Settings that writing it by hand.
     """
     s = Settings()
     dft = s.specific.cp2k.force_eval.dft
@@ -47,9 +49,10 @@ def test_overlay_cp2k_singlepoint():
 
 
 def test_overlay_adf_freq():
-    """
-    Test if the overlay function produces the same Settings that a user would
-    write by hand.
+    """Test ovelay method.
+
+    Check that the overlay function produces the
+    same Settings that a user would write by hand.
     """
     s = Settings()
     s.specific.adf.xc.gga = "bp86"

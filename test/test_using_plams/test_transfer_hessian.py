@@ -1,19 +1,17 @@
-from qmflows import (Settings, templates)
-from noodles import gather
-
-# User Defined imports
-from qmflows.packages.SCM import dftb
-from qmflows.packages.orca import orca
-from qmflows.packages import run
+"""Test Hessian utilities."""
 import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
+from noodles import gather
+
+from qmflows import Settings, templates
+from qmflows.packages import run
+from qmflows.packages.orca import orca
+from qmflows.packages.SCM import dftb
 
 
 @pytest.mark.slow
 def test_hessian_transfer():
-    """
-    Test DFTB -> Orca hessian transfer
-    """
+    """Test DFTB -> Orca hessian transfer."""
     h2o = molkit.from_smiles('O')
     h2o.properties.symmetry = 'C1'
 

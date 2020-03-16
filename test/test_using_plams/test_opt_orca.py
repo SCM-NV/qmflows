@@ -11,12 +11,14 @@ from qmflows import Settings, templates
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
+from qmflows.test_utils import PATH_MOLECULES
 
 
 @pytest.mark.slow
 def test_opt_orca():
     """Test Orca input generation and run functions."""
-    h2o = Molecule('test/test_files/h2o.xyz', 'xyz', charge=0, multiplicity=1)
+    h2o = Molecule(PATH_MOLECULES / "h2o.xyz",
+                   'xyz', charge=0, multiplicity=1)
 
     h2o_geometry = dftb(templates.geometry, h2o)
 
@@ -45,10 +47,8 @@ def test_opt_orca():
 
 @pytest.mark.slow
 def test_methanol_opt_orca():
-    """
-    Run a methanol optimization and retrieve the optimized geom.
-    """
-    methanol = Molecule('test/test_files/methanol.xyz')
+    """Run a methanol optimization and retrieve the optimized geom."""
+    methanol = Molecule(PATH_MOLECULES / "methanol.xyz")
 
     s = Settings()
     s.specific.orca.main = "RKS B3LYP SVP Opt TightSCF SmallPrint"

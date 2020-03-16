@@ -1,10 +1,14 @@
-from scm.plams import Molecule
-from qmflows import (Settings, templates, run)
-from qmflows.packages import (adf, dftb, gamess, orca)
+"""Test that failure is handled correctly."""
 import os
-import pytest
 import shutil
 import tempfile
+
+import pytest
+from scm.plams import Molecule
+
+from qmflows import Settings, run, templates
+from qmflows.packages import adf, dftb, gamess, orca
+from qmflows.test_utils import PATH_MOLECULES
 
 
 def isNone(x):
@@ -18,10 +22,10 @@ def remove(folder):
 
 @pytest.mark.xfail
 def test_fail_scm():
-    """ Test that both ADF and DFTB returns ``None`` if a computation fails"""
+    """Test that both ADF and DFTB returns ``None`` if a computation fails."""
     # 5 membered ring from which ozone will dissociate
     folder = tempfile.mkdtemp(prefix="qmflows_")
-    mol = Molecule("test/test_files/ethylene.xyz")
+    mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
     # Some dftb specific settings
     dftb_set = Settings()
@@ -40,12 +44,10 @@ def test_fail_scm():
 
 
 def test_fail_gamess():
-    """
-    Gamess should return ``None`` if a calculation fails.
-    """
+    """Gamess should return ``None`` if a calculation fails."""
     folder = tempfile.mkdtemp(prefix="qmflows_")
     symmetry = "Cpi"  # Erroneous Keyowrkd
-    methanol = Molecule('test/test_files/ion_methanol.xyz')
+    methanol = Molecule(PATH_MOLECULES / 'ion_methanol.xyz')
     methanol.properties['symmetry'] = symmetry
 
     s = Settings()
@@ -66,10 +68,10 @@ def test_fail_gamess():
 
 
 def test_fail_orca():
-    """ Orca package should returns ``None`` if the computation fails"""
+    """Orca package should returns ``None`` if the computation fails."""
     folder = tempfile.mkdtemp(prefix="qmflows_")
 
-    methanol = Molecule('test/test_files/methanol.xyz')
+    methanol = Molecule(PATH_MOLECULES / 'methanol.xyz')
 
     s = Settings()
     s.specific.orca.main = "RKS The_Cow_Functional SVP Opt TightSCF SmallPrint"

@@ -1,3 +1,4 @@
+"""Test package wrapper funcionality."""
 import os
 import warnings
 from typing import Type

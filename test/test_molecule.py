@@ -1,3 +1,4 @@
+"""Test molecule serialization."""
 from qmflows import packages
 import scm.plams.interfaces.molecule.rdkit as molkit
 
