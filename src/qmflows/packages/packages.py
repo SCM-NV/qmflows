@@ -33,6 +33,7 @@ from scm import plams
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 from ..type_hints import WarnMap, WarnDict, WarnParser
+from ..warnings_qmflows import QMFlows_Warning
 
 __all__ = ['package_properties',
            'Package', 'run', 'registry', 'Result',
@@ -138,7 +139,8 @@ class Result:
 
         elif not (has_crashed or is_private or prop in self.prop_dict):
             if self._results_open:
-                warn(f"Generic property {prop!r} not defined")
+                warn(f"Generic property {prop!r} not defined",
+                     category=QMFlows_Warning)
 
             # Do not issue this warning if the Results object is still pickled
             else:  # Unpickle the Results instance and try again
@@ -152,7 +154,7 @@ class Result:
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """)
+            """, category=QMFlows_Warning)
         return None
 
     def get_property(self, prop: str) -> Any:
@@ -216,7 +218,7 @@ class Result:
 
         # Ignore the Result.__getattr__() warnings for now
         with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
+            warnings.simplefilter("ignore", category=QMFlows_Warning)
 
             # Unpickle the results
             try:
@@ -237,7 +239,7 @@ class Result:
         # Failed to find or unpickle the .dill file; issue a warning
         if file_exc is not None:
             self._results = None
-            warn(f"{file_exc}, setting value to 'None'")
+            warn(f"{file_exc}, setting value to 'None'", category=QMFlows_Warning)
         else:
             self._results = results
 
@@ -352,20 +354,20 @@ class Package(ABC):
                         The Following Warning are rendered unacceptable in the Current
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
-                        """)
+                        """, category=QMFlows_Warning)
                         result = Result(None, None, job_name=job_name, dill_path=None,
                                         properties=properties, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
-                warn(f"Job {job_name} has failed.\n{err}")
+                warn(f"Job {job_name} has failed.\n{err}", category=QMFlows_Warning)
                 result = Result(None, None, job_name=job_name, dill_path=None,
                                 properties=properties, status='failed')
         else:
             warn(f"""
             Job {job_name} has failed. Either the Settings or Molecule
             objects are None, probably due to a previous calculation failure
-            """)
+            """, category=QMFlows_Warning)
 
             # Send an empty object downstream
             result = Result(None, None, job_name=job_name, dill_path=None,
@@ -770,5 +772,6 @@ def parse_output_warnings(job_name: str,
     try:
         return parser(next(output_files), package_warnings)
     except StopIteration:
-        warn(f"job: {job_name} has failed. check folder: {plams_dir}")
+        warn(f"job: {job_name} has failed. check folder: {plams_dir}",
+             category=QMFlows_Warning)
         return None

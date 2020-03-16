@@ -9,6 +9,7 @@ from typing import Any, Union, Optional, ClassVar
 from scm import plams
 
 from .packages import Package, package_properties, Result
+from ..warnings_qmflows import Key_Warning, QMFlows_Warning
 from ..settings import Settings
 from ..type_hints import WarnMap
 
@@ -150,7 +151,7 @@ class GAMESS(Package):
                         n = 'fvalue({:d})'.format(i)
                         s[n] = v
                     else:
-                        warn(f'Invalid constraint key: {k}')
+                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
                     i += 1
                 settings.specific.gamess.zmat = s
 
@@ -161,7 +162,8 @@ class GAMESS(Package):
         if key in functions:
             functions[key]()
         else:
-            warn(f'Generic keyword {key!r} not implemented for package Gamess')
+            warn(f'Generic keyword {key!r} not implemented for package Gamess',
+                 category=Key_Warning)
 
 
 class Gamess_Result(Result):
@@ -197,7 +199,7 @@ class Gamess_Result(Result):
             Maybe you need to provided to the gamess
             function the optional keyword 'work_dir' containing the path
             to the SCR folder where GAMESS stores the *.dat and other
-            output files""")
+            output files""", category=QMFlows_Warning)
 
         return result
 

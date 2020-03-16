@@ -11,7 +11,7 @@ from scm import plams
 from .packages import Package, Result, package_properties, parse_output_warnings
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
-from ..warnings_qmflows import cp2k_warnings
+from ..warnings_qmflows import cp2k_warnings, Key_Warning
 from ..type_hints import WarnMap
 
 __all__ = ['cp2k']
@@ -177,7 +177,8 @@ class CP2K(Package):
         if f is not None:
             f(settings, value, mol, key)
         else:
-            warn(f'Generic keyword {key!r} not implemented for package CP2K')
+            warn(f'Generic keyword {key!r} not implemented for package CP2K',
+                 category=Key_Warning)
 
 
 class CP2K_Result(Result):

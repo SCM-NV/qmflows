@@ -14,6 +14,7 @@ from .packages import Package, Result, get_tmpfile_name, package_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
 from ..type_hints import WarnMap
+from ..warnings_qmflows import Key_Warning
 
 # ============================= Orca ==========================================
 
@@ -134,12 +135,12 @@ class ORCA(Package):
                         cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(
                             *atoms, v)
                     else:
-                        warn(f'Invalid constraint key: {k}')
+                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
             settings.specific.orca.geom.Constraints._end = cons
 
         def freeze(value: Any) -> None:
             if not isinstance(value, list):
-                msg = 'selected_atoms ' + str(value) + ' is not a list'
+                msg = f'selected_atoms {value} is not a list'
                 raise RuntimeError(msg)
             cons = ''
             if isinstance(value[0], int):
@@ -173,7 +174,8 @@ class ORCA(Package):
         if key in functions:
             functions[key](value)
         else:
-            warn(f'Generic keyword {key!r} not implemented for package ORCA')
+            warn(f'Generic keyword {key!r} not implemented for package ORCA',
+                 category=Key_Warning)
 
 
 class ORCA_Result(Result):
