@@ -1,7 +1,8 @@
-from qmflows.parsers.gamess_parser import (parse_frequencies, parse_hessian)
+"""Test gamess output readers."""
+from qmflows.parsers.gamess_parser import parse_frequencies, parse_hessian
 import numpy as np
-
-file_name = 'test/test_files/CNH_hess.dat'
+from qmflows.test_utils import PATH
+file_name = PATH / 'CNH_hess.dat'
 
 
 def test_hess_gamess():

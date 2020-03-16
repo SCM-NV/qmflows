@@ -1,14 +1,13 @@
-from qmflows import (templates, run, dftb, adf)
+"""Test the rdkit/Molecule interface."""
 import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
+
+from qmflows import adf, dftb, run, templates
 
 
 @pytest.mark.slow
 def test_dftb_props():
-    """
-    Get properties from DFTB freq calc
-    """
-
+    """Get properties from DFTB freq calc."""
     mol = molkit.from_smiles('F[H]')
     result = run(dftb(templates.freq, mol, job_name='dftb_FH'))
     expected_energy = -4.76
@@ -22,10 +21,7 @@ def test_dftb_props():
 
 @pytest.mark.slow
 def test_adf_props():
-    """
-    Get properties from ADF freq calc
-    """
-
+    """Get properties from ADF freq calc."""
     mol = molkit.from_smiles('F[H]')
     result = run(adf(templates.freq, mol, job_name='adf_FH'))
     expected_energy = -0.30

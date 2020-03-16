@@ -1,16 +1,16 @@
-from io import StringIO, BytesIO
-from pathlib import Path
+"""Test PSF interface."""
+from io import BytesIO, StringIO
 from itertools import repeat
 
 import numpy as np
 import pandas as pd
-
 from assertionlib import assertion
-from qmflows import Settings
-from qmflows.cp2k_utils import (set_prm, map_psf_atoms, _get_key_path, CP2K_KEYS_ALIAS,
-                                LengthError, _validate_unit, _parse_unit, _construct_df)
 
-PATH = Path('test') / 'test_files'
+from qmflows import Settings
+from qmflows.cp2k_utils import (CP2K_KEYS_ALIAS, LengthError, _construct_df,
+                                _get_key_path, _parse_unit, _validate_unit,
+                                map_psf_atoms, set_prm)
+from qmflows.test_utils import PATH
 
 PSF_STR = """
 PSF EXT

@@ -27,9 +27,11 @@ def test_opt_gamess():
     s.specific.gamess.basis.ngauss = 3
     s.specific.gamess.guess.guess = 'huckel'
     s.specific.gamess.stapt.optol = '1d-5'
-    s.specific.gamess.zmat["izmat(1)"] = "1,1,2,  1,2,3,  1,3,4,  1,3,5,  1,3,6, \n"
-    "2,1,2,3,  2,2,3,4,  2,2,3,5,  2,2,3,6, \n"
-    "3,1,2,3,4,  3,1,2,3,5,  3,1,2,3,6"
+    s.specific.gamess.zmat["izmat(1)"] = """
+1,1,2,  1,2,3,  1,3,4,  1,3,5,  1,3,6,
+2,1,2,3,  2,2,3,4,  2,2,3,5,  2,2,3,6,
+3,1,2,3,4,  3,1,2,3,5,  3,1,2,3,6
+"""
 
     inp = templates.geometry.overlay(s)
     methanol_geometry = gamess(inp, methanol, work_dir='/tmp')

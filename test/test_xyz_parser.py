@@ -7,7 +7,7 @@ from qmflows.test_utils import PATH
 
 def test_multiple_geometries():
     """Test the reading of multiples molecular geometries from a file."""
-    path_xyz = PATH / "molecules" / "five_points_ethylene.xyz" 
+    path_xyz = PATH / "molecules" / "five_points_ethylene.xyz"
 
     with open(path_xyz, 'r') as f:
         ls = f.readlines()
