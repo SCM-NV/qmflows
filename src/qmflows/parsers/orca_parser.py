@@ -24,9 +24,7 @@ vectorize_float = np.vectorize(float)
 
 
 def parse_molecule(file_name, mol=None):
-    """
-    Parse The Cartesian coordinates from the output file.
-    """
+    """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
     parse_atoms = Group(Word(alphanums) + floatNumber * 3)
@@ -38,9 +36,7 @@ def parse_molecule(file_name, mol=None):
 
 
 def parse_molecule_traj(file_traj):
-    """
-    Read Molecules from the job_name.traj file.
-    """
+    """Read Molecules from the job_name.traj file."""
     mols = manyXYZ(file_traj)
     # Last geometry corresponds to the optimized structure
     opt_mol = mols[-1]
@@ -118,13 +114,11 @@ def read_block(lines):
 
     :returns: Numpy array
     """
-    return np.stack(map(lambda x: vectorize_float(x.split()[1:]), lines[1:]))
+    return np.stack(list(map(lambda x: vectorize_float(x.split()[1:]), lines[1:])))
 
 
 def parse_molecular_orbitals(file_name: str) -> tuple:
-    """
-    Read the Molecular orbital from the orca output
-    """
+    """Read the Molecular orbital from the orca output."""
     n_contracted = try_search_pattern(
         "# of contracted basis functions", file_name).split()[-1]
 
