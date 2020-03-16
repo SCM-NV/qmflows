@@ -48,7 +48,7 @@ def test_opt_orca():
 @pytest.mark.slow
 def test_methanol_opt_orca():
     """Run a methanol optimization and retrieve the optimized geom."""
-    methanol = Molecule((PATH_MOLECULES / "methanol.xyz"))
+    methanol = Molecule(PATH_MOLECULES / "methanol.xyz")
 
     s = Settings()
     s.specific.orca.main = "RKS B3LYP SVP Opt TightSCF SmallPrint"
