@@ -1,0 +1,17 @@
+[16:58:08] Running PLAMS located in /home/fza900/miniconda3/envs/namd/lib/python3.7/site-packages/scm/plams
+[16:58:08] Using Python 3.7.6 located in /home/fza900/miniconda3/envs/namd/bin/python
+[16:58:08] PLAMS defaults were loaded from /sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/scripting/scm/plams/plams_defaults
+[16:58:08] PLAMS environment initialized
+[16:58:08] PLAMS working folder: /nfs/home6/fza900/Prototype/TESTS/workdir
+[16:58:08] JOB ADFjob STARTED
+[16:58:08] Starting ADFjob.prerun()
+[16:58:08] ADFjob.prerun() finished
+[16:58:08] JOB ADFjob RUNNING
+[16:58:08] Executing ADFjob.run
+[16:58:53] Execution of ADFjob.run finished with returncode 0
+[16:58:53] JOB ADFjob FINISHED
+[16:58:53] Starting ADFjob.postrun()
+[16:58:53] ADFjob.postrun() finished
+[16:58:53] JOB ADFjob SUCCESSFUL
+[16:58:53] PLAMS environment cleaned up successfully
+[16:58:53] PLAMS run finished. Goodbye
