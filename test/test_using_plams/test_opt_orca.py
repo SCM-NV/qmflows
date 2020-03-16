@@ -25,8 +25,6 @@ def test_opt_orca():
     s = Settings()
     # generic keyword "basis" must be present in the generic dictionary
     s.basis = "sto_dzp"
-    # "specific" allows the user to apply specific keywords for a
-    # package that are not in a generic dictionary
     # s.specific.adf.basis.core = "large"
 
     r = templates.singlepoint.overlay(s)
