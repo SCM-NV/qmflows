@@ -3,7 +3,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Optional, Union, Any, Dict, ClassVar
+from typing import Any, ClassVar, Optional, Union
 from warnings import warn
 
 from scm import plams
@@ -11,23 +11,12 @@ from scm import plams
 from .packages import Package, Result, package_properties, parse_output_warnings
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
+
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
 from ..type_hints import WarnMap
 
-__all__ = ['cp2k']
 
-# ====================================<>=======================================
-charge_dict: Dict[str, int] = {
-    'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 3, 'C': 4, 'N': 5, 'O': 6, 'F': 7,
-    'Ne': 8, 'Na': 9, 'Mg': 10, 'Al': 3, 'Si': 4, 'P': 5, 'S': 6, 'Cl': 7,
-    'Ar': 8, 'K': 9, 'Ca': 10, 'Sc': 11, 'Ti': 12, 'V': 13, 'Cr': 14, 'Mn': 15,
-    'Fe': 16, 'Co': 17, 'Ni': 18, 'Cu': 11, 'Zn': 12, 'Ga': 13, 'Ge': 4, 'As': 5,
-    'Se': 6, 'Br': 7, 'Kr': 8, 'Rb': 9, 'Sr': 10, 'Y': 11, 'Zr': 12, 'Nb': 13,
-    'Mo': 14, 'Tc': 15, 'Ru': 16, 'Rh': 17, 'Pd': 18, 'Ag': 11, 'Cd': 12,
-    'In': 13, 'Sn': 4, 'Sb': 5, 'Te': 6, 'I': 7, 'Xe': 8, 'Cs': 9, 'Ba': 10,
-    'Hf': 12, 'Ta': 13, 'W': 14, 'Re': 15, 'Os': 16, 'Ir': 17, 'Pt': 18,
-    'Au': 11, 'Hg': 12, 'Tl': 13, 'Pb': 4, 'Bi': 5, 'Po': 6, 'At': 7, 'Rn': 8}
-# ======================================<>====================================
+__all__ = ['cp2k']
 
 
 class CP2K(Package):
@@ -104,8 +93,9 @@ class CP2K(Package):
         """
         def write_cell_angles(s: Settings, value: Any,
                               mol: plams.Molecule, key: str) -> Settings:
-            """The angles of the cell is a 3-dimensional list.
+            """Write the Angles for the cell.
 
+            The angles of the cell is a 3-dimensional list.
             &SUBSYS
               &CELL
                 ABC [angstrom] 5.958 7.596 15.610
@@ -121,7 +111,9 @@ class CP2K(Package):
 
         def write_cell_parameters(s: Settings, value: Any,
                                   mol: plams.Molecule, key: str) -> Settings:
-            """The cell parameter can be a list of lists containing the ABC parameter.
+            """Write the cell parameters.
+
+            The cell parameter can be a list of lists containing the ABC parameter.
 
             For example: ::
 
@@ -159,12 +151,13 @@ class CP2K(Package):
                 abc = ' [angstrom] {} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
-                raise RuntimeError(f"cell parameter:{value!r}\nformat not recognized")
+                raise RuntimeError(
+                    f"cell parameter:{value!r}\nformat not recognized")
 
             return s
 
         def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
-            """Set the keyword for periodic calculations"""
+            """Set the keyword for periodic calculations."""
             s.specific.cp2k.force_eval.subsys.cell.periodic = value
 
         funs = {'cell_parameters': write_cell_parameters,

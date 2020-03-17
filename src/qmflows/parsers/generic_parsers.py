@@ -10,8 +10,8 @@ from pyparsing import OneOrMore, SkipTo, Suppress
 from qmflows.parsers.parser import parse_file
 
 
-def awk_file(filename, plams_dir=None, script='', progfile=None, **kwargs):
-    """Execute an AWK script on a file given by *filename*.
+def awk_file(filename, script='', progfile=None, **kwargs):
+    r"""Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
     the contents of the script (should be a single string) as a *script*

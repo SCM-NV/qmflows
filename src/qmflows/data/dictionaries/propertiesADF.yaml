@@ -72,5 +72,5 @@ runtime:
     file_ext: out
     function: awk_file
     kwargs:
-        script: /Total Used/ {runtime = $9} END {print runtime}
+        script: /Total Used/ {print $9}
     parser: generic_parsers

@@ -1,3 +1,4 @@
+"""Test input keyword with special meaning."""
 from qmflows import (Settings, gamess, adf, dftb, orca)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
@@ -9,7 +10,8 @@ adf_const = {
 dftb_const = {
     'dftb': {'constraints': {'atom 1': '', 'atom 2': ''},
              'geometry': {'optim': 'cartesian'}}}
-orca_const = {'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}
+orca_const = {
+    'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}
 
 
 def test_freeze_with_gamess():

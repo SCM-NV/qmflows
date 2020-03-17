@@ -1,4 +1,5 @@
 """Test the xyz file format readers."""
+from assertionlib import assertion
 from more_itertools import chunked
 
 from qmflows.parsers import manyXYZ, parse_string_xyz
@@ -14,4 +15,4 @@ def test_multiple_geometries():
 
     xs = [''.join(x) for x in chunked(ls, 8)]
 
-    assert list(map(parse_string_xyz, xs)) == manyXYZ(path_xyz)
+    assertion.eq(list(map(parse_string_xyz, xs)), manyXYZ(path_xyz))
