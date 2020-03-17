@@ -72,7 +72,7 @@ def test_geometry() -> None:
 
     # Compare geometries
     xyz_ref = np.load(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.npy')
-    _xyz = Molecule(result.results['cp2k-pos-1.xyz'], geometry=500).as_array()
+    _xyz = Molecule(result.geometry).as_array()
     _xyz -= _xyz.mean(axis=0)[None, ...]
     xyz = overlap_coords(_xyz, xyz_ref)
     np.testing.assert_allclose(xyz, xyz_ref, rtol=np.inf, atol=0.05)
@@ -94,6 +94,12 @@ def test_freq() -> None:
     freqs = result.frequencies
     freqs_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.freq.npy')
     np.testing.assert_allclose(freqs, freqs_ref, rtol=np.inf, atol=5.0)
+
+    G = result.free_energy
+    H = result.enthalpy
+    H_ref = -8642.371633064053
+    assertion.isnan(G)
+    assertion.isclose(H, H_ref)
 
 
 @pytest.mark.slow

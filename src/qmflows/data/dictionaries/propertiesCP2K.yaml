@@ -13,10 +13,6 @@ geometry:
     file_pattern: '*-pos-1.xyz'
     function: read_xyz_file
     parser: cp2KParser
-orbitals:
-    file_pattern: '*MOLog'
-    function: read_cp2k_coefficients
-    parser: cp2KParser
 enthalpy:
     file_ext: out
     function: get_cp2k_thermo
@@ -28,4 +24,8 @@ free_energy:
     function: get_cp2k_thermo
     kwargs:
         quantity: G
+    parser: cp2KParser
+orbitals:
+    file_pattern: '*MOLog'
+    function: read_cp2k_coefficients
     parser: cp2KParser

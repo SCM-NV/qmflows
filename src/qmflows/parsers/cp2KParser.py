@@ -10,7 +10,7 @@ from io import TextIOBase
 from collections import namedtuple
 from itertools import islice
 from typing import (Union, Any, Type, Generator, Iterable, Tuple,
-                    List, Sequence, TypeVar, overload)
+                    List, Sequence, TypeVar, overload, FrozenSet, Dict)
 from typing import Optional as Optional_
 
 import numpy as np
@@ -18,7 +18,8 @@ from scm.plams import Units, Molecule
 from more_itertools import chunked
 from pyparsing import (
     FollowedBy, Group, Literal, NotAny, OneOrMore, Optional, ParserElement,
-    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange
+    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange,
+    ZeroOrMore, SkipTo
 )
 
 from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
@@ -405,8 +406,60 @@ def get_cp2k_freq(file: Union[PathLike, TextIOBase],
         return ret
 
 
-Quantity: Literal['G', 'H']
+QUANTITY_MAPPING: Dict[str, str] = {
+    ' VIB|              Electronic energy (U) [kJ/mol]:': 'E',
+    ' VIB|              Zero-point correction [kJ/mol]:': 'ZPE',
+    ' VIB|              Enthalpy correction (H-U) [kJ/mol]:': 'H',
+    ' VIB|              Entropy [kJ/(mol K)]:': 'S',
+    'VIB|              Temperature [K]:': 'T'
+}
 
-def get_cp2k_thermo(file, quantity:):
-    """Return thermochemical properties as extracted from a CP2K .out file."""
-    pass
+QUANTITY_SET: FrozenSet[str] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
+
+Quantity = Literal_[tuple(QUANTITY_SET)]
+
+
+def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
+                    unit: str = 'kcal/mol') -> float:
+    """Return thermochemical properties as extracted from a CP2K .out file.
+
+    Note
+    ----
+    Note that CP2K can under certain circumstances report entropies and, by extension,
+    Gibbs free energies as :data:`~math.nan`.
+
+    Parameters
+    ----------
+    file_name : :class:`str`, :class:`bytes` or :class:`os.PathLike`
+        A path-like object pointing to the CP2K .out file.
+
+    quantity : :class:`str`
+        The to-be returned quantity.
+        Accepted values are ``"E"``, ``"ZPE"``, ``"H"``, ``"S"`` and ``"G"``.
+
+    unit : :class:`str`
+        The unit of the to-be returned *quantity*.
+        See :class:`plams.Units<scm.plams.tools.units.Units>` for more details.
+
+    Returns
+    -------
+    :class:`float`
+        A user-specified *quantity* expressed in *unit* as extracted from *file_name*.
+
+    """
+    quantity = quantity.upper()
+    if quantity not in QUANTITY_SET:
+        raise ValueError(f"'quantity' has an invalid value ({quantity!r}); "
+                         f"expected values: {tuple(QUANTITY_SET)!r}")
+
+    parser = ZeroOrMore(Suppress(SkipTo(" VIB|              Temperature ")) + SkipTo('\n\n\n\n'))
+
+    energy = next(iter(parser.parseFile(file_name)))
+    energy_iter = (i.rsplit(maxsplit=1) for i in energy.splitlines() if i)
+    energy_dict = {QUANTITY_MAPPING.get(k): float(v) for k, v in energy_iter}
+
+    energy_dict['H'] += energy_dict['E']
+    energy_dict['ZPE'] += energy_dict['E']
+    energy_dict['G'] = energy_dict['H'] - energy_dict['T'] * energy_dict['S']
+
+    return energy_dict[quantity] * Units.conversion_ratio('kj/mol', unit)
