@@ -1,11 +1,11 @@
 """A module with warnings used throughout QMFlows."""
 
 from math import isclose, inf
-from typing import Optional, Mapping, Collection
+from typing import Optional, Collection
 
 from pyparsing import ZeroOrMore, Suppress, SkipTo
 
-from .type_hints import ParseWarning
+from .type_hints import ParseWarning, WarnMap
 
 __all__ = [
     'QMFlows_Warning', 'Key_Warning',
@@ -45,41 +45,35 @@ def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
     charge_int = int(charge)
 
     condition = isclose(charge, charge_int, rel_tol=inf, abs_tol=tolerance)
-    if condition:
-        return None
-    else:
-        return msg.strip().rstrip()
+    return None if condition else msg.rstrip()
 
 
-def _eval_param(msg: str, skip: Collection[str] = ('Urey-Bradley', 'Out of plane bend')
+def _eval_param(msg: str,
+                skip: Collection[str] = ('Urey-Bradley', 'Out of plane bend')
                 ) -> Optional[str]:
     """Return missing forcefield warnings in *msg* except for all terms in *skip*."""
-    msg_gen = (i.strip().rstrip() for i in msg.splitlines() if 'FORCEFIELD| Missing' in i)
-    ret = '\n'.join(i for i in msg_gen if all(j not in i for j in skip))
-    return ret or None
+    for i in skip:
+        if i in msg:
+            return None
+    return msg.rstrip()
 
 
-def _return_msg(msg: str) -> str:
-    """Return the passed *msg*."""
-    return msg
-
-
-cp2k_warnings: Mapping[str, ParseWarning] = {
+cp2k_warnings: WarnMap = {
     'SCF run NOT converged': ParseWarning(
         warn_type=SCF_Convergence_Warning,
-        parser=ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n')),
-        func=_return_msg
+        parser=ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
     ),
 
     'Missing': ParseWarning(
         warn_type=Parameter_Warning,
-        parser=ZeroOrMore(Suppress(SkipTo("FORCEFIELD| WARNING:")) + SkipTo('Charge Checking')),
+        parser=ZeroOrMore(Suppress(SkipTo("FORCEFIELD| Missing")) + SkipTo('\n')),
         func=_eval_param
     ),
 
     'Total Charge of the Classical System:': ParseWarning(
         warn_type=Charge_Warning,
-        parser=ZeroOrMore(Suppress(SkipTo("CHARGE_INFO| Total Charge of the Classical System:")) + SkipTo('\n')),
+        parser=ZeroOrMore(Suppress(SkipTo("CHARGE_INFO| Total Charge of "
+                                          "the Classical System:")) + SkipTo('\n')),
         func=_eval_charge
     ),
 }

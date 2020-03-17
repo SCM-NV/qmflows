@@ -13,14 +13,16 @@ from typing import Optional as Optional_
 
 import numpy as np
 from more_itertools import chunked
-from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
-                       SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
-                       nums, oneOf, restOfLine, srange)
+from pyparsing import (
+    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
+    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange
+)
 
 from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
-from ..type_hints import WarnMap, WarnDict, ParseWarning, PathLike
+from ..warnings_qmflows import QMFlows_Warning
+from ..type_hints import WarnMap, WarnDict, PathLike
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
@@ -47,8 +49,8 @@ def read_xyz_file(file_name: PathLike):
     return tuplesXYZ_to_plams(geometries[-1])
 
 
-def parse_cp2k_warnings(file_name: PathLike, package_warnings: WarnMap
-                        ) -> Optional_[WarnDict]:
+def parse_cp2k_warnings(file_name: PathLike,
+                        package_warnings: WarnMap) -> Optional_[WarnDict]:
     """Parse All the warnings found in an output file."""
     warnings = {}
     for msg, named_tup in package_warnings.items():
@@ -74,7 +76,7 @@ def assign_warning(warning_type: Type[Warning], msg: str,
         if msg in m:
             yield m, warning_type
         else:
-            yield m, RuntimeError
+            yield m, QMFlows_Warning
 
 
 def read_cp2k_coefficients(path_mos, plams_dir=None):
