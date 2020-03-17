@@ -5,7 +5,8 @@ from typing import Optional, Collection
 
 from pyparsing import ZeroOrMore, Suppress, SkipTo
 
-from .type_hints import ParseWarning, WarnMap
+from .type_hints import WarnMap
+from .common import ParseWarning
 
 __all__ = [
     'QMFlows_Warning', 'Key_Warning',
