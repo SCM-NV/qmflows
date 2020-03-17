@@ -9,7 +9,7 @@ import os
 import shutil
 from functools import wraps
 from os.path import abspath, normpath, join, splitext
-from typing import Union, Optional, Iterable, Callable, Any, IO
+from typing import Union, Optional, Iterable, Callable, Any, IO, ContextManager
 from contextlib import redirect_stdout, AbstractContextManager
 from collections import Counter, abc
 
@@ -20,7 +20,7 @@ from .backports import nullcontext
 from .type_hints import PathLike
 
 
-def settings2Dict(s):
+def settings2Dict(s: Settings) -> dict:
     """Transform a Settings object into a dict."""
     d = {}
     for k, v in s.items():
@@ -32,7 +32,7 @@ def settings2Dict(s):
     return d
 
 
-def dict2Setting(d):
+def dict2Setting(d: dict) -> Settings:
     """Transform recursively a dict into a Settings object."""
     r = Settings()
     for k, v in d.items():
@@ -80,7 +80,7 @@ def to_runtime_error(func: Callable) -> Callable:
 
 
 def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
-                    **kwargs: Any) -> Union[open, nullcontext]:
+                    **kwargs: Any) -> ContextManager[IO]:
     r"""Take a path- or file-like object and return an appropiate context manager instance.
 
     Passing a path-like object will supply it to :func:`open`,
