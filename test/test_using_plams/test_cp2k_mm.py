@@ -17,50 +17,6 @@ MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 SETTINGS: Settings = get_mm_settings()
 
 
-def get_frequencies(file: Union[AnyStr, PathLike, TextIOBase],
-                    unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
-    """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
-    try:
-        context_manager = open(file, **kwargs)  # path-like object
-    except TypeError as ex:
-        if not isinstance(file, abc.Iterator):
-            raise TypeError("'file' expected a file- or path-like object; "
-                            f"observed type: {file.__class__.__name__!r}") from ex
-        context_manager = nullcontext(file)  # a file-like object (hopefully)
-
-    with context_manager as f:
-        # Find the start of the [Atoms] block
-        for item in f:
-            if '[Atoms]' in item:
-                break
-        else:
-            raise ValueError(
-                f"failed to identify the '[Atoms]' substring in {f!r}")
-
-        # Find the end of the [Atoms] block, i.e. the start of the [FREQ] block
-        for atom_count, item in enumerate(f, 0):
-            if '[FREQ]' in item:
-                break
-        else:
-            raise ValueError(
-                f"failed to identify the '[FREQ]' substring in {f!r}")
-
-        # Identify the vibrational degrees of freedom
-        if not atom_count:
-            raise ValueError(
-                f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
-        elif atom_count in {1, 2}:
-            count = atom_count - 1
-        else:
-            count = 3 * atom_count - 6
-
-        # Gather and return the frequencies
-        iterator = islice(f, 0, count)
-        ret = np.fromiter(iterator, dtype=float, count=count)
-        ret *= Units.conversion_ratio('cm-1', unit)
-        return ret
-
-
 def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
     """Rotate *xyz1* such that it overlaps with *xyz2* using the Kabsch algorithm."""
     xyz1 = np.asarray(xyz1, dtype=float)

@@ -9,13 +9,15 @@ import os
 import shutil
 from functools import wraps
 from os.path import abspath, normpath, join, splitext
-from typing import Union, Optional, Iterable, Callable
+from typing import Union, Optional, Iterable, Callable, Any, IO
 from contextlib import redirect_stdout, AbstractContextManager
-from collections import Counter
+from collections import Counter, abc
 
 from scm.plams import config, init, finish, JobManager, load_all
 
 from .settings import Settings
+from .backports import nullcontext
+from .type_hints import PathLike
 
 
 def settings2Dict(s):
@@ -75,6 +77,41 @@ def to_runtime_error(func: Callable) -> Callable:
             raise RuntimeError(f"{key!r} section: {ex}").with_traceback(
                 ex.__traceback__) from ex
     return wrapper
+
+
+def file_to_context(file: Union[PathLike, IO],
+                    **kwargs: Any) -> Union[open, nullcontext]:
+    """Take a path- or file-like object and return an appropiate context manager instance.
+
+    Passing a path-like object will supply it to :func:`open`,
+    while passing a file-like object will pass it to :class:`contextlib.nullcontext`.
+
+    Parameters
+    ----------
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.IOBase`
+        A `path- <>`_ or `file-like <>`_ object.
+
+    /**kwargs : :data:`~typing.Any`
+        Further keyword arguments for :func:`open`.
+        Only relevant if *file* is a path-like object.
+
+    Returns
+    -------
+    :func:`open` or :class:`~contextlib.nullcontext`
+        An initialized context manager.
+        Entering the context manager will return a file-like object.
+
+    """
+    # path-like object
+    try:
+        return open(file, **kwargs)
+
+    # a file-like object (hopefully)
+    except TypeError as ex:
+        if isinstance(file, abc.Iterator):
+            return nullcontext(file)
+        raise TypeError("'file' expected a file- or path-like object; "
+                        f"observed type: {file.__class__.__name__!r}") from ex
 
 
 def init_restart(path: Union[None, str, os.PathLike] = None,

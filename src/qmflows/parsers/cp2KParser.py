@@ -6,15 +6,19 @@ __all__ = ['readCp2KBasis', 'read_cp2k_coefficients',
 import fnmatch
 import os
 import subprocess
-from collections import namedtuple
+from io import TextIOBase
+from collections import namedtuple, abc
 from itertools import islice
+from typing import AnyStr, Union, Any
 
 import numpy as np
+from scm.plams import Units
 from more_itertools import chunked
 from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
                        nums, oneOf, restOfLine, srange)
 
+from ..backports import nullcontext
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
@@ -293,3 +297,49 @@ def headTail(xs):
     head = next(it)
     tail = list(it)
     return (head, tail)
+
+
+def get_frequencies(file: Union[AnyStr, os.PathLike, TextIOBase],
+                    unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
+    """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
+    try:
+        context_manager = open(file, **kwargs)  # path-like object
+    except TypeError as ex:
+        if not isinstance(file, abc.Iterator):
+            raise TypeError("'file' expected a file- or path-like object; "
+                            f"observed type: {file.__class__.__name__!r}") from ex
+        context_manager = nullcontext(file)  # a file-like object (hopefully)
+
+    with context_manager as f:
+        i = next(f)
+        if not isinstance(i, str):
+            raise TypeError(f"Iteration through {f!r} should yield a string; "
+                            f"observed type: {i.__class__.__name__!r}")
+
+        # Find the start of the [Atoms] block
+        for item in f:
+            if '[Atoms]' in item:
+                break
+        else:
+            raise ValueError(f"failed to identify the '[Atoms]' substring in {f!r}")
+
+        # Find the end of the [Atoms] block, i.e. the start of the [FREQ] block
+        for atom_count, item in enumerate(f):
+            if '[FREQ]' in item:
+                break
+        else:
+            raise ValueError(f"failed to identify the '[FREQ]' substring in {f!r}")
+
+        # Identify the vibrational degrees of freedom
+        if atom_count == 0:
+            raise ValueError(f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
+        elif atom_count <= 2:
+            count = atom_count - 1
+        else:
+            count = 3 * atom_count - 6
+
+        # Gather and return the frequencies
+        iterator = islice(f, 0, count)
+        ret = np.fromiter(iterator, dtype=float, count=count)
+        ret *= Units.conversion_ratio('cm-1', unit)
+        return ret
