@@ -19,9 +19,9 @@ API
 
 import os
 import shutil
-from pathlib import Path
-from typing import Union, Callable, Any
 from functools import wraps
+from pathlib import Path
+from typing import Any, Callable, Union
 
 from .settings import Settings
 
