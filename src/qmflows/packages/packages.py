@@ -160,6 +160,9 @@ class Result:
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
+        if hasattr(self, prop):
+            return super().__getattribute__(prop)
+
         # Read the .yaml dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
@@ -180,10 +183,15 @@ class Result:
         if output_files:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
+
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
             kwargs['plams_dir'] = plams_dir
-            return ignore_unused_kwargs(fun, [file_out], kwargs)
+            ret = ignore_unused_kwargs(fun, [file_out], kwargs)
+
+            # Cache the property and return
+            setattr(self, prop, ret)
+            return ret
         else:
             raise FileNotFoundError(f"""
             Property {prop} not found. No output file called: {file_pattern}. Folder used:
