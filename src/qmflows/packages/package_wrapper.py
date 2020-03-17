@@ -100,12 +100,14 @@ from scm import plams
 from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
-from .packages import Package, Result, WarnMap, package_properties
+from .packages import Package, Result, package_properties
 from .SCM import adf, dftb
 from .orca import orca
 from .gamess import gamess
 from .cp2k_package import cp2k
 from ..settings import Settings
+from ..type_hints import WarnMap
+from ..warnings_qmflows import Key_Warning
 
 plams.Job = plams.core.basejob.Job
 plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
@@ -249,4 +251,5 @@ class PackageWrapper(Package):
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Method not implemented."""
-        warn(f'No generic keywords implemented for PackageWrapper')
+        warn(f'No generic keywords implemented for PackageWrapper',
+             category=Key_Warning)

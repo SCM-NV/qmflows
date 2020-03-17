@@ -7,6 +7,7 @@ import yaml
 from ..settings import Settings
 
 
+#: Templates for single-point calculations.
 singlepoint = Settings(yaml.load("""
 specific:
     adf:
@@ -112,6 +113,7 @@ specific:
             basis: sto_sz
 """, Loader=yaml.FullLoader))
 
+#: Templates for geometry optimization calculations.
 geometry = Settings(yaml.load("""
 specific:
     adf:
@@ -224,7 +226,7 @@ specific:
             runtyp: optimize
 """, Loader=yaml.FullLoader))
 
-# Transition state template
+#: Templates for transition state calculations.
 ts = Settings(yaml.load("""
 specific:
     adf:
@@ -261,7 +263,7 @@ specific:
             basis: sto_sz
 """,    Loader=yaml.FullLoader))
 
-# Frequencies template
+#: Templates for frequency analyses calculations.
 freq = Settings(yaml.load("""
 specific:
     adf:
@@ -345,8 +347,7 @@ specific:
             method: seminum
 """, Loader=yaml.FullLoader))
 
-
-# moleculair dynamics template
+#: Templates for moleculair dynamics (MD) calculations.
 md = Settings(yaml.load("""
 specific:
     adf: Null
