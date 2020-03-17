@@ -1,13 +1,13 @@
 """Utilities to read cp2k out files."""
 
-__all__ = ['readCp2KBasis', 'read_cp2k_coefficients',
+__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals']
 
 import fnmatch
 import os
 import subprocess
 from io import TextIOBase
-from collections import namedtuple, abc
+from collections import namedtuple
 from itertools import islice
 from typing import AnyStr, Union, Any, Type, Generator, Iterable, Tuple
 from typing import Optional as Optional_
@@ -22,7 +22,7 @@ from pyparsing import (
 
 from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
-from ..backports import nullcontext
+from ..utils import file_to_context
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
 from ..warnings_qmflows import QMFlows_Warning
 from ..type_hints import WarnMap, WarnDict, PathLike
@@ -308,21 +308,40 @@ def headTail(xs):
     return (head, tail)
 
 
-def get_frequencies(file: Union[AnyStr, os.PathLike, TextIOBase],
-                    unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
-    """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
-    try:
-        context_manager = open(file, **kwargs)  # path-like object
-    except TypeError as ex:
-        if not isinstance(file, abc.Iterator):
-            raise TypeError("'file' expected a file- or path-like object; "
-                            f"observed type: {file.__class__.__name__!r}") from ex
-        context_manager = nullcontext(file)  # a file-like object (hopefully)
+def get_cp2k_freq(file: Union[AnyStr, os.PathLike, TextIOBase],
+                  unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
+    r"""Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format.
+
+    Paramters
+    ---------
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.IOBase`
+        A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
+        `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object
+        pointing to the CP2K .mol file.
+        Note that passed file-like objects should return strings (not bytes) upon iteration;
+        consider wrapping *file* in :func:`codecs.iterdecode` if its iteration will yield bytes.
+
+    unit : :class:`str`
+        The output unit of the vibrational frequencies.
+        See :class:`plams.Units<scm.plams.tools.units.Units>` for more details.
+
+    /**kwargs : :data:`~typing.Any`
+        Further keyword arguments for :func:`open`.
+        Only relevant if *file* is a path-like object.
+
+    Returns
+    -------
+    :class:`numpy.ndarray` [:class:`float`], shape :math:`(n,)`
+        A 1D array of length :math:`n` containing the vibrational frequencies
+        extracted from *file*.
+
+    """
+    context_manager = file_to_context(file, **kwargs)
 
     with context_manager as f:
         i = next(f)
         if not isinstance(i, str):
-            raise TypeError(f"Iteration through {f!r} should yield a string; "
+            raise TypeError(f"Iteration through {f!r} should yield strings; "
                             f"observed type: {i.__class__.__name__!r}")
 
         # Find the start of the [Atoms] block

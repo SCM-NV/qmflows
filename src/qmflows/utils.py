@@ -79,17 +79,38 @@ def to_runtime_error(func: Callable) -> Callable:
     return wrapper
 
 
-def file_to_context(file: Union[PathLike, IO],
+def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
                     **kwargs: Any) -> Union[open, nullcontext]:
-    """Take a path- or file-like object and return an appropiate context manager instance.
+    r"""Take a path- or file-like object and return an appropiate context manager instance.
 
     Passing a path-like object will supply it to :func:`open`,
     while passing a file-like object will pass it to :class:`contextlib.nullcontext`.
 
+    Examples
+    --------
+    .. code:: python
+
+        >>> from io import StringIO
+
+        >>> path_like = 'file_name.txt'
+        >>> file_like = StringIO('this is a file-like object')
+
+        >>> context1 = file_to_context(path_like)
+        >>> context2 = file_to_context(file_like)
+
+        >>> with context1 as f1, with context2 as f2:
+        ...     ... # insert operations here
+
+
     Parameters
     ----------
-    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.IOBase`
-        A `path- <>`_ or `file-like <>`_ object.
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.TextIOBase`
+        A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
+        `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object.
+
+    allow_iterator : :class:`bool`
+        If``True``, loosen the constraints on what constitutes a file-like object
+        and allow *file* to-be an :class:`~collections.abc.Iterator`.
 
     /**kwargs : :data:`~typing.Any`
         Further keyword arguments for :func:`open`.
@@ -108,10 +129,10 @@ def file_to_context(file: Union[PathLike, IO],
 
     # a file-like object (hopefully)
     except TypeError as ex:
-        if isinstance(file, abc.Iterator):
-            return nullcontext(file)
-        raise TypeError("'file' expected a file- or path-like object; "
-                        f"observed type: {file.__class__.__name__!r}") from ex
+        if allow_iterator and not isinstance(file, abc.Iterator):
+            raise TypeError("'file' expected a file- or path-like object; "
+                            f"observed type: {file.__class__.__name__!r}") from ex
+        return nullcontext(file)
 
 
 def init_restart(path: Union[None, str, os.PathLike] = None,

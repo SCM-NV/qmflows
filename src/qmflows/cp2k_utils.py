@@ -37,8 +37,7 @@ import pandas as pd
 from scm import plams
 
 from .settings import Settings
-from .backports import nullcontext
-from .utils import to_runtime_error
+from .utils import to_runtime_error, file_to_context
 from .type_hints import MappingScalar, MappingSequence, PathLike
 
 __all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
@@ -125,9 +124,12 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
 
     Parameters
     ----------
-    file : :class:`str`, :class:`PathLike<os.PathLike>` or :class:`TextIOBase<io.TextIOBase>`
-        A path-like or file-like object containing the .psf file.
-        Note that passed file-like objects should return strings (not bytes) upon iteration.
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.TextIOBase`
+        A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
+        `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object
+        pointing to the .psf file.
+        Note that passed file-like objects should return strings (not bytes) upon iteration;
+        consider wrapping *file* in :func:`codecs.iterdecode` if its iteration will yield bytes.
 
     /**kwargs : :data:`Any<typing.Any>`
         Further keyword arguments for :func:`open`.
@@ -140,22 +142,15 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
         Atom types/names are extracted from the passed .psf file.
 
     """  # noqa
-    try:
-        context_manager = open(file, **kwargs)  # path-like object
-    except TypeError as ex:
-        cls_name = file.__class__.__name__
-        if cls_name == 'PSFContainer':  # i.e. the FOX.PSFContainer class
-            return {k: v for v, k in zip(file.atom_type, file.atom_name)}
-        elif not isinstance(file, abc.Iterator):
-            raise TypeError("'file' expected a file- or path-like object; "
-                            f"observed type: {cls_name!r}") from ex
-        context_manager = nullcontext(file)  # a file-like object (hopefully)
+    if file.__class__.__name__ == 'PSFContainer':
+        return {k: v for v, k in zip(file.atom_type, file.atom_name)}
+    context_manager = file_to_context(file, **kwargs)
 
     with context_manager as f:
         # A quick check to see *f* is not opened in bytes mode or something similar
         i = next(f)
         if not isinstance(i, str):
-            raise TypeError(f"Iteration through {f!r} should yield a string; "
+            raise TypeError(f"Iteration through {f!r} should yield strings; "
                             f"observed type: {i.__class__.__name__!r}")
 
         for i in f:
