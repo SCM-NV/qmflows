@@ -142,8 +142,6 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
         Atom types/names are extracted from the passed .psf file.
 
     """  # noqa
-    if file.__class__.__name__ == 'PSFContainer':
-        return {k: v for v, k in zip(file.atom_type, file.atom_name)}
     context_manager = file_to_context(file, **kwargs)
 
     with context_manager as f:
@@ -152,12 +150,12 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
         if not isinstance(i, str):
             raise TypeError(f"Iteration through {f!r} should yield strings; "
                             f"observed type: {i.__class__.__name__!r}")
-
-        for i in f:
-            if '!NATOM' in i:  # Find the !NATOM block
-                break
-        else:
-            raise ValueError(f"failed to identify the '!NATOM' substring in {f!r}")
+        elif '!NATOM' not in i:
+            for i in f:
+                if '!NATOM' in i:  # Find the !NATOM block
+                    break
+            else:
+                raise ValueError(f"failed to identify the '!NATOM' substring in {f!r}")
 
         # Identify rows 4 & 5 which contain, respectivelly,
         # the `atom name` and `atom type` blocks

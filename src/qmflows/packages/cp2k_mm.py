@@ -13,6 +13,7 @@ API
 """
 
 import os
+from pathlib import Path
 from os.path import join, abspath
 from typing import Union, Any, ClassVar, Mapping, Dict, Optional
 
@@ -63,8 +64,39 @@ class CP2KMM(CP2K):
 
     def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
-        if not settings.get('psf'):
+        psf = settings.get('psf')
+        if not psf:
             settings.psf = None
+
+        # Fix this at some point in the future
+        """
+        # Identify the number of pre-existing jobs
+        jm = plams.config.default_jobmanager
+        i = 1 + sum(jm.names.values())
+
+        # Figure out the working direcyory
+        workdir = kwargs.get('workdir')
+        if workdir is None:
+            workdir = Path(jm.path) / jm.foldername
+        else:
+            workdir = Path(workdir)
+
+        # Set psf to None if not specified; write it if it's a FOX.PSFContainer instance
+        psf = settings.get('psf')
+        if not psf:
+            settings.psf = None
+        elif psf.__class__.__name__ == 'PSFContainer':
+            psf_name = workdir / f"{kwargs.get('job_name', 'cp2k_job')}.{i}.psf"
+            psf.write(psf_name)
+            settings.psf = str(psf_name)
+
+        # Write it if it's a FOX.PRMContainer instance
+        prm = settings.get('prm')
+        if prm.__class__.__name__ == 'PRMContainer':
+            prm_name = workdir / f"{kwargs.get('job_name', 'cp2k_job')}.{i}.prm"
+            prm.write(prm_name)
+            settings.prm = str(prm_name)
+        """
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,

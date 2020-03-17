@@ -160,8 +160,10 @@ class Result:
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
-        if hasattr(self, prop):
+        try:
             return super().__getattribute__(prop)
+        except AttributeError:
+            pass
 
         # Read the .yaml dictionary than contains the parsers names
         ds = self.prop_dict[prop]
