@@ -1,6 +1,9 @@
 """Testing the workflow runner."""
+from assertionlib import assertion
 from noodles import schedule
+
 from qmflows import run
+
 
 @schedule
 def f(a, b):
@@ -16,4 +19,4 @@ def test_run_packages(tmpdir):
     """Test the Workflow runner."""
     wf = g(3, f(5, 2))
     result = run(wf, path=tmpdir, folder=tmpdir)
-    assert result == 16
+    assertion.eq(result, 16)

@@ -1,8 +1,10 @@
 """Mock utilities."""
-from noodles import (run_single)
-from pytest_mock import mocker
-from qmflows.components.operations import (select_max, select_min)
 import numpy as np
+from assertionlib import assertion
+from noodles import run_single
+from pytest_mock import mocker
+
+from qmflows.components.operations import select_max, select_min
 
 
 def generate_mocked_results(mocker, target, instances=10, expected=None):
@@ -32,7 +34,7 @@ def test_select_max_list(mocker):
     wf = select_max(results, prop='prop')
     xs = run_single(wf)
 
-    assert xs.prop == 1e3
+    assertion.eq(xs.prop, 1e3)
 
 
 def test_select_min(mocker):
@@ -43,4 +45,4 @@ def test_select_min(mocker):
 
     xs = run_single(wf)
 
-    assert xs.prop == -1e3
+    assertion.eq(xs.prop, -1e3)

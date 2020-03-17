@@ -1,0 +1,4 @@
+#!/bin/sh
+
+$ADFBIN/adf <"ADFjob.in"
+

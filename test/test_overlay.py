@@ -1,5 +1,7 @@
 """Test merging of the Settings."""
-from qmflows import (Settings, templates)
+from assertionlib import assertion
+
+from qmflows import Settings, templates
 
 
 def test_overlay_cp2k_singlepoint():
@@ -17,8 +19,6 @@ def test_overlay_cp2k_singlepoint():
     dft.scf.ot.preconditioner = 'full_single_inverse'
     dft.scf.added_mos = 0
     dft.scf.eps_scf = 5e-06
-
-    r = templates.singlepoint.overlay(s)
 
     dft.mgrid.cutoff = 400
     dft.mgrid.ngrids = 4
@@ -42,10 +42,12 @@ def test_overlay_cp2k_singlepoint():
     g.project = "cp2k"
     g.run_type = "energy"
 
-    print(s.specific.cp2k.force_eval)
-    print(r.specific.cp2k.force_eval)
+    r = templates.singlepoint.overlay(s)
 
-    assert s.specific.cp2k == r.specific.cp2k
+    print("created:\n", s.specific.cp2k.force_eval)
+    print("expected:\n", r.specific.cp2k.force_eval)
+
+    assertion.eq(s.specific.cp2k, r.specific.cp2k)
 
 
 def test_overlay_adf_freq():
@@ -68,4 +70,4 @@ def test_overlay_adf_freq():
 
     print(s.specific.adf)
     print(r.specific.adf)
-    assert s.specific.adf == r.specific.adf
+    assertion.eq(s.specific.adf, r.specific.adf)

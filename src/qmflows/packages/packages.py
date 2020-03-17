@@ -182,7 +182,7 @@ class Result:
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
             kwargs['plams_dir'] = plams_dir
-            return ignored_unused_kwargs(fun, [file_out], kwargs)
+            return ignore_unused_kwargs(fun, [file_out], kwargs)
         else:
             raise FileNotFoundError(f"""
             Property {prop} not found. No output file called: {file_pattern}. Folder used:
@@ -743,7 +743,7 @@ def get_tmpfile_name() -> str:
     return join(tmpfolder, str(uuid.uuid4()))
 
 
-def ignored_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
+def ignore_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
     Searches for the keyword arguments which have a nonempty default values
