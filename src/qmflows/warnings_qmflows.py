@@ -40,7 +40,7 @@ class Charge_Warning(Parameter_Warning):
 
 
 def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
-    """Check of the total moleculair charge is integer within a given *tolerance*."""
+    """Check of the total molecular charge is integer within a given *tolerance*."""
     charge = float(msg.rsplit(' ', maxsplit=1)[1])
     charge_int = int(charge)
 
