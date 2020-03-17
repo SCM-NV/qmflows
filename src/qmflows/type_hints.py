@@ -13,10 +13,10 @@ API
 """
 
 from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Union,
-                    Sequence, Any, AnyStr, TypeVar, TYPE_CHECKING)
+                    Sequence, Any, AnyStr, TYPE_CHECKING)
 
 from .common import ParseWarning
-from .backports import Literal
+from .backports import Literal, T
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
@@ -42,7 +42,7 @@ __all__ = [
 Literal = Literal
 
 #: A generic typevar.
-T = TypeVar('T')
+T = T
 
 #: A Mapping which maps a :class:`str` to a :class:`ParseWarning` instance.
 WarnMap = Mapping[str, ParseWarning]

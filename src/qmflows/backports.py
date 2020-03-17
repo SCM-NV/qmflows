@@ -1,9 +1,9 @@
 """A module with backports of objects added after Python 3.6."""
 
 from contextlib import AbstractContextManager
-from typing import Hashable
+from typing import Any, Union, overload, Tuple, TypeVar, Type
 
-__all__ = ['nullcontext', 'Literal']
+__all__ = ['nullcontext']
 
 try:
     from contextlib import nullcontext
@@ -32,6 +32,9 @@ except ImportError:  # nullcontext was added in python 3.7
             pass
 
 
+# T and Literal should be imported from qmflows.type_hints
+T = TypeVar('T')
+
 try:
     # Plan A: literal was added in Python 3.8
     from typing import Literal
@@ -43,8 +46,22 @@ except ImportError:
 
     except ImportError:
         class _Literal:
-            def __getitem__(self, name: Hashable) -> type:
-                return type(name) if not isinstance(name, type) else name
+            @staticmethod
+            def to_type(item: Any) -> type:
+                return Type[item] if isinstance(item, type) else type(item)
+
+            @overload
+            def __getitem__(self, name: Tuple[Union[Type[T], T], ...]) -> Union[Type[T]]: ...
+
+            @overload
+            def __getitem__(self, name: Union[Type[T], T]) -> Type[T]: ...
+
+            def __getitem__(self, name):
+                if isinstance(name, tuple):
+                    type_tup = tuple((self.to_type(i) for i in name))
+                    return Union[type_tup]
+                else:
+                    return self.to_type(name)
 
         # Plan C; Literal.__getitem__ will now simply return the type
         # of the passed object; for example: Literal[True] == bool
