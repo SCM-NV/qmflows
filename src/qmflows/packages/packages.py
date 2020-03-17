@@ -47,6 +47,7 @@ package_properties: Dict[Optional[str], Path] = {
     'adf': _BASE_PATH / 'propertiesADF.yaml',
     'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
     'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
+    'cp2kmm': _BASE_PATH / 'propertiesCP2KMM.yaml',
     'gamess': _BASE_PATH / 'propertiesGAMESS.yaml',
     'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
@@ -753,14 +754,12 @@ def ignored_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any
     ps = inspect.signature(fun).parameters
 
     # Look for the arguments with the nonempty defaults.
-    defaults = list(filter(lambda t: t[1].default != inspect._empty,
-                           ps.items()))
-    # there are not keyword arguments in the function
-    if not kwargs or not defaults:
-        return fun(*args)
-    else:  # extract from kwargs only the used keyword arguments
-        d = {k: kwargs[k] for k, _ in defaults}
-        return fun(*args, **d)
+    defaults = filter(lambda t: t[1].default != inspect._empty, ps.items())
+
+    # *kwargs* may contain keyword arguments not supported by *fun*
+    # Extract from *kwargs* only the used keyword arguments
+    kwargs2 = {k: kwargs[k] for k, _ in defaults if k in kwargs}
+    return fun(*args, **kwargs2)
 
 
 def parse_output_warnings(job_name: str,
