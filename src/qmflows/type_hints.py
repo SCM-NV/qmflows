@@ -39,10 +39,10 @@ __all__ = [
 #: Note this will only work as intended in python >= 3.8
 #: or if the ``typing_extensions`` package is installed;
 #: otherwise, for example, ``Literal[True]`` will default to ``type(True)``.
-Literal = Literal
+Literal
 
-#: A generic typevar.
-T = T
+#: A generic TypeVar.
+T
 
 #: A Mapping which maps a :class:`str` to a :class:`ParseWarning` instance.
 WarnMap = Mapping[str, ParseWarning]
