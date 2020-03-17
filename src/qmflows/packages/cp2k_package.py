@@ -8,11 +8,13 @@ from warnings import warn
 
 from scm import plams
 
+from .packages import Package, Result, package_properties, parse_output_warnings
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
-from ..warnings_qmflows import cp2k_warnings
-from .packages import (Package, Result, WarnMap, package_properties,
-                       parse_output_warnings)
+
+from ..warnings_qmflows import cp2k_warnings, Key_Warning
+from ..type_hints import WarnMap
+
 
 __all__ = ['cp2k']
 
@@ -91,8 +93,9 @@ class CP2K(Package):
         """
         def write_cell_angles(s: Settings, value: Any,
                               mol: plams.Molecule, key: str) -> Settings:
-            """The angles of the cell is a 3-dimensional list.
+            """Write the Angles for the cell.
 
+            The angles of the cell is a 3-dimensional list.
             &SUBSYS
               &CELL
                 ABC [angstrom] 5.958 7.596 15.610
@@ -108,7 +111,9 @@ class CP2K(Package):
 
         def write_cell_parameters(s: Settings, value: Any,
                                   mol: plams.Molecule, key: str) -> Settings:
-            """The cell parameter can be a list of lists containing the ABC parameter.
+            """Write the cell parameters.
+
+            The cell parameter can be a list of lists containing the ABC parameter.
 
             For example: ::
 
@@ -152,7 +157,7 @@ class CP2K(Package):
             return s
 
         def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
-            """Set the keyword for periodic calculations"""
+            """Set the keyword for periodic calculations."""
             s.specific.cp2k.force_eval.subsys.cell.periodic = value
 
         funs = {'cell_parameters': write_cell_parameters,
@@ -165,7 +170,8 @@ class CP2K(Package):
         if f is not None:
             f(settings, value, mol, key)
         else:
-            warn(f'Generic keyword {key!r} not implemented for package CP2K')
+            warn(f'Generic keyword {key!r} not implemented for package CP2K',
+                 category=Key_Warning)
 
 
 class CP2K_Result(Result):

@@ -3,15 +3,17 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 # =======>  Standard and third party Python Libraries <======
 
 import os
+import struct
 from os.path import join
 from warnings import warn
 from typing import Optional, Union, Any, ClassVar
 
 from scm import plams
-from ..settings import Settings
-from .packages import (Package, package_properties, Result, get_tmpfile_name, WarnMap)
 
-import struct
+from .packages import Package, package_properties, Result, get_tmpfile_name
+from ..settings import Settings
+from ..type_hints import WarnMap
+from ..warnings_qmflows import Key_Warning, QMFlows_Warning
 
 # ========================= ADF ============================
 
@@ -146,7 +148,7 @@ class ADF(Package):
                                    int(ks[3]), int(ks[4]))
                         settings.specific.adf.constraints[name] = v
                     else:
-                        warn(f'Invalid constraint key: {k}')
+                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
 
         # Available translations
         functions = {'freeze': freeze,
@@ -156,7 +158,8 @@ class ADF(Package):
         if key in functions:
             functions[key]()
         else:
-            warn(f'Generic keyword {key!r} not implemented for package ADF')
+            warn(f'Generic keyword {key!r} not implemented for package ADF',
+                 category=Key_Warning)
 
 
 class ADF_Result(Result):
@@ -250,7 +253,7 @@ class DFTB(Package):
             job.status = 'failed'
             name = job_name
             path = None
-            warn(f"job:{job_name} has failed.\nRKF is corrupted")
+            warn(f"job:{job_name} has failed.\nRKF is corrupted", category=QMFlows_Warning)
 
         if job.status in ['failed', 'crashed']:
             plams.config.default_jobmanager.remove_job(job)
@@ -312,7 +315,7 @@ class DFTB(Package):
                             int(ks[3]), int(ks[4]))
                         settings.specific.dftb.constraints[name] = v
                     else:
-                        warn(f'Invalid constraint key: {k}')
+                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
 
         # Available translations
         functions = {'freeze': freeze,
@@ -321,7 +324,8 @@ class DFTB(Package):
         if key in functions:
             functions[key]()
         else:
-            warn(f'Generic keyword {key!r} not implemented for package DFTB')
+            warn(f'Generic keyword {key!r} not implemented for package DFTB',
+                 category=Key_Warning)
 
 
 class DFTB_Result(Result):

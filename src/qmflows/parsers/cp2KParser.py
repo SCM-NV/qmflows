@@ -8,17 +8,21 @@ import os
 import subprocess
 from collections import namedtuple
 from itertools import islice
+from typing import Type, Generator, Iterable, Tuple
+from typing import Optional as Optional_
 
 import numpy as np
 from more_itertools import chunked
-from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
-                       SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
-                       nums, oneOf, restOfLine, srange)
+from pyparsing import (
+    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
+    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange
+)
 
-from ..common import AtomBasisData, AtomBasisKey, InfoMO
-from .parser import (floatNumber, minusOrplus, natural, point,
-                     try_search_pattern)
+from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+from ..common import AtomBasisData, AtomBasisKey, InfoMO
+from ..warnings_qmflows import QMFlows_Warning
+from ..type_hints import WarnMap, WarnDict, PathLike
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
@@ -39,36 +43,42 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
 
-def read_xyz_file(file_name: str):
+def read_xyz_file(file_name: PathLike):
     """Read the last geometry from the output file."""
     geometries = manyXYZ(file_name)
     return tuplesXYZ_to_plams(geometries[-1])
 
 
-def parse_cp2k_warnings(file_name, package_warnings):
+def parse_cp2k_warnings(file_name: PathLike,
+                        package_warnings: WarnMap) -> Optional_[WarnDict]:
     """Parse All the warnings found in an output file."""
-    p = ZeroOrMore(Suppress(SkipTo("*** WARNING")) + SkipTo('\n\n'))
+    warnings = {}
+    for msg, named_tup in package_warnings.items():
+        msg_list = named_tup.parser.parseFile(file_name).asList()
 
-    # Return dict of Warnings
-    messages = p.parseFile(file_name).asList()
+        # Search for warnings that match the ones provided by the user
+        iterator = assign_warning(named_tup.warn_type, msg, msg_list)
 
-    # Search for warnings that match the ones provided by the user
-    warnings = {m: assign_warning(package_warnings, m) for m in messages}
+        # Apply post processing to the exception message
+        for msg_ret, warn_type in iterator:
+            key = named_tup.func(msg_ret)
+            if key is not None:
+                v = warnings.get(key, QMFlows_Warning)
+                if v is QMFlows_Warning:
+                    warnings[key] = warn_type
 
-    if not warnings:
-        return None
-    else:
-        return warnings
+    return warnings or None
 
 
-def assign_warning(package_warnings, msg):
+def assign_warning(warning_type: Type[Warning], msg: str,
+                   msg_list: Iterable[str]
+                   ) -> Generator[Tuple[str, Type[Warning]], None, None]:
     """Assign an specific Warning from the ``package_warnings`` or a generic warnings."""
-    warnings = [w for k, w in package_warnings.items() if k in msg]
-
-    if not warnings:
-        return RuntimeWarning
-    else:
-        return warnings[0]
+    for m in msg_list:
+        if msg in m:
+            yield m, warning_type
+        else:
+            yield m, QMFlows_Warning
 
 
 def read_cp2k_coefficients(path_mos, plams_dir=None):
