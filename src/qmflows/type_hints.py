@@ -4,41 +4,11 @@ Index
 -----
 .. currentmodule:: qmflows.type_hints
 .. autosummary::
-    WarnMap
-    WarnDict
-    WarnParser
-    MappingScalar
-    MappingSequence
-    Generic2Special
-    PathLike
+    {autosummary}
 
 API
 ---
-.. autoclass:: ParseWarning
-
-.. autodata:: WarnMap
-    :annotation: = Mapping[str, ParseWarning]
-
-.. autodata:: WarnDict
-    :annotation: = Dict[str, Type[Warning]]
-
-.. autodata:: WarnParser
-    :annotation: = Callable[[str, WarnMap], Optional[WarnDict]]
-
-.. autodata:: WarnParseMap
-    :annotation: = Mapping[Type[Warning], Callable[[str], Optional[str]]]
-
-.. autodata:: MappingScalar
-    :annotation: = MutableMapping[str, Union[None, str, float]]
-
-.. autodata:: MappingSequence
-    :annotation: = MutableMapping[str, Union[Sequence[Optional[str]], Sequence[float]]]
-
-.. autodata:: Generic2Special
-    :annotation: = Callable[[qmflows.Settings, str, Any, plams.Molecule], None]
-
-.. autodata:: PathLike
-    :annotation: = Union[str, bytes, os.PathLike]
+{autodata}
 
 """
 
@@ -87,3 +57,7 @@ Generic2Special = Callable[[Settings, str, Any, Molecule], None]
 #: An alias for all path-like objects.
 #: Includes the likes of :class:`str`, :class:`bytes` and :class:`pathlib.Path`.
 PathLike = Union[AnyStr, _PathLike]
+
+
+__doc__ = __doc__.format(autosummary='\n'.join(f'    {i}' for i in __all__),
+                         autodata='\n'.join(f'.. autodata:: {i}' for i in __all__))
