@@ -111,7 +111,7 @@ def read_block(lines):
 
     :returns: Numpy array
     """
-    return np.stack(list(map(lambda x: vectorize_float(x.split()[1:]), lines[1:])))
+    return np.array([x.split()[1:] for x in lines[1:]], dtype=float)
 
 
 def parse_molecular_orbitals(file_name: str) -> tuple:

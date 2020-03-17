@@ -1,5 +1,6 @@
 """Mock orca funcionality."""
 import numpy as np
+from assertionlib import assertion
 from pytest_mock import mocker
 from scm.plams import Molecule
 
@@ -29,23 +30,23 @@ def test_orca_mock(mocker):
                                      plams_dir=plams_dir, properties=adf_properties)
     rs = run_mocked(job)
 
-    assert np.isfinite(rs.energy)
-    assert np.isfinite(rs.runtime)
-    assert np.isfinite(np.sum(rs.dipole))
+    assertion.isfinite(rs.energy)
+    assertion.isfinite(rs.runtime)
+    assertion.isfinite(np.sum(rs.dipole))
     # steps until convergence
-    assert rs.optcycles == 8
+    assertion.eq(rs.optcycles, 8)
 
     # Check that hessian is symmetric
     hess = rs.hessian
-    assert np.isclose(np.sum(hess - hess.T), 0.0)
+    assertion.isclose(np.sum(hess - hess.T), 0.0)
 
     # frequencies
     frequencies = rs.frequencies
-    assert len(frequencies) == 18
+    assertion.len_eq(frequencies, 18)
 
     # Normal modes
     normal_modes = rs.normal_modes
-    assert normal_modes.shape == (18, 18)
+    assertion.shape_eq(normal_modes, (18, 18))
 
     # Orbitals
     orbs = rs.orbitals

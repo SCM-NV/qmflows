@@ -1,5 +1,5 @@
 """Check orca output reader."""
-import numpy as np
+from assertionlib import assertion
 from scm import plams
 
 from qmflows.parsers.generic_parsers import awk_file
@@ -16,13 +16,13 @@ def test_orca_mol_trj():
     mol = parse_molecule_traj(path_trj)
     print(mol)
 
-    assert isinstance(mol, plams.Molecule)
+    assertion.isinstance(mol, plams.Molecule)
 
 
 def test_parse_hessian():
     """Check Hessian reader."""
     hess = parse_hessian(path_opt, "$hessian_approx")
-    assert hess.shape == (18, 18)
+    assertion.shape_eq(hess, (18, 18))
 
 
 def test_awk_orca():
@@ -31,4 +31,4 @@ def test_awk_orca():
     path_output = PATH / "output_orca" / "ORCAjob"
     filename = (path_output / "ORCAjob.out").as_posix()
     result = awk_file(filename, script=script)
-    assert np.isfinite(result)
+    assertion.isfinite(result)

@@ -1,6 +1,7 @@
 """Mock CP2K funcionality."""
 import numpy as np
 import yaml
+from assertionlib import assertion
 from pytest_mock import mocker
 from scm.plams import Molecule
 from pathlib import Path
@@ -60,9 +61,9 @@ def test_cp2k_mock(mocker):
     run_mocked.return_value = Result(templates.geometry, ethylene, jobname, dill_path=dill_path,
                                      plams_dir=plams_dir, properties=adf_properties)
     rs = run_mocked(job)
-    assert np.isfinite(rs.energy)
+    assertion.isfinite(rs.energy)
 
     # Molecular orbitals
     orbs = rs.orbitals
-    assert np.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
-    assert orbs.coeffs.shape == (46, 40)
+    assertion.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
+    assertion.shape_eq(orbs.coeffs, (46, 40))
