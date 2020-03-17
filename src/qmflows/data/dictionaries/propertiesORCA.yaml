@@ -35,6 +35,8 @@ frequencies:
 hessian:
     file_ext: hess
     function: parse_hessian
+    kwargs:
+        start: "$hessian"
     parser: orca_parser
 normal_modes:
     file_ext: hess

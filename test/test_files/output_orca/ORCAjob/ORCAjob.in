@@ -1,4 +1,6 @@
-! RKS B3LYP SVP Opt TightSCF SmallPrint
+! RKS B3LYP SVP Opt NumFreq TightSCF SmallPrint
+
+%scf print[p_mos] 1     end
 
 * xyz 0 1
          C   -1.48746   -0.02867   -0.00006 

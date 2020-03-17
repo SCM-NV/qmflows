@@ -59,15 +59,13 @@ def parse_hessian(file_hess: str, start: str = '$hessian') -> Matrix:
 
 
 def parse_normal_modes(file_hess: str) -> Matrix:
-    """Returns the normal modes from the job_name.hess file."""
+    """Return the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
 def parse_frequencies(file_hess: str) -> Matrix:
-    """
-    Parse the vibrational frequencies from the job_name.hess file.
-    """
+    """Parse the vibrational frequencies from the job_name.hess file."""
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
 
@@ -75,8 +73,7 @@ def parse_frequencies(file_hess: str) -> Matrix:
 
 
 def read_blocks_from_file(start: str, end: str, file_name: str) -> Matrix:
-    """
-    Read a matrix printed in block format
+    """Read a matrix printed in block format.
 
     :param  start: token identifying the start of the block.
     :param end: characters signaling end of block.
