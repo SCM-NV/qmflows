@@ -591,7 +591,7 @@ class Package(ABC):
         :class:`Result`
             A new Result instance.
 
-        """
+        """  # noqa
         raise NotImplementedError("The class representing a given quantum packages "
                                   "should implement this method")
 
