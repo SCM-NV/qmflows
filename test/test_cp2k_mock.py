@@ -4,12 +4,12 @@ import yaml
 from assertionlib import assertion
 from pytest_mock import mocker
 from scm.plams import Molecule
-from pathlib import Path
+
 from qmflows import Settings, cp2k, templates
 from qmflows.packages import Result, package_properties
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
-workdir = PATH / "output_cp2k"
+WORKDIR = PATH / "output_cp2k"
 
 kinds_template = Settings(yaml.load("""
 specific:
@@ -38,7 +38,7 @@ def test_cp2k_mock(mocker):
 
     # print orbitals
     s.specific.cp2k.force_eval.dft.print.mo.filename = (
-        Path("/home/felipe/Primer/Python/qmflows") / "plams_workdir/cp2k_job" / "orbitals.out").as_posix()
+        PATH / "orbitals.out").as_posix()
     s.specific.cp2k.force_eval.dft.print.mo.mo_index_range = "7 46"
     s.specific.cp2k.force_eval.dft.scf.added_mos = 20
 
@@ -55,8 +55,8 @@ def test_cp2k_mock(mocker):
 
     run_mocked = mocker.patch("qmflows.run")
     jobname = "cp2k_job"
-    dill_path = workdir / jobname / "cp2k_job.dill"
-    plams_dir = workdir / jobname
+    dill_path = WORKDIR / jobname / "cp2k_job.dill"
+    plams_dir = WORKDIR / jobname
     adf_properties = package_properties["cp2k"]
     run_mocked.return_value = Result(templates.geometry, ethylene, jobname, dill_path=dill_path,
                                      plams_dir=plams_dir, properties=adf_properties)

@@ -1,11 +1,11 @@
 &FORCE_EVAL
   &DFT
-    BASIS_SET_FILE_NAME  /home/felipe/Primer/Python/qmflows/test/test_files/BASIS_MOLOPT
+    BASIS_SET_FILE_NAME  test/test_files/BASIS_MOLOPT
     &MGRID
       CUTOFF  400
       NGRIDS  4
     &END
-    POTENTIAL_FILE_NAME  /home/felipe/Primer/Python/qmflows/test/test_files/GTH_POTENTIALS
+    POTENTIAL_FILE_NAME  test/test_files/GTH_POTENTIALS
     &PRINT
       &MO
         ADD_LAST  numeric
@@ -14,7 +14,7 @@
         &END
         EIGENVALUES
         EIGENVECTORS
-        FILENAME  /home/felipe/Primer/Python/qmflows/plams_workdir/cp2k_job/orbitals.out
+        FILENAME  workdir/cp2k_job/orbitals.out
         MO_INDEX_RANGE  7 46
         NDIGITS  36
         OCCUPATION_NUMBERS

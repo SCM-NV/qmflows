@@ -8,7 +8,7 @@ from qmflows import Settings, orca
 from qmflows.packages import Result, package_properties
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
-workdir = PATH / "output_orca"
+WORKDIR = PATH / "output_orca"
 
 
 def test_orca_mock(mocker):
@@ -23,8 +23,8 @@ def test_orca_mock(mocker):
 
     run_mocked = mocker.patch("qmflows.run")
     jobname = "ORCAjob"
-    dill_path = workdir / jobname / "ORCAjob.dill"
-    plams_dir = workdir / jobname
+    dill_path = WORKDIR / jobname / "ORCAjob.dill"
+    plams_dir = WORKDIR / jobname
     adf_properties = package_properties["orca"]
     run_mocked.return_value = Result(s, methanol, jobname, dill_path=dill_path,
                                      plams_dir=plams_dir, properties=adf_properties)
