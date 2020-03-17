@@ -18,8 +18,6 @@ def test_overlay_cp2k_singlepoint():
     dft.scf.added_mos = 0
     dft.scf.eps_scf = 5e-06
 
-    r = templates.singlepoint.overlay(s)
-
     dft.mgrid.cutoff = 400
     dft.mgrid.ngrids = 4
 
@@ -42,8 +40,10 @@ def test_overlay_cp2k_singlepoint():
     g.project = "cp2k"
     g.run_type = "energy"
 
-    print(s.specific.cp2k.force_eval)
-    print(r.specific.cp2k.force_eval)
+    r = templates.singlepoint.overlay(s)
+
+    print("created:\n", s.specific.cp2k.force_eval)
+    print("expected:\n", r.specific.cp2k.force_eval)
 
     assert s.specific.cp2k == r.specific.cp2k
 
