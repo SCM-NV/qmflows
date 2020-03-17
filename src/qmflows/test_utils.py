@@ -7,12 +7,15 @@ Index
     delete_output
     get_mm_settings
     PATH
+    PATH_MOLECULES
 
 API
 ---
 .. autofunction:: delete_output
 .. autofunction:: get_mm_settings
 .. autodata:: PATH
+    :annotation: : pathlib.Path
+.. autodata:: PATH_MOLECULES
     :annotation: : pathlib.Path
 
 """
@@ -25,10 +28,12 @@ from functools import wraps
 
 from .settings import Settings
 
-__all__ = ['delete_output', 'get_mm_settings', 'PATH']
+__all__ = ['delete_output', 'get_mm_settings', 'PATH', 'PATH_MOLECULES']
 
 #: The path to the ``tests/test_files`` directory.
 PATH = Path('test') / 'test_files'
+
+#: The path to the ``tests/test_files/molecules`` directory.
 PATH_MOLECULES = PATH / "molecules"
 
 
@@ -85,7 +90,8 @@ def delete_output(delete_db: Union[Callable, bool] = True,
 
 
 delete_output.__doc__ = delete_output.__doc__.format(
-    workdir=PATH / 'plams_workdir')
+    workdir=PATH / 'plams_workdir'
+)
 
 
 def _del_all_workdir(workdir: Union[str, os.PathLike]) -> None:
