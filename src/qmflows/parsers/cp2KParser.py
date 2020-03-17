@@ -238,14 +238,15 @@ topParseBasis = OneOrMore(Suppress(comment)) + \
 # ===============================<>====================================
 # Parsing From File
 
-#: A tuple with 2 elements; they can be either ``None`` or lists.
-Tuple2List = Tuple[Optional_[List[str]], Optional_[List[int]]]
+#: A tuple with 2 elements; output of :func:`read_mos_data_input`.
+Tuple2 = Tuple[Optional_[str], Optional_[List[int]]]
 
 
-def read_mos_data_input(path_input: PathLike) -> Tuple2List:
+def read_mos_data_input(path_input: PathLike) -> Tuple2:
     """Try to read the added_mos parameter and the range of printed MOs."""
-    properties = {"ADDED_MOS", "MO_INDEX_RANGE"}
+    properties = ("ADDED_MOS", "MO_INDEX_RANGE")
     l1, l2 = [try_search_pattern(x, path_input) for x in properties]
+
     added_mos = l1.split()[-1] if l1 is not None else None
     range_mos = list(map(int, l2.split()[1:])) if l1 is not None else None
 
@@ -290,7 +291,11 @@ def move_restart_coeff(path: PathLike) -> None:
     os.chdir(cwd)
 
 
-def readCp2KBasis(path: PathLike) -> Tuple[List[AtomBasisKey], List[AtomBasisData]]:
+#: A 2-tuple; output of :func:`readCp2KBasis`.
+Tuple2List = Tuple[List[AtomBasisKey], List[AtomBasisData]]
+
+
+def readCp2KBasis(path: PathLike) -> Tuple2List:
     """Read the Contracted Gauss function primitives format from a text file."""
     bss = topParseBasis.parseFile(path)
     atoms = [''.join(xs.atom[:]).lower() for xs in bss]
