@@ -47,7 +47,6 @@ package_properties: Dict[Optional[str], Path] = {
     'adf': _BASE_PATH / 'propertiesADF.yaml',
     'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
     'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
-    'gamess': _BASE_PATH / 'propertiesGAMESS.yaml',
     'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
 del _BASE_PATH

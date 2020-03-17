@@ -2,8 +2,7 @@ Extracting numerical properties from output files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Quantum packages simulations generate output file in different formats. For examples the SCM_ simulation suite
 (:class:`~qmflows.packages.SCM.ADF` and :class:`~qmflows.packages.SCM.DFTB` in *QMFlows*) generate binary outputs,
-while other packages like :class:`~qmflows.packages.cp2k_package.CP2K`, :class:`~qmflows.packages.gamess.GAMESS`
-and :class:`~qmflows.packages.orca.ORCA` generate ascii text files.
+while other packages like :class:`~qmflows.packages.cp2k_package.CP2K` and :class:`~qmflows.packages.orca.ORCA` generate ascii text files.
 
 *QMFlows* abstract away all the different commmunication protocols with the different output formats, allowing the user to
 extract the desire property by using the convention:
