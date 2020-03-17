@@ -13,9 +13,10 @@ API
 """
 
 from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Union,
-                    Sequence, Any, AnyStr, TYPE_CHECKING)
+                    Sequence, Any, AnyStr, TypeVar, TYPE_CHECKING)
 
 from .common import ParseWarning
+from .backports import Literal
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
@@ -27,12 +28,21 @@ else:
     Settings = 'qmflows.settings.Settings'
 
 __all__ = [
+    'T', 'Literal',
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
     'PathLike'
 ]
 
+#: Alias for :data:`typing.Literal`.
+#: Note this will only work as intended in python >= 3.8
+#: or if the ``typing_extensions`` package is installed;
+#: otherwise, for example, ``Literal[True]`` will default to ``type(True)``.
+Literal = Literal
+
+#: A generic typevar.
+T = TypeVar('T')
 
 #: A Mapping which maps a :class:`str` to a :class:`ParseWarning` instance.
 WarnMap = Mapping[str, ParseWarning]
@@ -59,5 +69,7 @@ Generic2Special = Callable[[Settings, str, Any, Molecule], None]
 PathLike = Union[AnyStr, _PathLike]
 
 
-__doc__ = __doc__.format(autosummary='\n'.join(f'    {i}' for i in __all__),
-                         autodata='\n'.join(f'.. autodata:: {i}' for i in __all__))
+__doc__ = __doc__.format(
+    autosummary='\n'.join(f'    {i}' for i in __all__),
+    autodata='\n'.join(f'.. autodata:: {i}' for i in __all__)
+)
