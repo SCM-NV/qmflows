@@ -5,6 +5,10 @@ energy:
         pattern: Total energy
         pos: 2
     parser: generic_parsers
+frequencies:
+    file_pattern: '*-VIBRATIONS-1.mol'
+    function: get_cp2k_freq
+    parser: cp2KParser
 geometry:
     file_pattern: '*-pos-1.xyz'
     function: read_xyz_file
