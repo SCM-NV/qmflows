@@ -11,7 +11,6 @@ The available interfaces to quantum codes are:
 * :class:`~qmflows.packages.SCM.DFTB`
 * :class:`~qmflows.packages.cp2k_package.CP2K`
 * :class:`~qmflows.packages.cp2k_mm.CP2KMM`
-* :class:`~qmflows.packages.gamess.GAMESS`
 * :class:`~qmflows.packages.orca.ORCA`
 
 

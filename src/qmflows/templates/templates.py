@@ -97,14 +97,6 @@ specific:
             project: cp2k
             run_type: energy
 
-    gamess:
-        basis:
-            gbasis: sto
-            ngauss: 3
-        contrl:
-            scftyp: rhf
-            dfttyp: pbe
-
     orca:
         method:
             method: dft
@@ -215,15 +207,6 @@ specific:
             runtyp: opt
         basis:
             basis: sto_sz
-
-    gamess:
-        basis:
-            gbasis: n21
-            ngauss: 3
-        contrl:
-            scftyp: rhf
-            dfttyp: pbe
-            runtyp: optimize
 """, Loader=yaml.FullLoader))
 
 #: Templates for transition state calculations.
@@ -261,7 +244,7 @@ specific:
             ts_search: ef
         basis:
             basis: sto_sz
-""",    Loader=yaml.FullLoader))
+""", Loader=yaml.FullLoader))
 
 #: Templates for frequency analyses calculations.
 freq = Settings(yaml.load("""
@@ -333,18 +316,6 @@ specific:
         basis:
             basis: sto_sz
         main: freq
-
-    gamess:
-        basis:
-            gbasis: n21
-            ngauss: 3
-        contrl:
-            scftyp: rhf
-            dfttyp: pbe
-            runtyp: hessian
-            nosym: 1
-        force:
-            method: seminum
 """, Loader=yaml.FullLoader))
 
 #: Templates for moleculair dynamics (MD) calculations.
@@ -357,8 +328,6 @@ specific:
     cp2k: Null
 
     orca: Null
-
-    gamess: Null
 
     cp2k_mm:
         force_eval:
