@@ -13,3 +13,15 @@ geometry:
     file_pattern: '*-pos-1.xyz'
     function: read_xyz_file
     parser: cp2KParser
+enthalpy:
+    file_ext: out
+    function: get_cp2k_thermo
+    kwargs:
+        quantity: H
+    parser: cp2KParser
+free_energy:
+    file_ext: out
+    function: get_cp2k_thermo
+    kwargs:
+        quantity: G
+    parser: cp2KParser

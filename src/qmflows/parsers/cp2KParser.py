@@ -14,7 +14,7 @@ from typing import (Union, Any, Type, Generator, Iterable, Tuple,
 from typing import Optional as Optional_
 
 import numpy as np
-from scm.plams import Units
+from scm.plams import Units, Molecule
 from more_itertools import chunked
 from pyparsing import (
     FollowedBy, Group, Literal, NotAny, OneOrMore, Optional, ParserElement,
@@ -48,7 +48,7 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
 
-def read_xyz_file(file_name: PathLike):
+def read_xyz_file(file_name: PathLike) -> Molecule:
     """Read the last geometry from the output file."""
     geometries = manyXYZ(file_name)
     return tuplesXYZ_to_plams(geometries[-1])
@@ -255,7 +255,7 @@ def read_mos_data_input(path_input: PathLike) -> Tuple2:
 
 def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
-    def fun_split(l):
+    def fun_split(l: str) -> str:
         return l.split()[-1]
 
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
@@ -405,6 +405,8 @@ def get_cp2k_freq(file: Union[PathLike, TextIOBase],
         return ret
 
 
-def get_cp2k_thermo():
+Quantity: Literal['G', 'H']
+
+def get_cp2k_thermo(file, quantity:):
     """Return thermochemical properties as extracted from a CP2K .out file."""
     pass
