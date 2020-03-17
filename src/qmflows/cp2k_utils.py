@@ -24,21 +24,22 @@ API
 """
 
 import textwrap
-from os import PathLike
 from io import TextIOBase
 from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
 from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping, NoReturn,
-                    Sequence, Any, AnyStr, Iterable)
+                    Sequence, Any, Iterable)
 
 import numpy as np
 import pandas as pd
 
 from scm import plams
-from qmflows.settings import Settings
-from qmflows.backports import nullcontext
-from qmflows.utils import to_runtime_error
+
+from .settings import Settings
+from .backports import nullcontext
+from .utils import to_runtime_error
+from .type_hints import MappingScalar, MappingSequence, PathLike
 
 __all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
@@ -79,24 +80,19 @@ CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {
 del _BASE_PATH
 
 
-MappingScalar = MutableMapping[str, Union[Optional[str], float]]
-MappingSequence = MutableMapping[str, Union[Sequence[Optional[str]], Sequence[float]]]
-
-
 class LengthError(ValueError):
     """A :exc:`ValueError` subclass for exceptions caused by incorrect lengths of a :class:`Mapping<collections.abc.Mapping>` or :class:`Sequence<collections.abc.Sequence>`."""  # noqa
 
 
 @to_runtime_error
 def _map_psf_atoms(settings: None, key: str,
-                   value: Union[AnyStr, PathLike, TextIOBase],
+                   value: Union[PathLike, TextIOBase],
                    mol: None, **kwargs: Any) -> Dict[str, str]:
     """A small wrapper around :func:`map_psf_atoms`."""
     return map_psf_atoms(value, **kwargs)
 
 
-def map_psf_atoms(file: Union[AnyStr, PathLike, TextIOBase],
-                  **kwargs: Any) -> Dict[str, str]:
+def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str, str]:
     r"""Take a .psf file and construct a :class:`dict` mapping atom types to atom names.
 
     Examples

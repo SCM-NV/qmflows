@@ -14,21 +14,20 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Mapping, Dict, Callable
+from typing import Union, Any, ClassVar, Mapping, Dict
 
 from scm import plams
 
-from qmflows.cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
-from qmflows.parsers.cp2KParser import parse_cp2k_warnings
-from qmflows.settings import Settings
-from qmflows.warnings_qmflows import cp2k_warnings
-from qmflows.packages.packages import parse_output_warnings
-from qmflows.packages.cp2k_package import CP2K_Result, CP2K
+from .packages import parse_output_warnings
+from .cp2k_package import CP2K_Result, CP2K
+from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
+from ..parsers.cp2KParser import parse_cp2k_warnings
+from ..settings import Settings
+from ..warnings_qmflows import cp2k_warnings
+from ..type_hints import Generic2Special
 
 __all__ = ['cp2k_mm']
 
-
-SpecialFunc = Callable[[Settings, str, Any, plams.Molecule], None]
 
 class CP2KMM(CP2K):
     """This class setup the requirement to run a `CP2K Job <https://www.cp2k.org/>`_ for classical forcefield calculations.
@@ -116,7 +115,7 @@ class CP2KMM(CP2K):
                 f(settings, key, value, mol)
 
     #: A :class:`dict` mapping special keywords to the appropiate function.
-    SPECIAL_FUNCS: ClassVar[Dict[str, SpecialFunc]]
+    SPECIAL_FUNCS: ClassVar[Dict[str, Generic2Special]]
 
     @staticmethod
     def _parse_psf(settings: Settings, key: str,

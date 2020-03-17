@@ -1,11 +1,17 @@
+from collections import namedtuple
+from typing import Type, NamedTuple, Callable, Optional, TYPE_CHECKING
 
-__author__ = "Felipe Zapata"
+if TYPE_CHECKING:
+    from pyparsing import ParserElement
+else:
+    ParserElement = 'pyparsing.ParserElement'
 
 __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
-           'InfoMO', 'InputKey', 'MO']
+           'InfoMO', 'InputKey', 'MO', 'ParseWarning']
 
 
-from collections import namedtuple
+def _return_msg(msg: str) -> str:
+    return msg
 
 
 # Named Tuples
@@ -16,3 +22,9 @@ CGF = namedtuple("CGF", ("primitives", "orbType"))
 InfoMO = namedtuple("InfoMO", ("eigenVals", "coeffs"))
 InputKey = namedtuple("InpuKey", ("name", "args"))
 MO = namedtuple("MO", ("coordinates", "cgfs", "coefficients"))
+
+
+class ParseWarning(NamedTuple):
+    warn_type: Type[Warning]
+    parser: ParserElement
+    func: Callable[[str], Optional[str]] = _return_msg
