@@ -1,8 +1,9 @@
 """A module with backports of objects added after Python 3.6."""
 
 from contextlib import AbstractContextManager
+from typing import Hashable
 
-__all__ = ['nullcontext']
+__all__ = ['nullcontext', 'Literal']
 
 try:
     from contextlib import nullcontext
@@ -29,3 +30,22 @@ except ImportError:  # nullcontext was added in python 3.7
 
         def __exit__(self, exc_type, exc_value, traceback):
             pass
+
+
+try:
+    # Plan A: literal was added in Python 3.8
+    from typing import Literal
+
+except ImportError:
+    try:
+        # Plan B: literal was previously available in a third party package
+        from typing_extensions import Literal
+
+    except ImportError:
+        class _Literal:
+            def __getitem__(self, name: Hashable) -> type:
+                return type(name) if not isinstance(name, type) else name
+
+        # Plan C; Literal.__getitem__ will now simply return the type
+        # of the passed object; for example: Literal[True] == bool
+        Literal = _Literal()
