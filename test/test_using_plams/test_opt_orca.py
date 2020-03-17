@@ -1,9 +1,7 @@
 """Tests for Orca functionality."""
 
-import math
 from math import sqrt
 
-import numpy as np
 import pytest
 from more_itertools import collapse
 from scm.plams import Molecule
@@ -44,6 +42,7 @@ def test_opt_orca():
     assert diff < 1e-2
 
 
+@pytest.mark.slow
 def test_methanol_opt_orca():
     """Run a methanol optimization and retrieve the optimized geom."""
     methanol = Molecule(PATH_MOLECULES / "methanol.xyz")
