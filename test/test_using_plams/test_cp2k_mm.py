@@ -30,15 +30,6 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
     return xyz1 @ rotmat.T
 
 
-from scm.plams import Cp2kJob, add_to_class
-
-
-@add_to_class(Cp2kJob)
-def get_runscript(self):
-    inp, out = self._filename('inp'), self._filename('out')
-    return f'cp2k.ssmp -i {inp} -o {out}'
-
-
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
 def test_singlepoint() -> None:
@@ -72,7 +63,7 @@ def test_geometry() -> None:
 
     # Compare geometries
     xyz_ref = np.load(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.npy')
-    _xyz = Molecule(result.geometry).as_array()
+    _xyz = np.array(result.geometry)
     _xyz -= _xyz.mean(axis=0)[None, ...]
     xyz = overlap_coords(_xyz, xyz_ref)
     np.testing.assert_allclose(xyz, xyz_ref, rtol=np.inf, atol=0.05)
@@ -99,7 +90,7 @@ def test_freq() -> None:
     H = result.enthalpy
     H_ref = -8642.371633064053
     assertion.isnan(G)
-    assertion.isclose(H, H_ref)
+    assertion.isclose(H, H_ref, rtol=np.inf, atol=0.1)
 
 
 @pytest.mark.slow
