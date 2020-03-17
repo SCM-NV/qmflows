@@ -14,19 +14,36 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Mapping, Dict
+from typing import Union, Any, ClassVar, Mapping, Dict, Optional
 
 from scm import plams
 
-from .packages import parse_output_warnings
-from .cp2k_package import CP2K_Result, CP2K
+from .packages import Result, parse_output_warnings, package_properties
+from .cp2k_package import CP2K
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special
+from ..type_hints import Generic2Special, WarnMap
 
 __all__ = ['cp2k_mm']
+
+
+class CP2KMM_Result(Result):
+    """Class providing access to CP2KMM result."""
+
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'successful',
+                 warnings: Optional[WarnMap] = None) -> None:
+        """Initialize this instance."""
+        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
+                         work_dir=work_dir, properties=package_properties['cp2kmm'],
+                         status=status, warnings=warnings)
 
 
 class CP2KMM(CP2K):
@@ -53,7 +70,7 @@ class CP2KMM(CP2K):
     def run_job(settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> 'CP2K_Result':
+                **kwargs: Any) -> CP2KMM_Result:
         """Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
@@ -86,8 +103,8 @@ class CP2KMM(CP2K):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
-                           work_dir=work_dir, status=job.status, warnings=warnings)
+        return CP2KMM_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
+                             work_dir=work_dir, status=job.status, warnings=warnings)
 
     @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,
@@ -143,7 +160,7 @@ class CP2KMM(CP2K):
             forcefield.parmtype = 'CHM'
 
     @staticmethod
-    def _parse_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
+    def _parse_periodic(s: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
         """Set the keyword for periodic calculations."""
         force_eval = s.specific.cp2k.force_eval
         force_eval.subsys.cell.periodic = value
