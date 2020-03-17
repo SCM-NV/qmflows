@@ -63,7 +63,9 @@ def parse_cp2k_warnings(file_name: PathLike,
         for msg_ret, warn_type in iterator:
             key = named_tup.func(msg_ret)
             if key is not None:
-                warnings[key] = warn_type
+                v = warnings.get(key, QMFlows_Warning)
+                if v is QMFlows_Warning:
+                    warnings[key] = warn_type
 
     return warnings or None
 
