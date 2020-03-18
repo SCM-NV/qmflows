@@ -13,7 +13,7 @@ from scm import plams
 from .packages import Package, Result, get_tmpfile_name, package_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from ..type_hints import WarnMap
+from ..type_hints import WarnMap, Final
 from ..warnings_qmflows import Key_Warning
 
 # ============================= Orca ==========================================
@@ -204,4 +204,7 @@ class ORCA_Result(Result):
             return None
 
 
-orca = ORCA()
+#: An instance :class:`ORCA`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+orca: Final[ORCA] = ORCA()

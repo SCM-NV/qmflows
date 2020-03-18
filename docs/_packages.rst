@@ -34,6 +34,15 @@ Package Subclasses
     ~orca.ORCA
     ~package_wrapper.PackageWrapper
 
+Package Instances
+------------------
+.. autosummary::
+    ~SCM.adf
+    ~SCM.dftb
+    ~cp2k_package.cp2k
+    ~cp2k_mm.cp2k_mm
+    ~orca.orca
+
 API
 ---
 .. autofunction:: qmflows.packages.packages.run
@@ -77,3 +86,11 @@ API
 
 .. autoclass:: qmflows.packages.package_wrapper.PackageWrapper
     :noindex:
+
+|
+
+.. autodata:: qmflows.packages.SCM.adf
+.. autodata:: qmflows.packages.SCM.dftb
+.. autodata:: qmflows.packages.cp2k_package.cp2k
+.. autodata:: qmflows.packages.cp2k_mm.cp2k_mm
+.. autodata:: qmflows.packages.orca.orca

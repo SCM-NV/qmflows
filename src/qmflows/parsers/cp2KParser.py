@@ -1,28 +1,34 @@
 """Utilities to read cp2k out files."""
 
-__all__ = ['readCp2KBasis', 'read_cp2k_coefficients',
+__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals']
 
 import fnmatch
 import os
 import subprocess
+from io import TextIOBase
 from collections import namedtuple
 from itertools import islice
-from typing import Type, Generator, Iterable, Tuple
+from typing import (Union, Any, Type, Generator, Iterable, Tuple,
+                    List, Sequence, TypeVar, overload, FrozenSet, Dict)
 from typing import Optional as Optional_
 
 import numpy as np
+from scm.plams import Units, Molecule
 from more_itertools import chunked
 from pyparsing import (
-    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
-    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange
+    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional, ParserElement,
+    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange,
+    ZeroOrMore, SkipTo
 )
 
 from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+from ..utils import file_to_context
 from ..common import AtomBasisData, AtomBasisKey, InfoMO
 from ..warnings_qmflows import QMFlows_Warning
-from ..type_hints import WarnMap, WarnDict, PathLike
+from ..type_hints import WarnMap, WarnDict, PathLike, T
+from ..type_hints import Literal as Literal_
 
 # =========================<>=============================
 MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
@@ -43,7 +49,7 @@ MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
 #     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
 
-def read_xyz_file(file_name: PathLike):
+def read_xyz_file(file_name: PathLike) -> Molecule:
     """Read the last geometry from the output file."""
     geometries = manyXYZ(file_name)
     return tuplesXYZ_to_plams(geometries[-1])
@@ -81,7 +87,8 @@ def assign_warning(warning_type: Type[Warning], msg: str,
             yield m, QMFlows_Warning
 
 
-def read_cp2k_coefficients(path_mos, plams_dir=None):
+def read_cp2k_coefficients(path_mos: PathLike,
+                           plams_dir: Union[None, str, os.PathLike] = None) -> InfoMO:
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -99,9 +106,11 @@ def read_cp2k_coefficients(path_mos, plams_dir=None):
     # Read the range of printed MOs from the input
     if range_mos is not None:
         printed_orbitals = range_mos[1] - range_mos[0] + 1
+
     # Otherwise read the added_mos parameter
     elif added_mos is not None:
         printed_orbitals = orbitals_info.added_mos * 2
+
     # Otherwise read the occupied orbitals
     else:
         printed_orbitals = orbitals_info.nOccupied
@@ -109,7 +118,7 @@ def read_cp2k_coefficients(path_mos, plams_dir=None):
     return readCp2KCoeff(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
 
 
-def readCp2KCoeff(path, nOrbitals: int, nOrbFuns: int):
+def readCp2KCoeff(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     """Read the coefficients from the plain text output.
 
     MO coefficients are stored in Column-major order.
@@ -121,7 +130,7 @@ def readCp2KCoeff(path, nOrbitals: int, nOrbFuns: int):
     :returns: Molecular orbitals and orbital energies
     """
     def remove_trailing(xs):
-        "Remove the last lines of the MOs output."
+        """Remove the last lines of the MOs output."""
         words = ['Fermi', 'HOMO-LUMO']
         if any([x in words for x in xs[-1]]):
             xs.pop(-1)
@@ -192,13 +201,13 @@ orbitals = Word(nums, max=1) + (orbS | orbP | orbD | orbF)
 orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 
 
-def funCoefficients(x):
+def funCoefficients(x: float) -> ParserElement:
     """Parser Coeffcients."""
     fun = OneOrMore(Suppress(orbInfo) + floatNumber * x)
     return fun.setResultsName("coeffs")
 
 
-def funOrbNumber(x):
+def funOrbNumber(x: float) -> float:
     """Parse Orbital Occupation Number. There is min 1 max 4."""
     return natural * x
 
@@ -230,19 +239,24 @@ topParseBasis = OneOrMore(Suppress(comment)) + \
 # ===============================<>====================================
 # Parsing From File
 
-def read_mos_data_input(path_input):
+#: A tuple with 2 elements; output of :func:`read_mos_data_input`.
+Tuple2 = Tuple[Optional_[str], Optional_[List[int]]]
+
+
+def read_mos_data_input(path_input: PathLike) -> Tuple2:
     """Try to read the added_mos parameter and the range of printed MOs."""
-    properties = ["ADDED_MOS", "MO_INDEX_RANGE"]
+    properties = ("ADDED_MOS", "MO_INDEX_RANGE")
     l1, l2 = [try_search_pattern(x, path_input) for x in properties]
+
     added_mos = l1.split()[-1] if l1 is not None else None
     range_mos = list(map(int, l2.split()[1:])) if l1 is not None else None
 
     return added_mos, range_mos
 
 
-def read_cp2k_number_of_orbitals(file_name):
+def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
-    def fun_split(l):
+    def fun_split(l: str) -> str:
         return l.split()[-1]
 
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
@@ -253,31 +267,42 @@ def read_cp2k_number_of_orbitals(file_name):
     return MO_metadata(*[int(x) for x in xs])
 
 
-def move_restart_coeff(path):
+def move_restart_coeff(path: PathLike) -> None:
     """Rename Molecular Orbital Coefficients and EigenValues."""
     root, file_name = os.path.split(path)
+
     # Current work directory
     cwd = os.path.realpath('.')
+
     # Change directory
     os.chdir(root)
+
     # Split File into the old and new set of coefficients
     cmd = 'csplit -f coeffs -n 1 {} "/HOMO-LUMO/+2"'.format(file_name)
     subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL)
+
     # Move the new set of coefficients to the Log file
     os.rename('coeffs1', file_name)
+
     # Remove old set of coefficients
     os.remove('coeffs0')
+
     # Return to CWD
     os.chdir(cwd)
 
 
-def readCp2KBasis(path: str) -> tuple:
+#: A 2-tuple; output of :func:`readCp2KBasis`.
+Tuple2List = Tuple[List[AtomBasisKey], List[AtomBasisData]]
+
+
+def readCp2KBasis(path: PathLike) -> Tuple2List:
     """Read the Contracted Gauss function primitives format from a text file."""
     bss = topParseBasis.parseFile(path)
     atoms = [''.join(xs.atom[:]).lower() for xs in bss]
     names = [' '.join(xs.basisName[:]).upper() for xs in bss]
     formats = [list(map(int, xs.format[:])) for xs in bss]
+
     # for example 2 0 3 7 3 3 2 1 there are sum(3 3 2 1) =9 Lists
     # of Coefficients + 1 lists of exponents
     nCoeffs = [int(sum(xs[4:]) + 1) for xs in formats]
@@ -290,6 +315,18 @@ def readCp2KBasis(path: str) -> tuple:
     return (basiskey, basisData)
 
 
+#: A :class:`~collections.abc.Sequence` typevar.
+ST = TypeVar('ST', bound=Sequence)
+
+
+@overload
+def swapCoeff(n: Literal_[1], rs: ST) -> ST: ...
+
+
+@overload
+def swapCoeff(n: int, rs: ST) -> List[ST]: ...
+
+
 def swapCoeff(n, rs):
     if n == 1:
         return rs
@@ -297,9 +334,132 @@ def swapCoeff(n, rs):
         return [rs[i::n] for i in range(n)]
 
 
-def headTail(xs):
+def headTail(xs: Iterable[T]) -> Tuple[T, List[T]]:
     """Return the head and tail from a list."""
-    it = iter(xs)
-    head = next(it)
-    tail = list(it)
+    head, *tail = xs
     return (head, tail)
+
+
+def get_cp2k_freq(file: Union[PathLike, TextIOBase],
+                  unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
+    r"""Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format.
+
+    Paramters
+    ---------
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.IOBase`
+        A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
+        `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object
+        pointing to the CP2K .mol file.
+        Note that passed file-like objects should return strings (not bytes) upon iteration;
+        consider wrapping *file* in :func:`codecs.iterdecode` if its iteration will yield bytes.
+
+    unit : :class:`str`
+        The output unit of the vibrational frequencies.
+        See :class:`plams.Units<scm.plams.tools.units.Units>` for more details.
+
+    /**kwargs : :data:`~typing.Any`
+        Further keyword arguments for :func:`open`.
+        Only relevant if *file* is a path-like object.
+
+    Returns
+    -------
+    :class:`numpy.ndarray` [:class:`float`], shape :math:`(n,)`
+        A 1D array of length :math:`n` containing the vibrational frequencies
+        extracted from *file*.
+
+    """
+    context_manager = file_to_context(file, **kwargs)
+
+    with context_manager as f:
+        item = next(f)
+        if not isinstance(item, str):
+            raise TypeError(f"Iteration through {f!r} should yield strings; "
+                            f"observed type: {item.__class__.__name__!r}")
+
+        # Find the start of the [Atoms] block
+        elif '[Atoms]' not in item:
+            for item in f:
+                if '[Atoms]' in item:
+                    break
+            else:
+                raise ValueError(f"failed to identify the '[Atoms]' substring in {f!r}")
+
+        # Find the end of the [Atoms] block, i.e. the start of the [FREQ] block
+        for atom_count, item in enumerate(f):
+            if '[FREQ]' in item:
+                break
+        else:
+            raise ValueError(f"failed to identify the '[FREQ]' substring in {f!r}")
+
+        # Identify the vibrational degrees of freedom
+        if atom_count == 0:
+            raise ValueError(f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
+        elif atom_count <= 2:
+            count = atom_count - 1
+        else:
+            count = 3 * atom_count - 6
+
+        # Gather and return the frequencies
+        iterator = islice(f, 0, count)
+        ret = np.fromiter(iterator, dtype=float, count=count)
+        ret *= Units.conversion_ratio('cm-1', unit)
+        return ret
+
+
+QUANTITY_MAPPING: Dict[str, str] = {
+    ' VIB|              Electronic energy (U) [kJ/mol]:': 'E',
+    ' VIB|              Zero-point correction [kJ/mol]:': 'ZPE',
+    ' VIB|              Enthalpy correction (H-U) [kJ/mol]:': 'H',
+    ' VIB|              Entropy [kJ/(mol K)]:': 'S',
+    'VIB|              Temperature [K]:': 'T'
+}
+
+QUANTITY_SET: FrozenSet[str] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
+
+Quantity = Literal_[tuple(QUANTITY_SET)]
+
+
+def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
+                    unit: str = 'kcal/mol') -> float:
+    """Return thermochemical properties as extracted from a CP2K .out file.
+
+    Note
+    ----
+    Note that CP2K can under certain circumstances report entropies and, by extension,
+    Gibbs free energies as :data:`~math.nan`.
+
+    Parameters
+    ----------
+    file_name : :class:`str`, :class:`bytes` or :class:`os.PathLike`
+        A path-like object pointing to the CP2K .out file.
+
+    quantity : :class:`str`
+        The to-be returned quantity.
+        Accepted values are ``"E"``, ``"ZPE"``, ``"H"``, ``"S"`` and ``"G"``.
+
+    unit : :class:`str`
+        The unit of the to-be returned *quantity*.
+        See :class:`plams.Units<scm.plams.tools.units.Units>` for more details.
+
+    Returns
+    -------
+    :class:`float`
+        A user-specified *quantity* expressed in *unit* as extracted from *file_name*.
+
+    """
+    quantity = quantity.upper()
+    if quantity not in QUANTITY_SET:
+        raise ValueError(f"'quantity' has an invalid value ({quantity!r}); "
+                         f"expected values: {tuple(QUANTITY_SET)!r}")
+
+    parser = ZeroOrMore(Suppress(SkipTo(" VIB|              Temperature ")) + SkipTo('\n\n\n\n'))
+
+    energy = next(iter(parser.parseFile(file_name)))
+    energy_iter = (i.rsplit(maxsplit=1) for i in energy.splitlines() if i)
+    energy_dict = {QUANTITY_MAPPING.get(k): float(v) for k, v in energy_iter}
+
+    energy_dict['H'] += energy_dict['E']
+    energy_dict['ZPE'] += energy_dict['E']
+    energy_dict['G'] = energy_dict['H'] - energy_dict['T'] * energy_dict['S']
+
+    return energy_dict[quantity] * Units.conversion_ratio('kj/mol', unit)

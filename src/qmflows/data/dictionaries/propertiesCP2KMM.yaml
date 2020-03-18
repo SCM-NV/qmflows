@@ -2,8 +2,8 @@ energy:
     file_ext: out
     function: extract_line_value
     kwargs:
-        pattern: Total energy
-        pos: 2
+        pattern: ENERGY| Total FORCE_EVAL
+        pos: -1
     parser: generic_parsers
 frequencies:
     file_pattern: '*-VIBRATIONS-1.mol'
@@ -24,8 +24,4 @@ free_energy:
     function: get_cp2k_thermo
     kwargs:
         quantity: G
-    parser: cp2KParser
-orbitals:
-    file_pattern: '*MOLog'
-    function: read_cp2k_coefficients
     parser: cp2KParser

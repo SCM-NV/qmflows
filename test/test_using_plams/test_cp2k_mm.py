@@ -1,66 +1,15 @@
-from io import TextIOBase
-from itertools import islice
-from typing import Union, Any
-from collections import abc
-
 import numpy as np
 import pytest
 from assertionlib import assertion
-from scm.plams import Molecule, add_to_instance, add_to_class, Units, Cp2kJob
+from scm.plams import Molecule
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
-from qmflows.type_hints import PathLike
-from qmflows.backports import nullcontext
 from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 
 #: Example input Settings for CP2K mm calculations.
 SETTINGS: Settings = get_mm_settings()
-
-
-def get_frequencies(file: Union[PathLike, TextIOBase],
-                    unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
-    """Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format."""
-    try:
-        context_manager = open(file, **kwargs)  # path-like object
-    except TypeError as ex:
-        if not isinstance(file, abc.Iterator):
-            raise TypeError("'file' expected a file- or path-like object; "
-                            f"observed type: {file.__class__.__name__!r}") from ex
-        context_manager = nullcontext(file)  # a file-like object (hopefully)
-
-    with context_manager as f:
-        # Find the start of the [Atoms] block
-        for item in f:
-            if '[Atoms]' in item:
-                break
-        else:
-            raise ValueError(
-                f"failed to identify the '[Atoms]' substring in {f!r}")
-
-        # Find the end of the [Atoms] block, i.e. the start of the [FREQ] block
-        for atom_count, item in enumerate(f, 0):
-            if '[FREQ]' in item:
-                break
-        else:
-            raise ValueError(
-                f"failed to identify the '[FREQ]' substring in {f!r}")
-
-        # Identify the vibrational degrees of freedom
-        if not atom_count:
-            raise ValueError(
-                f"failed to identify any atoms in the '[Atoms]' section of {f!r}")
-        elif atom_count in {1, 2}:
-            count = atom_count - 1
-        else:
-            count = 3 * atom_count - 6
-
-        # Gather and return the frequencies
-        iterator = islice(f, 0, count)
-        ret = np.fromiter(iterator, dtype=float, count=count)
-        ret *= Units.conversion_ratio('cm-1', unit)
-        return ret
 
 
 def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
@@ -81,13 +30,6 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
     return xyz1 @ rotmat.T
 
 
-def get_energy(self, index: int = -1, unit: str = 'Hartree') -> float:
-    """Return the energy of the last occurence of ``'ENERGY| Total FORCE_EVAL'`` in the output."""
-    energy_str = self.grep_output('ENERGY| Total FORCE_EVAL')[index]
-    energy = float(energy_str.rsplit(maxsplit=1)[1])
-    return Units.convert(energy, 'Hartree', unit)
-
-
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
 def test_singlepoint() -> None:
@@ -99,15 +41,9 @@ def test_singlepoint() -> None:
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
-    # Yes, this is a small hack as neither energy nor get_energy() seems to work
-    plams_results = result.results
-    add_to_instance(plams_results)(get_energy)
-    setattr(result, 'get_energy', plams_results.get_energy)
-
     # Compare energies
     ref = -15.4431781758
-    energy = result.get_energy()
-    assertion.isclose(energy, ref, rel_tol=10**-4)
+    assertion.isclose(result.energy, ref, rel_tol=10**-4)
 
 
 @pytest.mark.slow
@@ -121,19 +57,13 @@ def test_geometry() -> None:
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
-    # Yes, this is a small hack as neither energy nor get_energy() seems to work
-    plams_results = result.results
-    add_to_instance(plams_results)(get_energy)
-    setattr(result, 'get_energy', plams_results.get_energy)
-
     # Compare energies
     ref = -16.865587192150834
-    energy = result.get_energy()
-    assertion.isclose(energy, ref, rel_tol=10**-4)
+    assertion.isclose(result.energy, ref, rel_tol=10**-4)
 
     # Compare geometries
     xyz_ref = np.load(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.npy')
-    _xyz = Molecule(plams_results['cp2k-pos-1.xyz'], geometry=500).as_array()
+    _xyz = np.array(result.geometry)
     _xyz -= _xyz.mean(axis=0)[None, ...]
     xyz = overlap_coords(_xyz, xyz_ref)
     np.testing.assert_allclose(xyz, xyz_ref, rtol=np.inf, atol=0.05)
@@ -152,11 +82,15 @@ def test_freq() -> None:
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
-    plams_results = result.results
-
-    freqs = get_frequencies(plams_results['cp2k-VIBRATIONS-1.mol'])
+    freqs = result.frequencies
     freqs_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.freq.npy')
     np.testing.assert_allclose(freqs, freqs_ref, rtol=np.inf, atol=5.0)
+
+    G = result.free_energy
+    H = result.enthalpy
+    H_ref = -8642.371633064053
+    assertion.isnan(G)
+    assertion.isclose(H, H_ref, rtol=np.inf, atol=0.1)
 
 
 @pytest.mark.slow

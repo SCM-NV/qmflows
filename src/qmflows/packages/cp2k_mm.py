@@ -14,19 +14,36 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Mapping, Dict
+from typing import Union, Any, ClassVar, Mapping, Dict, Optional
 
 from scm import plams
 
-from .packages import parse_output_warnings
-from .cp2k_package import CP2K_Result, CP2K
+from .packages import Result, parse_output_warnings, package_properties
+from .cp2k_package import CP2K
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special
+from ..type_hints import Generic2Special, WarnMap, Final
 
 __all__ = ['cp2k_mm']
+
+
+class CP2KMM_Result(Result):
+    """Class providing access to CP2KMM result."""
+
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'successful',
+                 warnings: Optional[WarnMap] = None) -> None:
+        """Initialize this instance."""
+        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
+                         work_dir=work_dir, properties=package_properties['cp2kmm'],
+                         status=status, warnings=warnings)
 
 
 class CP2KMM(CP2K):
@@ -46,14 +63,47 @@ class CP2KMM(CP2K):
 
     def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:
         """Run a set of tasks before running the actual job."""
-        if not settings.get('psf'):
+        psf = settings.get('psf')
+        if not psf:
             settings.psf = None
+
+        # Fix this at some point in the future
+        """
+        from pathlib import Path
+
+        # Identify the number of pre-existing jobs
+        jm = plams.config.default_jobmanager
+        i = 1 + sum(jm.names.values())
+
+        # Figure out the working direcyory
+        workdir = kwargs.get('workdir')
+        if workdir is None:
+            workdir = Path(jm.path) / jm.foldername
+        else:
+            workdir = Path(workdir)
+
+        # Set psf to None if not specified; write it if it's a FOX.PSFContainer instance
+        psf = settings.get('psf')
+        if not psf:
+            settings.psf = None
+        elif psf.__class__.__name__ == 'PSFContainer':
+            psf_name = workdir / f"{kwargs.get('job_name', 'cp2k_job')}.{i}.psf"
+            psf.write(psf_name)
+            settings.psf = str(psf_name)
+
+        # Write it if it's a FOX.PRMContainer instance
+        prm = settings.get('prm')
+        if prm.__class__.__name__ == 'PRMContainer':
+            prm_name = workdir / f"{kwargs.get('job_name', 'cp2k_job')}.{i}.prm"
+            prm.write(prm_name)
+            settings.prm = str(prm_name)
+        """
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> 'CP2K_Result':
+                **kwargs: Any) -> CP2KMM_Result:
         """Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
@@ -86,8 +136,8 @@ class CP2KMM(CP2K):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return CP2K_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
-                           work_dir=work_dir, status=job.status, warnings=warnings)
+        return CP2KMM_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
+                             work_dir=work_dir, status=job.status, warnings=warnings)
 
     @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,
@@ -143,7 +193,7 @@ class CP2KMM(CP2K):
             forcefield.parmtype = 'CHM'
 
     @staticmethod
-    def _parse_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
+    def _parse_periodic(s: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
         """Set the keyword for periodic calculations."""
         force_eval = s.specific.cp2k.force_eval
         force_eval.subsys.cell.periodic = value
@@ -169,4 +219,7 @@ CP2KMM.SPECIAL_FUNCS = {
 for k in CP2K_KEYS_ALIAS:
     CP2KMM.SPECIAL_FUNCS[k] = set_prm
 
-cp2k_mm = CP2KMM()
+#: An instance :class:`CP2KMM`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+cp2k_mm: Final[CP2KMM] = CP2KMM()

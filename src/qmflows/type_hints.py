@@ -4,41 +4,11 @@ Index
 -----
 .. currentmodule:: qmflows.type_hints
 .. autosummary::
-    WarnMap
-    WarnDict
-    WarnParser
-    MappingScalar
-    MappingSequence
-    Generic2Special
-    PathLike
+    {autosummary}
 
 API
 ---
-.. autoclass:: ParseWarning
-
-.. autodata:: WarnMap
-    :annotation: = Mapping[str, ParseWarning]
-
-.. autodata:: WarnDict
-    :annotation: = Dict[str, Type[Warning]]
-
-.. autodata:: WarnParser
-    :annotation: = Callable[[str, WarnMap], Optional[WarnDict]]
-
-.. autodata:: WarnParseMap
-    :annotation: = Mapping[Type[Warning], Callable[[str], Optional[str]]]
-
-.. autodata:: MappingScalar
-    :annotation: = MutableMapping[str, Union[None, str, float]]
-
-.. autodata:: MappingSequence
-    :annotation: = MutableMapping[str, Union[Sequence[Optional[str]], Sequence[float]]]
-
-.. autodata:: Generic2Special
-    :annotation: = Callable[[qmflows.Settings, str, Any, plams.Molecule], None]
-
-.. autodata:: PathLike
-    :annotation: = Union[str, bytes, os.PathLike]
+{autodata}
 
 """
 
@@ -46,6 +16,7 @@ from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Uni
                     Sequence, Any, AnyStr, TYPE_CHECKING)
 
 from .common import ParseWarning
+from .backports import Literal, T, Final
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
@@ -57,12 +28,27 @@ else:
     Settings = 'qmflows.settings.Settings'
 
 __all__ = [
+    'T', 'Literal', 'Final',
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
     'PathLike'
 ]
 
+#: Alias for :data:`typing.Literal`.
+#: Note this will only work as intended in python >= 3.8
+#: or if the ``typing_extensions`` package is installed;
+#: otherwise, for example, ``Literal[True]`` will default to ``type(True)``.
+Literal
+
+#: Alias for :data:`typing.Final`.
+#: Note this will only work as intended in python >= 3.8
+#: or if the ``typing_extensions`` package is installed;
+#: otherwise, for example, ``Final[True]`` will default to ``type(True)``.
+Final
+
+#: A generic TypeVar.
+T
 
 #: A Mapping which maps a :class:`str` to a :class:`ParseWarning` instance.
 WarnMap = Mapping[str, ParseWarning]
@@ -87,3 +73,9 @@ Generic2Special = Callable[[Settings, str, Any, Molecule], None]
 #: An alias for all path-like objects.
 #: Includes the likes of :class:`str`, :class:`bytes` and :class:`pathlib.Path`.
 PathLike = Union[AnyStr, _PathLike]
+
+
+__doc__ = __doc__.format(
+    autosummary='\n'.join(f'    {i}' for i in __all__),
+    autodata='\n'.join(f'.. autodata:: {i}' for i in __all__)
+)

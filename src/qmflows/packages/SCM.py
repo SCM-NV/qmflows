@@ -12,7 +12,7 @@ from scm import plams
 
 from .packages import Package, package_properties, Result, get_tmpfile_name
 from ..settings import Settings
-from ..type_hints import WarnMap
+from ..type_hints import WarnMap, Final
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
 
 # ========================= ADF ============================
@@ -214,9 +214,10 @@ class ADF_Result(Result):
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
+    generic_dict_file : ClassVar[str] = 'generic2DFTB.yaml'
+
     def __init__(self) -> None:
         super().__init__("dftb")
-        self.generic_dict_file = 'generic2DFTB.yaml'
 
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule,
@@ -371,5 +372,12 @@ class DFTB_Result(Result):
         return m
 
 
-adf = ADF()
-dftb = DFTB()
+#: An instance :class:`ADF`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+adf: Final[ADF] = ADF()
+
+#: An instance :class:`DFTB`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+dftb: Final[DFTB] = DFTB()

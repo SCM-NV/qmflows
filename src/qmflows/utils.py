@@ -9,16 +9,18 @@ import os
 import shutil
 from functools import wraps
 from os.path import abspath, normpath, join, splitext
-from typing import Union, Optional, Iterable, Callable
+from typing import Union, Optional, Iterable, Callable, Any, IO, ContextManager
 from contextlib import redirect_stdout, AbstractContextManager
-from collections import Counter
+from collections import Counter, abc
 
 from scm.plams import config, init, finish, JobManager, load_all
 
 from .settings import Settings
+from .backports import nullcontext
+from .type_hints import PathLike
 
 
-def settings2Dict(s):
+def settings2Dict(s: Settings) -> dict:
     """Transform a Settings object into a dict."""
     d = {}
     for k, v in s.items():
@@ -30,7 +32,7 @@ def settings2Dict(s):
     return d
 
 
-def dict2Setting(d):
+def dict2Setting(d: dict) -> Settings:
     """Transform recursively a dict into a Settings object."""
     r = Settings()
     for k, v in d.items():
@@ -75,6 +77,62 @@ def to_runtime_error(func: Callable) -> Callable:
             raise RuntimeError(f"{key!r} section: {ex}").with_traceback(
                 ex.__traceback__) from ex
     return wrapper
+
+
+def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
+                    **kwargs: Any) -> ContextManager[IO]:
+    r"""Take a path- or file-like object and return an appropiate context manager instance.
+
+    Passing a path-like object will supply it to :func:`open`,
+    while passing a file-like object will pass it to :class:`contextlib.nullcontext`.
+
+    Examples
+    --------
+    .. code:: python
+
+        >>> from io import StringIO
+
+        >>> path_like = 'file_name.txt'
+        >>> file_like = StringIO('this is a file-like object')
+
+        >>> context1 = file_to_context(path_like)
+        >>> context2 = file_to_context(file_like)
+
+        >>> with context1 as f1, with context2 as f2:
+        ...     ... # insert operations here
+
+
+    Parameters
+    ----------
+    file : :class:`str`, :class:`bytes`, :class:`os.PathLike` or :class:`io.TextIOBase`
+        A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
+        `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object.
+
+    allow_iterator : :class:`bool`
+        If``True``, loosen the constraints on what constitutes a file-like object
+        and allow *file* to-be an :class:`~collections.abc.Iterator`.
+
+    /**kwargs : :data:`~typing.Any`
+        Further keyword arguments for :func:`open`.
+        Only relevant if *file* is a path-like object.
+
+    Returns
+    -------
+    :func:`open` or :class:`~contextlib.nullcontext`
+        An initialized context manager.
+        Entering the context manager will return a file-like object.
+
+    """
+    # path-like object
+    try:
+        return open(file, **kwargs)
+
+    # a file-like object (hopefully)
+    except TypeError as ex:
+        if allow_iterator and not isinstance(file, abc.Iterator):
+            raise TypeError("'file' expected a file- or path-like object; "
+                            f"observed type: {file.__class__.__name__!r}") from ex
+        return nullcontext(file)
 
 
 def init_restart(path: Union[None, str, os.PathLike] = None,

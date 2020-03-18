@@ -4,7 +4,7 @@ __all__ = ['json2Settings', 'yaml2Settings']
 import json
 import yaml
 
-from qmflows.utils import dict2Setting
+from .utils import dict2Setting
 
 
 def json2Settings(xs):

@@ -5,6 +5,7 @@ import fnmatch
 import importlib
 import inspect
 import os
+import sys
 import uuid
 import warnings
 from abc import abstractmethod, ABC
@@ -158,6 +159,11 @@ class Result:
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa
+        try:
+            return super().__getattribute__(prop)
+        except AttributeError:
+            pass
+
         # Read the .yaml dictionary than contains the parsers names
         ds = self.prop_dict[prop]
 
@@ -178,10 +184,16 @@ class Result:
         if output_files:
             file_out = output_files[0]
             fun = getattr(import_parser(ds), ds['function'])
+
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
             kwargs['plams_dir'] = plams_dir
-            return ignore_unused_kwargs(fun, [file_out], kwargs)
+            ret = ignore_unused_kwargs(fun, [file_out], kwargs)
+
+            # Cache the property and return
+            if sys.getsizeof(ret) < 10e5:
+                setattr(self, prop, ret)
+            return ret
         else:
             raise FileNotFoundError(f"""
             Property {prop} not found. No output file called: {file_pattern}. Folder used:
@@ -589,7 +601,7 @@ class Package(ABC):
         :class:`Result`
             A new Result instance.
 
-        """
+        """  # noqa
         raise NotImplementedError("The class representing a given quantum packages "
                                   "should implement this method")
 
@@ -752,14 +764,12 @@ def ignore_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
     ps = inspect.signature(fun).parameters
 
     # Look for the arguments with the nonempty defaults.
-    defaults = list(filter(lambda t: t[1].default != inspect._empty,
-                           ps.items()))
-    # there are not keyword arguments in the function
-    if not kwargs or not defaults:
-        return fun(*args)
-    else:  # extract from kwargs only the used keyword arguments
-        d = {k: kwargs[k] for k, _ in defaults}
-        return fun(*args, **d)
+    defaults = filter(lambda t: t[1].default != inspect._empty, ps.items())
+
+    # *kwargs* may contain keyword arguments not supported by *fun*
+    # Extract from *kwargs* only the used keyword arguments
+    kwargs2 = {k: kwargs[k] for k, _ in defaults if k in kwargs}
+    return fun(*args, **kwargs2)
 
 
 def parse_output_warnings(job_name: str,
