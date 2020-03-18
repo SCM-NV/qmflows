@@ -75,7 +75,7 @@ API
 
         >>> from typing import Dict, Type
 
-        >>> from qmflows.packages import Package, cp2k, adf, dftb, gamess, orca
+        >>> from qmflows.packages import Package, cp2k, adf, dftb, orca
         >>> from scm import plams
 
         >>> plams.Job = plams.core.basejob.Job
@@ -85,7 +85,6 @@ API
         ...     plams.Cp2kJob: cp2k,
         ...     plams.ADFJob: adf,
         ...     plams.DFTBJob: dftb,
-        ...     plams.GamessJob: gamess,
         ...     plams.ORCAJob: orca
         ... }
 
@@ -103,7 +102,6 @@ from noodles import has_scheduled_methods, schedule
 from .packages import Package, Result, package_properties
 from .SCM import adf, dftb
 from .orca import orca
-from .gamess import gamess
 from .cp2k_package import cp2k
 from ..settings import Settings
 from ..type_hints import WarnMap
@@ -120,7 +118,6 @@ JOB_MAP: Dict[Type[plams.Job], Package] = {
     plams.Cp2kJob: cp2k,
     plams.ADFJob: adf,
     plams.DFTBJob: dftb,
-    plams.GamessJob: gamess,
     plams.ORCAJob: orca
 }
 

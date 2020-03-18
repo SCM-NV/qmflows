@@ -72,14 +72,6 @@ For Example, the default parameter for a single point calculation for several pa
           project: cp2k
           run_type: energy
 
-      gamess:
-        basis:
-          gbasis: sto
-          ngauss: 3
-        contrl:
-          scftyp: rhf
-          dfttyp: pbe
-
       orca:
         method:
             method: dft

@@ -31,7 +31,6 @@ Package Subclasses
     ~SCM.DFTB
     ~cp2k_package.CP2K
     ~cp2k_mm.CP2KMM
-    ~gamess.GAMESS
     ~orca.ORCA
     ~package_wrapper.PackageWrapper
 
@@ -69,10 +68,6 @@ API
 |
 
 .. autoclass:: qmflows.packages.cp2k_mm.CP2KMM
-
-|
-
-.. autoclass:: qmflows.packages.gamess.GAMESS
 
 |
 

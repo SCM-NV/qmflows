@@ -6,7 +6,6 @@ from .cp2k_package import cp2k
 from .cp2k_mm import cp2k_mm
 from .SCM import (adf, dftb)
 from .orca import orca
-from .gamess import gamess
 
 from .package_wrapper import PackageWrapper
 
@@ -16,6 +15,5 @@ __all__ = [
     'cp2k_mm',
     'adf', 'dftb',
     'orca',
-    'gamess',
     'PackageWrapper'
 ]
