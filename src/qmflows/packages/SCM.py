@@ -1,19 +1,19 @@
+"""Interface to the SCM funcionality."""
 __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 
-# =======>  Standard and third party Python Libraries <======
 
 import os
 import struct
 from os.path import join
+from typing import Any, ClassVar, Optional, Union
 from warnings import warn
-from typing import Optional, Union, Any, ClassVar
 
 from scm import plams
 
-from .packages import Package, package_properties, Result, get_tmpfile_name
 from ..settings import Settings
-from ..type_hints import WarnMap, Final
+from ..type_hints import Final, WarnMap
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
+from .packages import Package, Result, get_tmpfile_name, package_properties
 
 # ========================= ADF ============================
 
@@ -148,7 +148,8 @@ class ADF(Package):
                                    int(ks[3]), int(ks[4]))
                         settings.specific.adf.constraints[name] = v
                     else:
-                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
+                        warn(
+                            f'Invalid constraint key: {k}', category=Key_Warning)
 
         # Available translations
         functions = {'freeze': freeze,
@@ -214,36 +215,28 @@ class ADF_Result(Result):
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
-    generic_dict_file : ClassVar[str] = 'generic2DFTB.yaml'
+    generic_dict_file: ClassVar[str] = 'generic2DFTB.yaml'
 
     def __init__(self) -> None:
         super().__init__("dftb")
 
     @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
-                job_name: str = 'DFTBjob',
-                nproc: Optional[int] = None,
-                **kwargs: Any) -> 'DFTB_Result':
-        """Execute an DFTB job with the *ADF* quantum package.
+    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+                work_dir: Union[None, str, os.PathLike] = None,
+                **kwargs: Any) -> Result:
+        """Execute an DFTB job with the AMS driver.
 
-        :param settings: user input settings.
-        :type settings: |Settings|
-        :param mol: Molecule to run the simulation
-        :type mol: Plams Molecule
-        :parameter input_file_name: The user can provide a name for the
-                                   job input.
-        :type input_file_name: String
-        :parameter out_file_name: The user can provide a name for the
-                                 job output.
-        :type out_file_name: String
-        :returns: :class:`~qmflows.packages.SCM.DFTB_Result`
-
+        In order to run a DFTB calculation we need both an AMS and DFTB sections.
+        The AMS sections, specifies which tasks to run: single point, optimization, etc.
+        While the DFTB section only set the input for the method.
+        For more information, see: `AMS <https://www.scm.com/doc/plams/interfaces/ams.html>`
         """
         dftb_settings = Settings()
-        if nproc:
-            dftb_settings.runscript.nproc = nproc
         dftb_settings.input = settings.specific.dftb
-        job = plams.DFTBJob(name=job_name, molecule=mol, settings=dftb_settings)
+        dftb_settings.input += settings.specific.ams
+
+        job = plams.AMSJob(name=job_name, molecule=mol,
+                           settings=dftb_settings)
 
         # Check RKF status
         try:
@@ -254,7 +247,8 @@ class DFTB(Package):
             job.status = 'failed'
             name = job_name
             path = None
-            warn(f"job:{job_name} has failed.\nRKF is corrupted", category=QMFlows_Warning)
+            warn(f"job:{job_name} has failed.\nRKF is corrupted",
+                 category=QMFlows_Warning)
 
         if job.status in ['failed', 'crashed']:
             plams.config.default_jobmanager.remove_job(job)
@@ -316,7 +310,8 @@ class DFTB(Package):
                             int(ks[3]), int(ks[4]))
                         settings.specific.dftb.constraints[name] = v
                     else:
-                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
+                        warn(
+                            f'Invalid constraint key: {k}', category=Key_Warning)
 
         # Available translations
         functions = {'freeze': freeze,
@@ -356,6 +351,7 @@ class DFTB_Result(Result):
     def molecule(self, unit: str = 'bohr',
                  internal: bool = False,
                  n: int = 1) -> plams.Molecule:
+        """Read molecule from output."""
         m = self._molecule.copy()
         natoms = len(m)
         coords = self.kf.read('Molecule', 'Coords')
