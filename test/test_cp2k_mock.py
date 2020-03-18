@@ -9,6 +9,7 @@ from qmflows import Settings, cp2k, templates
 from qmflows.packages import Result, package_properties
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
+# module constants
 WORKDIR = PATH / "output_cp2k"
 
 kinds_template = Settings(yaml.load("""
@@ -28,8 +29,7 @@ specific:
 
 def test_cp2k_mock(mocker):
     """Mock a call to CP2K."""
-    ethylene = Molecule(PATH_MOLECULES / "ethylene.xyz")
-
+    ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
     # geometry optimization input
     s = templates.singlepoint
     s.specific.cp2k.force_eval.subsys.cell.periodic = "None"
@@ -51,14 +51,14 @@ def test_cp2k_mock(mocker):
     s.specific.cp2k.force_eval.dft.basis_set_file_name = (
         PATH / "BASIS_MOLOPT").absolute().as_posix()
 
-    job = cp2k(s, ethylene)
+    job = cp2k(s, ETHYLENE)
 
     run_mocked = mocker.patch("qmflows.run")
     jobname = "cp2k_job"
     dill_path = WORKDIR / jobname / "cp2k_job.dill"
     plams_dir = WORKDIR / jobname
     adf_properties = package_properties["cp2k"]
-    run_mocked.return_value = Result(templates.geometry, ethylene, jobname, dill_path=dill_path,
+    run_mocked.return_value = Result(templates.geometry, ETHYLENE, jobname, dill_path=dill_path,
                                      plams_dir=plams_dir, properties=adf_properties)
     rs = run_mocked(job)
     assertion.isfinite(rs.energy)
