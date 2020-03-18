@@ -5,7 +5,7 @@ from typing import Any, Union, overload, Tuple, TypeVar, Type
 
 __all__ = ['nullcontext']
 
-# T and Literal should be imported from qmflows.type_hints
+# T, Final and Literal should be imported from qmflows.type_hints
 T = TypeVar('T')
 
 
@@ -68,3 +68,17 @@ except ImportError:
         # Plan C; Literal.__getitem__ will now simply return the type
         # of the passed object; for example: Literal[True] == bool
         Literal = _Literal()
+
+
+try:
+    # Plan A: Final was added in Python 3.8
+    from typing import Final
+
+except ImportError:
+    try:
+        # Plan B: Final was previously available in a third party package
+        from typing_extensions import Final
+    except ImportError:
+
+        # Plan C; use it as a Literal alias
+        Final = Literal

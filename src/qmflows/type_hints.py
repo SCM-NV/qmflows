@@ -16,7 +16,7 @@ from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Uni
                     Sequence, Any, AnyStr, TYPE_CHECKING)
 
 from .common import ParseWarning
-from .backports import Literal, T
+from .backports import Literal, T, Final
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
@@ -28,7 +28,7 @@ else:
     Settings = 'qmflows.settings.Settings'
 
 __all__ = [
-    'T', 'Literal',
+    'T', 'Literal', 'Final',
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
@@ -40,6 +40,12 @@ __all__ = [
 #: or if the ``typing_extensions`` package is installed;
 #: otherwise, for example, ``Literal[True]`` will default to ``type(True)``.
 Literal
+
+#: Alias for :data:`typing.Final`.
+#: Note this will only work as intended in python >= 3.8
+#: or if the ``typing_extensions`` package is installed;
+#: otherwise, for example, ``Final[True]`` will default to ``type(True)``.
+Final
 
 #: A generic TypeVar.
 T
