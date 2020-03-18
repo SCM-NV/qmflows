@@ -214,7 +214,7 @@ class ADF_Result(Result):
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
-    generic_dict_file : ClassVar[str] = 'generic2DFTB.yaml'
+    generic_dict_file: ClassVar[str] = 'generic2DFTB.yaml'
 
     def __init__(self) -> None:
         super().__init__("dftb")

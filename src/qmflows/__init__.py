@@ -10,7 +10,8 @@ from .packages import (
 
 from .templates import (freq, geometry, singlepoint, ts, md)
 from .settings import Settings
-from .examples import example_H2O2_TS, example_freqs, example_generic_constraints, example_partial_geometry_opt
+from .examples import (example_H2O2_TS, example_freqs, example_generic_constraints,
+                       example_partial_geometry_opt)
 
 __all__ = [
     '__version__',
