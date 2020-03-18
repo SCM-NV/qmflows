@@ -212,6 +212,50 @@ class ADF_Result(Result):
         return m
 
 
+class DFTB_Result(Result):
+    """Class providing access to PLAMS DFTBJob result results."""
+
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
+        # Read available propiety parsers from a yaml file
+        super().__init__(settings, molecule, job_name, dill_path,
+                         plams_dir=plams_dir, properties=package_properties['dftb'],
+                         status=status, warnings=warnings)
+
+        if plams_dir is not None:
+            kf_filename = join(plams_dir, 'dftb.rkf')
+            # create a kf reader instance
+            self.kf = plams.KFFile(kf_filename)
+        else:
+            self.kf = None
+
+    @property
+    def molecule(self, unit: str = 'bohr',
+                 internal: bool = False,
+                 n: int = 1) -> plams.Molecule:
+        """Read molecule from output."""
+        m = self._molecule.copy()
+        natoms = len(m)
+        coords = self.kf.read('Molecule', 'Coords')
+        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
+
+        if len(coords) > natoms:
+            coords = coords[(n - 1) * natoms: n * natoms]
+        if internal:
+            mapping = self._int2inp()
+            coords = [coords[mapping[i] - 1] for i in range(len(coords))]
+        for at, coord in zip(m, coords):
+            at.move_to(coord, 'bohr')
+
+        return m
+
+
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
@@ -223,7 +267,7 @@ class DFTB(Package):
     @staticmethod
     def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> Result:
+                **kwargs: Any) -> DFTB_Result:
         """Execute an DFTB job with the AMS driver.
 
         In order to run a DFTB calculation we need both an AMS and DFTB sections.
@@ -322,50 +366,6 @@ class DFTB(Package):
         else:
             warn(f'Generic keyword {key!r} not implemented for package DFTB',
                  category=Key_Warning)
-
-
-class DFTB_Result(Result):
-    """Class providing access to PLAMS DFTBJob result results."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'done',
-                 warnings: Optional[WarnMap] = None) -> None:
-        # Read available propiety parsers from a yaml file
-        super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['dftb'],
-                         status=status, warnings=warnings)
-
-        if plams_dir is not None:
-            kf_filename = join(plams_dir, 'dftb.rkf')
-            # create a kf reader instance
-            self.kf = plams.KFFile(kf_filename)
-        else:
-            self.kf = None
-
-    @property
-    def molecule(self, unit: str = 'bohr',
-                 internal: bool = False,
-                 n: int = 1) -> plams.Molecule:
-        """Read molecule from output."""
-        m = self._molecule.copy()
-        natoms = len(m)
-        coords = self.kf.read('Molecule', 'Coords')
-        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
-
-        if len(coords) > natoms:
-            coords = coords[(n - 1) * natoms: n * natoms]
-        if internal:
-            mapping = self._int2inp()
-            coords = [coords[mapping[i] - 1] for i in range(len(coords))]
-        for at, coord in zip(m, coords):
-            at.move_to(coord, 'bohr')
-
-        return m
 
 
 #: An instance :class:`ADF`.
