@@ -13,10 +13,6 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
-    - uses: codecov/codecov-action@v1
-      with:
-        file: ./coverage.xml
-        name: codecov-umbrella
     - name: Setup conda
       uses: s-weigand/setup-conda@master
       with:
@@ -39,3 +35,7 @@ jobs:
       run: |
         pip install pytest pytest-cov
         pytest -m "not (slow or long)" test
+    - uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.xml
+        name: codecov-umbrella
