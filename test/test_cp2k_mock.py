@@ -1,18 +1,18 @@
 """Mock CP2K funcionality."""
 import numpy as np
-import yaml
 from assertionlib import assertion
 from pytest_mock import mocker
 from scm.plams import Molecule
 
-from qmflows import Settings, cp2k, templates
+from qmflows import cp2k, templates
 from qmflows.packages import Result, package_properties
 from qmflows.test_utils import PATH, PATH_MOLECULES
+from qmflows.fileFunctions import yaml2Settings
 
 # module constants
 WORKDIR = PATH / "output_cp2k"
 
-kinds_template = Settings(yaml.load("""
+kinds_template = yaml2Settings("""
 specific:
   cp2k:
      force_eval:
@@ -24,7 +24,7 @@ specific:
            H:
              basis_set: DZVP-MOLOPT-SR-GTH-q1
              potential: GTH-PBE-q1
-""", Loader=yaml.FullLoader))
+""")
 
 
 def test_cp2k_mock(mocker):
