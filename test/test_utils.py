@@ -8,8 +8,7 @@ from contextlib import AbstractContextManager
 from assertionlib import assertion
 from scm.plams import init, finish
 
-from qmflows.utils import (to_runtime_error, file_to_context, settings2Dict,
-                           dict2Setting, init_restart, InitRestart)
+from qmflows.utils import to_runtime_error, file_to_context, init_restart, InitRestart
 from qmflows.test_utils import PATH_MOLECULES, PATH
 
 PSF_STR: str = """
@@ -59,19 +58,6 @@ def test_file_to_context() -> None:
     assertion.assert_(file_to_context, None, exception=TypeError)
     assertion.assert_(file_to_context, [1, 2], exception=TypeError)
     assertion.assert_(file_to_context, 5.0, exception=TypeError)
-
-
-def test_settings_to_dict() -> None:
-    """Tests for :func:`settings2Dict` and :func:`dict2Setting`."""
-    ref = {
-        0: 0,
-        1: {1: 1},
-        2: {2: {2: 2}},
-        3: {3: {3: {3: 3}}}
-    }
-    dct = settings2Dict(dict2Setting(ref))
-
-    assertion.eq(dct, ref)
 
 
 def test_restart_init() -> None:

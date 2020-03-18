@@ -2,8 +2,7 @@
 
 __author__ = "Felipe Zapata"
 
-__all__ = ['dict2Setting', 'settings2Dict', 'to_runtime_error',
-           'init_restart', 'InitRestart']
+__all__ = ['to_runtime_error', 'init_restart', 'InitRestart']
 
 import os
 import shutil
@@ -18,12 +17,6 @@ from scm.plams import config, init, finish, JobManager, load_all
 from .settings import Settings
 from .backports import nullcontext
 from .type_hints import PathLike
-
-#: Transform a Settings object into a dict.
-settings2Dict: Callable[[Settings], dict] = Settings.as_dict
-
-#: Transform recursively a dict into a Settings object.
-dict2Setting: Callable[[dict], Settings] = Settings
 
 
 def to_runtime_error(func: Callable) -> Callable:
