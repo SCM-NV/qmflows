@@ -5,8 +5,8 @@ __all__ = ['find_first_job', 'select_max', 'select_min']
 from noodles import find_first, schedule
 from scm.plams import Molecule
 
-from qmflows.packages import Result
-from qmflows.settings import Settings
+from ..packages import Result
+from ..settings import Settings
 
 
 @schedule
