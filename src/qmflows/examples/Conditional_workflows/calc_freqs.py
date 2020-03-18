@@ -1,7 +1,7 @@
 __all__ = ['example_freqs']
 
 from noodles import gather
-from qmflows import (dftb, adf, orca, run, Settings, templates, find_first_job)
+from qmflows import (adf, dftb, orca, run, Settings, templates, find_first_job)
 import scm.plams.interfaces.molecule.rdkit as molkit
 
 
