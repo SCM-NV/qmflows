@@ -4,9 +4,16 @@
 ## Added
   * Introduced the ``CP2KMM`` class for classical forcefield calculations with CP2K: [qmflows/pull/150](https://github.com/SCM-NV/qmflows/pull/150).
   * Introduced the ``PackageWrapper`` class: [qmflows/pull/149](https://github.com/SCM-NV/qmflows/pull/149).
-  * Introduced updates and code-style improvements to the ``Package`` and ``Result`` classes: [qmflows/pull/146](https://github.com/SCM-NV/qmflows/pull/146).
+  * Introduced updates and code-style improvements to the ``Package`` and ``Result`` classes: [qmflows/pull/146](https://github.com/SCM-NV/qmflows/pull/146)
+  * Added workflow for [GitHub Actions](https://github.com/SCM-NV/qmflows/actions)
+
+## Removed
   * [Removed references to Dirac](https://github.com/SCM-NV/qmflows/issues/152)
   * [Removed Pymonad](https://github.com/SCM-NV/qmflows/issues/156)
+  * Remove support for [FDE](https://github.com/SCM-NV/qmflows/issues/171)
+
+# Changed
+  * Used [Path](https://github.com/SCM-NV/qmflows/issues/153) instead of ``str``.
 
 
 # Version 0.9.0 (27/11/2019)
