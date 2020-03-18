@@ -4,7 +4,6 @@ __all__ = ['yaml2Settings']
 
 import yaml
 from typing import Union
-from .utils import dict2Setting
 from .settings import Settings
 
 
@@ -13,4 +12,4 @@ def yaml2Settings(xs: Union[bytes, str]) -> Settings:
     if isinstance(xs, bytes):
         xs = xs.decode()
     s = yaml.load(xs, Loader=yaml.FullLoader)  # yaml object must be string
-    return dict2Setting(s)
+    return Settings(s)
