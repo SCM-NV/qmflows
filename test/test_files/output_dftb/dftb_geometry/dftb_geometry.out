@@ -1,0 +1,365 @@
+
+
+ Parallel Execution: Process Information
+ ==============================================================================
+ Rank   Node Name                              NodeID   MyNodeRank  NodeMaster
+    0   tcn1107.bullx                             0          0          0
+ ==============================================================================
+
+
+
+ *******************************************************************************
+ *                                                                             *
+ *  --------------------------------                                           *
+ *   Amsterdam Modeling Suite (AMS)              2019.302                      *
+ *  --------------------------------                                           *
+ *                                               r80089 2019-12-11             *
+ *                                                                             *
+ *                                                                             *
+ *                              =================                              *
+ *                              |               |                              *
+ *                              |     A M S     |                              *
+ *                              |               |                              *
+ *                              =================                              *
+ *                                                                             *
+ *                                                                             *
+ *   Online information and documentation:  https://www.scm.com/support/       *
+ *   E-mail:  support@scm.com   info@scm.com                                   *
+ *                                                                             *
+ *   Scientific publications using AMS results must be properly referenced     *
+ *   See the User Manuals (or the web site) for recommended citations          *
+ *   The terms and conditions of the End User License Agreement apply to       *
+ *   the use of AMS, https://www.scm.com/license-terms/                        *
+ *                                                                             *
+ **********************  x86_64_linux_intel / intelmpi  ************************
+ 
+ Licensed to: SURF-SARA, Comp. & Networking Services / Amsterdam / NL
+ SCM User ID: u7409
+  
+ AMS 2019.302  RunTime: Mar18-2020 15:27:08  Nodes: 1  Procs: 1
+
+ AMS jobname: dftb_geometry
+ AMS jobid  : 804183021
+
+ Start   directory: /nfs/home6/fza900/Prototype/TESTS/plams_workdir.002/dftb_geometry/
+ Results directory: /nfs/home6/fza900/Prototype/TESTS/plams_workdir.002/dftb_geometry/
+ Scratch directory: /scratch/shared/fza900/adftmp/amstmp_dftb_geometry_kid0.804183021/
+
+ RNG seed: 194076034 -1486701492 -1055643232 830147745 596457588 -12262878 1903172840 -1087224137
+       ***************************
+       *  GEOMETRY OPTIMIZATION  *
+       ***************************
+
+Optimization Method                    Quasi Newton
+Optimization Coordinates               Delocalized Coordinates
+Optimize lattice                       F
+ 
+ ------------------------------------------------------
+ Convergence criteria (Hartree,Angstrom)
+ ------------------------------------------------------
+ Maximum gradient               0.001000000000
+ Maximum rms gradient           0.000666666667
+ Maximum step allowed           0.001000000000
+ Maximum rms step allowed       0.000666666667
+ Maximum energy change allowe   0.000010000000
+ Maximum stress energy allowe   0.000500000000
+ 
+Initial model Hessian                  Automatic Hessian
+ 
+------------------------------------
+Quasi-Newton Optimizer Parameters
+------------------------------------
+Hessian Update Method                  BFGS
+Maximum number of steps                  500
+First GDIIS cycle                          0
+Maximum GDIIS vectors                      0
+Trust radius (bohr)                        0.200000
+Trust radius varies                        T
+Constraints converged at all steps         T
+Rigid motions option                     All
+Symmetrize steps                           F
+ 
+ 
+--------
+Geometry
+--------
+Atoms
+  Index Symbol   x (angstrom)   y (angstrom)   z (angstrom)
+      1      O    -0.00033792     0.39781512     0.00000000
+      2      H    -0.76329846    -0.19955659     0.00000000
+      3      H     0.76363638    -0.19825853     0.00000000
+ 
+Total System Charge             0.00000
+ 
+ 
+-------------------------
+DFTB Engine configuration
+-------------------------
+DFTB Resources dir                     /sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1
+ 
+SCC convergence enabled.
+Maximum SCC cycles                       500
+SCC charge convergence                   0.000000010000
+SCC charge mixing                        0.150000000000
+DIIS max dimension                       20
+Adaptive SCC charge mixing             T
+Adaptive SCC charge mixing             T
+Adaptive SCC mixing strategy              3
+Spin polarization                      F
+Orbital-dependent SCC                  F
+Orbital fill strategy                  Fermi
+Fermi temperature (kelvin)                     300.0000
+Use of symmetry                        T
+Radial function extrapolation method   Auto
+
+---------------------
+Periodic DFTB options
+---------------------
+ kpoints config
+ grid method with params
+Assume insulator                        F
+Ewald tolerance                    1.00E-10
+Ewald range factor                  2.00
+
+ BZStruct config
+ ---------------
+ Enabled        T
+ Automatic      T
+ CalcFatBands   T
+ useSymmetry    T
+ deltaK          0.100000000000000     
+ 
+Number of symmetry operators: 2
+Schoenflies symbol:           C(S)
+ Using automatic Hessian for delocalized coordinates.
+
+Number of basis functions:            6
+ 
+----------------------------------------------------------------------
+Geometry Convergence after Step   1       (Hartree/Angstrom,Angstrom)
+----------------------------------------------------------------------
+current energy                               -4.05875976 Hartree
+energy change                      -4.05875976     0.00001000    F
+constrained gradient max            0.02840470     0.00100000    F
+constrained gradient rms            0.01200171     0.00066667    F
+gradient max                        0.02840470
+gradient rms                        0.01200171
+cart. step max                      0.01122975     0.00100000    F
+cart. step rms                      0.00464496     0.00066667    F
+ 
+ 
+--------
+Geometry
+--------
+Atoms
+  Index Symbol   x (angstrom)   y (angstrom)   z (angstrom)
+      1      O    -0.00032863     0.38658536     0.00000000
+      2      H    -0.76488738    -0.19394296     0.00000000
+      3      H     0.76521601    -0.19264240     0.00000000
+ 
+Total System Charge             0.00000
+ 
+
+ dE(predicted):    -0.22833E-03, dE(actual):    -0.27974E-03, Trust radius:    0.200000, all in a.u.
+ 
+----------------------------------------------------------------------
+Geometry Convergence after Step   2       (Hartree/Angstrom,Angstrom)
+----------------------------------------------------------------------
+current energy                               -4.05903951 Hartree
+energy change                      -0.00027974     0.00001000    F
+constrained gradient max            0.00566080     0.00100000    F
+constrained gradient rms            0.00250329     0.00066667    F
+gradient max                        0.00566080
+gradient rms                        0.00250329
+cart. step max                      0.00578366     0.00100000    F
+cart. step rms                      0.00346136     0.00066667    F
+ 
+ WARNING: Atom coordinates do not satisfy symmetry (probably due to orientation)
+Note, symmetry increased during calculation.
+Previous number of operators: 2
+Current  number of operators: 4
+ 
+--------
+Geometry
+--------
+Atoms
+  Index Symbol   x (angstrom)   y (angstrom)   z (angstrom)
+      1      O    -0.00032368     0.38080170     0.00000000
+      2      H    -0.77025887    -0.19105570     0.00000000
+      3      H     0.77058256    -0.18974600     0.00000000
+ 
+Total System Charge             0.00000
+ 
+
+ dE(predicted):    -0.35543E-04, dE(actual):    -0.40419E-04, Trust radius:    0.200000, all in a.u.
+ 
+----------------------------------------------------------------------
+Geometry Convergence after Step   3       (Hartree/Angstrom,Angstrom)
+----------------------------------------------------------------------
+current energy                               -4.05907993 Hartree
+energy change                      -0.00004042     0.00001000    F
+constrained gradient max            0.00098465     0.00100000    T
+constrained gradient rms            0.00046467     0.00066667    T
+gradient max                        0.00098465
+gradient rms                        0.00046467
+cart. step max                      0.00138732     0.00100000    F
+cart. step rms                      0.00073626     0.00066667    F
+ 
+ 
+--------
+Geometry
+--------
+Atoms
+  Index Symbol   x (angstrom)   y (angstrom)   z (angstrom)
+      1      O    -0.00032298     0.37997247     0.00000000
+      2      H    -0.77164619    -0.19064227     0.00000000
+      3      H     0.77196917    -0.18933020     0.00000000
+ 
+Total System Charge             0.00000
+ 
+
+ dE(predicted):    -0.13335E-05, dE(actual):    -0.13816E-05, Trust radius:    0.200000, all in a.u.
+ 
+---------------------------------------------------------
+Geometry Convergence after Step   4       ** CONVERGED **
+---------------------------------------------------------
+current energy                               -4.05908131 Hartree
+energy change                      -0.00000138     0.00001000    T
+constrained gradient max            0.00005689     0.00100000    T
+constrained gradient rms            0.00003329     0.00066667    T
+gradient max                        0.00005689
+gradient rms                        0.00003329
+cart. step max                      0.00005253     0.00100000    T
+cart. step rms                      0.00002511     0.00066667    T
+ 
+Geometry optimization converged
+Performing a single point calculation on the final geometry ...
+
+------------------------
+DFTB Database file paths
+------------------------
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/metainfo.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/additional_parameters.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/additional_parameters.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-H.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-H.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-H.skf
+
+ * Reference
+
+M. Gaus, A. Goez, M. Elstner
+"Parametrization and Benchmark of DFTB3 for Organic Molecules"
+J. Chem. Theory Comput. 2013, 9 (1), pp 338-354.
+
+M. Gaus, X. Lu, M. Elstner, Q. Cui
+"Parameterization of DFTB3/3OB for Sulfur and Phosphorus for Chemical and Biological Applications"
+J. Chem. Theory Comput. 2014, 10 (4), pp 1518-1537
+
+X. Lu, M. Gaus, M. Elstner, Q. Cui
+"Parametrization of DFTB3/3OB for Magnesium and Zinc for Chemical and Biological Applications"
+J. Phys. Chem. B, 2015, 119, 1062-1082
+
+M. Kubillus, T. Kubar, M. Gaus, J. Rezac, and M. Elstner
+"Parameterization of the DFTB3 Method for Br, Ca, Cl, F, I, K, and Na in Organic and Biological Systems"
+J. Chem. Theory Comput., 2015, 11, 332-342
+
+
+Estimated upper bound for memory consumption:    0.004 MiB
+SCC Cycle:   1, MaxQDiff:   0.000000000203, Energy:      -4.1191046273, Used mix:   0.150
+ Evaluation was successful
+
+
+    =====================
+     CALCULATION RESULTS
+    =====================
+
+ Energy (hartree)           -4.05908131
+
+ Gradients (hartree/bohr)
+   Index   Atom            d/dx            d/dy            d/dz
+       1      O    0.0000000207   -0.0000255759   -0.0000000000
+       2      H    0.0000300818    0.0000128133    0.0000000000
+       3      H   -0.0000301025    0.0000127625    0.0000000000
+
+
+ Dipole moment vector    (Debye):     0.00142431   -1.67566000    0.00000000
+               magnitude (Debye):     1.67566061
+
+ 
+--------------------
+Energy Decomposition
+--------------------
+Total Energy (hartree)                -4.05908131
+Total Energy (eV)                   -110.45322226
+Electronic Energy (hartree)           -4.13844534
+Coulomb Energy (hartree)               0.01934071
+Repulsion Energy (hartree)             0.06002332
+ 
+----------------------
+Gradient Decomposition
+----------------------
+Total Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O    0.0000000207   -0.0000255759   -0.0000000000
+      2      H    0.0000300818    0.0000128133    0.0000000000
+      3      H   -0.0000301025    0.0000127625    0.0000000000
+ 
+Total Gradients (eV/angstrom)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O    0.0000010627   -0.0013151639   -0.0000000000
+      2      H    0.0015468679    0.0006588877    0.0000000000
+      3      H   -0.0015479306    0.0006562762    0.0000000000
+ 
+Electronic Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0001479637    0.1740733747   -0.0000000000
+      2      H   -0.1230268361   -0.0871413234    0.0000000000
+      3      H    0.1231747998   -0.0869320513    0.0000000000
+ 
+Coulomb Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0000130409    0.0153422641    0.0000000000
+      2      H   -0.0051281628   -0.0076754965    0.0000000000
+      3      H    0.0051412038   -0.0076667676    0.0000000000
+ 
+Repulsion Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O    0.0001610253   -0.1894412147    0.0000000000
+      2      H    0.1281850807    0.0948296333    0.0000000000
+      3      H   -0.1283461061    0.0946115814    0.0000000000
+ 
+----------------
+Mulliken Charges
+----------------
+  Index   Atom          Charge      Population
+      1      O   -0.6120845828        6.612085
+      2      H    0.3060422914        0.693958
+      3      H    0.3060422914        0.693958
+         Total   -0.0000000000        8.000000
+ 
+ 
+--------
+Orbitals
+--------
+Index of HOMO                    4
+Fermi Energy (hartree)            0.00000000
+Orbitals
+   Index Energy (hartree)      Energy (eV)       Occupation  Degeneracy
+       1      -0.84128385     -22.89249847       2.00000000           1
+       2      -0.40561380     -11.03731320       2.00000000           1
+       3      -0.30985168      -8.43149311       2.00000000           1
+       4      -0.25739929      -7.00419093       2.00000000           1
+       5       0.41426294      11.27266822       0.00000000           1
+       6       0.59466019      16.18152698       0.00000000           1
+ 
+
+AMS application finished. Exiting.
+ NORMAL TERMINATION
+     Total cpu time:       0.19
+  Total system time:       0.06
+ Total elapsed time:       0.61

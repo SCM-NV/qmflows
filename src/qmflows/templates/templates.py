@@ -30,8 +30,6 @@ specific:
         dftb:
             resourcesdir:
                 "DFTB.org/3ob-3-1"
-        task:
-            runtype: SP
 
     cp2k:
         force_eval:
@@ -128,8 +126,6 @@ specific:
                 MaxIterations: 500
 
     dftb:
-        task:
-            runtype: GO
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
 
@@ -226,8 +222,6 @@ specific:
             transitionstate: "mode=1"
 
     dftb:
-        task:
-            runtype: TS
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
 
@@ -267,8 +261,6 @@ specific:
                 NormalModes: Yes
 
     dftb:
-        task:
-            runtype: Frequencies
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
 
@@ -318,7 +310,7 @@ specific:
         main: freq
 """, Loader=yaml.FullLoader))
 
-#: Templates for moleculair dynamics (MD) calculations.
+#: Templates for molecular dynamics (MD) calculations.
 md = Settings(yaml.load("""
 specific:
     adf: Null

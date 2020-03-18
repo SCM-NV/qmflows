@@ -56,9 +56,9 @@ def mock_runner(mocker_instance, jobname: str) -> Result:
     run_mocked = mocker_instance.patch("qmflows.run")
     dill_path = WORKDIR / jobname / f"{jobname}.dill"
     plams_dir = WORKDIR / jobname
-    adf_properties = package_properties["cp2k"]
+    cp2k_properties = package_properties["cp2k"]
     run_mocked.return_value = Result(templates.geometry, ETHYLENE, jobname, dill_path=dill_path,
-                                     plams_dir=plams_dir, properties=adf_properties)
+                                     plams_dir=plams_dir, properties=cp2k_properties)
     return run_mocked
 
 

@@ -1,0 +1,328 @@
+
+
+ Parallel Execution: Process Information
+ ==============================================================================
+ Rank   Node Name                              NodeID   MyNodeRank  NodeMaster
+    0   tcn1315.bullx                             0          0          0
+ ==============================================================================
+
+
+
+ *******************************************************************************
+ *                                                                             *
+ *  --------------------------------                                           *
+ *   Amsterdam Modeling Suite (AMS)              2019.302                      *
+ *  --------------------------------                                           *
+ *                                               r80089 2019-12-11             *
+ *                                                                             *
+ *                                                                             *
+ *                              =================                              *
+ *                              |               |                              *
+ *                              |     A M S     |                              *
+ *                              |               |                              *
+ *                              =================                              *
+ *                                                                             *
+ *                                                                             *
+ *   Online information and documentation:  https://www.scm.com/support/       *
+ *   E-mail:  support@scm.com   info@scm.com                                   *
+ *                                                                             *
+ *   Scientific publications using AMS results must be properly referenced     *
+ *   See the User Manuals (or the web site) for recommended citations          *
+ *   The terms and conditions of the End User License Agreement apply to       *
+ *   the use of AMS, https://www.scm.com/license-terms/                        *
+ *                                                                             *
+ **********************  x86_64_linux_intel / intelmpi  ************************
+ 
+ Licensed to: SURF-SARA, Comp. & Networking Services / Amsterdam / NL
+ SCM User ID: u7409
+  
+ AMS 2019.302  RunTime: Mar18-2020 17:08:12  Nodes: 1  Procs: 1
+
+ AMS jobname: dftb_freq
+ AMS jobid  : 2004808170
+
+ Start   directory: /nfs/home6/fza900/Prototype/TESTS/plams_workdir/dftb_freq/
+ Results directory: /nfs/home6/fza900/Prototype/TESTS/plams_workdir/dftb_freq/
+ Scratch directory: /scratch/shared/fza900/adftmp/amstmp_dftb_freq_kid0.2004808170/
+
+ RNG seed: -1268065258 545328446 504200676 1185861802 2097393517 1940995320 -1967074183 939276640
+       ****************************
+       * SINGLE POINT CALCULATION *
+       ****************************
+ 
+--------
+Geometry
+--------
+Atoms
+  Index Symbol   x (angstrom)   y (angstrom)   z (angstrom)
+      1      O    -0.00033792     0.39781512     0.00000000
+      2      H    -0.76329846    -0.19955659     0.00000000
+      3      H     0.76363638    -0.19825853     0.00000000
+ 
+Total System Charge             0.00000
+ 
+ 
+-------------------------
+DFTB Engine configuration
+-------------------------
+DFTB Resources dir                     /sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1
+ 
+SCC convergence enabled.
+Maximum SCC cycles                       500
+SCC charge convergence                   0.000000010000
+SCC charge mixing                        0.150000000000
+DIIS max dimension                       20
+Adaptive SCC charge mixing             T
+Adaptive SCC charge mixing             T
+Adaptive SCC mixing strategy              3
+Spin polarization                      F
+Orbital-dependent SCC                  F
+Orbital fill strategy                  Fermi
+Fermi temperature (kelvin)                     300.0000
+Use of symmetry                        T
+Radial function extrapolation method   Auto
+
+---------------------
+Periodic DFTB options
+---------------------
+ kpoints config
+ grid method with params
+Assume insulator                        F
+Ewald tolerance                    1.00E-10
+Ewald range factor                  2.00
+
+ BZStruct config
+ ---------------
+ Enabled        T
+ Automatic      T
+ CalcFatBands   T
+ useSymmetry    T
+ deltaK          0.100000000000000     
+ 
+------------------------
+DFTB Database file paths
+------------------------
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/metainfo.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/additional_parameters.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/additional_parameters.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-H.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H.yaml
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/O-H.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-O.skf
+/sw/arch/RedHatEnterpriseServer7/EB_production/2019/software/ADF/2019.302-intelmpi/atomicdata/DFTB/DFTB.org/3ob-3-1/H-H.skf
+
+ * Reference
+
+M. Gaus, A. Goez, M. Elstner
+"Parametrization and Benchmark of DFTB3 for Organic Molecules"
+J. Chem. Theory Comput. 2013, 9 (1), pp 338-354.
+
+M. Gaus, X. Lu, M. Elstner, Q. Cui
+"Parameterization of DFTB3/3OB for Sulfur and Phosphorus for Chemical and Biological Applications"
+J. Chem. Theory Comput. 2014, 10 (4), pp 1518-1537
+
+X. Lu, M. Gaus, M. Elstner, Q. Cui
+"Parametrization of DFTB3/3OB for Magnesium and Zinc for Chemical and Biological Applications"
+J. Phys. Chem. B, 2015, 119, 1062-1082
+
+M. Kubillus, T. Kubar, M. Gaus, J. Rezac, and M. Elstner
+"Parameterization of the DFTB3 Method for Br, Ca, Cl, F, I, K, and Na in Organic and Biological Systems"
+J. Chem. Theory Comput., 2015, 11, 332-342
+
+
+Estimated upper bound for memory consumption:    0.004 MiB
+
+Number of basis functions:            6
+SCC Cycle:   1, MaxQDiff:   0.789282087466, Energy:      -4.1055520817, Used mix:   0.150
+SCC Cycle:   2, MaxQDiff:   0.712650893137, Energy:      -4.1069480554, Used mix:   0.150
+SCC Cycle:   3, MaxQDiff:   0.573949306465, Energy:      -4.1091291397, Used mix:   0.150
+SCC Cycle:   4, MaxQDiff:   0.004103788719, Energy:      -4.1132269241, Used mix:   0.150
+SCC Cycle:   5, MaxQDiff:   0.001443792587, Energy:      -4.1132271120, Used mix:   0.150
+SCC Cycle:   6, MaxQDiff:   0.000100512796, Energy:      -4.1132271384, Used mix:   0.150
+SCC Cycle:   7, MaxQDiff:   0.000000002048, Energy:      -4.1132271385, Used mix:   0.150
+ Evaluation was successful
+
+
+    =====================
+     CALCULATION RESULTS
+    =====================
+
+ Energy (hartree)           -4.05875976
+
+ Gradients (hartree/bohr)
+   Index   Atom            d/dx            d/dy            d/dz
+       1      O   -0.0000123116    0.0150311182   -0.0000000000
+       2      H   -0.0034664873   -0.0075186904    0.0000000000
+       3      H    0.0034787988   -0.0075124279   -0.0000000000
+
+ Symmetry: C(S)
+
+ -----------------------
+ Normal Mode Frequencies
+ -----------------------
+
+ Index   Frequency (cm-1)   Intensity (km/mol)   Irrep
+     7          1573.5768              77.9573    A'
+     8          3492.3336              30.9978    A'
+     9          3763.0679              16.0945    A'
+
+ Zero-point energy (Hartree):     0.0201
+
+ ------------
+ Normal Modes
+ ------------
+
+ Number of removed rigid normal modes: 6
+ 
+ Mode:     7      Frequency (cm-1):     1573.5768     Intensity (km/mol):       77.9573     Irrep: A'
+ Index  Atom      ---- Displacements (x/y/z) ----
+     1     O       0.000059  -0.069224  -0.000000
+     2     H      -0.443023   0.548939   0.000000
+     3     H       0.442090   0.549691  -0.000000
+ 
+ Mode:     8      Frequency (cm-1):     3492.3336     Intensity (km/mol):       30.9978     Irrep: A'
+ Index  Atom      ---- Displacements (x/y/z) ----
+     1     O       0.000043  -0.051781  -0.000000
+     2     H       0.573956   0.411396   0.000000
+     3     H      -0.574640   0.410409   0.000000
+ 
+ Mode:     9      Frequency (cm-1):     3763.0679     Intensity (km/mol):       16.0945     Irrep: A'
+ Index  Atom      ---- Displacements (x/y/z) ----
+     1     O      -0.070035  -0.000059   0.000000
+     2     H       0.555379   0.434843  -0.000000
+     3     H       0.556132  -0.433910   0.000000
+
+ PES point character: Geometry corresponds to a non-stationary point on the PES.
+                      At least one gradient component is too large!
+                      (Hint: The threshold for what is considered a small enough gradient is
+                      configured with the GeometryOptimization%Convergence%Gradients keyword.)
+
+
+
+
+ ============================
+ Statistical Thermal Analysis  ***  ideal gas assumed  ***
+ ============================
+  
+ Pressure:                  1.000000 atm.
+ Temperature:             298.150000 K
+
+
+
+ Moments of Inertia [amu*bohr^2] and principal axis
+ ==================================================
+
+           2.2762          4.1956          6.4718
+ ------------------------------------------------
+           1.0000         -0.0009          0.0000
+           0.0009          1.0000          0.0000
+           0.0000          0.0000          1.0000
+
+
+ The rotational contribution to the molecular entropy includes
+ a term, dependent on the symmetry number sigma. The results 
+ reported below were computed using sigma = 1, determined from
+ the point group symmetry of the input geometry (C(S)). 
+ If this is not the correct symmetry, try symmetrizing the molecule before
+ running the calculation (note: linear molecules should be aligned along one
+ of the Cartesian axes).
+ Contributions from frequencies below 20 1/cm are not included in
+ the vibrational sums. Their contributions, if any, are reported separately.
+
+
+     Temp                                                       Transl     Rotat    Vibrat     Total
+     ----                                                       ------     -----    ------     -----
+
+     298.15   Entropy (cal/mole-K):                             34.608    11.901     0.009    46.517
+              Internal Energy (Kcal/mole):                       0.889     0.889    12.624    14.401
+              Constant Volume Heat Capacity (cal/mole-K):        2.981     2.981     0.058     6.019
+
+              Summary of energy terms
+                                                   hartree              eV         kcal/mol           kJ/mol
+                                      --------------------     -----------       ----------      -----------
+              Bond Energy:              -4.058759761120931       -110.4445         -2546.91        -10656.27
+              Internal Energy:           0.022950064667723          0.6245            14.40            60.26
+              pV/n = RT:                 0.000944186013486          0.0257             0.59             2.48
+              Enthalpy H:               -4.034865510439722       -109.7943         -2531.92        -10593.54
+              -T*S:                     -0.022101949936561         -0.6014           -13.87           -58.03
+              Gibbs free energy:        -4.056967460376283       -110.3957         -2545.79        -10651.57
+
+ Dipole moment vector    (Debye):     0.00147422   -1.73493973    0.00000000
+               magnitude (Debye):     1.73494036
+
+ 
+--------------------
+Energy Decomposition
+--------------------
+Total Energy (hartree)                -4.05875976
+Total Energy (eV)                   -110.44447255
+Electronic Energy (hartree)           -4.13276092
+Coulomb Energy (hartree)               0.01953378
+Repulsion Energy (hartree)             0.05446738
+ 
+----------------------
+Gradient Decomposition
+----------------------
+Total Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0000123116    0.0150311182   -0.0000000000
+      2      H   -0.0034664873   -0.0075186904    0.0000000000
+      3      H    0.0034787988   -0.0075124279   -0.0000000000
+ 
+Total Gradients (eV/angstrom)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0006330862    0.7729311281   -0.0000000000
+      2      H   -0.1782539317   -0.3866265796    0.0000000000
+      3      H    0.1788870179   -0.3863045485   -0.0000000000
+ 
+Electronic Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0001549964    0.1822789923   -0.0000000000
+      2      H   -0.1155475460   -0.0912377279    0.0000000000
+      3      H    0.1157025424   -0.0910412643   -0.0000000000
+ 
+Coulomb Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O   -0.0000132411    0.0155762877    0.0000000000
+      2      H   -0.0047967240   -0.0077922233    0.0000000000
+      3      H    0.0048099651   -0.0077840643    0.0000000000
+ 
+Repulsion Gradients (hartree/bohr)
+  Index   Atom            d/dx            d/dy            d/dz
+      1      O    0.0001559259   -0.1828241617    0.0000000000
+      2      H    0.1168777827    0.0915112609    0.0000000000
+      3      H   -0.1170337086    0.0913129008    0.0000000000
+ 
+----------------
+Mulliken Charges
+----------------
+  Index   Atom          Charge      Population
+      1      O   -0.6053140881        6.605314
+      2      H    0.3026569783        0.697343
+      3      H    0.3026571098        0.697343
+         Total    0.0000000000        8.000000
+ 
+ 
+--------
+Orbitals
+--------
+Index of HOMO                    4
+Fermi Energy (hartree)            0.00000000
+Orbitals
+   Index Energy (hartree)      Energy (eV)       Occupation  Degeneracy
+       1      -0.84054096     -22.87228316       2.00000000           1
+       2      -0.40157682     -10.92746124       2.00000000           1
+       3      -0.31315973      -8.52150989       2.00000000           1
+       4      -0.25747218      -7.00617451       2.00000000           1
+       5       0.38301515      10.42237261       0.00000000           1
+       6       0.57256543      15.58029816       0.00000000           1
+ 
+
+AMS application finished. Exiting.
+ NORMAL TERMINATION
+     Total cpu time:       0.25
+  Total system time:       0.05
+ Total elapsed time:       1.17
