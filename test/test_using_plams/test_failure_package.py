@@ -1,4 +1,6 @@
 """Test that failure is handled correctly."""
+import warnings
+
 import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
@@ -6,26 +8,31 @@ from scm.plams import Molecule
 from qmflows import Settings, run, templates
 from qmflows.packages import adf, dftb, orca
 from qmflows.test_utils import PATH_MOLECULES, delete_output
+from qmflows.warnings_qmflows import QMFlows_Warning
 
 
 @delete_output
 @pytest.mark.xfail
 def test_fail_scm(tmpdir):
     """Test that both ADF and DFTB returns ``None`` if a computation fails."""
-    # 5 membered ring from which ozone will dissociate
-    mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
+    # Temporary mute all QMFlows_Warnings
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=QMFlows_Warning)
 
-    # Some dftb specific settings
-    dftb_set = Settings()
-    dftb_set.specific.dftb.dftb.scc
+        # 5 membered ring from which ozone will dissociate
+        mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
-    # Calculate the DFTB hessian
-    opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
-                    job_name="failed_DFTB")
-    fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
-    result = run(fail_adf.molecule, path=tmpdir)
-    print(result)
-    assertion.eq(result, None)
+        # Some dftb specific settings
+        dftb_set = Settings()
+        dftb_set.specific.dftb.dftb.scc
+
+        # Calculate the DFTB hessian
+        opt_dftb = dftb(templates.geometry.overlay(dftb_set), mol,
+                        job_name="failed_DFTB")
+        fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
+        result = run(fail_adf.molecule, path=tmpdir)
+        print(result)
+        assertion.eq(result, None)
 
 
 @delete_output
