@@ -1,19 +1,19 @@
-from qmflows.templates import (freq, geometry, singlepoint, ts)
-from qmflows.utils import (dict2Setting, settings2Dict)
+"""Test that the templates behave correctly."""
+from qmflows import Settings
+from qmflows.templates import freq, geometry, singlepoint, ts
+from assertionlib import assertion
 
 
-def fun(x):
-    """Assert that the functions are the inverse of each other."""
-    return dict2Setting(settings2Dict(x))
+def transform(x: Settings) -> Settings:
+    """Transform `x` to dict and back to Settings."""
+    return Settings(x.as_dict())
 
 
 def test_templates():
-    """
-    Test that the JSON files are read properly.
-    """
-    b1 = freq == fun(freq)
-    b2 = geometry == fun(geometry)
-    b3 = singlepoint == fun(singlepoint)
-    b4 = ts == fun(ts)
+    """Test that the yaml files are read properly."""
+    b1 = freq == transform(freq)
+    b2 = geometry == transform(geometry)
+    b3 = singlepoint == transform(singlepoint)
+    b4 = ts == transform(ts)
 
-    assert all([b1, b2, b3, b4])
+    assertion.truth(all((b1, b2, b3, b4)))

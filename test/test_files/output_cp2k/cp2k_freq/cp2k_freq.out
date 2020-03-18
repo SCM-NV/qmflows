@@ -1,0 +1,365 @@
+ DBCSR| Multiplication driver                                               BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Multiplicative factor virtual images                                   1
+ DBCSR| Multiplication size stacks                                             3
+ DBCSR| Number of 3D layers                                               SINGLE
+ DBCSR| Use MPI memory allocation                                              T
+ DBCSR| Use RMA algorithm                                                      F
+ DBCSR| Use Communication thread                                               T
+ DBCSR| Communication thread load                                             87
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2020-03-18 13:26:33.184
+ ***** ** ***  *** **   PROGRAM STARTED ON                                 delta
+ **    ****   ******    PROGRAM STARTED BY                                felipe
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  5610
+  **** **  *******  **  PROGRAM STARTED IN /home/felipe/Primer/Python/qmflows/pl
+                                           ams_workdir/cp2k_freq
+
+ CP2K| version string:                                          CP2K version 5.1
+ CP2K| source code revision number:                                    svn:18091
+ CP2K| cp2kflags: libint fftw3 libxc parallel mpi3 scalapack libderiv_max_am1=5 
+ CP2K|            libint_max_am=6
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                          Mon Jan 15 17:12:42 UTC 2018
+ CP2K| Program compiled on                                       lgw01-amd64-018
+ CP2K| Program compiled for                                Linux-x86_64-gfortran
+ CP2K| Data directory path                                       /usr/share/cp2k
+ CP2K| Input file name                                              cp2k_freq.in
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name            /home/felipe/Primer/Python/qmflows/test/
+ GLOBAL| Potential file name            /home/felipe/Primer/Python/qmflows/test/
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                      __STD_INPUT__
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                       cp2k
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                           VIBRATIONAL_ANALYSIS
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             6
+ GLOBAL| Number of threads for this process                                    1
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name :  Intel(R) Core(TM) i7-8850H CPU @ 2.60GHz
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal              7767564       7767564       7767564       7767564
+ MEMORY| MemFree               1296024       1296024       1296024       1296024
+ MEMORY| Buffers                 64496         64496         64496         64496
+ MEMORY| Cached                1008684       1008684       1008684       1008684
+ MEMORY| Slab                   353948        353948        353948        353948
+ MEMORY| SReclaimable           116908        116908        116908        116908
+ MEMORY| MemLikelyFree         2486112       2486112       2486112       2486112
+
+
+ GENERATE|  Preliminary Number of Bonds generated:                             0
+ GENERATE|  Achieved consistency in connectivity generation.
+
+ *******************************************************************************
+ *******************************************************************************
+ **                                                                           **
+ **     #####                         ##              ##                      **
+ **    ##   ##            ##          ##              ##                      **
+ **   ##     ##                       ##            ######                    **
+ **   ##     ##  ##   ##  ##   #####  ##  ##   ####   ##    #####    #####    **
+ **   ##     ##  ##   ##  ##  ##      ## ##   ##      ##   ##   ##  ##   ##   **
+ **   ##  ## ##  ##   ##  ##  ##      ####     ###    ##   ######   ######    **
+ **    ##  ###   ##   ##  ##  ##      ## ##      ##   ##   ##       ##        **
+ **     #######   #####   ##   #####  ##  ##  ####    ##    #####   ##        **
+ **           ##                                                    ##        **
+ **                                                                           **
+ **                                                ... make the atoms dance   **
+ **                                                                           **
+ **            Copyright (C) by CP2K developers group (2000 - 2017)           **
+ **                                                                           **
+ *******************************************************************************
+
+
+ SCF PARAMETERS         Density guess:                                   RESTART
+                        --------------------------------------------------------
+                        max_scf:                                             200
+                        max_scf_history:                                       0
+                        max_diis:                                              4
+                        --------------------------------------------------------
+                        eps_scf:                                        1.00E-06
+                        eps_scf_history:                                0.00E+00
+                        eps_diis:                                       1.00E-01
+                        eps_eigval:                                     1.00E-05
+                        --------------------------------------------------------
+                        level_shift [a.u.]:                                 0.00
+                        --------------------------------------------------------
+                        Mixing method:                           DIRECT_P_MIXING
+                        --------------------------------------------------------
+                        No outer SCF
+
+ *******************************************************************************
+ *******************************************************************************
+ **                                                                           **
+ **  #  #   #    #                  #     #                      ##           **
+ **  #  #        ###   # ##   ###  ####         ##   # #    ###   #           **
+ **  #  #   #    #  #  ##    #  #   #     #    #  #  ## #  #  #   #           **
+ **   ##    #    #  #  #     # ##   #     #    #  #  #  #  # ##   #           **
+ **   ##    #    ###   #      # #    ##   #     ##   #  #   # #  ###          **
+ **                                                                           **
+ **   ##               ##                 #                                   **
+ **  #  #  # #    ###   #    #  #   ###         ###                           **
+ **  #  #  ## #  #  #   #    #  #  ##     #    ##                             **
+ **  ####  #  #  # ##   #     ###    ##   #      ##  N. Replicas:           6 **
+ **  #  #  #  #   # #  ###      #  ###    #    ###   N. Procs/Rep:          1 **
+ **                           ##                                              **
+ **                                       T. Laino  and F. Schiffmann         **
+ **                                       2008 - 2015                         **
+ *******************************************************************************
+ *******************************************************************************
+
+ REPLICA| layout of the replica grid, number of groups                         6
+ REPLICA| layout of the replica grid, size of each group                       1
+ REPLICA| MPI process to grid (group,rank) correspondence:
+  (   0 :    0,   0)  (   1 :    1,   0)  (   2 :    2,   0)  (   3 :    3,   0)
+  (   4 :    4,   0)  (   5 :    5,   0)
+
+ VIB|                        NORMAL MODES - CARTESIAN DISPLACEMENTS
+ VIB|
+ VIB|                         1                    2                    3
+ VIB|Frequency (cm^-1)   728.961999           850.800339           896.509664
+ VIB|Intensities           0.000000             0.000000             0.000000
+ VIB|Red.Masses (a.u.)     1.040569             1.483239             1.160889
+ VIB|Frc consts (a.u.)     0.000752             0.001990             0.001920
+  ATOM  EL             X     Y     Z        X     Y     Z        X     Y     Z  
+     1  C            -0.03  0.02 -0.00     0.00  0.00 -0.15     0.00  0.00  0.08
+     2  H             0.42  0.27  0.00    -0.00 -0.00  0.51    -0.00  0.00 -0.49
+     3  H            -0.02 -0.50  0.00     0.00  0.00  0.50     0.00 -0.00 -0.48
+     4  C            -0.03  0.02  0.00    -0.00 -0.00  0.14    -0.00 -0.00  0.09
+     5  H             0.42  0.27  0.00    -0.00 -0.00 -0.47     0.00  0.00 -0.51
+     6  H            -0.02 -0.50 -0.00    -0.00  0.00 -0.48    -0.00 -0.00 -0.50
+
+
+ VIB|                         4                    5                    6
+ VIB|Frequency (cm^-1)   984.334394          1190.080124          1337.119476
+ VIB|Intensities           0.000000             0.000000             0.000000
+ VIB|Red.Masses (a.u.)     1.007973             1.489898             1.319397
+ VIB|Frc consts (a.u.)     0.002423             0.007651             0.010798
+  ATOM  EL             X     Y     Z        X     Y     Z        X     Y     Z  
+     1  C            -0.00 -0.00 -0.00     0.13 -0.07 -0.00    -0.06 -0.10 -0.00
+     2  H             0.00 -0.00 -0.49    -0.36 -0.34  0.00    -0.38 -0.31  0.00
+     3  H            -0.00 -0.00  0.51     0.12  0.47  0.00    -0.08 -0.49 -0.00
+     4  C             0.00  0.00  0.00    -0.13  0.07  0.00     0.06  0.10  0.00
+     5  H             0.00  0.00 -0.50     0.35  0.34 -0.00     0.38  0.31  0.00
+     6  H             0.00  0.00  0.50    -0.12 -0.47  0.00     0.08  0.49 -0.00
+
+
+ VIB|                         7                    8                    9
+ VIB|Frequency (cm^-1)  1390.721010          1569.791054          3299.366337
+ VIB|Intensities           0.000000             0.000000             0.000000
+ VIB|Red.Masses (a.u.)     1.115213             2.717482             1.045568
+ VIB|Frc consts (a.u.)     0.010680             0.042248             0.317210
+  ATOM  EL             X     Y     Z        X     Y     Z        X     Y     Z  
+     1  C             0.03  0.06  0.00     0.14  0.24  0.00    -0.02 -0.03 -0.00
+     2  H            -0.44 -0.22 -0.00    -0.45 -0.08 -0.00    -0.20  0.34  0.00
+     3  H             0.03 -0.50  0.00     0.16 -0.43  0.00     0.41 -0.00  0.00
+     4  C             0.03  0.06 -0.00    -0.14 -0.24 -0.00    -0.02 -0.04  0.00
+     5  H            -0.45 -0.23 -0.00     0.45  0.08 -0.00    -0.30  0.50 -0.00
+     6  H             0.03 -0.50  0.00    -0.16  0.43  0.00     0.58 -0.01 -0.00
+
+
+ VIB|                        10                   11                   12
+ VIB|Frequency (cm^-1)  3309.636029          3445.837392          3450.478902
+ VIB|Intensities           0.000000             0.000000             0.000000
+ VIB|Red.Masses (a.u.)     1.061495             1.119420             1.118161
+ VIB|Frc consts (a.u.)     0.326070             0.404058             0.405783
+  ATOM  EL             X     Y     Z        X     Y     Z        X     Y     Z  
+     1  C             0.03  0.05  0.00     0.02 -0.01 -0.00    -0.08  0.05  0.00
+     2  H             0.29 -0.49 -0.00    -0.07  0.14  0.00     0.34 -0.61 -0.00
+     3  H            -0.59  0.01 -0.00    -0.15 -0.01  0.00     0.67  0.01 -0.00
+     4  C            -0.02 -0.04  0.00     0.09 -0.05  0.00     0.02 -0.01 -0.00
+     5  H            -0.21  0.35 -0.00    -0.33  0.60  0.00    -0.08  0.13 -0.00
+     6  H             0.40 -0.01 -0.00    -0.69 -0.01 -0.00    -0.16  0.00  0.00
+
+
+
+ VIB|                        NORMAL MODES - THERMOCHEMICAL DATA
+ VIB|
+ VIB|              Symmetry number:                                                 1
+ VIB|              Temperature [K]:                                            273.15
+ VIB|              Pressure [Pa]:                                           101325.00
+
+
+ VIB|              Electronic energy (U) [kJ/mol]:                    -36022.96379486
+ VIB|              Zero-point correction [kJ/mol]:                       134.30257120
+ VIB|              Entropy [kJ/(mol K)]:                                   0.20439402
+ VIB|              Enthalpy correction (H-U) [kJ/mol]:                   142.77889812
+ VIB|              Gibbs energy correction [kJ/mol]:                      86.94867048
+ VIB|              Heat capacity [kJ/(mol*K)]:                             0.03815418
+
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                DBCSR STATISTICS                             -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ COUNTER                                    TOTAL       BLAS       SMM       ACC
+ flops     5 x     6 x     5               403200     100.0%      0.0%      0.0%
+ flops    13 x     6 x     5               524160     100.0%      0.0%      0.0%
+ flops     5 x     6 x    13               524160     100.0%      0.0%      0.0%
+ flops    13 x     6 x    13               681408     100.0%      0.0%      0.0%
+ flops     5 x     5 x     6              1392000     100.0%      0.0%      0.0%
+ flops    13 x     5 x     6              1447680     100.0%      0.0%      0.0%
+ flops     5 x    13 x     6              1447680     100.0%      0.0%      0.0%
+ flops    13 x    13 x     6              2822976     100.0%      0.0%      0.0%
+ flops inhomo. stacks                           0       0.0%      0.0%      0.0%
+ flops total                         9.243264E+06     100.0%      0.0%      0.0%
+ flops max/rank                      1.658028E+06     100.0%      0.0%      0.0%
+ matmuls inhomo. stacks                         0       0.0%      0.0%      0.0%
+ matmuls total                              12768     100.0%      0.0%      0.0%
+ number of processed stacks                  2192     100.0%      0.0%      0.0%
+ average stack size                                     5.8       0.0       0.0
+ marketing flops                    13.914816E+06
+ -------------------------------------------------------------------------------
+ # multiplications                             96
+ max memory usage/rank             603.529216E+06
+ # max total images/rank                        1
+ # max 3D layers                                1
+ # MPI messages exchanged                       0
+ MPI messages size (bytes):
+  total size                         0.000000E+00
+  min size                           0.000000E+00
+  max size                           0.000000E+00
+  average size                       0.000000E+00
+ MPI breakdown and total messages size (bytes):
+             size <=      128                   0                        0
+       128 < size <=     8192                   0                        0
+      8192 < size <=    32768                   0                        0
+     32768 < size <=   131072                   0                        0
+    131072 < size <=  4194304                   0                        0
+   4194304 < size <= 16777216                   0                        0
+  16777216 < size                               0                        0
+ -------------------------------------------------------------------------------
+
+ MEMORY| Estimated peak process memory [MiB]                                 576
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                         MESSAGE PASSING PERFORMANCE                         -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+
+ ROUTINE             CALLS      AVE VOLUME [Bytes]
+ MP_Group                5
+ MP_Bcast               65                5647296.
+ MP_Allreduce          102                   2781.
+ MP_Sync                 4
+ -------------------------------------------------------------------------------
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                           R E F E R E N C E S                               -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ 
+ CP2K version 5.1, the CP2K developers group (2017).
+ CP2K is freely available from https://www.cp2k.org/ .
+
+ Schuett, Ole; Messmer, Peter; Hutter, Juerg; VandeVondele, Joost. 
+ Electronic Structure Calculations on Graphics Processing Units, John Wiley & Sons, Ltd, 173-190 (2016). 
+ GPU-Accelerated Sparse Matrix-Matrix Multiplication for Linear Scaling Density Functional Theory.
+ http://dx.doi.org/10.1002/9781118670712.ch8
+
+
+ Borstnik, U; VandeVondele, J; Weber, V; Hutter, J. 
+ PARALLEL COMPUTING, 40 (5-6), 47-58 (2014). 
+ Sparse matrix multiplication: The distributed block-compressed sparse
+ row library.
+ http://dx.doi.org/10.1016/j.parco.2014.03.012
+
+
+ Hutter, J; Iannuzzi, M; Schiffmann, F; VandeVondele, J. 
+ WILEY INTERDISCIPLINARY REVIEWS-COMPUTATIONAL MOLECULAR SCIENCE, 4 (1), 15-25 (2014). 
+ CP2K: atomistic simulations of condensed matter systems.
+ http://dx.doi.org/10.1002/wcms.1159
+
+
+ VandeVondele, J; Hutter, J. 
+ JOURNAL OF CHEMICAL PHYSICS, 127 (11), 114105 (2007). 
+ Gaussian basis sets for accurate calculations on molecular systems in
+ gas and condensed phases.
+ http://dx.doi.org/10.1063/1.2770708
+
+
+ Krack, M. 
+ THEORETICAL CHEMISTRY ACCOUNTS, 114 (1-3), 145-152 (2005). 
+ Pseudopotentials for H to Kr optimized for gradient-corrected
+ exchange-correlation functionals.
+ http://dx.doi.org/10.1007/s00214-005-0655-y
+
+
+ VandeVondele, J; Krack, M; Mohamed, F; Parrinello, M; Chassaing, T;
+ Hutter, J. COMPUTER PHYSICS COMMUNICATIONS, 167 (2), 103-128 (2005). 
+ QUICKSTEP: Fast and accurate density functional calculations using a
+ mixed Gaussian and plane waves approach.
+ http://dx.doi.org/10.1016/j.cpc.2004.12.014
+
+
+ Frigo, M; Johnson, SG. 
+ PROCEEDINGS OF THE IEEE, 93 (2), 216-231 (2005). 
+ The design and implementation of FFTW3.
+ http://dx.doi.org/10.1109/JPROC.2004.840301
+
+
+ Kolafa, J. 
+ JOURNAL OF COMPUTATIONAL CHEMISTRY, 25 (3), 335-342 (2004). 
+ Time-reversible always stable predictor-corrector method for molecular dynamics of polarizable molecules.
+ http://dx.doi.org/10.1002/jcc.10385
+
+
+ Hartwigsen, C; Goedecker, S; Hutter, J. 
+ PHYSICAL REVIEW B, 58 (7), 3641-3662 (1998). 
+ Relativistic separable dual-space Gaussian pseudopotentials from H to Rn.
+ http://dx.doi.org/10.1103/PhysRevB.58.3641
+
+
+ Lippert, G; Hutter, J; Parrinello, M. 
+ MOLECULAR PHYSICS, 92 (3), 477-487 (1997). 
+ A hybrid Gaussian and plane wave density functional scheme.
+ http://dx.doi.org/10.1080/002689797170220
+
+
+ Perdew, JP; Burke, K; Ernzerhof, M. 
+ PHYSICAL REVIEW LETTERS, 77 (18), 3865-3868 (1996). 
+ Generalized gradient approximation made simple.
+ http://dx.doi.org/10.1103/PhysRevLett.77.3865
+
+
+ Goedecker, S; Teter, M; Hutter, J. 
+ PHYSICAL REVIEW B, 54 (3), 1703-1710 (1996). 
+ Separable dual-space Gaussian pseudopotentials.
+ http://dx.doi.org/10.1103/PhysRevB.54.1703
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                T I M I N G                                  -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ SUBROUTINE                       CALLS  ASD         SELF TIME        TOTAL TIME
+                                MAXIMUM       AVERAGE  MAXIMUM  AVERAGE  MAXIMUM
+ CP2K                                 1  1.0    0.007    0.009  361.707  361.708
+ vb_anal                              1  2.0  360.194  360.241  361.470  361.487
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 1
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2020-03-18 13:32:35.177
+ ***** ** ***  *** **   PROGRAM RAN ON                                     delta
+ **    ****   ******    PROGRAM RAN BY                                    felipe
+ ***** **    ** ** **   PROGRAM PROCESS ID                                  5610
+  **** **  *******  **  PROGRAM STOPPED IN /home/felipe/Primer/Python/qmflows/pl
+                                           ams_workdir/cp2k_freq

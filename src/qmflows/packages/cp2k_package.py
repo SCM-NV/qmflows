@@ -91,7 +91,7 @@ class CP2K(Package):
         :type mol: plams Molecule
 
         """
-        def write_cell_angles(s: Settings, value: Any,
+        def write_cell_angles(s: Settings, value: list,
                               mol: plams.Molecule, key: str) -> Settings:
             """Write the Angles for the cell.
 
@@ -105,7 +105,7 @@ class CP2K(Package):
             """
             if value is not None:
                 angles = '{} {} {}'.format(*value)
-                s.specific.cp2k.force_eval.subsys.cell.alpha_beta_gamma = angles
+                s.specific.cp2k.force_eval.subsys.cell.ALPHA_BETA_GAMMA = angles
 
             return s
 
