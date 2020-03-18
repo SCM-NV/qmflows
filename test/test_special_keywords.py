@@ -1,7 +1,11 @@
 """Test input keyword with special meaning."""
-from qmflows import (Settings, adf, dftb, orca)
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
+from scm.plams import Molecule
+
+from qmflows import Settings, adf, dftb, orca
+from qmflows.packages.cp2k_package import CP2K
+from qmflows.test_utils import PATH_MOLECULES
 
 indices = [3, 4, 5, 6]
 adf_const = {
@@ -101,3 +105,27 @@ def test_selected_atoms_with_orca():
         {'selected_atoms': indices, 'specific': orca_const})
 
     assertion.eq(str(orca.generic2specific(s, mol)), str(expected_settings))
+
+
+def test_cp2k_special_keywords():
+    """Test the translation from settings to CP2K specific keywords."""
+    abc = [5.958, 7.596, 15.610]
+    angles = [81.25, 86.56, 89.80]
+    ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
+
+    s = Settings()
+    s.cell_parameters = abc
+    s.cell_angles = angles
+    s.periodic = None
+
+    # apply transformations
+    CP2K.handle_special_keywords(s, "cell_parameters", abc, ETHYLENE)
+    CP2K.handle_special_keywords(s, "cell_angles", angles, ETHYLENE)
+    CP2K.handle_special_keywords(s, "periodic", None, ETHYLENE)
+
+    # compare with the reference
+    ref = Settings()
+    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 5.958 7.596 15.61"
+    ref.specific.cp2k.force_eval.subsys.cell.ALPHA_BETA_GAMMA = "81.25 86.56 89.8"
+    ref.specific.cp2k.force_eval.subsys.cell.periodic = None
+    assertion.eq(s.specific, ref.specific)

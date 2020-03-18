@@ -1,23 +1,15 @@
+"""Check yaml to Settings conversion."""
 
-__all__ = ['json2Settings', 'yaml2Settings']
+__all__ = ['yaml2Settings']
 
-import json
 import yaml
-
-from .utils import dict2Setting
-
-
-def json2Settings(xs):
-    """Transform a string containing some data in JSON format to a Settings object."""
-    if isinstance(xs, bytes):
-        xs = xs.decode()
-    s = json.loads(xs)  # Json object must be string
-    return dict2Setting(s)
+from typing import Union
+from .settings import Settings
 
 
-def yaml2Settings(xs):
+def yaml2Settings(xs: Union[bytes, str]) -> Settings:
     """Transform a string containing some data in .yaml format to a Settings object."""
     if isinstance(xs, bytes):
         xs = xs.decode()
     s = yaml.load(xs, Loader=yaml.FullLoader)  # yaml object must be string
-    return dict2Setting(s)
+    return Settings(s)

@@ -1,0 +1,67 @@
+&FORCE_EVAL
+  &DFT
+    BASIS_SET_FILE_NAME  test/test_files/BASIS_MOLOPT
+    &MGRID
+      CUTOFF  400
+      NGRIDS  4
+    &END
+    POTENTIAL_FILE_NAME  test/test_files/GTH_POTENTIALS
+    &QS
+      METHOD  gpw
+    &END
+    &SCF
+      &OT
+        N_DIIS  7
+        MINIMIZER  DIIS
+        PRECONDITIONER  full_single_inverse
+      &END
+      ADDED_MOS  0
+      EPS_SCF  1e-06
+      MAX_SCF  200
+      SCF_GUESS  atomic
+    &END
+    &XC
+      &XC_FUNCTIONAL
+        &PBE
+        &END
+      &END
+    &END
+  &END
+  &SUBSYS
+    &CELL
+      ABC   [angstrom] 10 10 10
+      PERIODIC  None
+    &END
+    &COORD 
+ C -2.58 0.068 0.0
+ H -2.047 -0.859 0.0
+ H -3.65 0.068 0.0
+ C -1.905 1.243 0.0
+ H -2.438 2.171 0.0
+ H -0.835 1.243 0.0
+    &END
+    &KIND  C
+      BASIS_SET  DZVP-MOLOPT-SR-GTH-q4
+      POTENTIAL  GTH-PBE-q4
+    &END
+    &KIND  H
+      BASIS_SET  DZVP-MOLOPT-SR-GTH-q1
+      POTENTIAL  GTH-PBE-q1
+    &END
+  &END
+&END
+
+&GLOBAL
+  PRINT_LEVEL  low
+  PROJECT  cp2k
+  RUN_TYPE  geometry_optimization
+&END
+
+&MOTION
+  &GEO_OPT
+    MAX_ITER  500
+    OPTIMIZER  bfgs
+    TYPE  minimization
+  &END
+&END
+
