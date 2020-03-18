@@ -78,7 +78,7 @@ except ImportError:
     try:
         # Plan B: Final was previously available in a third party package
         from typing_extensions import Final
-    except ImportError:
 
+    except ImportError:
         # Plan C; use it as a Literal alias
         Final = Literal

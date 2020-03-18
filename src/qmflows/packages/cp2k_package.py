@@ -13,7 +13,7 @@ from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
-from ..type_hints import WarnMap
+from ..type_hints import WarnMap, Final
 
 
 __all__ = ['cp2k']
@@ -191,5 +191,7 @@ class CP2K_Result(Result):
                          status=status, warnings=warnings)
 
 
-# instance
-cp2k = CP2K()
+#: An instance :class:`CP2K`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+cp2k: Final[CP2K] = CP2K()
