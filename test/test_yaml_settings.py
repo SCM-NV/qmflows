@@ -1,6 +1,6 @@
 """Test the conversion from yaml to settings."""
 from assertionlib import assertion
-from qmflows import Settings, templates
+from qmflows import Settings
 from qmflows.fileFunctions import yaml2Settings
 
 
