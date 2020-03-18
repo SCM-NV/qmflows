@@ -177,7 +177,12 @@ class Result:
         plams_dir = self.archive['plams_dir']
 
         # Search for the specified output file in the folders
-        file_pattern = ds.get('file_pattern', f'{self.job_name}*.{file_ext}')
+        if file_ext != "rkf":
+            file_pattern = ds.get(
+                'file_pattern', f'{self.job_name}*.{file_ext}')
+        else:
+            # AMS rename all the DFTB job names
+            file_pattern = "dftb.rkf"
 
         output_files = list(collapse(map(partial(find_file_pattern, file_pattern),
                                          [plams_dir, work_dir])))
@@ -250,7 +255,8 @@ class Result:
         # Failed to find or unpickle the .dill file; issue a warning
         if file_exc is not None:
             self._results = None
-            warn(f"{file_exc}, setting value to 'None'", category=QMFlows_Warning)
+            warn(f"{file_exc}, setting value to 'None'",
+                 category=QMFlows_Warning)
         else:
             self._results = results
 
@@ -340,7 +346,8 @@ class Package(ABC):
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                plams_mol = molkit.from_rdmol(mol) if isinstance(mol, Chem.Mol) else mol
+                plams_mol = molkit.from_rdmol(
+                    mol) if isinstance(mol, Chem.Mol) else mol
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -354,7 +361,8 @@ class Package(ABC):
 
                 # Check if there are warnings in the output that render the calculation
                 # useless from the point of view of the user
-                warnings_tolerance = kwargs.get("terminate_job_in_case_of_warnings")
+                warnings_tolerance = kwargs.get(
+                    "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
                 if all(w is not None for w in [warnings_tolerance, output_warnings]):
@@ -371,7 +379,8 @@ class Package(ABC):
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
-                warn(f"Job {job_name} has failed.\n{err}", category=QMFlows_Warning)
+                warn(f"Job {job_name} has failed.\n{err}",
+                     category=QMFlows_Warning)
                 result = Result(None, None, job_name=job_name, dill_path=None,
                                 properties=properties, status='failed')
         else:
@@ -386,7 +395,8 @@ class Package(ABC):
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
-        self.postrun(result, output_warnings, job_settings, plams_mol, **kwargs)
+        self.postrun(result, output_warnings,
+                     job_settings, plams_mol, **kwargs)
         return result
 
     def generic2specific(self, settings: Settings,
@@ -419,12 +429,14 @@ class Package(ABC):
             if k == "specific":
                 continue
             elif k == 'input':  # Allow for PLAMS-style input; i.e. settings.input.blablabla
-                specific_from_generic_settings.specific[self.pkg_name].update(v)
+                specific_from_generic_settings.specific[self.pkg_name].update(
+                    v)
                 continue
 
             key = generic_dict.get(k)
             if not key:
-                self.handle_special_keywords(specific_from_generic_settings, k, v, mol)
+                self.handle_special_keywords(
+                    specific_from_generic_settings, k, v, mol)
                 continue
 
             # The `key` variable can have four types of values:
@@ -451,7 +463,8 @@ class Package(ABC):
                     v = Settings(v)
                 specific_from_generic_settings.specific[self.pkg_name][key] = v
             else:
-                specific_from_generic_settings.specific[self.pkg_name][key] = Settings()
+                specific_from_generic_settings.specific[self.pkg_name][key] = Settings(
+                )
 
         return settings.overlay(specific_from_generic_settings)
 
@@ -489,7 +502,8 @@ class Package(ABC):
             A string representation of this instnce.
 
         """
-        vars_str = ', '.join(f'{k}={v!r}' for k, v in sorted(vars(self).items()))
+        vars_str = ', '.join(f'{k}={v!r}' for k,
+                             v in sorted(vars(self).items()))
         return f'{self.__class__.__name__}({vars_str})'
 
     def prerun(self, settings: Settings, mol: plams.Molecule, **kwargs: Any) -> None:

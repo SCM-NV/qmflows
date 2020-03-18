@@ -9,7 +9,7 @@ dipole:
     file_ext: out
     function: awk_file
     kwargs:
-        script: /Dipole/ {print $2; print $3; print $4}
+        script: /Dipole/ {print $5; print $6; print $7}
     parser: generic_parsers
 energy:
     file_ext: rkf

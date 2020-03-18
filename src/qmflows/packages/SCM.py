@@ -341,7 +341,7 @@ class DFTB_Result(Result):
                          status=status, warnings=warnings)
 
         if plams_dir is not None:
-            kf_filename = join(plams_dir, f'{job_name}.rkf')
+            kf_filename = join(plams_dir, 'dftb.rkf')
             # create a kf reader instance
             self.kf = plams.KFFile(kf_filename)
         else:
