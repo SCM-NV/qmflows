@@ -32,7 +32,6 @@ setup(
               "qmflows.examples",
               "qmflows.examples.Conditional_workflows",
               "qmflows.examples.Constrained_and_TS_optimizations",
-              "qmflows.examples.FDE_Fragments",
               "qmflows.packages",
               "qmflows.parsers",
               "qmflows.templates"],
