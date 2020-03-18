@@ -19,29 +19,11 @@ from .settings import Settings
 from .backports import nullcontext
 from .type_hints import PathLike
 
+#: Transform a Settings object into a dict.
+settings2Dict: Callable[[Settings], dict] = Settings.as_dict
 
-def settings2Dict(s: Settings) -> dict:
-    """Transform a Settings object into a dict."""
-    d = {}
-    for k, v in s.items():
-        if not isinstance(v, Settings):
-            d[k] = v
-        else:
-            d[k] = settings2Dict(v)
-
-    return d
-
-
-def dict2Setting(d: dict) -> Settings:
-    """Transform recursively a dict into a Settings object."""
-    r = Settings()
-    for k, v in d.items():
-        if isinstance(v, dict):
-            r[k] = dict2Setting(v)
-        else:
-            r[k] = v
-
-    return r
+#: Transform recursively a dict into a Settings object.
+dict2Setting: Callable[[dict], Settings] = Settings
 
 
 def to_runtime_error(func: Callable) -> Callable:
@@ -74,12 +56,14 @@ def to_runtime_error(func: Callable) -> Callable:
         except Exception as ex:
             if isinstance(ex, RuntimeError):
                 raise ex
-            raise RuntimeError(f"{key!r} section: {ex}").with_traceback(
-                ex.__traceback__) from ex
+
+            exc = RuntimeError(f"{key!r} section: {ex}")
+            raise exc.with_traceback(ex.__traceback__) from ex
     return wrapper
 
 
-def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
+def file_to_context(file: Union[PathLike, IO],
+                    require_iterator: bool = True,
                     **kwargs: Any) -> ContextManager[IO]:
     r"""Take a path- or file-like object and return an appropiate context manager instance.
 
@@ -108,7 +92,7 @@ def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
         A `path- <https://docs.python.org/3/glossary.html#term-path-like-object>`_ or
         `file-like <https://docs.python.org/3/glossary.html#term-file-object>`_ object.
 
-    allow_iterator : :class:`bool`
+    require_iterator : :class:`bool`
         If``True``, loosen the constraints on what constitutes a file-like object
         and allow *file* to-be an :class:`~collections.abc.Iterator`.
 
@@ -129,14 +113,14 @@ def file_to_context(file: Union[PathLike, IO], allow_iterator: bool = True,
 
     # a file-like object (hopefully)
     except TypeError as ex:
-        if allow_iterator and not isinstance(file, abc.Iterator):
+        if require_iterator and not isinstance(file, abc.Iterator):
             raise TypeError("'file' expected a file- or path-like object; "
                             f"observed type: {file.__class__.__name__!r}") from ex
         return nullcontext(file)
 
 
-def init_restart(path: Union[None, str, os.PathLike] = None,
-                 folder: Union[None, str, os.PathLike] = None,
+def init_restart(path: Optional[PathLike] = None,
+                 folder: Optional[PathLike] = None,
                  load_jobs: bool = False) -> None:
     """Call the PLAMS |init| function without creating a new directory.
 
@@ -209,8 +193,8 @@ class InitRestart(AbstractContextManager):
 
     """
 
-    def __init__(self, path: Union[None, str, os.PathLike] = None,
-                 folder: Union[None, str, os.PathLike] = None,
+    def __init__(self, path: Optional[PathLike] = None,
+                 folder: Optional[PathLike] = None,
                  otherJM: Optional[Iterable[JobManager]] = None,
                  load_jobs: bool = False) -> None:
         """Initialize the context manager, assign the path, folder and jobmanagers."""
