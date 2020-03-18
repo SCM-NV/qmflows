@@ -1,22 +1,37 @@
 charges:
     file_ext: rkf
-    function: extract_properties_rkf
+    function: kfreader
     kwargs:
-        key: Atomic Charge
-        subkey: Net
+        section: AMSResults
+        prop: Charges
     parser: adf_parser
 dipole:
-    file_ext: out
-    function: awk_file
+    file_ext: rkf
+    function: kfreader    
     kwargs:
-        script: /Dipole/ {print $5; print $6; print $7}
-    parser: generic_parsers
+        section: AMSResults
+        prop: DipoleMoment
+    parser: adf_parser
 energy:
     file_ext: rkf
-    function: extract_properties_rkf
+    function: kfreader
     kwargs:
-        key: Energy
-        subkey: DFTB Final Energy
+        section: AMSResults
+        prop: Energy
+    parser: adf_parser
+enthalpy:
+    file_ext: rkf
+    function: kfreader
+    kwargs:
+        section: Thermodynamics
+        prop: Enthalpy
+    parser: adf_parser
+free_energy:
+    file_ext: rkf
+    function: kfreader
+    kwargs:
+        section: Thermodynamics
+        prop: 'Gibbs free Energy'
     parser: adf_parser
 frequencies:
     file_ext: rkf
@@ -27,15 +42,8 @@ frequencies:
     parser: adf_parser
 hessian:
     file_ext: rkf
-    function: extract_properties_rkf
-    kwargs:
-        key: Hessian
-        subkey: Generic
-    parser: adf_parser
-optcycles:
-    file_ext: rkf
     function: kfreader
     kwargs:
-        prop: nEntries
-        section: History
+        section: AMSResults
+        prop: Hessian
     parser: adf_parser

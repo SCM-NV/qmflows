@@ -1,0 +1,18 @@
+Properties
+  NormalModes
+end
+
+Task SinglePoint
+
+system
+  atoms
+              O     -0.0003379221      0.3978151187      0.0000000000 
+              H     -0.7632984581     -0.1995565889      0.0000000000 
+              H      0.7636363802     -0.1982585298      0.0000000000 
+  end
+end
+
+engine dftb
+  resourcesdir DFTB.org/3ob-3-1
+endengine
+

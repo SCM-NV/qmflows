@@ -310,7 +310,7 @@ specific:
         main: freq
 """, Loader=yaml.FullLoader))
 
-#: Templates for moleculair dynamics (MD) calculations.
+#: Templates for molecular dynamics (MD) calculations.
 md = Settings(yaml.load("""
 specific:
     adf: Null

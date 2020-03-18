@@ -8,6 +8,7 @@ from os.path import join
 from typing import Any, ClassVar, Optional, Union
 from warnings import warn
 
+import numpy as np
 from scm import plams
 
 from ..settings import Settings
@@ -188,27 +189,16 @@ class ADF_Result(Result):
         return self.kf.read(section, prop)
 
     @property
-    def molecule(self, unit: str = 'bohr',
-                 internal: bool = False,
-                 n: int = 1) -> Optional[plams.Molecule]:
+    def molecule(self) -> Optional[plams.Molecule]:
         """WARNING: Cheap copy from PLAMS, do not keep this!!!."""
         try:
             m = self._molecule.copy()
         except AttributeError:
             return None  # self._molecule can be None
-        natoms = len(m)
         # Find out correct location
         coords = self.kf.read('Geometry', 'xyz InputOrder')
-        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
-
-        if len(coords) > natoms:
-            coords = coords[(n - 1) * natoms: n * natoms]
-        if internal:
-            mapping = self._int2inp()
-            coords = [coords[mapping[i] - 1] for i in range(len(coords))]
-        for at, coord in zip(m, coords):
-            at.move_to(coord, unit)
-
+        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
+        m.from_array(coords)
         return m
 
 
@@ -236,23 +226,15 @@ class DFTB_Result(Result):
             self.kf = None
 
     @property
-    def molecule(self, unit: str = 'bohr',
-                 internal: bool = False,
-                 n: int = 1) -> plams.Molecule:
+    def molecule(self) -> plams.Molecule:
         """Read molecule from output."""
-        m = self._molecule.copy()
-        natoms = len(m)
+        try:
+            m = self._molecule.copy()
+        except AttributeError:
+            return None  # self._molecule can be None
         coords = self.kf.read('Molecule', 'Coords')
-        coords = [coords[i: i + 3] for i in range(0, len(coords), 3)]
-
-        if len(coords) > natoms:
-            coords = coords[(n - 1) * natoms: n * natoms]
-        if internal:
-            mapping = self._int2inp()
-            coords = [coords[mapping[i] - 1] for i in range(len(coords))]
-        for at, coord in zip(m, coords):
-            at.move_to(coord, 'bohr')
-
+        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
+        m.from_array(coords)
         return m
 
 
