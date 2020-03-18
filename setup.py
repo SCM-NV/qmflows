@@ -50,7 +50,7 @@ setup(
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
         'test': ['pytest', 'pytest-cov', 'pytest-mock', 'typing_extensions',
-                 'assertionlib', pycodestyle'],
+                 'assertionlib', 'pycodestyle'],
         'doc': ['sphinx>=2.1', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )
