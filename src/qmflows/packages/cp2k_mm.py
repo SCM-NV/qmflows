@@ -13,7 +13,6 @@ API
 """
 
 import os
-from pathlib import Path
 from os.path import join, abspath
 from typing import Union, Any, ClassVar, Mapping, Dict, Optional
 
@@ -25,7 +24,7 @@ from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special, WarnMap
+from ..type_hints import Generic2Special, WarnMap, Final
 
 __all__ = ['cp2k_mm']
 
@@ -70,6 +69,8 @@ class CP2KMM(CP2K):
 
         # Fix this at some point in the future
         """
+        from pathlib import Path
+
         # Identify the number of pre-existing jobs
         jm = plams.config.default_jobmanager
         i = 1 + sum(jm.names.values())
@@ -218,4 +219,7 @@ CP2KMM.SPECIAL_FUNCS = {
 for k in CP2K_KEYS_ALIAS:
     CP2KMM.SPECIAL_FUNCS[k] = set_prm
 
-cp2k_mm = CP2KMM()
+#: An instance :class:`CP2KMM`.
+#: Only one instance of this class should exist at any given momemt;
+#: *i.e.* this value is a singleton.
+cp2k_mm: Final[CP2KMM] = CP2KMM()
