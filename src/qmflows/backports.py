@@ -65,7 +65,7 @@ try:
     from contextlib import nullcontext
 except ImportError:  # nullcontext was added in python 3.7
     nullcontext = _NullContextBackup
-    nullcontext.__name__ = nullcontext
+    nullcontext.__name__ = 'nullcontext'
 
 
 try:  # Plan A: literal was added in Python 3.8
