@@ -5,6 +5,7 @@ import fnmatch
 import importlib
 import inspect
 import os
+import sys
 import uuid
 import warnings
 from abc import abstractmethod, ABC
@@ -190,7 +191,8 @@ class Result:
             ret = ignore_unused_kwargs(fun, [file_out], kwargs)
 
             # Cache the property and return
-            setattr(self, prop, ret)
+            if sys.getsizeof(ret) < 10e5:
+                setattr(self, prop, ret)
             return ret
         else:
             raise FileNotFoundError(f"""
