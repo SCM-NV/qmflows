@@ -13,7 +13,6 @@ API
 """
 
 import os
-from pathlib import Path
 from os.path import join, abspath
 from typing import Union, Any, ClassVar, Mapping, Dict, Optional
 
@@ -70,6 +69,8 @@ class CP2KMM(CP2K):
 
         # Fix this at some point in the future
         """
+        from pathlib import Path
+
         # Identify the number of pre-existing jobs
         jm = plams.config.default_jobmanager
         i = 1 + sum(jm.names.values())
