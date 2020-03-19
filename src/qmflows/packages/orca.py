@@ -4,7 +4,7 @@ __all__ = ['orca']
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional, ClassVar
+from typing import Any, Union, Optional, ClassVar, List
 
 import numpy as np
 from noodles import schedule
@@ -70,11 +70,11 @@ class ORCA(Package):
             # Convert Hessian to numpy array
             value = value if isinstance(value, np.ndarray) else np.array(value)
 
-            def format_atom(atom):
+            def format_atom(atom: plams.Atom) -> str:
                 symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
                 return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
-            def format_hessian(dim, hess):
+            def format_hessian(dim: int, hess: List[List[float]]) -> str:
                 """Format numpy array to Orca matrix format."""
                 ret = ''
                 for i in range((dim - 1) // 6 + 1):
@@ -138,7 +138,7 @@ class ORCA(Package):
                         warn(f'Invalid constraint key: {k}', category=Key_Warning)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def freeze(value: Any) -> None:
+        def freeze(value: List[Union[int, str]]) -> None:
             if not isinstance(value, list):
                 msg = f'selected_atoms {value} is not a list'
                 raise RuntimeError(msg)
@@ -152,7 +152,7 @@ class ORCA(Package):
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def selected_atoms(value: Any) -> None:
+        def selected_atoms(value: List[Union[int, str]]) -> None:
             if not isinstance(value, list):
                 raise RuntimeError(f'selected_atoms {value} is not a list')
             cons = ''
@@ -196,12 +196,16 @@ class ORCA_Result(Result):
     @property
     def molecule(self) -> Optional[plams.Molecule]:
         """Retrieve the molecule from the output file."""
-        if self.status not in ['crashed', 'failed']:
-            plams_dir = self.archive["plams_dir"]
-            file_name = join(plams_dir, f'{self.job_name}.out')
-            return parse_molecule(file_name, self._molecule)
-        else:
+        if self.status in {'crashed', 'failed'}:
             return None
+
+        plams_dir = self.archive["plams_dir"]
+        try:
+            file_name = join(plams_dir, f'{self.job_name}.out')
+        except TypeError:  # plams_dir can be None
+            return None
+        else:
+            return parse_molecule(file_name, self._molecule)
 
 
 #: An instance :class:`ORCA`.

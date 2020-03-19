@@ -7,7 +7,6 @@ import fnmatch
 import os
 import subprocess
 from io import TextIOBase
-from collections import namedtuple
 from itertools import islice
 from typing import (Union, Any, Type, Generator, Iterable, Tuple,
                     List, Sequence, TypeVar, overload, FrozenSet, Dict)
@@ -25,28 +24,10 @@ from pyparsing import (
 from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 from ..utils import file_to_context
-from ..common import AtomBasisData, AtomBasisKey, InfoMO
+from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata
 from ..warnings_qmflows import QMFlows_Warning
 from ..type_hints import WarnMap, WarnDict, PathLike, T
 from ..type_hints import Literal as Literal_
-
-# =========================<>=============================
-MO_metadata = namedtuple("MO_metadada", ("nOccupied", "nOrbitals", "nOrbFuns"))
-
-# Molecular Orbitals Parsing
-# MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
-
-# 1                      2
-#                          -0.9857682741370732    -0.9831467097855797
-
-#                           2.0000000000000000     2.0000000000000000
-
-#     1     1 cd  2s       -0.0015026981889089    -0.0103313715516893
-#     2     1 cd  3s       -0.0005376142747880    -0.0041729598190025
-#     3     1 cd  3py      -0.0013790317507575     0.0132729535025288
-#     4     1 cd  3pz      -0.0015557487597731    -0.0005486094359245
-#     5     1 cd  3px      -0.0013339995106232    -0.0100914249163043
-#     6     1 cd  4py      -0.0003884918433452     0.0046068283721132
 
 
 def read_xyz_file(file_name: PathLike) -> Molecule:
