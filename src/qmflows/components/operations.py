@@ -2,17 +2,25 @@
 
 __all__ = ['find_first_job', 'select_max', 'select_min']
 
+from typing import Callable, Iterable, Any
+
 from noodles import find_first, schedule
 from scm.plams import Molecule
 
-from ..packages import Result
+from ..packages import Result, Package
 from ..settings import Settings
+from ..type_hints import PromisedObject
+
+#: A function which takes a PromisedObject as argument and returns a boolean.
+Predicate = Callable[[PromisedObject], bool]
 
 
 @schedule
-def find_first_job(
-        pred: callable, packagelist: list, settings: Settings, molecule: Molecule,
-        job_name: str, **kwargs) -> Result:
+def find_first_job(pred: Predicate,
+                   packagelist: Iterable[Package],
+                   settings: Settings,
+                   molecule: Molecule,
+                   job_name: str, **kwargs: Any) -> Result:
     """Return the first job to finish."""
     joblist = [package(
         settings, molecule, job_name=f"{package.pkg_name}_{job_name}", **kwargs)
@@ -21,32 +29,28 @@ def find_first_job(
 
 
 @schedule
-def select_max(results: Result, prop: str = 'energy'):
+def select_max(results: Iterable[Result], prop: str = 'energy') -> Result:
     """Select a result with the maximum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because
     the job failed) the result is ignored.
     """
-    filtered_results = [
-        result for result in results if result and result.__getattr__(prop)]
-    if len(filtered_results) > 0:
-        selected = max(filtered_results, key=lambda item: getattr(item, prop))
-        return selected
-    else:
+    generator = (result for result in results if getattr(result, prop, None))
+    try:
+        return max(generator, key=lambda item: getattr(item, prop))
+    except ValueError:  # Raised if generator is empty
         return None
 
 
 @schedule
-def select_min(results: Result, prop='energy'):
+def select_min(results: Iterable[Result], prop: str = 'energy') -> Result:
     """Select a result with the minimum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because
     the job failed) the result is ignored.
     """
-    filtered_results = [
-        result for result in results if result and result.__getattr__(prop)]
-    if len(filtered_results) > 0:
-        selected = min(filtered_results, key=lambda item: getattr(item, prop))
-        return selected
-    else:
+    generator = (result for result in results if getattr(result, prop, None))
+    try:
+        return min(generator, key=lambda item: getattr(item, prop))
+    except ValueError:  # Raised if generator is empty
         return None
