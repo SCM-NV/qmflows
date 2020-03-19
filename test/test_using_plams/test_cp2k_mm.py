@@ -3,7 +3,6 @@ import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
-from qmflows.utils import RestartInit
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
 from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
