@@ -7,6 +7,7 @@ from scm.plams import Molecule
 from qmflows import Settings, adf, dftb, orca
 from qmflows.packages.cp2k_package import CP2K
 from qmflows.packages.orca import ORCA
+from qmflows.packages.SCM import ADF
 from qmflows.parsers.adf_parser import kfreader
 from qmflows.parsers.orca_parser import parse_hessian
 from qmflows.test_utils import PATH, PATH_MOLECULES
@@ -177,4 +178,31 @@ def test_orca_constrains():
     s.constraint['dihed 1 2 3 4'] = 180  # Constrain Dihedral to 180
     ORCA.handle_special_keywords(
         s, "constraint", Settings({'dihed 1 2 3 4': 180}), ethylene)
-    assertion.eq(s.specific.orca.geom.Constraints._end, "{ D 0 1 2 3 180.00 C }")
+    assertion.eq(s.specific.orca.geom.Constraints._end,
+                 "{ D 0 1 2 3 180.00 C }")
+
+
+def test_adf_constrains():
+    """Test the geometry constrains in ADF."""
+    ethylene = PATH_MOLECULES / "molecules" / "ethylene.xyz"
+
+    # Test distance constrains
+    s = Settings()
+    s.constraint['dist 1 2'] = 1.1  # Constrain C-H bond to 1.1 Angstrom
+    ADF.handle_special_keywords(
+        s, "constraint", Settings({'dist 1 2': 1.1}), ethylene)
+    assertion.eq(s.specific.adf.constraints, Settings({"dist 1 2": 1.1}))
+
+    # Test distance angles
+    s = Settings()
+    s.constraint['angle 1 2 3'] = 109.5  # Constrain C-H bond to 1.1 Angstrom
+    ADF.handle_special_keywords(
+        s, "constraint", Settings({'angle 1 2 3': 109.5}), ethylene)
+    assertion.eq(s.specific.adf.constraints, Settings({'angle 1 2 3': 109.5}))
+
+    # Test distance dihedral
+    s = Settings()
+    s.constraint['dihe 1 2 3 4'] = 180  # Constrain C-H bond to 1.1 Angstrom
+    ADF.handle_special_keywords(
+        s, "constraint", Settings({'dihed 1 2 3 4': 180}), ethylene)
+    assertion.eq(s.specific.adf.constraints, Settings({'dihed 1 2 3 4': 180}))

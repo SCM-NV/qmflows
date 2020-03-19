@@ -6,7 +6,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 def example_generic_constraints():
-    """
+    """Run different job with geometric constrains.
     This examples illustrates that, by using generic keywords, it is possible
     to call different packages interchangeably with the same Settings
     """
