@@ -14,7 +14,6 @@ from collections import Counter, abc
 
 from scm.plams import config, init, finish, JobManager, load_all
 
-from .settings import Settings
 from .backports import nullcontext
 from .type_hints import PathLike
 
