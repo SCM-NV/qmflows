@@ -1,6 +1,6 @@
 """A module with warnings used throughout QMFlows."""
 
-from math import isclose, inf
+from math import isclose
 from typing import Optional, Collection
 
 from pyparsing import ZeroOrMore, Suppress, SkipTo
@@ -42,10 +42,10 @@ class Charge_Warning(Parameter_Warning):
 
 def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
     """Check of the total molecular charge is integer within a given *tolerance*."""
-    charge = float(msg.rsplit(' ', maxsplit=1)[1])
-    charge_int = int(charge)
+    charge = float(msg.rsplit(maxsplit=1)[1])
+    charge_int = round(charge)
 
-    condition = isclose(charge, charge_int, rel_tol=inf, abs_tol=tolerance)
+    condition = isclose(charge, charge_int, rel_tol=0, abs_tol=tolerance)
     return None if condition else msg.rstrip()
 
 
