@@ -10,7 +10,7 @@ from pyparsing import OneOrMore, SkipTo, Suppress
 from qmflows.parsers.parser import parse_file
 
 
-def awk_file(filename, script='', progfile=None, **kwargs):
+def awk_file(filename, script='', progfile=None):
     r"""Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
@@ -20,14 +20,9 @@ def awk_file(filename, script='', progfile=None, **kwargs):
     script using *progfile* argument. If *progfile* is not ``None``, the
     *script* argument is ignored.
 
-    Other keyword arguments (*\*\*kwargs*) can be used to pass additional
-    variables to AWK (see ``-v`` flag in AWK manual)
-
     Returned value is a list of lines (strings). See ``man awk`` for details.
     """
     cmd = ['awk']
-    for k, v in kwargs.items():
-        cmd += ['-v', '%s=%s' % (k, v)]
     if progfile:
         if os.path.isfile(progfile):
             cmd += ['-f', progfile]
