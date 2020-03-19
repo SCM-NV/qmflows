@@ -29,7 +29,7 @@ from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
 from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping, NoReturn,
-                    Sequence, Any, Iterable)
+                    Sequence, Any, Iterable, Iterator)
 
 import numpy as np
 import pandas as pd
@@ -322,7 +322,7 @@ def set_prm_values(prm_key, prm_map, atom_map,
     except KeyError:
         unit_iter = repeat('{}')
     else:
-        unit_iter = _parse_unit(unit)
+        unit_iter = _parse_unit(unit)  # type: ignore
 
     # Construct a DataFrame of parameters
     df = _construct_df(prm_key, prm_map)
@@ -390,6 +390,7 @@ def _construct_df(columns, prm_map) -> pd.DataFrame:
             data = prm_map.values.T
         else:
             data = np.array([v for v in prm_map.values()], dtype=str)
+
         if data.ndim == 1:
             data.shape = -1, 1
             columns_ = [columns]
@@ -453,10 +454,10 @@ def _raise_df_exc_scalar(columns: str, prm_map: MappingScalar, ex: Exception) ->
                     f"{v.__class__.__name__!r}") from ex
 
 
-def _validate_unit(unit_iter: Union[repeat, Sequence[str]], columns: Sequence[str]) -> None:
+def _validate_unit(unit_iter: Union[Iterator[str], Sequence[str]], columns: Sequence[str]) -> None:
     """Check if *unit_str* and *columns* in :func:`set_prm_values` are of the same length."""
     column_count = len(columns)
-    if isinstance(unit_iter, repeat):
+    if isinstance(unit_iter, abc.Iterator):
         return  # It's a itertools.repeat instance; this is fine
 
     elif len(unit_iter) != column_count:
