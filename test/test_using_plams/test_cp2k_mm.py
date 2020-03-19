@@ -3,6 +3,7 @@ import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
+from qmflows.utils import RestartInit
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
 from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
@@ -37,7 +38,7 @@ def test_singlepoint() -> None:
     s = SETTINGS.copy()
     s.specific.cp2k += singlepoint.specific.cp2k_mm
 
-    job = cp2k_mm(settings=s, mol=MOL)
+    job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_sp')
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
@@ -53,7 +54,7 @@ def test_geometry() -> None:
     s = SETTINGS.copy()
     s.specific.cp2k += geometry.specific.cp2k_mm
 
-    job = cp2k_mm(settings=s, mol=MOL)
+    job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_opt')
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
@@ -66,7 +67,9 @@ def test_geometry() -> None:
     _xyz = np.array(result.geometry)
     _xyz -= _xyz.mean(axis=0)[None, ...]
     xyz = overlap_coords(_xyz, xyz_ref)
-    np.testing.assert_allclose(xyz, xyz_ref, rtol=np.inf, atol=0.05)
+
+    r_mean = np.linalg.norm(xyz - xyz_ref, axis=1).mean()
+    assertion.le(r_mean, 0.1)
 
 
 @pytest.mark.slow
@@ -78,19 +81,19 @@ def test_freq() -> None:
     s = SETTINGS.copy()
     s.specific.cp2k += freq.specific.cp2k_mm
 
-    job = cp2k_mm(settings=s, mol=mol)
+    job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_freq')
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 
     freqs = result.frequencies
     freqs_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.freq.npy')
-    np.testing.assert_allclose(freqs, freqs_ref, rtol=np.inf, atol=5.0)
+    np.testing.assert_allclose(freqs, freqs_ref, rtol=0, atol=5.0)
 
     G = result.free_energy
     H = result.enthalpy
     H_ref = -8642.371633064053
     assertion.isnan(G)
-    assertion.isclose(H, H_ref, rtol=np.inf, atol=0.1)
+    assertion.isclose(H, H_ref, rel_tol=0.1)
 
 
 @pytest.mark.slow
@@ -103,7 +106,7 @@ def test_md() -> None:
     s.specific.cp2k += md.specific.cp2k_mm
     s.specific.cp2k.motion.md.steps = 1000
 
-    job = cp2k_mm(settings=s, mol=mol)
+    job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_md')
     result = run(job, path=PATH)
     assertion.eq(result.status, 'successful')
 

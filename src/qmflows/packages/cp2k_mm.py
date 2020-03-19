@@ -41,8 +41,8 @@ class CP2KMM_Result(Result):
                  status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
-                         work_dir=work_dir, properties=package_properties['cp2kmm'],
+        super().__init__(settings, molecule, job_name, dill_path, plams_dir,
+                         work_dir=work_dir, properties=package_properties['cp2k_mm'],
                          status=status, warnings=warnings)
 
 

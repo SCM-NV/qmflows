@@ -1,0 +1,3 @@
+#!/bin/sh
+
+cp2k.ssmp -i cp2k_mm_freq.in -o cp2k_mm_freq.out
