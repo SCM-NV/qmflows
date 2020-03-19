@@ -4,7 +4,7 @@ from pytest_mock import mocker
 from scm.plams import Molecule
 
 from qmflows import adf, templates
-from qmflows.packages import Result, package_properties
+from qmflows.packages.SCM import ADF_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
 WORKDIR = PATH / "output_adf"
@@ -19,9 +19,9 @@ def test_adf_mock(mocker):
     jobname = "ADFjob"
     dill_path = WORKDIR / jobname / "ADFjob.dill"
     plams_dir = WORKDIR / jobname
-    adf_properties = package_properties["adf"]
-    run_mocked.return_value = Result(templates.geometry, mol, jobname, dill_path=dill_path,
-                                     plams_dir=plams_dir, properties=adf_properties)
+    path_t21 = WORKDIR / jobname / "ADFjob.t21"
+    run_mocked.return_value = ADF_Result(templates.geometry, mol, jobname, path_t21,
+                                         dill_path=dill_path, plams_dir=plams_dir)
     rs = run_mocked(job)
     assertion.isfinite(rs.energy)
     assertion.isfinite(rs.homo)
@@ -32,3 +32,9 @@ def test_adf_mock(mocker):
     assertion.len_eq(rs.dipole, 3)
     # number of steps until convergence
     assertion.eq(rs.optcycles, 8)
+
+    # Test molecule
+    # Molecule
+    mol = rs.molecule
+    assertion.isinstance(mol, Molecule)
+    assertion.len_eq(mol, 6)  # there are 6 atoms
