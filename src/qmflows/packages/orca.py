@@ -7,7 +7,6 @@ from warnings import warn
 from typing import Any, Union, Optional, ClassVar
 
 import numpy as np
-from noodles import schedule
 from scm import plams
 
 from .packages import Package, Result, get_tmpfile_name, package_properties
@@ -60,7 +59,6 @@ class ORCA(Package):
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Translate generic keywords to their corresponding Orca keywords."""
-        @schedule
         def inithess(value: Any) -> Settings:
             """Generate an seperate file containing the initial Hessian matrix.
 
@@ -74,7 +72,7 @@ class ORCA(Package):
                 symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
                 return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
-            def format_hessian(dim, hess):
+            def format_hessian(dim, hess: Union[list, np.array]) -> str:
                 """Format numpy array to Orca matrix format."""
                 ret = ''
                 for i in range((dim - 1) // 6 + 1):
@@ -135,7 +133,8 @@ class ORCA(Package):
                         cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(
                             *atoms, v)
                     else:
-                        warn(f'Invalid constraint key: {k}', category=Key_Warning)
+                        warn(
+                            f'Invalid constraint key: {k}', category=Key_Warning)
             settings.specific.orca.geom.Constraints._end = cons
 
         def freeze(value: Any) -> None:

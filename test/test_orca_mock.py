@@ -5,7 +5,7 @@ from pytest_mock import mocker
 from scm.plams import Molecule
 
 from qmflows import Settings, orca
-from qmflows.packages import Result, package_properties
+from qmflows.packages.orca import ORCA_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
 WORKDIR = PATH / "output_orca"
@@ -25,9 +25,8 @@ def test_orca_mock(mocker):
     jobname = "ORCAjob"
     dill_path = WORKDIR / jobname / "ORCAjob.dill"
     plams_dir = WORKDIR / jobname
-    adf_properties = package_properties["orca"]
-    run_mocked.return_value = Result(s, methanol, jobname, dill_path=dill_path,
-                                     plams_dir=plams_dir, properties=adf_properties)
+    run_mocked.return_value = ORCA_Result(s, methanol, jobname, dill_path=dill_path,
+                                          plams_dir=plams_dir)
     rs = run_mocked(job)
 
     assertion.isfinite(rs.energy)
@@ -51,3 +50,8 @@ def test_orca_mock(mocker):
     # Orbitals
     orbs = rs.orbitals
     assert np.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
+
+    # Molecule
+    mol = rs.molecule
+    assertion.isinstance(mol, Molecule)
+    assertion.len_eq(mol, 6)  # there are 6 atoms

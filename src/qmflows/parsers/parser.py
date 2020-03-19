@@ -83,10 +83,10 @@ def string_array_to_molecule(
         else:
             raise RuntimeError('Output molecule does not match input molecule')
     else:
-        plams_mol = Molecule()
+        mol = Molecule()
         for e, c in zip(elems, coords):
-            plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
-    return plams_mol
+            mol.add_atom(Atom(symbol=e, coords=tuple(c)))
+    return mol
 
 
 def try_search_pattern(pat: str, file_name: PathLike) -> typing.Optional[str]:
