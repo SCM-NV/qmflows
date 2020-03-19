@@ -19,7 +19,6 @@ def test_fail_scm(tmpdir):
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=QMFlows_Warning)
 
-        # 5 membered ring from which ozone will dissociate
         mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
         # Some dftb specific settings
