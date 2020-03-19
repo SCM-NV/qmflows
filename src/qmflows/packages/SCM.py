@@ -14,8 +14,8 @@ from scm import plams
 from ..settings import Settings
 from ..type_hints import Final, WarnMap
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
-from .packages import Package, Result, get_tmpfile_name, package_properties
-
+from .packages import Package, Result, package_properties
+from ..utils import get_tmpfile_name
 # ========================= ADF ============================
 
 
@@ -124,10 +124,10 @@ class ADF(Package):
                         settings.specific.adf.constraints[at] = ""
 
         def inithess() -> None:
-            hess_path = get_tmpfile_name()
+            hess_path = get_tmpfile_name("ADF_hessian_")
             hess_file = open(hess_path, "w")
             hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
-            settings.specific.adf.geometry.inithess = hess_path
+            settings.specific.adf.geometry.inithess = hess_path.as_posix()
 
         def constraint() -> None:
             if isinstance(value, Settings):

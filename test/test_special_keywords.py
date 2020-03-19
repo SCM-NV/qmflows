@@ -1,11 +1,15 @@
 """Test input keyword with special meaning."""
+import numpy as np
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, adf, dftb, orca
 from qmflows.packages.cp2k_package import CP2K
-from qmflows.test_utils import PATH_MOLECULES
+from qmflows.packages.orca import ORCA
+from qmflows.parsers.adf_parser import kfreader
+from qmflows.parsers.orca_parser import parse_hessian
+from qmflows.test_utils import PATH, PATH_MOLECULES
 
 indices = [3, 4, 5, 6]
 adf_const = {
@@ -129,3 +133,48 @@ def test_cp2k_special_keywords():
     ref.specific.cp2k.force_eval.subsys.cell.ALPHA_BETA_GAMMA = "81.25 86.56 89.8"
     ref.specific.cp2k.force_eval.subsys.cell.periodic = None
     assertion.eq(s.specific, ref.specific)
+
+
+def test_orca_init_hessian():
+    """Test the translation from settings to CP2K specific keywords."""
+    # Read Hessian from DFTB
+    PATH_RKF = PATH / "output_dftb" / "dftb_freq" / "dftb.rkf"
+    assertion.truth(PATH_RKF.exists())
+    hess = kfreader(PATH_RKF, section="AMSResults", prop="Hessian")
+    water = molkit.from_smiles('[OH2]', forcefield='mmff')
+
+    # Tess Hessian initialization
+    s = Settings()
+    hess = np.array(hess).reshape(9, 9)
+    s.inithess = hess
+    ORCA.handle_special_keywords(s, "inithess", hess, water)
+
+    # Test that the hessian is readable
+    new_hess = parse_hessian(s.specific.orca.geom.InHessName)
+    new_hess = np.array(new_hess, dtype=np.float)
+    assertion.truth(np.allclose(hess, new_hess, atol=1e-5))
+
+
+def test_orca_constrains():
+    """Test geometry constrains in orca."""
+    ethylene = PATH_MOLECULES / "molecules" / "ethylene.xyz"
+
+    # Test distance constrains
+    s = Settings()
+    s.constraint['dist 1 2'] = 1.1  # Constrain C-H bond to 1.1 Angstrom
+    ORCA.handle_special_keywords(
+        s, "constraint", Settings({'dist 1 2': 1.1}), ethylene)
+    assertion.eq(s.specific.orca.geom.Constraints._end, "{ B 0 1 1.10 C }")
+
+    # Test angle constrains
+    s = Settings()
+    s.constraint['angle 1 2 3'] = 109.5  # Constrain H-C-H to 109.5
+    ORCA.handle_special_keywords(
+        s, "constraint", Settings({'angle 1 2 3': 109.5}), ethylene)
+    assertion.eq(s.specific.orca.geom.Constraints._end, "{ A 0 1 2 109.50 C }")
+
+    s = Settings()
+    s.constraint['dihed 1 2 3 4'] = 180  # Constrain Dihedral to 180
+    ORCA.handle_special_keywords(
+        s, "constraint", Settings({'dihed 1 2 3 4': 180}), ethylene)
+    assertion.eq(s.specific.orca.geom.Constraints._end, "{ D 0 1 2 3 180.00 C }")

@@ -13,10 +13,16 @@ from contextlib import redirect_stdout, AbstractContextManager
 from collections import Counter, abc
 
 from scm.plams import config, init, finish, JobManager, load_all
-
-from .settings import Settings
+from pathlib import Path
 from .backports import nullcontext
 from .type_hints import PathLike
+
+import tempfile
+
+
+def get_tmpfile_name(name: str = "tmp_qmflows_") -> PathLike:
+    """Create a temporal file name."""
+    return Path(tempfile.mkstemp(prefix=name)[1])
 
 
 def to_runtime_error(func: Callable) -> Callable:

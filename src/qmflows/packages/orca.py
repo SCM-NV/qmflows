@@ -9,10 +9,11 @@ from typing import Any, Union, Optional, ClassVar
 import numpy as np
 from scm import plams
 
-from .packages import Package, Result, get_tmpfile_name, package_properties
+from .packages import Package, Result, package_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
 from ..type_hints import WarnMap, Final
+from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
 
 # ============================= Orca ==========================================
@@ -109,12 +110,12 @@ class ORCA(Package):
             hess_str += '\n\n$end\n'
 
             # Store the hessian in the plams_dir
-            hess_path = get_tmpfile_name()
+            hess_path = get_tmpfile_name("ORCA_hessian_")
             with open(hess_path, "w") as hess_file:
                 hess_file.write(hess_str)
 
             settings.specific.orca.geom.InHess = "read"
-            settings.specific.orca.geom.InHessName = '"' + hess_path + '"'
+            settings.specific.orca.geom.InHessName = f"{hess_path.as_posix()}"
 
             return settings
 
@@ -125,12 +126,12 @@ class ORCA(Package):
                     ks = k.split()
                     atoms = [int(a) - 1 for a in ks[1:]]
                     if ks[0] == 'dist' and len(ks) == 3:
-                        cons += '{{ B {:d} {:d} {:f} C }}'.format(*atoms, v)
+                        cons += '{{ B {:d} {:d} {:.2f} C }}'.format(*atoms, v)
                     elif ks[0] == 'angle' and len(ks) == 4:
-                        cons += '{{ A {:d} {:d} {:d} {:f} C }}'.format(
+                        cons += '{{ A {:d} {:d} {:d} {:.2f} C }}'.format(
                             *atoms, v)
                     elif ks[0] == 'dihed' and len(ks) == 5:
-                        cons += '{{ D {:d} {:d} {:d} {:d} {:f} C }}'.format(
+                        cons += '{{ D {:d} {:d} {:d} {:d} {:.2f} C }}'.format(
                             *atoms, v)
                     else:
                         warn(

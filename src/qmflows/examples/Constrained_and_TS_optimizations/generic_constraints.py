@@ -22,7 +22,8 @@ def example_generic_constraints():
         # loop over packages
         for package in [dftb, adf, orca]:
             job_name = package.pkg_name + '_' + str(distance)
-            constraint_opt = package(templates.geometry.overlay(s), hydrogen_fluoride, job_name)
+            constraint_opt = package(templates.geometry.overlay(
+                s), hydrogen_fluoride, job_name)
             jobs.append(constraint_opt)
 
     # run the jobs
@@ -46,3 +47,7 @@ def example_generic_constraints():
         print('{:10s} {:10.2f} {:10.2f} {:10.2f}'.format(*row))
 
     return names, energies
+
+
+if __name__ == "__main__":
+    example_generic_constraints()
