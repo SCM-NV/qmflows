@@ -1,3 +1,4 @@
+"""common Namedtuples used mostly for parsing."""
 from collections import namedtuple
 from typing import Type, NamedTuple, Callable, Optional, TYPE_CHECKING
 
@@ -25,6 +26,10 @@ MO = namedtuple("MO", ("coordinates", "cgfs", "coefficients"))
 
 
 class ParseWarning(NamedTuple):
+    """Generate a Namedtuple using a sort of data class.
+
+    see: https://docs.python.org/3/library/typing.html#typing.NamedTuple
+    """
     warn_type: Type[Warning]
     parser: ParserElement
     func: Callable[[str], Optional[str]] = _return_msg
