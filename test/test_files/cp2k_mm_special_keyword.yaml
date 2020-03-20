@@ -1,0 +1,72 @@
+cp2k:
+  force_eval:
+    mm:
+      forcefield:
+        charge:
+        - atom: C2O3
+          charge: '0.4524'
+        - atom: Cd
+          charge: '0.9768'
+        - atom: O2D2
+          charge: '-0.4704'
+        - atom: Se
+          charge: '-0.9768'
+        nonbonded:
+          lennard-jones:
+          - atoms: Cd C2O3
+            epsilon: '[kcalmol] 0.1547'
+            sigma: '[angstrom] 2.9841'
+          - atoms: Cd C331
+            epsilon: '[kcalmol] 0.1547'
+            sigma: '[angstrom] 2.9841'
+          - atoms: 'Cd Cd  '
+            epsilon: '[kcalmol] 0.0741'
+            sigma: '[angstrom] 1.234'
+          - atoms: Cd HGA3
+            epsilon: '[kcalmol] 0.1002'
+            sigma: '[angstrom] 2.5542'
+          - atoms: Cd O2D2
+            epsilon: '[kcalmol] 0.4383'
+            sigma: '[angstrom] 2.471'
+          - atoms: 'Cd Se  '
+            epsilon: '[kcalmol] 0.3639'
+            sigma: '[angstrom] 2.94'
+          - atoms: Se C2O3
+            epsilon: '[kcalmol] 0.1748'
+            sigma: '[angstrom] 3.5885'
+          - atoms: Se C331
+            epsilon: '[kcalmol] 0.1748'
+            sigma: '[angstrom] 3.5885'
+          - atoms: Se HGA3
+            epsilon: '[kcalmol] 0.1132'
+            sigma: '[angstrom] 3.1587'
+          - atoms: Se O2D2
+            epsilon: '[kcalmol] 0.3856'
+            sigma: '[angstrom] 3.526'
+          - atoms: 'Se Se  '
+            epsilon: '[kcalmol] 0.102'
+            sigma: '[angstrom] 4.852'
+        parm_file_name: Cd68Cl26Se55__26_acetate.prm
+        parmtype: CHM
+      poisson:
+        ewald:
+          ewald_type: none
+        periodic: none
+    subsys:
+      cell:
+        periodic: none
+      kind C2O3:
+        element: C
+      kind C331:
+        element: C
+      kind Cd:
+        element: Cd
+      kind HGA3:
+        element: H
+      kind O2D2:
+        element: O
+      kind Se:
+        element: Se
+      topology:
+        conn_file_format: PSF
+        conn_file_name: Cd68Cl26Se55__26_acetate.psf

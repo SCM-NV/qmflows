@@ -139,4 +139,5 @@ def get_mm_settings() -> Settings:
     s.prm = PATH / 'Cd68Cl26Se55__26_acetate.prm'
     s.charge = charge
     s.lennard_jones = lj
+    s.periodic = 'none'
     return s
