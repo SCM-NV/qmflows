@@ -1,16 +1,21 @@
 """Test input keyword with special meaning."""
+
+from os.path import basename
+
 import numpy as np
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, adf, dftb, orca
+from qmflows.fileFunctions import yaml2Settings
+from qmflows.packages.cp2k_mm import CP2KMM
 from qmflows.packages.cp2k_package import CP2K
 from qmflows.packages.orca import ORCA
 from qmflows.packages.SCM import ADF
 from qmflows.parsers.adf_parser import kfreader
 from qmflows.parsers.orca_parser import parse_hessian
-from qmflows.test_utils import PATH, PATH_MOLECULES
+from qmflows.test_utils import PATH, PATH_MOLECULES, get_mm_settings
 
 indices = [3, 4, 5, 6]
 adf_const = {
@@ -173,9 +178,12 @@ def test_cp2k_cell_parameters():
 
     # compare with the reference
     ref = Settings()
-    ref.specific.cp2k.force_eval.subsys.cell.A = '{:.2f} {:.2f} {:.2f}'.format(*abc[0])
-    ref.specific.cp2k.force_eval.subsys.cell.B = '{:.2f} {:.2f} {:.2f}'.format(*abc[1])
-    ref.specific.cp2k.force_eval.subsys.cell.C = '{:.2f} {:.2f} {:.2f}'.format(*abc[2])
+    ref.specific.cp2k.force_eval.subsys.cell.A = '{:.2f} {:.2f} {:.2f}'.format(
+        *abc[0])
+    ref.specific.cp2k.force_eval.subsys.cell.B = '{:.2f} {:.2f} {:.2f}'.format(
+        *abc[1])
+    ref.specific.cp2k.force_eval.subsys.cell.C = '{:.2f} {:.2f} {:.2f}'.format(
+        *abc[2])
     assertion.eq(s.specific, ref.specific)
 
 
@@ -249,3 +257,25 @@ def test_adf_constrains():
     ADF.handle_special_keywords(
         s, "constraint", Settings({'dihed 1 2 3 4': 180}), ethylene)
     assertion.eq(s.specific.adf.constraints, Settings({'dihed 1 2 3 4': 180}))
+
+
+def test_cp2k_mm_keywords():
+    """Test the translation from settings to CP2KMM specific keywords."""
+    s = get_mm_settings()
+
+    CP2KMM.prerun(None, s, None)
+    CP2KMM.handle_special_keywords(s, 'psf', s.psf, None)
+    CP2KMM.handle_special_keywords(s, 'prm', s.prm, None)
+    CP2KMM.handle_special_keywords(s, 'lennard_jones', s.lennard_jones, None)
+    CP2KMM.handle_special_keywords(s, 'charge', s.charge, None)
+    CP2KMM.handle_special_keywords(s, 'periodic', s.periodic, None)
+
+    # Change absolute to relative path names for the purpose of testing
+    s.specific.cp2k.force_eval.subsys.topology.conn_file_name = basename(
+        s.specific.cp2k.force_eval.subsys.topology.conn_file_name)
+    s.specific.cp2k.force_eval.mm.forcefield.parm_file_name = basename(
+        s.specific.cp2k.force_eval.mm.forcefield.parm_file_name)
+
+    with open(PATH / 'cp2k_mm_special_keyword.yaml', 'rb') as f:
+        ref = yaml2Settings(f)
+    assertion.eq(s.specific, ref)
