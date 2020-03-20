@@ -3,13 +3,20 @@
 __all__ = ['awk_file', 'extract_line_value']
 
 import subprocess
+from typing import Union, List, Optional
 
 from pyparsing import OneOrMore, SkipTo, Suppress
 
-from qmflows.parsers.parser import parse_file
+from .parser import parse_file
+from ..type_hints import PathLike
 
 
-def awk_file(filename, script='', progfile=None):
+Scalar = Union[int, float, str]
+
+
+def awk_file(filename: PathLike, script: str = '',
+             progfile: Optional[PathLike] = None
+             ) -> Union[Scalar, List[Scalar]]:
     r"""Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
@@ -21,10 +28,13 @@ def awk_file(filename, script='', progfile=None):
 
     Returned value is a list of lines (strings). See ``man awk`` for details.
     """
+    if not isinstance(filename, str):
+        filename = str(filename)
+
     cmd = ['awk', script, filename]
     # if progfile:
     #     if os.path.isfile(progfile):
-    #         cmd += ['-f', progfile]
+    #         cmd += ['-f', str(progfile)]
     #     else:
     #         raise FileNotFoundError('File %s not present' % progfile)
     # else:
@@ -34,22 +44,23 @@ def awk_file(filename, script='', progfile=None):
     ret = subprocess.check_output(cmd).decode('utf-8').split('\n')
     if ret[-1] == '':
         ret = ret[:-1]
-    result = []
+
+    result: List[Scalar] = []
     for i in ret:
         try:
-            v = int(i)
+            v: Scalar = int(i)
         except ValueError:
             try:
                 v = float(i)
             except ValueError:
                 v = i
         result.append(v)
-    if len(result) == 1:
-        result = result[0]
-    return result
+    return result[0] if len(result) == 1 else result
 
 
-def extract_line_value(file_name, pattern=None, pos=0):
+def extract_line_value(file_name: PathLike,
+                       pattern: Optional[str] = None,
+                       pos: int = 0) -> float:
     """Get a field record from a file.
 
     Search for lines containing `pattern` and return the last line

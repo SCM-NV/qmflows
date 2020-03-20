@@ -62,17 +62,17 @@ class _NullContextBackup(AbstractContextManager):
 
 
 try:
-    from contextlib import nullcontext
+    from contextlib import nullcontext  # type:ignore
 except ImportError:  # nullcontext was added in python 3.7
     nullcontext = _NullContextBackup
-    nullcontext.__name__ = 'nullcontext'
+    nullcontext.__name__ = 'nullcontext'  # type: ignore
 
 
 try:  # Plan A: literal was added in Python 3.8
-    from typing import Literal
+    from typing import Literal  # type:ignore
 except ImportError:
     try:  # Plan B: literal was previously available in a third party package
-        from typing_extensions import Literal
+        from typing_extensions import Literal  # type:ignore
 
     except ImportError:
         # Plan C; Literal.__getitem__ will now simply return the type
@@ -82,10 +82,10 @@ except ImportError:
 
 
 try:  # Plan A: Final was added in Python 3.8
-    from typing import Final
+    from typing import Final  # type:ignore
 except ImportError:
     try:  # Plan B: Final was previously available in a third party package
-        from typing_extensions import Final
+        from typing_extensions import Final  # type:ignore
 
     except ImportError:
         # Plan C; Final.__getitem__ will now simply return the type

@@ -9,7 +9,7 @@ from .type_hints import WarnMap
 from .common import ParseWarning
 
 __all__ = [
-    'QMFlows_Warning', 'Key_Warning',
+    'QMFlows_Warning', 'Key_Warning', 'Assertion_Warning',
     'SCF_Convergence_Warning', 'Geometry_Convergence_Warning',
     'Parameter_Warning', 'Charge_Warning',
     'cp2k_warnings'
@@ -18,6 +18,10 @@ __all__ = [
 
 class QMFlows_Warning(Warning):
     """Generic :exc:`Warning` class for QMFlows."""
+
+
+class Assertion_Warning(QMFlows_Warning):
+    """Warning class for ``assertion``-related warnings."""
 
 
 class Key_Warning(QMFlows_Warning):

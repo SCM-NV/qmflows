@@ -5,14 +5,15 @@ __all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
 
 
 import re
-import typing
+from typing import Optional as Optional_
 
 import numpy as np
-from ..type_hints import PathLike
 from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
                        ParseException, ParserElement, ParseResults, Regex,
                        SkipTo, Suppress, Word, nums)
 from scm.plams import Atom, Molecule
+
+from ..type_hints import PathLike
 
 # Literals
 point = Literal('.')
@@ -45,10 +46,8 @@ def parse_file(p: ParserElement, file_name: PathLike) -> ParseResults:
     """Apply parser `p` on file `file_name`."""
     try:
         return p.parseFile(file_name)
-    except ParseException:
-        msg = "Error Trying to parse: {} in file: {}".format(p, file_name)
-        print(msg)
-        raise
+    except ParseException as ex:
+        raise ParseException(f"Error Trying to parse: {p} in file: {file_name}") from ex
 
 
 def parse_section(start: str, end: str) -> ParserElement:
@@ -59,8 +58,9 @@ def parse_section(start: str, end: str) -> ParserElement:
     return Suppress(SkipTo(s)) + skipLine + SkipTo(e)
 
 
-def string_array_to_molecule(
-        parser_fun: ParserElement, file_name: PathLike, mol: Molecule = None) -> Molecule:
+def string_array_to_molecule(parser_fun: ParserElement,
+                             file_name: PathLike,
+                             mol: Optional_[Molecule] = None) -> Molecule:
     """Convert a Numpy string array.
 
     It takes an array like:
@@ -77,11 +77,13 @@ def string_array_to_molecule(
     last_mol = np.array(mols[-1])
     elems = last_mol[:, 0]
     coords = np.array(last_mol[:, 1:], dtype=float)
+
     if mol:
         if len(coords) == len(mol):
             mol.from_array(coords)
         else:
             raise RuntimeError('Output molecule does not match input molecule')
+
     else:
         mol = Molecule()
         for e, c in zip(elems, coords):
@@ -89,15 +91,15 @@ def string_array_to_molecule(
     return mol
 
 
-def try_search_pattern(pat: str, file_name: PathLike) -> typing.Optional[str]:
+def try_search_pattern(pat: str, file_name: PathLike) -> Optional_[str]:
     """Search for an specific pattern in  a file."""
     try:
         with open(file_name, 'r') as f:
             for line in f:
                 if re.search(pat, line):
                     return line
-    except NameError:
-        return None
+            else:
+                return None
     except FileNotFoundError:
-        msg2 = 'There is not a file: {}\n'.format(file_name)
+        msg2 = f'There is not a file: {file_name}\n'
         raise RuntimeError(msg2)

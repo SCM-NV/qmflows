@@ -23,6 +23,7 @@ API
 
 """
 
+import copy
 import textwrap
 from io import TextIOBase
 from functools import singledispatch
@@ -33,6 +34,7 @@ from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping
 
 import numpy as np
 import pandas as pd
+from pandas.core.generic import NDFrame
 
 from scm import plams
 
@@ -247,7 +249,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
             set_prm(settings, key, prm_map, mol)
         return
     else:
-        prm_map = value.copy()
+        prm_map = copy.copy(value)
 
     try:
         prm_key = prm_map.pop('param')
@@ -362,9 +364,6 @@ def _(unit: Optional[str]) -> List[str]:
         return [f'[{unit}] {{}}']
 
 
-NDFrame: type = pd.DataFrame.__bases__[0]
-
-
 @overload
 def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame: ...
 
@@ -432,13 +431,13 @@ def _raise_df_exc_seq(columns: Sequence[str], prm_map: MappingSequence, ex: Exce
     except TypeError as ex2:
         raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
                         f"observed type: {v.__class__.__name__!r}") from ex2
-    else:
-        if not (isinstance(v, abc.Sequence) or hasattr(v, '__array__')):
-            raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
-                            f"observed type: {v.__class__.__name__!r}") from ex
 
-        raise LengthError(f"{k!r} expected a sequence with {column_count} {elements}; "
-                          f"observed length: {len(v)}") from ex
+    if not (isinstance(v, abc.Sequence) or hasattr(v, '__array__')):
+        raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
+                        f"observed type: {v.__class__.__name__!r}") from ex
+
+    raise LengthError(f"{k!r} expected a sequence with {column_count} {elements}; "
+                      f"observed length: {len(v)}") from ex
 
 
 def _raise_df_exc_scalar(columns: str, prm_map: MappingScalar, ex: Exception) -> NoReturn:

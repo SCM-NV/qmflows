@@ -3,10 +3,11 @@
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals']
 
-import fnmatch
 import os
+import fnmatch
 import subprocess
 from io import TextIOBase
+from pathlib import Path
 from itertools import islice
 from typing import (Union, Any, Type, Generator, Iterable, Tuple,
                     List, Sequence, TypeVar, overload, FrozenSet, Dict)
@@ -16,7 +17,7 @@ import numpy as np
 from scm.plams import Units, Molecule
 from more_itertools import chunked
 from pyparsing import (
-    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional, ParserElement,
+    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
     Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange,
     ZeroOrMore, SkipTo
 )
@@ -39,7 +40,7 @@ def read_xyz_file(file_name: PathLike) -> Molecule:
 def parse_cp2k_warnings(file_name: PathLike,
                         package_warnings: WarnMap) -> Optional_[WarnDict]:
     """Parse All the warnings found in an output file."""
-    warnings = {}
+    warnings: WarnDict = {}
     for msg, named_tup in package_warnings.items():
         msg_list = named_tup.parser.parseFile(file_name).asList()
 
@@ -57,9 +58,12 @@ def parse_cp2k_warnings(file_name: PathLike,
     return warnings or None
 
 
+#: A generator yielding 2-tuples with warning messages and warning types.
+WarnGenerator = Generator[Tuple[str, Type[Warning]], None, None]
+
+
 def assign_warning(warning_type: Type[Warning], msg: str,
-                   msg_list: Iterable[str]
-                   ) -> Generator[Tuple[str, Type[Warning]], None, None]:
+                   msg_list: Iterable[str]) -> WarnGenerator:
     """Assign an specific Warning from the ``package_warnings`` or a generic warnings."""
     for m in msg_list:
         if msg in m:
@@ -69,7 +73,7 @@ def assign_warning(warning_type: Type[Warning], msg: str,
 
 
 def read_cp2k_coefficients(path_mos: PathLike,
-                           plams_dir: Union[None, str, os.PathLike] = None) -> InfoMO:
+                           plams_dir: Optional_[PathLike] = None) -> InfoMO:
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -77,10 +81,14 @@ def read_cp2k_coefficients(path_mos: PathLike,
 
     :returns: NamedTuple containing the Eigenvalues and the Coefficients
     """
-    file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
+    plams_dir = Path(plams_dir) if plams_dir else Path(os.getcwd())
+
     file_in = fnmatch.filter(os.listdir(plams_dir), '*in')[0]
-    path_in, path_out = [os.path.join(plams_dir, x)
-                         for x in [file_in, file_out]]
+    file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
+
+    path_in = plams_dir / file_in
+    path_out = plams_dir / file_out
+
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     added_mos, range_mos = read_mos_data_input(path_in)
 
@@ -214,11 +222,11 @@ Tuple2 = Tuple[Optional_[str], Optional_[List[int]]]
 
 def read_mos_data_input(path_input: PathLike) -> Tuple2:
     """Try to read the added_mos parameter and the range of printed MOs."""
-    properties = ("ADDED_MOS", "MO_INDEX_RANGE")
-    l1, l2 = [try_search_pattern(x, path_input) for x in properties]
+    l1 = try_search_pattern("ADDED_MOS", path_input)
+    l2 = try_search_pattern("MO_INDEX_RANGE", path_input)
 
     added_mos = l1.split()[-1] if l1 is not None else None
-    range_mos = list(map(int, l2.split()[1:])) if l1 is not None else None
+    range_mos = list(map(int, l2.split()[1:])) if l2 is not None else None
 
     return added_mos, range_mos
 
@@ -231,7 +239,10 @@ def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
                   "Number of orbital functions"]
 
-    xs = [fun_split(try_search_pattern(x, file_name)) for x in properties]
+    try:
+        xs = [fun_split(try_search_pattern(x, file_name)) for x in properties]  # type: ignore
+    except AttributeError as ex:  # try_search_pattern() can return None
+        raise RuntimeError(f"Failed to identify orbitals in {file_name!r}") from ex
 
     return MO_metadata(*[int(x) for x in xs])
 
@@ -279,7 +290,7 @@ def readCp2KBasis(path: PathLike) -> Tuple2List:
     rss = [swapCoeff(*args) for args in zip(nCoeffs, coefficients)]
     tss = [headTail(xs) for xs in rss]
     basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
-    basiskey = [AtomBasisKey(*rs) for rs in zip(atoms, names, formats)]
+    basiskey = [AtomBasisKey(at, name, fmt) for at, name, fmt in zip(atoms, names, formats)]
 
     return (basiskey, basisData)
 
@@ -293,7 +304,7 @@ def swapCoeff(n: Literal_[1], rs: ST) -> ST: ...
 
 
 @overload
-def swapCoeff(n: int, rs: ST) -> List[ST]: ...
+def swapCoeff(n: int, rs: ST) -> List[ST]: ...  # type: ignore
 
 
 def swapCoeff(n, rs):
