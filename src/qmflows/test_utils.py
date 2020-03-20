@@ -27,8 +27,9 @@ from pathlib import Path
 from typing import Any, Callable, Union
 
 from .settings import Settings
+from .warnings_qmflows import Assertion_Warning
 
-__all__ = ['delete_output', 'get_mm_settings', 'PATH', 'PATH_MOLECULES']
+__all__ = ['delete_output', 'get_mm_settings', 'PATH', 'PATH_MOLECULES', 'Assertion_Warning']
 
 #: The path to the ``tests/test_files`` directory.
 PATH = Path('test') / 'test_files'
