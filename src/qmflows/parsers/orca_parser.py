@@ -7,6 +7,7 @@ from itertools import chain
 
 import numpy as np
 import pyparsing as pa
+import typing
 from more_itertools import chunked
 from pyparsing import Group, OneOrMore, Word, alphanums
 from scm.plams import Atom, Molecule
@@ -16,14 +17,13 @@ from qmflows.common import AtomBasisData, AtomBasisKey, InfoMO
 from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
                      skipSupress, string_array_to_molecule, try_search_pattern)
 from .xyzParser import manyXYZ
+from ..type_hints import PathLike
 
 Vector = np.ndarray
 Matrix = np.ndarray
 
-vectorize_float = np.vectorize(float)
 
-
-def parse_molecule(file_name, mol=None):
+def parse_molecule(file_name: PathLike, mol: typing.Optional[Molecule] = None) -> Molecule:
     """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
@@ -35,7 +35,7 @@ def parse_molecule(file_name, mol=None):
     return string_array_to_molecule(parse_many_mol, file_name, mol=mol)
 
 
-def parse_molecule_traj(file_traj):
+def parse_molecule_traj(file_traj: PathLike) -> Molecule:
     """Read Molecules from the job_name.traj file."""
     mols = manyXYZ(file_traj)
     # Last geometry corresponds to the optimized structure
@@ -50,7 +50,7 @@ def parse_molecule_traj(file_traj):
     return plams_mol
 
 
-def parse_hessian(file_hess: str, start: str = '$hessian') -> Matrix:
+def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> Matrix:
     """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
 
     :returns: Numpy array
@@ -58,21 +58,21 @@ def parse_hessian(file_hess: str, start: str = '$hessian') -> Matrix:
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_normal_modes(file_hess: str) -> Matrix:
+def parse_normal_modes(file_hess: PathLike) -> Matrix:
     """Return the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_frequencies(file_hess: str) -> Matrix:
+def parse_frequencies(file_hess: PathLike) -> Matrix:
     """Parse the vibrational frequencies from the job_name.hess file."""
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
 
-    return vectorize_float([x.split()[-1] for x in lines[1:]])
+    return np.array([x.split()[-1] for x in lines[1:]], dtype=float)
 
 
-def read_blocks_from_file(start: str, end: str, file_name: str) -> Matrix:
+def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
     """Read a matrix printed in block format.
 
     :param  start: token identifying the start of the block.
@@ -96,7 +96,7 @@ def read_blocks_from_file(start: str, end: str, file_name: str) -> Matrix:
     return np.concatenate(blocks, axis=1)
 
 
-def read_block(lines):
+def read_block(lines: list) -> Matrix:
     """Read a block containing the values of the block matrix.
 
     The format is similar to:
@@ -160,7 +160,7 @@ def read_column_orbitals(lines: list) -> tuple:
     return energies, coefficients
 
 
-def parse_basis_set(file_name: str) -> tuple:
+def parse_basis_set(file_name: PathLike) -> tuple:
     """Read the basis set used by Orca.
 
     It is printed by specifying the keyword: !printbase

@@ -1,51 +1,49 @@
-"""A module with named tuples (:class:`~typing.NamedTuple`)."""
-
+"""common (:class:`~typing.NamedTuple`) used mostly for parsing."""
 from typing import Any, Type, NamedTuple, Callable, Optional, TYPE_CHECKING
-
+import numpy as np
 if TYPE_CHECKING:
     from pyparsing import ParserElement
 else:
     ParserElement = 'pyparsing.ParserElement'
 
 __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
-           'InfoMO', 'InputKey', 'MO', 'MO_metadata', 'ParseWarning']
+           'InfoMO', 'MO_metadata', 'ParseWarning']
 
 
 class AtomBasisKey(NamedTuple):
-    atom: Any
-    basis: Any
-    basisFormat: Any
+    """Namedtuple containing the `basisFormat` for a given `basis` and `atom`."""
+
+    atom: str
+    basis: str
+    basisFormat: list
 
 
 class AtomBasisData(NamedTuple):
-    exponents: Any
-    coefficients: Any
+    """Contraction coefficients and exponents for a gaussian basis."""
+
+    exponents: np.ndarray
+    coefficients: np.ndarray
 
 
 class AtomXYZ(NamedTuple):
-    symbol: Any
-    xyz: Any
+    """Symbol and coordinates of an Atom."""
+
+    symbol: str
+    xyz: tuple
 
 
 class CGF(NamedTuple):
-    primitives: Any
-    orbType: Any
+    """Contracted Gaussian function."""
+
+    primitives: tuple  # (AtomBasisKey, AtomBasisData)
+    orbType: str  # (S, Px, Py, Pz, etc.)
 
 
 class InfoMO(NamedTuple):
-    eigenVals: Any
-    coeffs: Any
+    """Energies and coefficients of the molecular orbitals."""
 
-
-class InputKey(NamedTuple):
-    name: Any
-    args: Any
-
-
-class MO(NamedTuple):
-    coordinates: Any
-    cgfs: Any
-    coefficients: Any
+    eigenVals: np.ndarray  # Orbitals eigenvalues
+    coeffs: np.ndarray  # Orbitals eigenvectors
 
 
 class MO_metadata(NamedTuple):
@@ -75,6 +73,10 @@ class MO_metadata(NamedTuple):
 
 
 class ParseWarning(NamedTuple):
+    """Generate a Namedtuple using a sort of data class.
+
+    see: https://docs.python.org/3/library/typing.html#typing.NamedTuple
+    """
     warn_type: Type[Warning]
     parser: ParserElement
     func: Callable[[str], Optional[str]] = NotImplemented

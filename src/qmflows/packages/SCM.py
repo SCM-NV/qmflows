@@ -14,9 +14,84 @@ from scm import plams
 from ..settings import Settings
 from ..type_hints import Final, WarnMap
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
-from .packages import Package, Result, get_tmpfile_name, package_properties
-
+from .packages import Package, Result, package_properties
+from ..utils import get_tmpfile_name
 # ========================= ADF ============================
+
+
+def handle_SCM_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule, package: str) -> None:
+    """Handle special ADF/DFTB specific keywords."""
+    def freeze() -> None:
+        settings.specific[package].geometry.optim = "cartesian"
+        if not isinstance(value, list):
+            msg = 'freeze ' + str(value) + ' is not a list'
+            raise RuntimeError(msg)
+        if isinstance(value[0], int):
+            for a in value:
+                at = 'atom ' + str(a)
+                settings.specific[package].constraints[at] = ""
+        else:
+            for a in range(len(mol)):
+                if mol[a + 1].symbol in value:
+                    at = 'atom ' + str(a + 1)
+                    settings.specific[package].constraints[at] = ""
+
+    def selected_atoms() -> None:
+        settings.specific[package].geometry.optim = "cartesian"
+        if not isinstance(value, list):
+            msg = f'selected_atoms {value} is not a list'
+            raise RuntimeError(msg)
+        if isinstance(value[0], int):
+            for a in range(len(mol)):
+                if a + 1 not in value:
+                    at = 'atom ' + str(a + 1)
+                    settings.specific[package].constraints[at] = ""
+        else:
+            for a in range(len(mol)):
+                if mol[a + 1].symbol not in value:
+                    at = 'atom ' + str(a + 1)
+                    settings.specific[package].constraints[at] = ""
+
+    def inithess() -> None:
+        hess_path = get_tmpfile_name("ADF_hessian_")
+        hess_file = open(hess_path, "w")
+        hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
+        settings.specific[package].geometry.inithess = hess_path.as_posix()
+
+    def constraint() -> None:
+        if isinstance(value, Settings):
+            for k, v in value.items():
+                ks = k.split()
+                # print('--->', ks, type(ks[2]), type(value), v)
+                if ks[0] == 'dist' and len(ks) == 3:
+                    name = 'dist {:d} {:d}'.format(int(ks[1]),
+                                                   int(ks[2]))
+                    settings.specific[package].constraints[name] = v
+                elif ks[0] == 'angle' and len(ks) == 4:
+                    name = 'angle {:d} {:d} {:d}'.format(int(ks[1]),
+                                                         int(ks[2]),
+                                                         int(ks[3]))
+                    settings.specific[package].constraints[name] = v
+                elif ks[0] == 'dihed' and len(ks) == 5:
+                    name = 'dihed {:d} {:d} {:d} {:d}'.\
+                        format(int(ks[1]), int(ks[2]),
+                               int(ks[3]), int(ks[4]))
+                    settings.specific[package].constraints[name] = v
+                else:
+                    warn(
+                        f'Invalid constraint key: {k}', category=Key_Warning)
+
+    # Available translations
+    functions = {'freeze': freeze,
+                 'selected_atoms': selected_atoms,
+                 'inithess': inithess,
+                 'constraint': constraint}
+    if key in functions:
+        functions[key]()
+    else:
+        warn(f'Generic keyword {key!r} not implemented for package ADF',
+             category=Key_Warning)
 
 
 class ADF(Package):
@@ -82,7 +157,7 @@ class ADF(Package):
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
-        """Handle special ADF-specific keywords.
+        """Handle special ADF/DFTB specific keywords.
 
         Some keywords provided by the user do not have a straightforward
         translation to *ADF* input and require some hooks that handles the
@@ -90,78 +165,10 @@ class ADF(Package):
 
         * ``freeze``
         * ``selected_atoms``
-
+        * ``initHess``
+        * ``Constraint``
         """
-        def freeze() -> None:
-            settings.specific.adf.geometry.optim = "cartesian"
-            if not isinstance(value, list):
-                msg = 'freeze ' + str(value) + ' is not a list'
-                raise RuntimeError(msg)
-            if isinstance(value[0], int):
-                for a in value:
-                    at = 'atom ' + str(a)
-                    settings.specific.adf.constraints[at] = ""
-            else:
-                for a in range(len(mol)):
-                    if mol[a + 1].symbol in value:
-                        at = 'atom ' + str(a + 1)
-                        settings.specific.adf.constraints[at] = ""
-
-        def selected_atoms() -> None:
-            settings.specific.adf.geometry.optim = "cartesian"
-            if not isinstance(value, list):
-                msg = f'selected_atoms {value} is not a list'
-                raise RuntimeError(msg)
-            if isinstance(value[0], int):
-                for a in range(len(mol)):
-                    if a + 1 not in value:
-                        at = 'atom ' + str(a + 1)
-                        settings.specific.adf.constraints[at] = ""
-            else:
-                for a in range(len(mol)):
-                    if mol[a + 1].symbol not in value:
-                        at = 'atom ' + str(a + 1)
-                        settings.specific.adf.constraints[at] = ""
-
-        def inithess() -> None:
-            hess_path = get_tmpfile_name()
-            hess_file = open(hess_path, "w")
-            hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
-            settings.specific.adf.geometry.inithess = hess_path
-
-        def constraint() -> None:
-            if isinstance(value, Settings):
-                for k, v in value.items():
-                    ks = k.split()
-                    # print('--->', ks, type(ks[2]), type(value), v)
-                    if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]),
-                                                       int(ks[2]))
-                        settings.specific.adf.constraints[name] = v
-                    elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(int(ks[1]),
-                                                             int(ks[2]),
-                                                             int(ks[3]))
-                        settings.specific.adf.constraints[name] = v
-                    elif ks[0] == 'dihed' and len(ks) == 5:
-                        name = 'dihed {:d} {:d} {:d} {:d}'.\
-                            format(int(ks[1]), int(ks[2]),
-                                   int(ks[3]), int(ks[4]))
-                        settings.specific.adf.constraints[name] = v
-                    else:
-                        warn(
-                            f'Invalid constraint key: {k}', category=Key_Warning)
-
-        # Available translations
-        functions = {'freeze': freeze,
-                     'selected_atoms': selected_atoms,
-                     'inithess': inithess,
-                     'constraint': constraint}
-        if key in functions:
-            functions[key]()
-        else:
-            warn(f'Generic keyword {key!r} not implemented for package ADF',
-                 category=Key_Warning)
+        handle_SCM_special_keywords(settings, key, value, mol, "adf")
 
 
 class ADF_Result(Result):
@@ -289,65 +296,7 @@ class DFTB(Package):
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Translate generic keywords to their corresponding Orca keywords."""
-        def freeze() -> None:
-            settings.specific.dftb.geometry.optim = "cartesian"
-            if not isinstance(value, list):
-                raise RuntimeError(f'freeze {value} is not a list')
-            if isinstance(value[0], int):
-                for a in value:
-                    at = 'atom ' + str(a)
-                    settings.specific.dftb.constraints[at] = ""
-            else:
-                for a in range(len(mol)):
-                    if mol[a + 1].symbol in value:
-                        at = 'atom ' + str(a + 1)
-                        settings.specific.dftb.constraints[at] = ""
-
-        def selected_atoms() -> None:
-            settings.specific.dftb.geometry.optim = "cartesian"
-            if not isinstance(value, list):
-                raise RuntimeError(f'selected_atoms {value} is not a list')
-            if isinstance(value[0], int):
-                for a in range(len(mol)):
-                    if a + 1 not in value:
-                        at = 'atom ' + str(a + 1)
-                        settings.specific.dftb.constraints[at] = ""
-            else:
-                for a in range(len(mol)):
-                    if mol[a + 1].symbol not in value:
-                        name = 'atom ' + str(a + 1)
-                        settings.specific.dftb.constraints[name] = ""
-
-        def constraint() -> None:
-            if isinstance(value, Settings):
-                for k, v in value.items():
-                    ks = k.split()
-                    if ks[0] == 'dist' and len(ks) == 3:
-                        name = 'dist {:d} {:d}'.format(int(ks[1]),
-                                                       int(ks[2]))
-                        settings.specific.dftb.constraints[name] = v
-                    elif ks[0] == 'angle' and len(ks) == 4:
-                        name = 'angle {:d} {:d} {:d}'.format(
-                            int(ks[1]), int(ks[2]), int(ks[2]))
-                        settings.specific.dftb.constraints[name] = v
-                    elif ks[0] == 'dihed' and len(ks) == 5:
-                        name = 'dihed {:d} {:d} {:d} {:d}'.format(
-                            int(ks[1]), int(ks[2]),
-                            int(ks[3]), int(ks[4]))
-                        settings.specific.dftb.constraints[name] = v
-                    else:
-                        warn(
-                            f'Invalid constraint key: {k}', category=Key_Warning)
-
-        # Available translations
-        functions = {'freeze': freeze,
-                     'selected_atoms': selected_atoms,
-                     'constraint': constraint}
-        if key in functions:
-            functions[key]()
-        else:
-            warn(f'Generic keyword {key!r} not implemented for package DFTB',
-                 category=Key_Warning)
+        handle_SCM_special_keywords(settings, key, value, mol, "dftb")
 
 
 #: An instance :class:`ADF`.

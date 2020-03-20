@@ -5,10 +5,13 @@ __all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
 
 
 import re
+import typing
 
 import numpy as np
+from ..type_hints import PathLike
 from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
-                       ParseException, Regex, SkipTo, Suppress, Word, nums)
+                       ParseException, ParserElement, ParseResults, Regex,
+                       SkipTo, Suppress, Word, nums)
 from scm.plams import Atom, Molecule
 
 # Literals
@@ -26,7 +29,8 @@ floatNumberDot = Regex(r'(\-)?(\d+)?(\.)(\d*)?([eE][\-\+]\d+)?')
 # Parse Utilities
 
 
-def skipSupress(z):
+def skipSupress(z: str) -> ParserElement:
+    """Skip until `z` and suppress the skipped values."""
     return Suppress(SkipTo(z))
 
 
@@ -37,10 +41,8 @@ skipLine = Suppress(skipSupress('\n'))
 # Generic Functions
 
 
-def parse_file(p, file_name):
-    """
-    Wrapper over the parseFile method
-    """
+def parse_file(p: ParserElement, file_name: PathLike) -> ParseResults:
+    """Apply parser `p` on file `file_name`."""
     try:
         return p.parseFile(file_name)
     except ParseException:
@@ -49,20 +51,19 @@ def parse_file(p, file_name):
         raise
 
 
-def parse_section(start, end):
-    """
-    Read the lines from `start` to `end`.
-    """
+def parse_section(start: str, end: str) -> ParserElement:
+    """Read the lines from `start` to `end`."""
     s = Literal('{}'.format(start))
     e = Literal('{}'.format(end))
 
     return Suppress(SkipTo(s)) + skipLine + SkipTo(e)
 
 
-def string_array_to_molecule(parser_fun, file_name, mol=None):
-    """
-    Convert a Numpy string array like:
+def string_array_to_molecule(
+        parser_fun: ParserElement, file_name: PathLike, mol: Molecule = None) -> Molecule:
+    """Convert a Numpy string array.
 
+    It takes an array like:
     [['C', '-1.487460', '-0.028670', '-0.000060'],
     ['O', '0.376340', '0.028670', '-0.000060'],
     ['H', '-1.818910', '-1.067060', '-0.000060'],
@@ -70,31 +71,26 @@ def string_array_to_molecule(parser_fun, file_name, mol=None):
     ['H', '-1.866470', '0.473700', '-0.890040'],
     ['H', '0.756720', '-0.950010', '-0.000060']]
 
-    To a plams ``Molecule``.
+    and covert it to a plams ``Molecule``.
     """
-    string_array_to_float = np.vectorize(float)
     mols = parse_file(parser_fun, file_name).asList()
     last_mol = np.array(mols[-1])
     elems = last_mol[:, 0]
-    coords = string_array_to_float(last_mol[:, 1:])
+    coords = np.array(last_mol[:, 1:], dtype=float)
     if mol:
         if len(coords) == len(mol):
-            plams_mol = mol
-            for i in range(len(plams_mol)):
-                plams_mol.atoms[i].coords = tuple([float(c) for c in coords[i]])
+            mol.from_array(coords)
         else:
             raise RuntimeError('Output molecule does not match input molecule')
     else:
-        plams_mol = Molecule()
+        mol = Molecule()
         for e, c in zip(elems, coords):
-            plams_mol.add_atom(Atom(symbol=e, coords=tuple(c)))
-    return plams_mol
+            mol.add_atom(Atom(symbol=e, coords=tuple(c)))
+    return mol
 
 
-def try_search_pattern(pat, file_name):
-    """
-    Search for an specific pattern in  a file
-    """
+def try_search_pattern(pat: str, file_name: PathLike) -> typing.Optional[str]:
+    """Search for an specific pattern in  a file."""
     try:
         with open(file_name, 'r') as f:
             for line in f:

@@ -134,11 +134,11 @@ class CP2K(Package):
 
             """
             def fun(xs: Tuple[Any, Any, Any]) -> str:
-                return '{} {} {}'.format(*xs)
+                return '{:.2f} {:.2f} {:.2f}'.format(*xs)
 
             if not isinstance(value, list):
                 abc = [value] * 3
-                abc_cell = ' [angstrom] {} {} {}'.format(*abc)
+                abc_cell = f' [angstrom] {fun(abc)}'
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc_cell
             elif isinstance(value[0], list):
                 a, b, c = value
@@ -146,7 +146,7 @@ class CP2K(Package):
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
             elif isinstance(value, list):
-                abc = ' [angstrom] {} {} {}'.format(*value)
+                abc = f' [angstrom] {fun(value)}'
                 s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
                 raise RuntimeError(
@@ -182,7 +182,7 @@ class CP2K_Result(Result):
                  status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
+        super().__init__(settings, molecule, job_name, dill_path=dill_path, plams_dir=plams_dir,
                          work_dir=work_dir, properties=package_properties['cp2k'],
                          status=status, warnings=warnings)
 

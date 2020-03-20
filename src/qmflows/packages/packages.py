@@ -6,7 +6,6 @@ import importlib
 import inspect
 import os
 import sys
-import uuid
 import warnings
 from abc import abstractmethod, ABC
 from types import ModuleType
@@ -756,16 +755,11 @@ def import_parser(ds: Mapping[str, str], module_root: str = "qmflows.parsers") -
 def find_file_pattern(path: Union[str, os.PathLike],
                       folder: Union[None, str, os.PathLike] = None) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
+        print("folder: ", folder)
+        print("path: ", path)
         return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])
-
-
-def get_tmpfile_name() -> str:
-    tmpfolder = join(plams.config.jm.workdir, 'tmpfiles')
-    if not os.path.exists(tmpfolder):
-        os.mkdir(tmpfolder)
-    return join(tmpfolder, str(uuid.uuid4()))
 
 
 def ignore_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:

@@ -181,18 +181,6 @@ orbitals = Word(nums, max=1) + (orbS | orbP | orbD | orbF)
 # Orbital Information:"        12     1 cd  4d+1"
 orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 
-
-def funCoefficients(x: float) -> ParserElement:
-    """Parser Coeffcients."""
-    fun = OneOrMore(Suppress(orbInfo) + floatNumber * x)
-    return fun.setResultsName("coeffs")
-
-
-def funOrbNumber(x: float) -> float:
-    """Parse Orbital Occupation Number. There is min 1 max 4."""
-    return natural * x
-
-
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
