@@ -3,6 +3,7 @@ import numpy as np
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from scm.plams import Molecule
+from typing import Any
 
 from qmflows import Settings, adf, dftb, orca
 from qmflows.packages.cp2k_package import CP2K
@@ -112,27 +113,70 @@ def test_selected_atoms_with_orca():
     assertion.eq(str(orca.generic2specific(s, mol)), str(expected_settings))
 
 
-def test_cp2k_special_keywords():
-    """Test the translation from settings to CP2K specific keywords."""
-    abc = [5.958, 7.596, 15.610]
+def test_cp2k_angle_and_period_keywords():
+    """Test the translation from settings to CP2K specific angle and periodic keywords."""
     angles = [81.25, 86.56, 89.80]
     ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
     s = Settings()
-    s.cell_parameters = abc
     s.cell_angles = angles
     s.periodic = None
 
     # apply transformations
-    CP2K.handle_special_keywords(s, "cell_parameters", abc, ETHYLENE)
     CP2K.handle_special_keywords(s, "cell_angles", angles, ETHYLENE)
     CP2K.handle_special_keywords(s, "periodic", None, ETHYLENE)
 
     # compare with the reference
     ref = Settings()
-    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 5.958 7.596 15.61"
     ref.specific.cp2k.force_eval.subsys.cell.ALPHA_BETA_GAMMA = "81.25 86.56 89.8"
     ref.specific.cp2k.force_eval.subsys.cell.periodic = None
+    assertion.eq(s.specific, ref.specific)
+
+
+def test_cp2k_cell_parameters():
+    """Test the translation from settings to CP2K specific cell parameters keywords."""
+    ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
+
+    # List of parameters
+    s = Settings()
+    abc = [5.958, 7.596, 15.610]
+    s.cell_parameters = abc
+
+    # apply transformations
+    CP2K.handle_special_keywords(s, "cell_parameters", abc, ETHYLENE)
+
+    # compare with the reference
+    ref = Settings()
+    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 5.96 7.60 15.61"
+    assertion.eq(s.specific, ref.specific)
+
+    # cubic cell
+    s = Settings()
+    abc = 10
+    s.cell_parameters = abc
+
+    # apply transformations
+    CP2K.handle_special_keywords(s, "cell_parameters", abc, ETHYLENE)
+
+    # compare with the reference
+    ref = Settings()
+    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 10.00 10.00 10.00"
+    assertion.eq(s.specific, ref.specific)
+
+    # Matrix
+    s = Settings()
+    abc = [[16.12, 0.078, -0.70], [-0.22, 4.39, 1.41], [-0.22, 1.73, 9.75]]
+
+    s.cell_parameters = abc
+
+    # apply transformations
+    CP2K.handle_special_keywords(s, "cell_parameters", abc, ETHYLENE)
+
+    # compare with the reference
+    ref = Settings()
+    ref.specific.cp2k.force_eval.subsys.cell.A = '{:.2f} {:.2f} {:.2f}'.format(*abc[0])
+    ref.specific.cp2k.force_eval.subsys.cell.B = '{:.2f} {:.2f} {:.2f}'.format(*abc[1])
+    ref.specific.cp2k.force_eval.subsys.cell.C = '{:.2f} {:.2f} {:.2f}'.format(*abc[2])
     assertion.eq(s.specific, ref.specific)
 
 
