@@ -98,24 +98,24 @@ class Result:
         self._results_open = False
         self._results = dill_path
 
-    def __deepcopy__(self, memo: Any) -> 'Result':
-        """Return a deep copy of this instance."""
-        cls = type(self)
-        if not self._results_open or self._results is None:
-            dill_path = self._results
-        else:
-            job = self._results.job
-            dill_path = join(job.path, f"{job.name}.dill")
+    # def __deepcopy__(self, memo: Any) -> 'Result':
+    #     """Return a deep copy of this instance."""
+    #     cls = type(self)
+    #     if not self._results_open or self._results is None:
+    #         dill_path = self._results
+    #     else:
+    #         job = self._results.job
+    #         dill_path = join(job.path, f"{job.name}.dill")
 
-        return cls(self.settings,
-                   self._molecule,
-                   self.job_name,
-                   dill_path,
-                   plams_dir=self.archive['plams_dir'],
-                   work_dir=self.archive['work_dir'],
-                   status=self.status,
-                   warnings=self.warnings
-                   )
+    #     return cls(self.settings,
+    #                self._molecule,
+    #                self.job_name,
+    #                dill_path,
+    #                plams_dir=self.archive['plams_dir'],
+    #                work_dir=self.archive['work_dir'],
+    #                status=self.status,
+    #                warnings=self.warnings
+    #                )
 
     def __getattr__(self, prop: str) -> Any:
         """Return a section of the results.
