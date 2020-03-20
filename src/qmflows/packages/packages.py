@@ -98,25 +98,6 @@ class Result:
         self._results_open = False
         self._results = dill_path
 
-    # def __deepcopy__(self, memo: Any) -> 'Result':
-    #     """Return a deep copy of this instance."""
-    #     cls = type(self)
-    #     if not self._results_open or self._results is None:
-    #         dill_path = self._results
-    #     else:
-    #         job = self._results.job
-    #         dill_path = join(job.path, f"{job.name}.dill")
-
-    #     return cls(self.settings,
-    #                self._molecule,
-    #                self.job_name,
-    #                dill_path,
-    #                plams_dir=self.archive['plams_dir'],
-    #                work_dir=self.archive['work_dir'],
-    #                status=self.status,
-    #                warnings=self.warnings
-    #                )
-
     def __getattr__(self, prop: str) -> Any:
         """Return a section of the results.
 
@@ -437,33 +418,6 @@ class Package(ABC):
                 self.handle_special_keywords(
                     specific_from_generic_settings, k, v, mol)
                 continue
-
-            # The `key` variable can have four types of values:
-            # * None
-            # * A string
-            # * A list with two elements; the second one being a dict
-            # * A list of arbitrary length
-
-            if isinstance(key, list):
-                initial_key, *final_keys = key
-
-                if isinstance(final_keys[0], dict):
-                    v_tmp = final_keys[0].get(v)
-                else:
-                    v_tmp = Settings()
-                    v_tmp.set_nested(final_keys, v)
-
-                if v_tmp:
-                    v = v_tmp
-                key = initial_key
-
-            if v:
-                if isinstance(v, dict):
-                    v = Settings(v)
-                specific_from_generic_settings.specific[self.pkg_name][key] = v
-            else:
-                specific_from_generic_settings.specific[self.pkg_name][key] = Settings(
-                )
 
         return settings.overlay(specific_from_generic_settings)
 
