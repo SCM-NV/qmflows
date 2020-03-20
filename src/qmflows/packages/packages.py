@@ -183,6 +183,7 @@ class Result:
             # AMS rename all the DFTB job names
             file_pattern = "dftb.rkf"
 
+        print("plams dir: ", plams_dir)
         output_files = list(collapse(map(partial(find_file_pattern, file_pattern),
                                          [plams_dir, work_dir])))
         if output_files:
@@ -755,6 +756,8 @@ def import_parser(ds: Mapping[str, str], module_root: str = "qmflows.parsers") -
 def find_file_pattern(path: Union[str, os.PathLike],
                       folder: Union[None, str, os.PathLike] = None) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
+        print("folder: ", folder)
+        print("path: ", path)
         return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])

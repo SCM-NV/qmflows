@@ -5,7 +5,7 @@ from pytest_mock import mocker
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k, templates
-from qmflows.packages import Result, package_properties
+from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 from qmflows.fileFunctions import yaml2Settings
 
@@ -51,14 +51,14 @@ def add_basis_potential(s: Settings) -> None:
         PATH / "BASIS_MOLOPT").absolute().as_posix()
 
 
-def mock_runner(mocker_instance, jobname: str) -> Result:
+def mock_runner(mocker_instance, jobname: str) -> CP2K_Result:
     """Create a Result instance using a mocked runner."""
     run_mocked = mocker_instance.patch("qmflows.run")
     dill_path = WORKDIR / jobname / f"{jobname}.dill"
     plams_dir = WORKDIR / jobname
-    cp2k_properties = package_properties["cp2k"]
-    run_mocked.return_value = Result(templates.geometry, ETHYLENE, jobname, dill_path=dill_path,
-                                     plams_dir=plams_dir, properties=cp2k_properties)
+    run_mocked.return_value = CP2K_Result(templates.geometry, ETHYLENE, jobname,
+                                          dill_path=dill_path, plams_dir=plams_dir)
+
     return run_mocked
 
 

@@ -182,7 +182,7 @@ class CP2K_Result(Result):
                  status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
+        super().__init__(settings, molecule, job_name, dill_path=dill_path, plams_dir=plams_dir,
                          work_dir=work_dir, properties=package_properties['cp2k'],
                          status=status, warnings=warnings)
 

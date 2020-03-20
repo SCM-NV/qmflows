@@ -3,7 +3,6 @@ import numpy as np
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from scm.plams import Molecule
-from typing import Any
 
 from qmflows import Settings, adf, dftb, orca
 from qmflows.packages.cp2k_package import CP2K
