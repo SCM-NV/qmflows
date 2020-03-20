@@ -4,26 +4,27 @@ __all__ = [
     'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
 from itertools import chain
+from typing import Sequence, Tuple, Iterable
+from typing import Optional as Optional_
 
 import numpy as np
 import pyparsing as pa
-import typing
 from more_itertools import chunked
 from pyparsing import Group, OneOrMore, Word, alphanums
 from scm.plams import Atom, Molecule
 
-from qmflows.common import AtomBasisData, AtomBasisKey, InfoMO
-
 from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
-                     skipSupress, string_array_to_molecule, try_search_pattern)
+                     ParserElement, skipSupress, string_array_to_molecule,
+                     try_search_pattern)
 from .xyzParser import manyXYZ
+from ..common import AtomBasisData, AtomBasisKey, InfoMO
 from ..type_hints import PathLike
 
 Vector = np.ndarray
 Matrix = np.ndarray
 
 
-def parse_molecule(file_name: PathLike, mol: typing.Optional[Molecule] = None) -> Molecule:
+def parse_molecule(file_name: PathLike, mol: Optional_[Molecule] = None) -> Molecule:
     """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
@@ -84,6 +85,7 @@ def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
     raw = parse_file(p, file_name)[0].splitlines()
     number_of_basis = int(raw[0].split()[0])
     lines = raw[1:]
+
     # Matrix elements are printed in block of 6 columns
     nblocks = number_of_basis // 6
     rest = number_of_basis % 6
@@ -96,7 +98,7 @@ def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
     return np.concatenate(blocks, axis=1)
 
 
-def read_block(lines: list) -> Matrix:
+def read_block(lines: Sequence[str]) -> Matrix:
     """Read a block containing the values of the block matrix.
 
     The format is similar to:
@@ -114,10 +116,13 @@ def read_block(lines: list) -> Matrix:
     return np.array([x.split()[1:] for x in lines[1:]], dtype=float)
 
 
-def parse_molecular_orbitals(file_name: str) -> tuple:
+def parse_molecular_orbitals(file_name: PathLike) -> InfoMO:
     """Read the Molecular orbital from the orca output."""
-    n_contracted = try_search_pattern(
-        "# of contracted basis functions", file_name).split()[-1]
+    _n_contracted = try_search_pattern("# of contracted basis functions", file_name)
+    try:
+        n_contracted = _n_contracted.rsplit(maxsplit=1)[-1]  # type: ignore
+    except AttributeError as ex:  # _n_contracted can be None
+        raise RuntimeError("Failed to extract molecular orbials from {file_name!r}") from ex
 
     # Parse the blocks of MOs
     start = 'MOLECULAR ORBITALS'
@@ -138,7 +143,7 @@ def parse_molecular_orbitals(file_name: str) -> tuple:
     return InfoMO(np.hstack(tuple_energies), np.hstack(tuple_coeffs))
 
 
-def read_column_orbitals(lines: list) -> tuple:
+def read_column_orbitals(lines: Sequence[str]) -> Tuple[np.ndarray, np.ndarray]:
     """Read a set of maximum 6 columns containing the Molecular orbitals.
 
     the format similar to:
@@ -160,7 +165,14 @@ def read_column_orbitals(lines: list) -> tuple:
     return energies, coefficients
 
 
-def parse_basis_set(file_name: PathLike) -> tuple:
+#: A tuple with 2 named tuples.
+NamedTup2 = Tuple[AtomBasisKey, AtomBasisData]
+
+#: A tuple with 2 tuples of named tuples.
+NamedTupN = Tuple[Tuple[AtomBasisKey, ...], Tuple[AtomBasisData, ...]]
+
+
+def parse_basis_set(file_name: PathLike) -> NamedTupN:
     """Read the basis set used by Orca.
 
     It is printed by specifying the keyword: !printbase
@@ -178,22 +190,24 @@ def parse_basis_set(file_name: PathLike) -> tuple:
     return create_basis_data(basis)
 
 
-def create_basis_data(basis: list) -> tuple:
+AtomBasis = Tuple[str, Sequence[str]]
+
+
+def create_basis_data(basis: Tuple[str, Iterable[AtomBasis]]) -> NamedTupN:
     """Convert the parse data into Contracted Gauss functions information."""
     basis_name = basis[0]
     atom_keys, atom_basis = zip(*[create_CGFs_per_atom(basis_name, xs)
                                   for xs in basis[1]])
-
     return atom_keys, atom_basis
 
 
-def create_CGFs_per_atom(basis_name: str, xs: list) -> tuple:
+def create_CGFs_per_atom(basis_name: str, xs: AtomBasis) -> NamedTup2:
     """Create the structure of the CGFs for each atom."""
     atom_name = xs[0]
-    formats, primitives = zip(*[((x[0], int(x[1])), x[2:]) for x in xs[1:]])
+    formats, _primitives = zip(*[((x[0], int(x[1])), x[2:]) for x in xs[1:]])
 
     # flatten de primitives
-    primitives = list(chain(*chain(*primitives)))
+    primitives = list(chain(*chain(*_primitives)))
 
     # order in coefficients and exponents the CGFs
     nPrimitives = len(primitives) // 2
@@ -206,7 +220,7 @@ def create_CGFs_per_atom(basis_name: str, xs: list) -> tuple:
     return atom_basis_key, atom_basis_data
 
 
-def create_parser_element():
+def create_parser_element() -> ParserElement:
     """Parser to read the basis set of a given element.
 
     The format is:

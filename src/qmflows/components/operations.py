@@ -2,7 +2,7 @@
 
 __all__ = ['find_first_job', 'select_max', 'select_min']
 
-from typing import Callable, Iterable, Any
+from typing import Callable, Iterable, Any, Optional
 
 from noodles import find_first, schedule
 from scm.plams import Molecule
@@ -20,7 +20,7 @@ def find_first_job(pred: Predicate,
                    packagelist: Iterable[Package],
                    settings: Settings,
                    molecule: Molecule,
-                   job_name: str, **kwargs: Any) -> Result:
+                   job_name: str, **kwargs: Any) -> Optional[Result]:
     """Return the first job to finish."""
     joblist = [package(
         settings, molecule, job_name=f"{package.pkg_name}_{job_name}", **kwargs)
@@ -29,7 +29,7 @@ def find_first_job(pred: Predicate,
 
 
 @schedule
-def select_max(results: Iterable[Result], prop: str = 'energy') -> Result:
+def select_max(results: Iterable[Result], prop: str = 'energy') -> Optional[Result]:
     """Select a result with the maximum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because
@@ -43,7 +43,7 @@ def select_max(results: Iterable[Result], prop: str = 'energy') -> Result:
 
 
 @schedule
-def select_min(results: Iterable[Result], prop: str = 'energy') -> Result:
+def select_min(results: Iterable[Result], prop: str = 'energy') -> Optional[Result]:
     """Select a result with the minimum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because

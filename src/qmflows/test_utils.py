@@ -90,7 +90,7 @@ def delete_output(delete_db: Union[Callable, bool] = True,
         return decorator
 
 
-delete_output.__doc__ = delete_output.__doc__.format(
+delete_output.__doc__ = delete_output.__doc__.format(  # type: ignore
     workdir=PATH / 'plams_workdir'
 )
 

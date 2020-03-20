@@ -3,12 +3,16 @@
 __all__ = ['parse_string_xyz', 'readXYZ',
            'manyXYZ', "string_to_plams_Molecule"]
 
+from typing import List, Iterable
+
 from pyparsing import (Group, LineEnd, OneOrMore, Suppress, Word, alphas,
-                       restOfLine)
+                       restOfLine, ParseResults)
 from scm.plams import Atom, Molecule
 
-from qmflows.common import AtomXYZ
-from qmflows.parsers.parser import floatNumber, natural
+from .parser import floatNumber, natural
+from ..common import AtomXYZ
+from ..type_hints import PathLike
+
 
 # =============================================================================
 
@@ -25,7 +29,7 @@ parser_xyz = Suppress(header) + OneOrMore(Group(atomParser))
 # ==============================<>====================================
 
 
-def parse_string_xyz(xs: str) -> list:
+def parse_string_xyz(xs: str) -> List[AtomXYZ]:
     """Read a molecula geometry in XYZ format from a string.
 
     :param: xs
@@ -36,7 +40,7 @@ def parse_string_xyz(xs: str) -> list:
     return createAtoms(rs)
 
 
-def readXYZ(pathXYZ: str) -> list:
+def readXYZ(pathXYZ: PathLike) -> List[AtomXYZ]:
     """Parse molecular geometry in XYZ format from a file.
 
     :param: pathXYZ
@@ -47,7 +51,7 @@ def readXYZ(pathXYZ: str) -> list:
     return createAtoms(xs)
 
 
-def manyXYZ(pathXYZ: str) -> list:
+def manyXYZ(pathXYZ: PathLike) -> List[List[AtomXYZ]]:
     """Read one or more molecular geometries in XYZ format from a file.
 
     :param: pathXYZ
@@ -59,14 +63,14 @@ def manyXYZ(pathXYZ: str) -> list:
     return list(map(createAtoms, xss))
 
 
-def createAtoms(xs):
+def createAtoms(xs: ParseResults) -> List[AtomXYZ]:
     """Create an AtomXYZ tuple from a string."""
-    ls = [a.label.lower() for a in xs]
-    rs = [list(map(float, a.xyz)) for a in xs]
-    return [AtomXYZ(*args) for args in zip(ls, rs)]
+    ls = (a.label.lower() for a in xs)
+    rs = (tuple(map(float, a.xyz)) for a in xs)
+    return [AtomXYZ(symbol, xyz) for symbol, xyz in zip(ls, rs)]  # type: ignore
 
 
-def tuplesXYZ_to_plams(xs):
+def tuplesXYZ_to_plams(xs: Iterable[AtomXYZ]) -> Molecule:
     """Transform a list of namedTuples to a Plams molecule."""
     plams_mol = Molecule()
     for at in xs:
@@ -77,6 +81,6 @@ def tuplesXYZ_to_plams(xs):
     return plams_mol
 
 
-def string_to_plams_Molecule(xs):
+def string_to_plams_Molecule(xs: str) -> Molecule:
     """Convert a molecule stored in a string to a plams Molecule."""
     return tuplesXYZ_to_plams(parse_string_xyz(xs))

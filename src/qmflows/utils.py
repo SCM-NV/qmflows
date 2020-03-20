@@ -61,7 +61,7 @@ def to_runtime_error(func: Callable) -> Callable:
     return wrapper
 
 
-def file_to_context(file: Union[PathLike, IO],
+def file_to_context(file: Union[int, PathLike, IO],
                     require_iterator: bool = True,
                     **kwargs: Any) -> ContextManager[IO]:
     r"""Take a path- or file-like object and return an appropiate context manager instance.
@@ -108,14 +108,14 @@ def file_to_context(file: Union[PathLike, IO],
     """
     # path-like object
     try:
-        return open(file, **kwargs)
+        return open(file, **kwargs)  # type: ignore
 
     # a file-like object (hopefully)
     except TypeError as ex:
         if require_iterator and not isinstance(file, abc.Iterator):
             raise TypeError("'file' expected a file- or path-like object; "
                             f"observed type: {file.__class__.__name__!r}") from ex
-        return nullcontext(file)
+        return nullcontext(file)  # type: ignore
 
 
 def init_restart(path: Optional[PathLike] = None,
