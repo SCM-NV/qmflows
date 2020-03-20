@@ -2,7 +2,6 @@
 
 __all__ = ['awk_file', 'extract_line_value']
 
-import os
 import subprocess
 
 from pyparsing import OneOrMore, SkipTo, Suppress
@@ -22,17 +21,17 @@ def awk_file(filename, script='', progfile=None):
 
     Returned value is a list of lines (strings). See ``man awk`` for details.
     """
-    cmd = ['awk']
-    if progfile:
-        if os.path.isfile(progfile):
-            cmd += ['-f', progfile]
-        else:
-            raise FileNotFoundError('File %s not present' % progfile)
-    else:
-        cmd += [script]
+    cmd = ['awk', script, filename]
+    # if progfile:
+    #     if os.path.isfile(progfile):
+    #         cmd += ['-f', progfile]
+    #     else:
+    #         raise FileNotFoundError('File %s not present' % progfile)
+    # else:
+    #     cmd += [script]
 
-    new_cmd = cmd + [filename]
-    ret = subprocess.check_output(new_cmd).decode('utf-8').split('\n')
+    # new_cmd = cmd + [filename]
+    ret = subprocess.check_output(cmd).decode('utf-8').split('\n')
     if ret[-1] == '':
         ret = ret[:-1]
     result = []
