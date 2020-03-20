@@ -2,8 +2,7 @@
 
 import warnings
 import subprocess
-from os.path import dirname, join
-from typing import Tuple
+from os.path import join
 from pathlib import Path
 
 from qmflows.test_utils import PATH, Assertion_Warning
@@ -13,16 +12,21 @@ _ROOT = Path(__file__).parts[:-2]
 PACKAGE = join(*_ROOT, 'src', 'qmflows')
 INI = str(PATH / 'mypy.ini')
 
-#: Type annotation for the 'action' keyword.
-Action = Literal['raise', 'warn', 'ignore']
+ACTION = frozenset({'raise', 'warn', 'ignore'})
+Action = Literal[tuple(ACTION)]  #: Type annotation for the 'action' keyword.
 
 
 def test_mypy(action: Action = 'warn') -> None:
     """Test using mypy."""
+    if action not in ACTION:
+        raise ValueError(f"Invalid value for the 'action' parameter: {action!r}")
+
     command = f"mypy {PACKAGE!r} --config-file {INI!r}"
-    out = subprocess.run(command, capture_output=True, shell=True)
+    out = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
 
     stdout = out.stdout.decode()
+    stderr = out.stderr.decode()
+    assert not stderr, stderr
 
     if action == 'warn' and out.returncode != 0:
         warnings.warn(stdout, category=Assertion_Warning)
@@ -33,7 +37,3 @@ def test_mypy(action: Action = 'warn') -> None:
         except AssertionError as ex:
             msg = stdout.rsplit('\n', maxsplit=2)[1]
             raise AssertionError(msg) from ex
-
-    else:
-        pass
-
