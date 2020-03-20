@@ -1,0 +1,904 @@
+ DBCSR| Multiplication driver                                               BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Multiplicative factor virtual images                                   1
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2020-03-19 17:54:47.714
+ ***** ** ***  *** **   PROGRAM STARTED ON                     bass-macbook.home
+ **    ****   ******    PROGRAM STARTED BY                              bvanbeek
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 85934
+  **** **  *******  **  PROGRAM STARTED IN /Users/bvanbeek/Documents/GitHub/qmfl
+                                           ows/test/test_files/plams_workdir.005
+                                           /cp2k_mm_sp
+
+ CP2K| version string:                                          CP2K version 6.1
+ CP2K| source code revision number:                                    svn:18464
+ CP2K| cp2kflags: omp no_statm_access accelerate                                
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                         Fri Apr 19 11:24:34 CEST 2019
+ CP2K| Program compiled on                                         192.168.1.124
+ CP2K| Program compiled for                       Darwin-IntelMacintosh-gfortran
+ CP2K| Data directory path            /Users/bvanbeek/Documents/GitHub/cp2k/data
+ CP2K| Input file name                                             cp2k_mm_sp.in
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                           BASIS_SET
+ GLOBAL| Potential file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                      __STD_INPUT__
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                       cp2k
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                         ENERGY
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    4
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name : UNKNOWN
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal                    0             0             0             0
+ MEMORY| MemFree                     0             0             0             0
+ MEMORY| Buffers                     0             0             0             0
+ MEMORY| Cached                      0             0             0             0
+ MEMORY| Slab                        0             0             0             0
+ MEMORY| SReclaimable                0             0             0             0
+ MEMORY| MemLikelyFree               0             0             0             0
+
+ WARNING : FFT library FFTW3 is not available  Trying FFTSG as a default
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+ EWALD|                                                                 not used
+     CHM BOND            1 C2O3 C331    200.00000000000000        1.5220000000000000     
+     CHM BOND            2 C331 HGA3    322.00000000000000        1.1110000000000000     
+     CHM BOND            3 C2O3 O2D2    525.00000000000000        1.2600000000000000     
+     CHM BEND            1 O2D2 C2O3 C331    40.000000000000000        116.00000000000000     
+     CHM BEND            2 C2O3 C331 HGA3    33.000000000000000        109.50000000000000     
+     CHM BEND            3 HGA3 C331 HGA3    35.500000000000000        108.40000000000001     
+     CHM BEND            4 O2D2 C2O3 O2D2    100.00000000000000        128.00000000000000     
+     CHM TORSION            1 O2D2 C2O3 C331 HGA3    5.0000000000000003E-002           6   180.00000000000000     
+     CHM IMPROPERS            1 C2O3 C331 O2D2 O2D2    107.00000000000000        0.0000000000000000     
+     CHM NONBOND            1 C2O3   -7.0000000000000007E-002   2.0000000000000000     
+     CHM NONBOND            2 C331   -7.8000000000000000E-002   2.0499999999999998     
+     CHM NONBOND            3 HGA3   -2.4000000000000000E-002   1.3400000000000001     
+     CHM NONBOND            4 O2D2  -0.12000000000000000        1.7000000000000000     
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+
+ FORCEFIELD| Missing Urey-Bradley      (C2O3,C331,HGA3)                         
+ FORCEFIELD| Missing Urey-Bradley      (O2D2,C2O3,C331)                         
+ FORCEFIELD| Missing Urey-Bradley      (O2D2,C2O3,O2D2)                         
+ FORCEFIELD| Missing Urey-Bradley      (HGA3,C331,HGA3)                         
+ FORCEFIELD| Missing Out of plane bend (C331,O2D2,O2D2,C2O3)                    
+ Charge Checking ::C2O3CD                                                                              
+ Charge Checking ::CDCD                                                                              
+
+ *** WARNING in force_fields_all.F:3322 :: Multiple Charge declarations: ( ***
+ *** CD ) overwriting!                                                     ***
+
+ Charge Checking ::O2D2CD                                                                              
+ Charge Checking ::SECD                                                                              
+ Charge Checking ::C2O3SE                                                                              
+ Charge Checking ::CDSE                                                                              
+ Charge Checking ::O2D2SE                                                                              
+ Charge Checking ::SESE                                                                              
+
+ *** WARNING in force_fields_all.F:3322 :: Multiple Charge declarations: ( ***
+ *** SE ) overwriting!                                                     ***
+
+ Charge Checking ::C2O3C331                                                                            
+ Charge Checking ::CDC331                                                                            
+ Charge Checking ::O2D2C331                                                                            
+ Charge Checking ::SEC331                                                                            
+ Charge Checking ::C2O3C2O3                                                                            
+
+ *** WARNING in force_fields_all.F:3322 :: Multiple Charge declarations: ( ***
+ *** C2O3 ) overwriting!                                                   ***
+
+ Charge Checking ::CDC2O3                                                                            
+ Charge Checking ::O2D2C2O3                                                                            
+ Charge Checking ::SEC2O3                                                                            
+ Charge Checking ::C2O3O2D2                                                                            
+ Charge Checking ::CDO2D2                                                                            
+ Charge Checking ::O2D2O2D2                                                                            
+
+ *** WARNING in force_fields_all.F:3322 :: Multiple Charge declarations: ( ***
+ *** O2D2 ) overwriting!                                                   ***
+
+ Charge Checking ::SEO2D2                                                                            
+ Charge Checking ::C2O3HGA3                                                                            
+ Charge Checking ::CDHGA3                                                                            
+ Charge Checking ::O2D2HGA3                                                                            
+ Charge Checking ::SEHGA3                                                                            
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+ Matching kinds for MM_RADIUS :: 'CD' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'CD' with 'C331'
+ Matching kinds for MM_RADIUS :: 'CD' with 'CD'
+ Matching kinds for MM_RADIUS :: 'CD' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'CD' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'CD' with 'SE'
+ Matching kinds for MM_RADIUS :: 'SE' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'SE' with 'C331'
+ Matching kinds for MM_RADIUS :: 'SE' with 'CD'
+ Matching kinds for MM_RADIUS :: 'SE' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'SE' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'SE' with 'SE'
+ Matching kinds for MM_RADIUS :: 'C331' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'C331' with 'C331'
+ Matching kinds for MM_RADIUS :: 'C331' with 'CD'
+ Matching kinds for MM_RADIUS :: 'C331' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'C331' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'C331' with 'SE'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'C331'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'CD'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'C2O3' with 'SE'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'C331'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'CD'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'O2D2' with 'SE'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'C2O3'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'C331'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'CD'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'HGA3'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'O2D2'
+ Matching kinds for MM_RADIUS :: 'HGA3' with 'SE'
+ Total number of particles with a shell ::            0
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+
+ FORCEFIELD| Missing Spline_Bond_Env   (  CD,  CD)                              
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+
+ SPLINE_INFO| Generating 21 splines for NONBONDED14 interactions 
+              Due to 6 different atomic kinds
+  ...2  ...4  ...6  ...8  ...10  ...12  ...14  ...16  ...18  ...20
+ SPLINE_INFO| Number of unique splines computed:            11
+ SPLINE_INFO| Done
+     TESTING CDCD with CDC2O3
+     TESTING CDCD with CDC331
+     TESTING CDCD with CDCD
+     FOUND CD CD
+     TESTING CDCD with CDHGA3
+     TESTING CDCD with CDO2D2
+     TESTING CDCD with CDSE
+     TESTING CDCD with SEC2O3
+     TESTING CDCD with SEC331
+     TESTING CDCD with SEHGA3
+     TESTING CDCD with SEO2D2
+     TESTING CDCD with SESE
+     TESTING CDSE with CDC2O3
+     TESTING CDSE with CDC331
+     TESTING CDSE with CDCD
+     TESTING CDSE with CDHGA3
+     TESTING CDSE with CDO2D2
+     TESTING CDSE with CDSE
+     FOUND CD SE
+     TESTING CDSE with SEC2O3
+     TESTING CDSE with SEC331
+     TESTING CDSE with SEHGA3
+     TESTING CDSE with SEO2D2
+     TESTING CDSE with SESE
+     TESTING CDC331 with CDC2O3
+     TESTING CDC331 with CDC331
+     FOUND CD C331
+     TESTING CDC331 with CDCD
+     TESTING CDC331 with CDHGA3
+     TESTING CDC331 with CDO2D2
+     TESTING CDC331 with CDSE
+     TESTING CDC331 with SEC2O3
+     TESTING CDC331 with SEC331
+     TESTING CDC331 with SEHGA3
+     TESTING CDC331 with SEO2D2
+     TESTING CDC331 with SESE
+     TESTING CDC2O3 with CDC2O3
+     FOUND CD C2O3
+     TESTING CDC2O3 with CDC331
+     TESTING CDC2O3 with CDCD
+     TESTING CDC2O3 with CDHGA3
+     TESTING CDC2O3 with CDO2D2
+     TESTING CDC2O3 with CDSE
+     TESTING CDC2O3 with SEC2O3
+     TESTING CDC2O3 with SEC331
+     TESTING CDC2O3 with SEHGA3
+     TESTING CDC2O3 with SEO2D2
+     TESTING CDC2O3 with SESE
+     TESTING CDO2D2 with CDC2O3
+     TESTING CDO2D2 with CDC331
+     TESTING CDO2D2 with CDCD
+     TESTING CDO2D2 with CDHGA3
+     TESTING CDO2D2 with CDO2D2
+     FOUND CD O2D2
+     TESTING CDO2D2 with CDSE
+     TESTING CDO2D2 with SEC2O3
+     TESTING CDO2D2 with SEC331
+     TESTING CDO2D2 with SEHGA3
+     TESTING CDO2D2 with SEO2D2
+     TESTING CDO2D2 with SESE
+     TESTING CDHGA3 with CDC2O3
+     TESTING CDHGA3 with CDC331
+     TESTING CDHGA3 with CDCD
+     TESTING CDHGA3 with CDHGA3
+     FOUND CD HGA3
+     TESTING CDHGA3 with CDO2D2
+     TESTING CDHGA3 with CDSE
+     TESTING CDHGA3 with SEC2O3
+     TESTING CDHGA3 with SEC331
+     TESTING CDHGA3 with SEHGA3
+     TESTING CDHGA3 with SEO2D2
+     TESTING CDHGA3 with SESE
+     TESTING SESE with CDC2O3
+     TESTING SESE with CDC331
+     TESTING SESE with CDCD
+     TESTING SESE with CDHGA3
+     TESTING SESE with CDO2D2
+     TESTING SESE with CDSE
+     TESTING SESE with SEC2O3
+     TESTING SESE with SEC331
+     TESTING SESE with SEHGA3
+     TESTING SESE with SEO2D2
+     TESTING SESE with SESE
+     FOUND SE SE
+     TESTING SEC331 with CDC2O3
+     TESTING SEC331 with CDC331
+     TESTING SEC331 with CDCD
+     TESTING SEC331 with CDHGA3
+     TESTING SEC331 with CDO2D2
+     TESTING SEC331 with CDSE
+     TESTING SEC331 with SEC2O3
+     TESTING SEC331 with SEC331
+     FOUND SE C331
+     TESTING SEC331 with SEHGA3
+     TESTING SEC331 with SEO2D2
+     TESTING SEC331 with SESE
+     TESTING SEC2O3 with CDC2O3
+     TESTING SEC2O3 with CDC331
+     TESTING SEC2O3 with CDCD
+     TESTING SEC2O3 with CDHGA3
+     TESTING SEC2O3 with CDO2D2
+     TESTING SEC2O3 with CDSE
+     TESTING SEC2O3 with SEC2O3
+     FOUND SE C2O3
+     TESTING SEC2O3 with SEC331
+     TESTING SEC2O3 with SEHGA3
+     TESTING SEC2O3 with SEO2D2
+     TESTING SEC2O3 with SESE
+     TESTING SEO2D2 with CDC2O3
+     TESTING SEO2D2 with CDC331
+     TESTING SEO2D2 with CDCD
+     TESTING SEO2D2 with CDHGA3
+     TESTING SEO2D2 with CDO2D2
+     TESTING SEO2D2 with CDSE
+     TESTING SEO2D2 with SEC2O3
+     TESTING SEO2D2 with SEC331
+     TESTING SEO2D2 with SEHGA3
+     TESTING SEO2D2 with SEO2D2
+     FOUND SE O2D2
+     TESTING SEO2D2 with SESE
+     TESTING SEHGA3 with CDC2O3
+     TESTING SEHGA3 with CDC331
+     TESTING SEHGA3 with CDCD
+     TESTING SEHGA3 with CDHGA3
+     TESTING SEHGA3 with CDO2D2
+     TESTING SEHGA3 with CDSE
+     TESTING SEHGA3 with SEC2O3
+     TESTING SEHGA3 with SEC331
+     TESTING SEHGA3 with SEHGA3
+     FOUND SE HGA3
+     TESTING SEHGA3 with SEO2D2
+     TESTING SEHGA3 with SESE
+     TESTING C331C331 with CDC2O3
+     TESTING C331C331 with CDC331
+     TESTING C331C331 with CDCD
+     TESTING C331C331 with CDHGA3
+     TESTING C331C331 with CDO2D2
+     TESTING C331C331 with CDSE
+     TESTING C331C331 with SEC2O3
+     TESTING C331C331 with SEC331
+     TESTING C331C331 with SEHGA3
+     TESTING C331C331 with SEO2D2
+     TESTING C331C331 with SESE
+     TESTING C331C2O3 with CDC2O3
+     TESTING C331C2O3 with CDC331
+     TESTING C331C2O3 with CDCD
+     TESTING C331C2O3 with CDHGA3
+     TESTING C331C2O3 with CDO2D2
+     TESTING C331C2O3 with CDSE
+     TESTING C331C2O3 with SEC2O3
+     TESTING C331C2O3 with SEC331
+     TESTING C331C2O3 with SEHGA3
+     TESTING C331C2O3 with SEO2D2
+     TESTING C331C2O3 with SESE
+     TESTING C331O2D2 with CDC2O3
+     TESTING C331O2D2 with CDC331
+     TESTING C331O2D2 with CDCD
+     TESTING C331O2D2 with CDHGA3
+     TESTING C331O2D2 with CDO2D2
+     TESTING C331O2D2 with CDSE
+     TESTING C331O2D2 with SEC2O3
+     TESTING C331O2D2 with SEC331
+     TESTING C331O2D2 with SEHGA3
+     TESTING C331O2D2 with SEO2D2
+     TESTING C331O2D2 with SESE
+     TESTING C331HGA3 with CDC2O3
+     TESTING C331HGA3 with CDC331
+     TESTING C331HGA3 with CDCD
+     TESTING C331HGA3 with CDHGA3
+     TESTING C331HGA3 with CDO2D2
+     TESTING C331HGA3 with CDSE
+     TESTING C331HGA3 with SEC2O3
+     TESTING C331HGA3 with SEC331
+     TESTING C331HGA3 with SEHGA3
+     TESTING C331HGA3 with SEO2D2
+     TESTING C331HGA3 with SESE
+     TESTING C2O3C2O3 with CDC2O3
+     TESTING C2O3C2O3 with CDC331
+     TESTING C2O3C2O3 with CDCD
+     TESTING C2O3C2O3 with CDHGA3
+     TESTING C2O3C2O3 with CDO2D2
+     TESTING C2O3C2O3 with CDSE
+     TESTING C2O3C2O3 with SEC2O3
+     TESTING C2O3C2O3 with SEC331
+     TESTING C2O3C2O3 with SEHGA3
+     TESTING C2O3C2O3 with SEO2D2
+     TESTING C2O3C2O3 with SESE
+     TESTING C2O3O2D2 with CDC2O3
+     TESTING C2O3O2D2 with CDC331
+     TESTING C2O3O2D2 with CDCD
+     TESTING C2O3O2D2 with CDHGA3
+     TESTING C2O3O2D2 with CDO2D2
+     TESTING C2O3O2D2 with CDSE
+     TESTING C2O3O2D2 with SEC2O3
+     TESTING C2O3O2D2 with SEC331
+     TESTING C2O3O2D2 with SEHGA3
+     TESTING C2O3O2D2 with SEO2D2
+     TESTING C2O3O2D2 with SESE
+     TESTING C2O3HGA3 with CDC2O3
+     TESTING C2O3HGA3 with CDC331
+     TESTING C2O3HGA3 with CDCD
+     TESTING C2O3HGA3 with CDHGA3
+     TESTING C2O3HGA3 with CDO2D2
+     TESTING C2O3HGA3 with CDSE
+     TESTING C2O3HGA3 with SEC2O3
+     TESTING C2O3HGA3 with SEC331
+     TESTING C2O3HGA3 with SEHGA3
+     TESTING C2O3HGA3 with SEO2D2
+     TESTING C2O3HGA3 with SESE
+     TESTING O2D2O2D2 with CDC2O3
+     TESTING O2D2O2D2 with CDC331
+     TESTING O2D2O2D2 with CDCD
+     TESTING O2D2O2D2 with CDHGA3
+     TESTING O2D2O2D2 with CDO2D2
+     TESTING O2D2O2D2 with CDSE
+     TESTING O2D2O2D2 with SEC2O3
+     TESTING O2D2O2D2 with SEC331
+     TESTING O2D2O2D2 with SEHGA3
+     TESTING O2D2O2D2 with SEO2D2
+     TESTING O2D2O2D2 with SESE
+     TESTING O2D2HGA3 with CDC2O3
+     TESTING O2D2HGA3 with CDC331
+     TESTING O2D2HGA3 with CDCD
+     TESTING O2D2HGA3 with CDHGA3
+     TESTING O2D2HGA3 with CDO2D2
+     TESTING O2D2HGA3 with CDSE
+     TESTING O2D2HGA3 with SEC2O3
+     TESTING O2D2HGA3 with SEC331
+     TESTING O2D2HGA3 with SEHGA3
+     TESTING O2D2HGA3 with SEO2D2
+     TESTING O2D2HGA3 with SESE
+     TESTING HGA3HGA3 with CDC2O3
+     TESTING HGA3HGA3 with CDC331
+     TESTING HGA3HGA3 with CDCD
+     TESTING HGA3HGA3 with CDHGA3
+     TESTING HGA3HGA3 with CDO2D2
+     TESTING HGA3HGA3 with CDSE
+     TESTING HGA3HGA3 with SEC2O3
+     TESTING HGA3HGA3 with SEC331
+     TESTING HGA3HGA3 with SEHGA3
+     TESTING HGA3HGA3 with SEO2D2
+     TESTING HGA3HGA3 with SESE
+
+ SPLINE_INFO| Generating 21 splines for NONBONDED interactions 
+              Due to 6 different atomic kinds
+  ...2  ...4  ...6  ...8  ...10  ...12  ...14  ...16  ...18  ...20
+ SPLINE_INFO| Number of unique splines computed:            19
+ SPLINE_INFO| Done
+       atom            1  Cd charge =   0.97680000000000000     
+     Mol Kind MOL1 charge =   0.97680000000000000     
+       atom            1  Se charge =  -0.97680000000000000     
+     Mol Kind MOL2 charge =  -0.97680000000000000     
+       atom            1  Cd charge =   0.97680000000000000     
+     Mol Kind MOL1 charge =   0.97680000000000000     
+       atom            1  Se charge =  -0.97680000000000000     
+     Mol Kind MOL2 charge =  -0.97680000000000000     
+       atom            1  C331 charge =  -0.34499999999999997     
+       atom            2  C2O3 charge =   0.45240000000000002     
+       atom            3  O2D2 charge =  -0.47039999999999998     
+       atom            4  O2D2 charge =  -0.47039999999999998     
+       atom            5  HGA3 charge =   0.11500000000000000     
+       atom            6  HGA3 charge =   0.11500000000000000     
+       atom            7  HGA3 charge =   0.11500000000000000     
+     Mol Kind MOL3 charge =  -0.48839999999999995     
+       atom            1  Cd charge =   0.97680000000000000     
+       atom            2  Cd charge =   0.97680000000000000     
+       atom            3  Cd charge =   0.97680000000000000     
+       atom            4  Cd charge =   0.97680000000000000     
+       atom            5  Cd charge =   0.97680000000000000     
+       atom            6  Cd charge =   0.97680000000000000     
+       atom            7  Cd charge =   0.97680000000000000     
+       atom            8  Cd charge =   0.97680000000000000     
+       atom            9  Cd charge =   0.97680000000000000     
+       atom           10  Cd charge =   0.97680000000000000     
+       atom           11  Cd charge =   0.97680000000000000     
+       atom           12  Cd charge =   0.97680000000000000     
+       atom           13  Cd charge =   0.97680000000000000     
+       atom           14  Cd charge =   0.97680000000000000     
+       atom           15  Cd charge =   0.97680000000000000     
+       atom           16  Cd charge =   0.97680000000000000     
+       atom           17  Se charge =  -0.97680000000000000     
+       atom           18  Se charge =  -0.97680000000000000     
+       atom           19  Se charge =  -0.97680000000000000     
+       atom           20  Se charge =  -0.97680000000000000     
+       atom           21  Se charge =  -0.97680000000000000     
+       atom           22  Se charge =  -0.97680000000000000     
+       atom           23  Se charge =  -0.97680000000000000     
+       atom           24  Se charge =  -0.97680000000000000     
+       atom           25  Se charge =  -0.97680000000000000     
+       atom           26  Se charge =  -0.97680000000000000     
+       atom           27  Se charge =  -0.97680000000000000     
+       atom           28  Se charge =  -0.97680000000000000     
+       atom           29  Se charge =  -0.97680000000000000     
+       atom           30  Cd charge =   0.97680000000000000     
+       atom           31  Cd charge =   0.97680000000000000     
+       atom           32  Cd charge =   0.97680000000000000     
+       atom           33  Cd charge =   0.97680000000000000     
+       atom           34  Cd charge =   0.97680000000000000     
+       atom           35  Cd charge =   0.97680000000000000     
+       atom           36  Cd charge =   0.97680000000000000     
+       atom           37  Cd charge =   0.97680000000000000     
+       atom           38  Cd charge =   0.97680000000000000     
+       atom           39  Cd charge =   0.97680000000000000     
+       atom           40  Cd charge =   0.97680000000000000     
+       atom           41  Cd charge =   0.97680000000000000     
+       atom           42  Cd charge =   0.97680000000000000     
+       atom           43  Cd charge =   0.97680000000000000     
+       atom           44  Cd charge =   0.97680000000000000     
+       atom           45  Cd charge =   0.97680000000000000     
+       atom           46  Cd charge =   0.97680000000000000     
+       atom           47  Cd charge =   0.97680000000000000     
+       atom           48  Cd charge =   0.97680000000000000     
+       atom           49  Cd charge =   0.97680000000000000     
+       atom           50  Cd charge =   0.97680000000000000     
+       atom           51  Cd charge =   0.97680000000000000     
+       atom           52  Cd charge =   0.97680000000000000     
+       atom           53  Cd charge =   0.97680000000000000     
+       atom           54  Cd charge =   0.97680000000000000     
+       atom           55  Cd charge =   0.97680000000000000     
+       atom           56  Cd charge =   0.97680000000000000     
+       atom           57  Cd charge =   0.97680000000000000     
+       atom           58  Cd charge =   0.97680000000000000     
+       atom           59  Cd charge =   0.97680000000000000     
+       atom           60  Cd charge =   0.97680000000000000     
+       atom           61  Cd charge =   0.97680000000000000     
+       atom           62  Cd charge =   0.97680000000000000     
+       atom           63  Cd charge =   0.97680000000000000     
+       atom           64  Cd charge =   0.97680000000000000     
+       atom           65  Cd charge =   0.97680000000000000     
+       atom           66  Cd charge =   0.97680000000000000     
+       atom           67  Cd charge =   0.97680000000000000     
+       atom           68  Cd charge =   0.97680000000000000     
+       atom           69  Cd charge =   0.97680000000000000     
+       atom           70  Cd charge =   0.97680000000000000     
+       atom           71  Cd charge =   0.97680000000000000     
+       atom           72  Cd charge =   0.97680000000000000     
+       atom           73  Cd charge =   0.97680000000000000     
+       atom           74  Cd charge =   0.97680000000000000     
+       atom           75  Cd charge =   0.97680000000000000     
+       atom           76  Cd charge =   0.97680000000000000     
+       atom           77  Cd charge =   0.97680000000000000     
+       atom           78  Cd charge =   0.97680000000000000     
+       atom           79  Cd charge =   0.97680000000000000     
+       atom           80  Cd charge =   0.97680000000000000     
+       atom           81  Cd charge =   0.97680000000000000     
+       atom           82  Se charge =  -0.97680000000000000     
+       atom           83  Se charge =  -0.97680000000000000     
+       atom           84  Se charge =  -0.97680000000000000     
+       atom           85  Se charge =  -0.97680000000000000     
+       atom           86  Se charge =  -0.97680000000000000     
+       atom           87  Se charge =  -0.97680000000000000     
+       atom           88  Se charge =  -0.97680000000000000     
+       atom           89  Se charge =  -0.97680000000000000     
+       atom           90  Se charge =  -0.97680000000000000     
+       atom           91  Se charge =  -0.97680000000000000     
+       atom           92  Se charge =  -0.97680000000000000     
+       atom           93  Se charge =  -0.97680000000000000     
+       atom           94  Se charge =  -0.97680000000000000     
+       atom           95  Se charge =  -0.97680000000000000     
+       atom           96  Se charge =  -0.97680000000000000     
+       atom           97  Se charge =  -0.97680000000000000     
+       atom           98  Se charge =  -0.97680000000000000     
+       atom           99  Se charge =  -0.97680000000000000     
+       atom          100  Se charge =  -0.97680000000000000     
+       atom          101  Se charge =  -0.97680000000000000     
+       atom          102  Se charge =  -0.97680000000000000     
+       atom          103  Se charge =  -0.97680000000000000     
+       atom          104  Se charge =  -0.97680000000000000     
+       atom          105  Se charge =  -0.97680000000000000     
+       atom          106  Se charge =  -0.97680000000000000     
+       atom          107  Se charge =  -0.97680000000000000     
+       atom          108  Se charge =  -0.97680000000000000     
+       atom          109  Se charge =  -0.97680000000000000     
+       atom          110  Se charge =  -0.97680000000000000     
+       atom          111  Se charge =  -0.97680000000000000     
+       atom          112  Se charge =  -0.97680000000000000     
+       atom          113  Se charge =  -0.97680000000000000     
+       atom          114  Se charge =  -0.97680000000000000     
+       atom          115  Se charge =  -0.97680000000000000     
+       atom          116  Se charge =  -0.97680000000000000     
+       atom          117  Se charge =  -0.97680000000000000     
+       atom          118  Se charge =  -0.97680000000000000     
+       atom          119  Se charge =  -0.97680000000000000     
+       atom          120  Se charge =  -0.97680000000000000     
+       atom          121  Se charge =  -0.97680000000000000     
+       atom          122  Se charge =  -0.97680000000000000     
+       atom          123  Se charge =  -0.97680000000000000     
+       atom          124  C331 charge =  -0.34499999999999997     
+       atom          125  C2O3 charge =   0.45240000000000002     
+       atom          126  O2D2 charge =  -0.47039999999999998     
+       atom          127  O2D2 charge =  -0.47039999999999998     
+       atom          128  HGA3 charge =   0.11500000000000000     
+       atom          129  HGA3 charge =   0.11500000000000000     
+       atom          130  HGA3 charge =   0.11500000000000000     
+       atom          131  C331 charge =  -0.34499999999999997     
+       atom          132  C2O3 charge =   0.45240000000000002     
+       atom          133  O2D2 charge =  -0.47039999999999998     
+       atom          134  O2D2 charge =  -0.47039999999999998     
+       atom          135  HGA3 charge =   0.11500000000000000     
+       atom          136  HGA3 charge =   0.11500000000000000     
+       atom          137  HGA3 charge =   0.11500000000000000     
+       atom          138  C331 charge =  -0.34499999999999997     
+       atom          139  C2O3 charge =   0.45240000000000002     
+       atom          140  O2D2 charge =  -0.47039999999999998     
+       atom          141  O2D2 charge =  -0.47039999999999998     
+       atom          142  HGA3 charge =   0.11500000000000000     
+       atom          143  HGA3 charge =   0.11500000000000000     
+       atom          144  HGA3 charge =   0.11500000000000000     
+       atom          145  C331 charge =  -0.34499999999999997     
+       atom          146  C2O3 charge =   0.45240000000000002     
+       atom          147  O2D2 charge =  -0.47039999999999998     
+       atom          148  O2D2 charge =  -0.47039999999999998     
+       atom          149  HGA3 charge =   0.11500000000000000     
+       atom          150  HGA3 charge =   0.11500000000000000     
+       atom          151  HGA3 charge =   0.11500000000000000     
+       atom          152  C331 charge =  -0.34499999999999997     
+       atom          153  C2O3 charge =   0.45240000000000002     
+       atom          154  O2D2 charge =  -0.47039999999999998     
+       atom          155  O2D2 charge =  -0.47039999999999998     
+       atom          156  HGA3 charge =   0.11500000000000000     
+       atom          157  HGA3 charge =   0.11500000000000000     
+       atom          158  HGA3 charge =   0.11500000000000000     
+       atom          159  C331 charge =  -0.34499999999999997     
+       atom          160  C2O3 charge =   0.45240000000000002     
+       atom          161  O2D2 charge =  -0.47039999999999998     
+       atom          162  O2D2 charge =  -0.47039999999999998     
+       atom          163  HGA3 charge =   0.11500000000000000     
+       atom          164  HGA3 charge =   0.11500000000000000     
+       atom          165  HGA3 charge =   0.11500000000000000     
+       atom          166  C331 charge =  -0.34499999999999997     
+       atom          167  C2O3 charge =   0.45240000000000002     
+       atom          168  O2D2 charge =  -0.47039999999999998     
+       atom          169  O2D2 charge =  -0.47039999999999998     
+       atom          170  HGA3 charge =   0.11500000000000000     
+       atom          171  HGA3 charge =   0.11500000000000000     
+       atom          172  HGA3 charge =   0.11500000000000000     
+       atom          173  C331 charge =  -0.34499999999999997     
+       atom          174  C2O3 charge =   0.45240000000000002     
+       atom          175  O2D2 charge =  -0.47039999999999998     
+       atom          176  O2D2 charge =  -0.47039999999999998     
+       atom          177  HGA3 charge =   0.11500000000000000     
+       atom          178  HGA3 charge =   0.11500000000000000     
+       atom          179  HGA3 charge =   0.11500000000000000     
+       atom          180  C331 charge =  -0.34499999999999997     
+       atom          181  C2O3 charge =   0.45240000000000002     
+       atom          182  O2D2 charge =  -0.47039999999999998     
+       atom          183  O2D2 charge =  -0.47039999999999998     
+       atom          184  HGA3 charge =   0.11500000000000000     
+       atom          185  HGA3 charge =   0.11500000000000000     
+       atom          186  HGA3 charge =   0.11500000000000000     
+       atom          187  C331 charge =  -0.34499999999999997     
+       atom          188  C2O3 charge =   0.45240000000000002     
+       atom          189  O2D2 charge =  -0.47039999999999998     
+       atom          190  O2D2 charge =  -0.47039999999999998     
+       atom          191  HGA3 charge =   0.11500000000000000     
+       atom          192  HGA3 charge =   0.11500000000000000     
+       atom          193  HGA3 charge =   0.11500000000000000     
+       atom          194  C331 charge =  -0.34499999999999997     
+       atom          195  C2O3 charge =   0.45240000000000002     
+       atom          196  O2D2 charge =  -0.47039999999999998     
+       atom          197  O2D2 charge =  -0.47039999999999998     
+       atom          198  HGA3 charge =   0.11500000000000000     
+       atom          199  HGA3 charge =   0.11500000000000000     
+       atom          200  HGA3 charge =   0.11500000000000000     
+       atom          201  C331 charge =  -0.34499999999999997     
+       atom          202  C2O3 charge =   0.45240000000000002     
+       atom          203  O2D2 charge =  -0.47039999999999998     
+       atom          204  O2D2 charge =  -0.47039999999999998     
+       atom          205  HGA3 charge =   0.11500000000000000     
+       atom          206  HGA3 charge =   0.11500000000000000     
+       atom          207  HGA3 charge =   0.11500000000000000     
+       atom          208  C331 charge =  -0.34499999999999997     
+       atom          209  C2O3 charge =   0.45240000000000002     
+       atom          210  O2D2 charge =  -0.47039999999999998     
+       atom          211  O2D2 charge =  -0.47039999999999998     
+       atom          212  HGA3 charge =   0.11500000000000000     
+       atom          213  HGA3 charge =   0.11500000000000000     
+       atom          214  HGA3 charge =   0.11500000000000000     
+       atom          215  C331 charge =  -0.34499999999999997     
+       atom          216  C2O3 charge =   0.45240000000000002     
+       atom          217  O2D2 charge =  -0.47039999999999998     
+       atom          218  O2D2 charge =  -0.47039999999999998     
+       atom          219  HGA3 charge =   0.11500000000000000     
+       atom          220  HGA3 charge =   0.11500000000000000     
+       atom          221  HGA3 charge =   0.11500000000000000     
+       atom          222  C331 charge =  -0.34499999999999997     
+       atom          223  C2O3 charge =   0.45240000000000002     
+       atom          224  O2D2 charge =  -0.47039999999999998     
+       atom          225  O2D2 charge =  -0.47039999999999998     
+       atom          226  HGA3 charge =   0.11500000000000000     
+       atom          227  HGA3 charge =   0.11500000000000000     
+       atom          228  HGA3 charge =   0.11500000000000000     
+       atom          229  C331 charge =  -0.34499999999999997     
+       atom          230  C2O3 charge =   0.45240000000000002     
+       atom          231  O2D2 charge =  -0.47039999999999998     
+       atom          232  O2D2 charge =  -0.47039999999999998     
+       atom          233  HGA3 charge =   0.11500000000000000     
+       atom          234  HGA3 charge =   0.11500000000000000     
+       atom          235  HGA3 charge =   0.11500000000000000     
+       atom          236  C331 charge =  -0.34499999999999997     
+       atom          237  C2O3 charge =   0.45240000000000002     
+       atom          238  O2D2 charge =  -0.47039999999999998     
+       atom          239  O2D2 charge =  -0.47039999999999998     
+       atom          240  HGA3 charge =   0.11500000000000000     
+       atom          241  HGA3 charge =   0.11500000000000000     
+       atom          242  HGA3 charge =   0.11500000000000000     
+       atom          243  C331 charge =  -0.34499999999999997     
+       atom          244  C2O3 charge =   0.45240000000000002     
+       atom          245  O2D2 charge =  -0.47039999999999998     
+       atom          246  O2D2 charge =  -0.47039999999999998     
+       atom          247  HGA3 charge =   0.11500000000000000     
+       atom          248  HGA3 charge =   0.11500000000000000     
+       atom          249  HGA3 charge =   0.11500000000000000     
+       atom          250  C331 charge =  -0.34499999999999997     
+       atom          251  C2O3 charge =   0.45240000000000002     
+       atom          252  O2D2 charge =  -0.47039999999999998     
+       atom          253  O2D2 charge =  -0.47039999999999998     
+       atom          254  HGA3 charge =   0.11500000000000000     
+       atom          255  HGA3 charge =   0.11500000000000000     
+       atom          256  HGA3 charge =   0.11500000000000000     
+       atom          257  C331 charge =  -0.34499999999999997     
+       atom          258  C2O3 charge =   0.45240000000000002     
+       atom          259  O2D2 charge =  -0.47039999999999998     
+       atom          260  O2D2 charge =  -0.47039999999999998     
+       atom          261  HGA3 charge =   0.11500000000000000     
+       atom          262  HGA3 charge =   0.11500000000000000     
+       atom          263  HGA3 charge =   0.11500000000000000     
+       atom          264  C331 charge =  -0.34499999999999997     
+       atom          265  C2O3 charge =   0.45240000000000002     
+       atom          266  O2D2 charge =  -0.47039999999999998     
+       atom          267  O2D2 charge =  -0.47039999999999998     
+       atom          268  HGA3 charge =   0.11500000000000000     
+       atom          269  HGA3 charge =   0.11500000000000000     
+       atom          270  HGA3 charge =   0.11500000000000000     
+       atom          271  C331 charge =  -0.34499999999999997     
+       atom          272  C2O3 charge =   0.45240000000000002     
+       atom          273  O2D2 charge =  -0.47039999999999998     
+       atom          274  O2D2 charge =  -0.47039999999999998     
+       atom          275  HGA3 charge =   0.11500000000000000     
+       atom          276  HGA3 charge =   0.11500000000000000     
+       atom          277  HGA3 charge =   0.11500000000000000     
+       atom          278  C331 charge =  -0.34499999999999997     
+       atom          279  C2O3 charge =   0.45240000000000002     
+       atom          280  O2D2 charge =  -0.47039999999999998     
+       atom          281  O2D2 charge =  -0.47039999999999998     
+       atom          282  HGA3 charge =   0.11500000000000000     
+       atom          283  HGA3 charge =   0.11500000000000000     
+       atom          284  HGA3 charge =   0.11500000000000000     
+       atom          285  C331 charge =  -0.34499999999999997     
+       atom          286  C2O3 charge =   0.45240000000000002     
+       atom          287  O2D2 charge =  -0.47039999999999998     
+       atom          288  O2D2 charge =  -0.47039999999999998     
+       atom          289  HGA3 charge =   0.11500000000000000     
+       atom          290  HGA3 charge =   0.11500000000000000     
+       atom          291  HGA3 charge =   0.11500000000000000     
+       atom          292  C331 charge =  -0.34499999999999997     
+       atom          293  C2O3 charge =   0.45240000000000002     
+       atom          294  O2D2 charge =  -0.47039999999999998     
+       atom          295  O2D2 charge =  -0.47039999999999998     
+       atom          296  HGA3 charge =   0.11500000000000000     
+       atom          297  HGA3 charge =   0.11500000000000000     
+       atom          298  HGA3 charge =   0.11500000000000000     
+       atom          299  C331 charge =  -0.34499999999999997     
+       atom          300  C2O3 charge =   0.45240000000000002     
+       atom          301  O2D2 charge =  -0.47039999999999998     
+       atom          302  O2D2 charge =  -0.47039999999999998     
+       atom          303  HGA3 charge =   0.11500000000000000     
+       atom          304  HGA3 charge =   0.11500000000000000     
+       atom          305  HGA3 charge =   0.11500000000000000     
+    Total system charge =         0.0000000000
+    Total system mass   =  24650138.9535497911
+     Mol(           5 ) Old BOND Count:            6           3
+     1     5
+     1     6
+     1     7
+     2     1
+     3     2
+     4     2
+     Mol(           5 ) Old BEND Count:            9           4
+     2     1     5
+     2     1     6
+     2     1     7
+     3     2     1
+     4     2     1
+     4     2     3
+     6     1     5
+     7     1     5
+     7     1     6
+     Mol(           5 ) Old UB Count:            9           4
+     2     1     5
+     2     1     6
+     2     1     7
+     3     2     1
+     4     2     1
+     4     2     3
+     6     1     5
+     7     1     5
+     7     1     6
+     Mol(           5 ) New UB Count:            0           0
+
+     Mol(           5 ) Old TORSION Count:            6           1
+     5     1     2     3
+     5     1     2     4
+     6     1     2     3
+     6     1     2     4
+     7     1     2     3
+     7     1     2     4
+     Mol(           5 ) Old IMPROPER Count:            1           1
+     Mol(           5 ) Old OPBEND Count:            1           1
+     Mol(           5 ) New OPBEND Count:            0           0
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):            -15.443080591840685
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                DBCSR STATISTICS                             -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ COUNTER                                    TOTAL       BLAS       SMM       ACC
+ flops inhomo. stacks                           0       0.0%      0.0%      0.0%
+ flops total                         0.000000E+00       0.0%      0.0%      0.0%
+ flops max/rank                      0.000000E+00       0.0%      0.0%      0.0%
+ matmuls inhomo. stacks                         0       0.0%      0.0%      0.0%
+ matmuls total                                  0       0.0%      0.0%      0.0%
+ number of processed stacks                     0       0.0%      0.0%      0.0%
+ average stack size                                     0.0       0.0       0.0
+ marketing flops                     0.000000E+00
+ -------------------------------------------------------------------------------
+
+ MEMORY| Estimated peak process memory [MiB]                                   0
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                           R E F E R E N C E S                               -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ 
+ CP2K version 6.1, the CP2K developers group (2018).
+ CP2K is freely available from https://www.cp2k.org/ .
+
+ Schuett, Ole; Messmer, Peter; Hutter, Juerg; VandeVondele, Joost. 
+ Electronic Structure Calculations on Graphics Processing Units, John Wiley & Sons, Ltd, 173-190 (2016). 
+ GPU-Accelerated Sparse Matrix-Matrix Multiplication for Linear Scaling Density Functional Theory.
+ http://dx.doi.org/10.1002/9781118670712.ch8
+
+
+ Borstnik, U; VandeVondele, J; Weber, V; Hutter, J. 
+ PARALLEL COMPUTING, 40 (5-6), 47-58 (2014). 
+ Sparse matrix multiplication: The distributed block-compressed sparse
+ row library.
+ http://dx.doi.org/10.1016/j.parco.2014.03.012
+
+
+ Hutter, J; Iannuzzi, M; Schiffmann, F; VandeVondele, J. 
+ WILEY INTERDISCIPLINARY REVIEWS-COMPUTATIONAL MOLECULAR SCIENCE, 4 (1), 15-25 (2014). 
+ CP2K: atomistic simulations of condensed matter systems.
+ http://dx.doi.org/10.1002/wcms.1159
+
+
+ Frigo, M; Johnson, SG. 
+ PROCEEDINGS OF THE IEEE, 93 (2), 216-231 (2005). 
+ The design and implementation of FFTW3.
+ http://dx.doi.org/10.1109/JPROC.2004.840301
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                T I M I N G                                  -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ SUBROUTINE                       CALLS  ASD         SELF TIME        TOTAL TIME
+                                MAXIMUM       AVERAGE  MAXIMUM  AVERAGE  MAXIMUM
+ CP2K                                 1  1.0    0.005    0.005    0.133    0.133
+ fist_calc_energy_force               1  2.0    0.000    0.000    0.084    0.084
+ force_nonbond                        1  3.0    0.058    0.058    0.058    0.058
+ fist_create_force_env                1  2.0    0.000    0.000    0.043    0.043
+ fist_init                            1  3.0    0.001    0.001    0.043    0.043
+ topology_control                     1  4.0    0.000    0.000    0.025    0.025
+ list_control                         1  3.0    0.000    0.000    0.025    0.025
+ build_fist_neighbor_lists            1  4.0    0.000    0.000    0.025    0.025
+ build_neighbor_lists                 1  5.0    0.023    0.023    0.023    0.023
+ connectivity_control                 1  5.0    0.000    0.000    0.020    0.020
+ read_topology_psf                    1  6.0    0.018    0.018    0.019    0.019
+ force_field_control                  1  4.0    0.000    0.000    0.017    0.017
+ read_force_field_charmm              1  5.0    0.003    0.003    0.008    0.008
+ force_field_pack                     1  5.0    0.000    0.000    0.007    0.007
+ parser_read_line                   711  6.7    0.001    0.001    0.006    0.006
+ parser_read_line_low                10  7.1    0.006    0.006    0.006    0.006
+ force_field_pack_splines             2  6.0    0.000    0.000    0.006    0.006
+ spline_nonbond_control               2  7.0    0.004    0.004    0.004    0.004
+ coordinate_control                   1  5.0    0.000    0.000    0.003    0.003
+ coordinate_control_READ_COORDI       1  6.0    0.000    0.000    0.003    0.003
+ read_atoms_input                     1  7.0    0.003    0.003    0.003    0.003
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 4
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2020-03-19 17:54:47.938
+ ***** ** ***  *** **   PROGRAM RAN ON                         bass-macbook.home
+ **    ****   ******    PROGRAM RAN BY                                  bvanbeek
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 85934
+  **** **  *******  **  PROGRAM STOPPED IN /Users/bvanbeek/Documents/GitHub/qmfl
+                                           ows/test/test_files/plams_workdir.005
+                                           /cp2k_mm_sp

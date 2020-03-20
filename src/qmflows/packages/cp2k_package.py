@@ -3,7 +3,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, Tuple
 from warnings import warn
 
 from scm import plams
@@ -92,7 +92,7 @@ class CP2K(Package):
 
         """
         def write_cell_angles(s: Settings, value: list,
-                              mol: plams.Molecule, key: str) -> Settings:
+                              mol: plams.Molecule, key: str) -> None:
             """Write the Angles for the cell.
 
             The angles of the cell is a 3-dimensional list.
@@ -107,10 +107,8 @@ class CP2K(Package):
                 angles = '{} {} {}'.format(*value)
                 s.specific.cp2k.force_eval.subsys.cell.ALPHA_BETA_GAMMA = angles
 
-            return s
-
         def write_cell_parameters(s: Settings, value: Any,
-                                  mol: plams.Molecule, key: str) -> Settings:
+                                  mol: plams.Molecule, key: str) -> None:
             """Write the cell parameters.
 
             The cell parameter can be a list of lists containing the ABC parameter.
@@ -135,7 +133,7 @@ class CP2K(Package):
             &END CELL
 
             """
-            def fun(xs):
+            def fun(xs: Tuple[Any, Any, Any]) -> str:
                 return '{} {} {}'.format(*xs)
 
             if not isinstance(value, list):
@@ -154,9 +152,7 @@ class CP2K(Package):
                 raise RuntimeError(
                     f"cell parameter:{value!r}\nformat not recognized")
 
-            return s
-
-        def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> Settings:
+        def write_periodic(s: Settings, value: Any, mol: plams.Molecule, key: str) -> None:
             """Set the keyword for periodic calculations."""
             s.specific.cp2k.force_eval.subsys.cell.periodic = value
 

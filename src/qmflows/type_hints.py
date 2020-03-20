@@ -20,19 +20,29 @@ from .backports import Literal, T, Final
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
+
     from scm.plams import Molecule
+    from rdkit.Chem import Mol
+    from noodles.interface import PromisedObject
+
     from .settings import Settings
+
 else:
     _PathLike = 'os.PathLike'
     Molecule = 'scm.plams.mol.molecule.Molecule'
+    Mol = 'rdkit.Chem.rdchem.Mol'
+    PromisedObject = 'noodles.interface.decorator.PromisedObject'
     Settings = 'qmflows.settings.Settings'
+
 
 __all__ = [
     'T', 'Literal', 'Final',
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
-    'PathLike'
+    'PathLike',
+    'MolType',
+    'PromisedObject'
 ]
 
 #: Alias for :data:`typing.Literal`.
@@ -73,6 +83,9 @@ Generic2Special = Callable[[Settings, str, Any, Molecule], None]
 #: An alias for all path-like objects.
 #: Includes the likes of :class:`str`, :class:`bytes` and :class:`pathlib.Path`.
 PathLike = Union[AnyStr, _PathLike]
+
+#: An rdkit or PLAMS molecule.
+MolType = Union[Mol, Molecule]
 
 
 __doc__ = __doc__.format(

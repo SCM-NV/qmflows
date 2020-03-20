@@ -6,18 +6,18 @@ __all__ = ['to_runtime_error', 'init_restart', 'InitRestart']
 
 import os
 import shutil
-from functools import wraps
-from os.path import abspath, normpath, join, splitext
-from typing import Union, Optional, Iterable, Callable, Any, IO, ContextManager
-from contextlib import redirect_stdout, AbstractContextManager
+import tempfile
 from collections import Counter, abc
-
-from scm.plams import config, init, finish, JobManager, load_all
+from contextlib import AbstractContextManager, redirect_stdout
+from functools import wraps
+from os.path import abspath, join, normpath, splitext
 from pathlib import Path
+from typing import IO, Any, Callable, ContextManager, Iterable, Optional, Union
+
+from scm.plams import JobManager, config, finish, init, load_all
+
 from .backports import nullcontext
 from .type_hints import PathLike
-
-import tempfile
 
 
 def get_tmpfile_name(name: str = "tmp_qmflows_") -> PathLike:

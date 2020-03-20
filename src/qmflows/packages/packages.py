@@ -21,7 +21,6 @@ import pkg_resources as pkg
 import scm.plams.interfaces.molecule.rdkit as molkit
 from more_itertools import collapse
 from noodles import has_scheduled_methods, schedule, serial
-from noodles.interface import PromisedObject
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import AsDict, Registry, Serialiser
 from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
@@ -32,7 +31,7 @@ from scm import plams
 
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
-from ..type_hints import WarnMap, WarnDict, WarnParser
+from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType
 from ..warnings_qmflows import QMFlows_Warning
 
 __all__ = ['package_properties',
@@ -47,6 +46,7 @@ package_properties: Dict[Optional[str], Path] = {
     'adf': _BASE_PATH / 'propertiesADF.yaml',
     'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
     'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
+    'cp2k_mm': _BASE_PATH / 'propertiesCP2KMM.yaml',
     'orca': _BASE_PATH / 'propertiesORCA.yaml'
 }
 del _BASE_PATH
@@ -308,7 +308,7 @@ class Package(ABC):
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
     def __call__(self, settings: Settings,
-                 mol: Union[plams.Molecule, Chem.Mol],
+                 mol: MolType,
                  job_name: str = '', **kwargs: Any) -> Result:
         r"""Perform a job with the package specified by :attr:`Package.pkg_name`.
 
