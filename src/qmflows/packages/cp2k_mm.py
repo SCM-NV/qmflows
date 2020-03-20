@@ -159,7 +159,6 @@ class CP2KMM(CP2K):
             try:
                 f = cls.SPECIAL_FUNCS[key]
             except KeyError:  # Plan B: fall back to the CP2K super-class
-                # Oddly enough this doesn't work with super() when using pytest
                 super().handle_special_keywords(settings, key, value, mol)
             else:
                 f(settings, key, value, mol)
@@ -199,15 +198,11 @@ class CP2KMM(CP2K):
         force_eval.subsys.cell.periodic = value
         force_eval.mm.poisson.periodic = value
 
-        if not force_eval.mm.poisson.ewald.ewald_type:
-            force_eval.mm.poisson.ewald.ewald_type = 'EWALD'
-
-    @staticmethod
-    def _set_kinds(s: Settings, symbol_map: Mapping[str, str]) -> None:
-        """Generate the kind section for cp2k."""
-        subsys = s.specific.cp2k.force_eval.subsys
-        for custom_symbol, symbol in symbol_map.items():
-            subsys[f'kind {custom_symbol}'].element = symbol
+        ewald = force_eval.mm.poisson.ewald
+        if value.lower() == 'none':
+            ewald.ewald_type = value
+        elif not ewald.ewald_type:
+            ewald.ewald_type = 'EWALD'
 
 
 CP2KMM.SPECIAL_FUNCS = {
@@ -219,7 +214,7 @@ CP2KMM.SPECIAL_FUNCS = {
 for k in CP2K_KEYS_ALIAS:
     CP2KMM.SPECIAL_FUNCS[k] = set_prm
 
-#: An instance :class:`CP2KMM`.
+#: An instance of :class:`CP2KMM`.
 #: Only one instance of this class should exist at any given momemt;
 #: *i.e.* this value is a singleton.
 cp2k_mm: Final[CP2KMM] = CP2KMM()
