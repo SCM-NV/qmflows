@@ -183,7 +183,6 @@ class Result:
             # AMS rename all the DFTB job names
             file_pattern = "dftb.rkf"
 
-        print("plams dir: ", plams_dir)
         output_files = list(collapse(map(partial(find_file_pattern, file_pattern),
                                          [plams_dir, work_dir])))
         if output_files:

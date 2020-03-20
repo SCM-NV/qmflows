@@ -115,7 +115,7 @@ class ORCA(Package):
                 hess_file.write(hess_str)
 
             settings.specific.orca.geom.InHess = "read"
-            settings.specific.orca.geom.InHessName = f"{hess_path.as_posix()}"
+            settings.specific.orca.geom.InHessName = f'{hess_path.as_posix()}'
 
             return settings
 

@@ -21,8 +21,8 @@ class AtomBasisKey(NamedTuple):
 class AtomBasisData(NamedTuple):
     """Contraction coefficients and exponents for a gaussian basis."""
 
-    exponents: np.array
-    coefficients: np.array
+    exponents: np.ndarray
+    coefficients: np.ndarray
 
 
 class AtomXYZ(NamedTuple):
@@ -42,8 +42,8 @@ class CGF(NamedTuple):
 class InfoMO(NamedTuple):
     """Energies and coefficients of the molecular orbitals."""
 
-    eigenVals: np.array  # Orbitals eigenvalues
-    coeffs: np.array  # Orbitals eigenvectors
+    eigenVals: np.ndarray  # Orbitals eigenvalues
+    coeffs: np.ndarray  # Orbitals eigenvectors
 
 
 class MO_metadata(NamedTuple):

@@ -7,6 +7,7 @@ from itertools import chain
 
 import numpy as np
 import pyparsing as pa
+import typing
 from more_itertools import chunked
 from pyparsing import Group, OneOrMore, Word, alphanums
 from scm.plams import Atom, Molecule
@@ -21,10 +22,8 @@ from ..type_hints import PathLike
 Vector = np.ndarray
 Matrix = np.ndarray
 
-vectorize_float = np.vectorize(float)
 
-
-def parse_molecule(file_name: PathLike, mol: Molecule = None) -> Molecule:
+def parse_molecule(file_name: PathLike, mol: typing.Optional[Molecule] = None) -> Molecule:
     """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
@@ -70,7 +69,7 @@ def parse_frequencies(file_hess: PathLike) -> Matrix:
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
 
-    return vectorize_float([x.split()[-1] for x in lines[1:]])
+    return np.array([x.split()[-1] for x in lines[1:]], dtype=float)
 
 
 def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
@@ -97,7 +96,7 @@ def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
     return np.concatenate(blocks, axis=1)
 
 
-def read_block(lines: list) -> np.array:
+def read_block(lines: list) -> Matrix:
     """Read a block containing the values of the block matrix.
 
     The format is similar to:
