@@ -1,13 +1,14 @@
 """Mock CP2K funcionality."""
+
 import numpy as np
 from assertionlib import assertion
-from pytest_mock import mocker
+from pytest_mock import MockFixture, mocker
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k, templates
+from qmflows.fileFunctions import yaml2Settings
 from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
-from qmflows.fileFunctions import yaml2Settings
 
 # module constants
 WORKDIR = PATH / "output_cp2k"
@@ -62,9 +63,8 @@ def mock_runner(mocker_instance, jobname: str) -> CP2K_Result:
     return run_mocked
 
 
-def test_cp2k_singlepoint_mock(mocker):
+def test_cp2k_singlepoint_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
-    ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
     # single point calculation
     s = fill_defaults(templates.singlepoint)
 
@@ -88,7 +88,7 @@ def test_cp2k_singlepoint_mock(mocker):
     assertion.shape_eq(orbs.coeffs, (46, 40))
 
 
-def test_c2pk_opt_mock(mocker):
+def test_c2pk_opt_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
     # geometry optimization input
     s = fill_defaults(templates.geometry)
@@ -106,7 +106,7 @@ def test_c2pk_opt_mock(mocker):
     assertion.eq(atom.symbol, 'C')
 
 
-def test_c2pk_freq_mock(mocker):
+def test_c2pk_freq_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
     # Frequency calculation
     s = fill_defaults(templates.singlepoint)
