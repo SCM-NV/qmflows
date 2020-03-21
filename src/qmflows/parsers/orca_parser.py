@@ -1,23 +1,21 @@
 """Read Orca output files."""
 __all__ = [
-    'parse_basis_set', 'parse_hessian', 'parse_frequencies', 'parse_molecule',
+    'parse_hessian', 'parse_frequencies', 'parse_molecule',
     'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
-from itertools import chain
-from typing import Sequence, Tuple, Iterable
+from typing import Sequence, Tuple
 from typing import Optional as Optional_
 
 import numpy as np
-import pyparsing as pa
 from more_itertools import chunked
 from pyparsing import Group, OneOrMore, Word, alphanums
 from scm.plams import Atom, Molecule
 
-from .parser import (floatNumber, natural, parse_file, parse_section, skipLine,
-                     ParserElement, skipSupress, string_array_to_molecule,
+from .parser import (floatNumber, parse_file, parse_section, skipLine,
+                     skipSupress, string_array_to_molecule,
                      try_search_pattern)
 from .xyzParser import manyXYZ
-from ..common import AtomBasisData, AtomBasisKey, InfoMO
+from ..common import InfoMO
 from ..type_hints import PathLike
 
 Vector = np.ndarray
@@ -118,11 +116,13 @@ def read_block(lines: Sequence[str]) -> Matrix:
 
 def parse_molecular_orbitals(file_name: PathLike) -> InfoMO:
     """Read the Molecular orbital from the orca output."""
-    _n_contracted = try_search_pattern("# of contracted basis functions", file_name)
+    _n_contracted = try_search_pattern(
+        "# of contracted basis functions", file_name)
     try:
         n_contracted = _n_contracted.rsplit(maxsplit=1)[-1]  # type: ignore
     except AttributeError as ex:  # _n_contracted can be None
-        raise RuntimeError("Failed to extract molecular orbials from {file_name!r}") from ex
+        raise RuntimeError(
+            "Failed to extract molecular orbials from {file_name!r}") from ex
 
     # Parse the blocks of MOs
     start = 'MOLECULAR ORBITALS'
@@ -163,95 +163,3 @@ def read_column_orbitals(lines: Sequence[str]) -> Tuple[np.ndarray, np.ndarray]:
         [z.split()[2:] for z in lines[4:]], dtype=np.float)
 
     return energies, coefficients
-
-
-#: A tuple with 2 named tuples.
-NamedTup2 = Tuple[AtomBasisKey, AtomBasisData]
-
-#: A tuple with 2 tuples of named tuples.
-NamedTupN = Tuple[Tuple[AtomBasisKey, ...], Tuple[AtomBasisData, ...]]
-
-
-def parse_basis_set(file_name: PathLike) -> NamedTupN:
-    """Read the basis set used by Orca.
-
-    It is printed by specifying the keyword: !printbase
-    """
-    parse_basis_name = skipSupress('Your calculation utilizes the basis: ') + \
-        skipSupress(pa.Literal(':')) + pa.Suppress(pa.Literal(':')) + \
-        pa.SkipTo('\n')
-    header = skipSupress('BASIS SET IN INPUT FORMAT') + skipLine * 2
-    parserElements = create_parser_element()
-    parser = parse_basis_name + pa.Suppress(header) + \
-        pa.Group(pa.OneOrMore(parserElements))
-
-    basis = parse_file(parser, file_name).asList()
-
-    return create_basis_data(basis)
-
-
-AtomBasis = Tuple[str, Sequence[str]]
-
-
-def create_basis_data(basis: Tuple[str, Iterable[AtomBasis]]) -> NamedTupN:
-    """Convert the parse data into Contracted Gauss functions information."""
-    basis_name = basis[0]
-    atom_keys, atom_basis = zip(*[create_CGFs_per_atom(basis_name, xs)
-                                  for xs in basis[1]])
-    return atom_keys, atom_basis
-
-
-def create_CGFs_per_atom(basis_name: str, xs: AtomBasis) -> NamedTup2:
-    """Create the structure of the CGFs for each atom."""
-    atom_name = xs[0]
-    formats, _primitives = zip(*[((x[0], int(x[1])), x[2:]) for x in xs[1:]])
-
-    # flatten de primitives
-    primitives = list(chain(*chain(*_primitives)))
-
-    # order in coefficients and exponents the CGFs
-    nPrimitives = len(primitives) // 2
-    exponents, coefficients = np.array(
-        primitives, dtype=np.float).reshape(nPrimitives, 2).transpose()
-
-    atom_basis_key = AtomBasisKey(atom_name, basis_name, formats)
-    atom_basis_data = AtomBasisData(exponents, coefficients)
-
-    return atom_basis_key, atom_basis_data
-
-
-def create_parser_element() -> ParserElement:
-    """Parser to read the basis set of a given element.
-
-    The format is:
-
-    # Basis set for element : O
-      NewGTO O
-      S 5
-        1    2266.1767785000     -0.0053893504
-        2     340.8701019100     -0.0402347214
-        3      77.3631351670     -0.1800818421
-        4      21.4796449400     -0.4682885766
-        5       6.6589433124     -0.4469261716
-      S 1
-        1       0.8097597567      1.0000000000
-      S 1
-        1       0.2553077223      1.0000000000
-      P 3
-        1      17.7215043170      0.0626302488
-        2       3.8635505440      0.3333113849
-        3       1.0480920883      0.7414863830
-      P 1
-        1       0.2764154441      1.0000000000
-      D 1
-        1       1.2000000000      1.0000000000
-       end;
-    """
-    header = pa.Suppress(pa.Literal('# Basis set for element :')) + \
-        pa.Word(pa.alphas) + skipLine
-
-    parseCGF = pa.Group(
-        pa.Word(pa.alphas, exact=1) + natural +
-        pa.Group(pa.OneOrMore(pa.Suppress(natural) + floatNumber * 2)))
-
-    return pa.Group(header + pa.OneOrMore(parseCGF) + pa.Suppress(pa.Literal('end;')))

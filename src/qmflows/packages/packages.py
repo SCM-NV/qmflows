@@ -413,11 +413,9 @@ class Package(ABC):
                     v)
                 continue
 
-            key = generic_dict.get(k)
-            if not key:
+            if not generic_dict.get(k):
                 self.handle_special_keywords(
                     specific_from_generic_settings, k, v, mol)
-                continue
 
         return settings.overlay(specific_from_generic_settings)
 
