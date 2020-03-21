@@ -1,6 +1,9 @@
 """common (:class:`~typing.NamedTuple`) used mostly for parsing."""
-from typing import Any, Type, NamedTuple, Callable, Optional, TYPE_CHECKING
+from typing import (Any, Type, NamedTuple, Callable, Optional, Tuple,
+                    Sequence, Union, TYPE_CHECKING)
+
 import numpy as np
+
 if TYPE_CHECKING:
     from pyparsing import ParserElement
 else:
@@ -15,7 +18,9 @@ class AtomBasisKey(NamedTuple):
 
     atom: str
     basis: str
-    basisFormat: list
+    basisFormat: Union[Sequence[int],
+                       Sequence[Tuple[str, int]]]
+    # Orca uses 2-tuples while CP2K uses integer
 
 
 class AtomBasisData(NamedTuple):
@@ -29,7 +34,7 @@ class AtomXYZ(NamedTuple):
     """Symbol and coordinates of an Atom."""
 
     symbol: str
-    xyz: tuple
+    xyz: Tuple[float, float, float]
 
 
 class CGF(NamedTuple):
@@ -77,6 +82,7 @@ class ParseWarning(NamedTuple):
 
     see: https://docs.python.org/3/library/typing.html#typing.NamedTuple
     """
+
     warn_type: Type[Warning]
     parser: ParserElement
     func: Callable[[str], Optional[str]] = NotImplemented
