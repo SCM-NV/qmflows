@@ -98,6 +98,15 @@ class Result:
         self._results_open = False
         self._results = dill_path
 
+    def __deepcopy__(self, memo: Optional[dict] = None) -> 'Result':
+        """Return a deep copy of this instance."""
+        cls = type(self)
+        # Construct an empty instance while bypassing __init__()
+        copy_instance = cls.__new__(cls)
+        # Manually set all instance variables
+        copy_instance.__dict__ = self.__dict__.copy()
+        return copy_instance
+
     def __getattr__(self, prop: str) -> Any:
         """Return a section of the results.
 

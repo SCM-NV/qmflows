@@ -1,4 +1,5 @@
 """Mock CP2K funcionality."""
+import copy
 
 import numpy as np
 from assertionlib import assertion
@@ -9,6 +10,7 @@ from qmflows import Settings, cp2k, templates
 from qmflows.fileFunctions import yaml2Settings
 from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
+from qmflows.utils import init_restart
 
 # module constants
 WORKDIR = PATH / "output_cp2k"
@@ -61,6 +63,20 @@ def mock_runner(mocker_instance, jobname: str) -> CP2K_Result:
                                           dill_path=dill_path, plams_dir=plams_dir)
 
     return run_mocked
+
+
+def test_deepcopy(mocker):
+    """Test the copy of a result instance."""
+    job = cp2k(templates.singlepoint, ETHYLENE)
+    jobname = "cp2k_job"
+    run_mocked = mock_runner(mocker, jobname)
+    result = run_mocked(job)
+    copy_result = copy.deepcopy(result)
+
+    init_restart(folder=WORKDIR)
+    assertion.eq(copy_result.molecule, result.molecule)
+    assertion.eq(copy_result.archive, result.archive)
+    assertion.eq(copy_result.settings, result.settings)
 
 
 def test_cp2k_singlepoint_mock(mocker: MockFixture):

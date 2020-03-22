@@ -3,7 +3,7 @@ from assertionlib import assertion
 from more_itertools import chunked
 
 from qmflows.parsers import manyXYZ, parse_string_xyz
-from qmflows.test_utils import PATH
+from qmflows.test_utils import PATH, PATH_MOLECULES
 
 
 def test_multiple_geometries():
@@ -16,3 +16,8 @@ def test_multiple_geometries():
     xs = [''.join(x) for x in chunked(ls, 8)]
 
     assertion.eq(list(map(parse_string_xyz, xs)), manyXYZ(path_xyz))
+
+
+def test_xyz_reader():
+    """Test the xyz parser from a file."""
+    path_qd = PATH_MOLECULES / "Cd68Cl26Se55__26_acetate.xyz"
