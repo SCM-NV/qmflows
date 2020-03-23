@@ -9,10 +9,10 @@ from typing import Any, Union, Optional, ClassVar, List, Type
 import numpy as np
 from scm import plams
 
-from .packages import Package, Result
+from .packages import Package, Result, load_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from ..type_hints import Final
+from ..type_hints import Final, _Settings
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
 
@@ -21,6 +21,8 @@ from ..warnings_qmflows import Key_Warning
 
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='properties')
 
     @property
     def molecule(self) -> Optional[plams.Molecule]:
@@ -46,6 +48,7 @@ class ORCA(Package):
 
     """
 
+    generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ORCA_Result
 
     def __init__(self) -> None:

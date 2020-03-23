@@ -8,17 +8,19 @@ from warnings import warn
 
 from scm import plams
 
-from .packages import Package, Result, parse_output_warnings
+from .packages import Package, Result, parse_output_warnings, load_properties
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
-from ..type_hints import Final
+from ..type_hints import Final, _Settings
 
 __all__ = ['cp2k']
 
 
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='properties')
 
     @property
     def molecule(self) -> plams.Molecule:
@@ -43,6 +45,7 @@ class CP2K(Package):
 
     """
 
+    generic_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='generic2')
     result_type: ClassVar[Type[Result]] = CP2K_Result
 
     def __init__(self) -> None:

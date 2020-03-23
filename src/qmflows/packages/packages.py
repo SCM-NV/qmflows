@@ -7,13 +7,13 @@ import inspect
 import os
 import sys
 import warnings
-from abc import abstractmethod, ABCMeta
+from abc import abstractmethod, ABC
 from types import ModuleType
 from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type)
+from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict)
 
 import numpy as np
 import pkg_resources as pkg
@@ -29,9 +29,10 @@ from rdkit import Chem
 from scm import plams
 
 from ..fileFunctions import yaml2Settings
-from ..settings import Settings, _Settings
-from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType
+from ..settings import Settings
+from ..settings import _Settings as _SettingsType
 from ..warnings_qmflows import QMFlows_Warning
+from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 
 __all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
@@ -40,24 +41,15 @@ def load_properties(name: str, prefix: str = 'properties') -> _Settings:
     """Load the properties-defining .yaml file from ."""
     file_name = os.path.join('data', 'dictionaries', f'{prefix}{name}.yaml')
     xs = pkg.resource_string("qmflows", file_name)
-    return yaml2Settings(xs, mapping_type=_Settings)
+    return yaml2Settings(xs, mapping_type=_SettingsType)
 
 
-class _MetaResult(type):
-    def __new__(mcls, name, bases, namespace, **kwargs):
-        """Metaclass of :class:`Result`."""
-        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
-        if name != 'Result':
-            cls.prop_dict = load_properties(cls.__name__, prefix='properties')
-        return cls
-
-
-class Result(metaclass=_MetaResult):
+class Result:
     """Class containing the results associated with a quantum chemistry simulation."""
 
     #: A :class:`Settings` instance with :class:`Result`-specific properties.
-    #: To-be set by :meth:`_MetaResult.__new__`.
-    prop_dict: ClassVar[_Settings] = NotImplemented
+    #: Should be set when creating a subclass.
+    prop_mapping: ClassVar[_Settings] = NotImplemented
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
@@ -96,7 +88,7 @@ class Result(metaclass=_MetaResult):
         self._results_open = False
         self._results = dill_path
 
-    def __deepcopy__(self, memo: Optional[dict] = None) -> 'Result':
+    def __deepcopy__(self, memo: Optional[Dict[int, Any]] = None) -> 'Result':
         """Return a deep copy of this instance."""
         cls = type(self)
 
@@ -123,10 +115,10 @@ class Result(metaclass=_MetaResult):
         is_private = prop.startswith('__') and prop.endswith('__')
         has_crashed = self.status in {'failed', 'crashed'}
 
-        if not has_crashed and prop in self.prop_dict:
+        if not has_crashed and prop in self.prop_mapping:
             return self.get_property(prop)
 
-        elif not (has_crashed or is_private or prop in self.prop_dict):
+        elif not (has_crashed or is_private or prop in self.prop_mapping):
             if self._results_open:
                 warn(f"Generic property {prop!r} not defined",
                      category=QMFlows_Warning)
@@ -154,7 +146,7 @@ class Result(metaclass=_MetaResult):
             pass
 
         # Read the .yaml dictionary than contains the parsers names
-        ds = self.prop_dict[prop]
+        ds = self.prop_mapping[prop]
 
         # extension of the output file containing the property value
         file_ext = ds.get('file_ext')
@@ -249,20 +241,8 @@ class Result(metaclass=_MetaResult):
             self._results = results
 
 
-class _MetaPackage(ABCMeta):
-    def __new__(mcls, name, bases, namespace, **kwargs):
-        """Metaclass of :class:`Package`."""
-        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
-        if name != 'Package':
-            if cls.result_type is NotImplemented:
-                raise AttributeError(f"'{cls.__name__}.result_type' must be specified; "
-                                     f"current value: {cls.result_type!r}")
-            cls.generic_dict = load_properties(cls.__name__, prefix='generic2')
-        return cls
-
-
 @has_scheduled_methods
-class Package(metaclass=_MetaPackage):
+class Package(ABC):
     """:class:`Package` is the base class to handle the invocation to different quantum package.
 
     The only relevant (instance) attribute of this class is :attr:`Package.pkg_name` which is a
@@ -286,8 +266,8 @@ class Package(metaclass=_MetaPackage):
     result_type: ClassVar[Type[Result]] = NotImplemented
 
     #: A class variable with the name of the generic .yaml file.
-    #: To-be set by :meth:`_MetaResult.__new__`.
-    generic_dict: ClassVar[_Settings] = NotImplemented
+    #: Should be set when creating a subclass.
+    generic_mapping: ClassVar[_Settings] = NotImplemented
 
     #: An instance variable with the name of the respective quantum chemical package.
     pkg_name: str
@@ -425,7 +405,7 @@ class Package(metaclass=_MetaPackage):
                     v)
                 continue
 
-            if not self.generic_dict.get(k):
+            if not self.generic_mapping.get(k):
                 self.handle_special_keywords(
                     specific_from_generic_settings, k, v, mol)
 

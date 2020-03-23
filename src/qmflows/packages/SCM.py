@@ -11,10 +11,10 @@ from warnings import warn
 import numpy as np
 from scm import plams
 
+from .packages import Package, Result, load_properties
 from ..settings import Settings
-from ..type_hints import Final, WarnMap
+from ..type_hints import Final, WarnMap, _Settings
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
-from .packages import Package, Result
 from ..utils import get_tmpfile_name
 # ========================= ADF ============================
 
@@ -97,6 +97,8 @@ def handle_SCM_special_keywords(settings: Settings, key: str,
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results."""
 
+    prop_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='properties')
+
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
                  job_name: str,
@@ -133,6 +135,8 @@ class ADF_Result(Result):
 
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='properties')
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
@@ -177,6 +181,7 @@ class ADF(Package):
 
     """
 
+    generic_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ADF_Result
 
     def __init__(self) -> None:
@@ -246,6 +251,7 @@ class ADF(Package):
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
+    generic_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='generic2')
     result_type: ClassVar[Type[Result]] = DFTB_Result
 
     def __init__(self) -> None:

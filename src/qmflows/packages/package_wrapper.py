@@ -92,19 +92,19 @@ API
 
 import os
 from os.path import join
-from typing import Type, Optional, TypeVar, Union, ClassVar, Any, Dict
+from typing import Type, TypeVar, Union, ClassVar, Any, Dict
 from warnings import warn
 
 from scm import plams
 from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
-from .packages import Package, Result
+from .packages import Package, Result, load_properties
 from .SCM import adf, dftb
 from .orca import orca
 from .cp2k_package import cp2k
 from ..settings import Settings
-from ..type_hints import WarnMap
+from ..type_hints import _Settings
 from ..warnings_qmflows import Key_Warning
 
 plams.Job = plams.core.basejob.Job
@@ -127,6 +127,8 @@ RT = TypeVar('RT', bound=Result)
 
 class ResultWrapper(Result):
     """The matching :class:`~qmflows.packages.packages.Result` subclass for :class:`PackageWrapper`."""  # noqa
+
+    prop_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='properties')
 
 
 @has_scheduled_methods
@@ -171,6 +173,7 @@ class PackageWrapper(Package):
 
     """  # noqa
 
+    generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ResultWrapper
 
     def __init__(self, job_type: Type[plams.Job]) -> None:
