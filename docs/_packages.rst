@@ -20,7 +20,6 @@ The Package Class
     Package.run_job
     Package.postrun
     Package.generic2specific
-    Package.get_generic_mapping
     Package.handle_special_keywords
 
 Package Subclasses
