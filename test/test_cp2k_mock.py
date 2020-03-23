@@ -70,8 +70,8 @@ def test_deepcopy():
     jobname = "cp2k_job"
     dill_path = WORKDIR / jobname / f"{jobname}.dill"
     plams_dir = WORKDIR / jobname
-    result = Result(templates.geometry, ETHYLENE, jobname,
-                    dill_path=dill_path, plams_dir=plams_dir)
+    result = CP2K_Result(templates.geometry, ETHYLENE, jobname,
+                         dill_path=dill_path, plams_dir=plams_dir)
 
     copy_result = copy.deepcopy(result)
 
