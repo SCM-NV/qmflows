@@ -8,7 +8,6 @@ from scm.plams import Molecule
 
 from qmflows import Settings, cp2k, templates
 from qmflows.fileFunctions import yaml2Settings
-from qmflows.packages.packages import Result, package_properties
 from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 from qmflows.utils import init_restart
@@ -71,9 +70,8 @@ def test_deepcopy():
     jobname = "cp2k_job"
     dill_path = WORKDIR / jobname / f"{jobname}.dill"
     plams_dir = WORKDIR / jobname
-    result = Result(templates.geometry, ETHYLENE, jobname,
-                    dill_path=dill_path, plams_dir=plams_dir,
-                    properties=package_properties['cp2k'])
+    result = CP2K_Result(templates.geometry, ETHYLENE, jobname,
+                         dill_path=dill_path, plams_dir=plams_dir)
 
     copy_result = copy.deepcopy(result)
 

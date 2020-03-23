@@ -13,8 +13,7 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Dict, Union, ClassVar,
-                    Iterable, Mapping, Iterator)
+from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict)
 
 import numpy as np
 import pkg_resources as pkg
@@ -31,29 +30,26 @@ from scm import plams
 
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
-from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType
+from ..settings import _Settings as _SettingsType
 from ..warnings_qmflows import QMFlows_Warning
+from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 
-__all__ = ['package_properties',
-           'Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
+__all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
-_BASE_PATH = Path('data') / 'dictionaries'
 
-#: A dictionary mapping package names to .yaml files.
-package_properties: Dict[Optional[str], Path] = {
-    None: _BASE_PATH / 'propertiesNone.yaml',
-    'adf': _BASE_PATH / 'propertiesADF.yaml',
-    'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
-    'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
-    'cp2k_mm': _BASE_PATH / 'propertiesCP2KMM.yaml',
-    'orca': _BASE_PATH / 'propertiesORCA.yaml'
-}
-del _BASE_PATH
+def load_properties(name: str, prefix: str = 'properties') -> _Settings:
+    """Load the properties-defining .yaml file from ."""
+    file_name = os.path.join('data', 'dictionaries', f'{prefix}{name}.yaml')
+    xs = pkg.resource_string("qmflows", file_name)
+    return yaml2Settings(xs, mapping_type=_SettingsType)
 
 
 class Result:
     """Class containing the results associated with a quantum chemistry simulation."""
+
+    #: A :class:`Settings` instance with :class:`Result`-specific properties.
+    #: Should be set when creating a subclass.
+    prop_mapping: ClassVar[_Settings] = NotImplemented
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
@@ -61,7 +57,6 @@ class Result:
                  dill_path: Union[None, str, os.PathLike] = None,
                  plams_dir: Union[None, str, os.PathLike] = None,
                  work_dir: Union[None, str, os.PathLike] = None,
-                 properties: Union[None, str, os.PathLike] = None,
                  status: str = 'done',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize a :class:`Result` instance.
@@ -79,18 +74,13 @@ class Result:
         :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
-        :param properties: path to the `yaml` file containing the data to
-                           load the parser on the fly.
-        :type properties: str
 
         """
         plams_dir = None if plams_dir is None else Path(plams_dir)
+
         self.settings = settings
         self._molecule = molecule
-        xs = pkg.resource_string("qmflows", str(properties))
-        self.prop_dict = yaml2Settings(xs)
-        self.archive = {"plams_dir": plams_dir,
-                        'work_dir': work_dir}
+        self.archive = {"plams_dir": plams_dir, 'work_dir': work_dir}
         self.job_name = job_name
         self.status = status
         self.warnings = warnings
@@ -98,11 +88,13 @@ class Result:
         self._results_open = False
         self._results = dill_path
 
-    def __deepcopy__(self, memo: Optional[dict] = None) -> 'Result':
+    def __deepcopy__(self, memo: Optional[Dict[int, Any]] = None) -> 'Result':
         """Return a deep copy of this instance."""
         cls = type(self)
+
         # Construct an empty instance while bypassing __init__()
         copy_instance = cls.__new__(cls)
+
         # Manually set all instance variables
         copy_instance.__dict__ = self.__dict__.copy()
         return copy_instance
@@ -123,10 +115,10 @@ class Result:
         is_private = prop.startswith('__') and prop.endswith('__')
         has_crashed = self.status in {'failed', 'crashed'}
 
-        if not has_crashed and prop in self.prop_dict:
+        if not has_crashed and prop in self.prop_mapping:
             return self.get_property(prop)
 
-        elif not (has_crashed or is_private or prop in self.prop_dict):
+        elif not (has_crashed or is_private or prop in self.prop_mapping):
             if self._results_open:
                 warn(f"Generic property {prop!r} not defined",
                      category=QMFlows_Warning)
@@ -154,10 +146,10 @@ class Result:
             pass
 
         # Read the .yaml dictionary than contains the parsers names
-        ds = self.prop_dict[prop]
+        ds = self.prop_mapping[prop]
 
         # extension of the output file containing the property value
-        file_ext = ds['file_ext']
+        file_ext = ds.get('file_ext')
 
         # If there is not work_dir returns None
         work_dir = self.archive.get('work_dir')
@@ -181,8 +173,7 @@ class Result:
 
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
-            kwargs['plams_dir'] = plams_dir
-            ret = ignore_unused_kwargs(fun, [file_out], kwargs)
+            ret = ignore_unused_kwargs(fun, file_out, plams_dir=plams_dir, **kwargs)
 
             # Cache the property and return
             if sys.getsizeof(ret) < 10e5:
@@ -270,14 +261,13 @@ class Package(ABC):
 
     """
 
-    #: A class variable with the name of the generic .yaml file.
-    #: Should be implemented by :class:`Package` subclasses.
-    generic_dict_file: ClassVar[str] = NotImplemented
+    #: A class variable pointing to the :class:`Package`-specific :class:`Result` class.
+    #: Should be set when creating a subclass.
+    result_type: ClassVar[Type[Result]] = NotImplemented
 
-    #: A class variable with a special flag for used by the
-    #: :class:`~qmflows.packages.package_wrapper.PackageWrapper` subclass.
-    #: Used for denoting Job types without any generic .yaml files.
-    generic_package: ClassVar[bool] = False
+    #: A class variable with the name of the generic .yaml file.
+    #: Should be set when creating a subclass.
+    generic_mapping: ClassVar[_Settings] = NotImplemented
 
     #: An instance variable with the name of the respective quantum chemical package.
     pkg_name: str
@@ -320,11 +310,6 @@ class Package(ABC):
             A new Result instance.
 
         """  # noqa
-        if self.generic_package:
-            properties = package_properties[None]
-        else:
-            properties = package_properties[self.pkg_name]
-
         # Ensure that these variables have an actual value
         # Precaution against passing unbound variables to self.postrun()
         output_warnings = plams_mol = job_settings = None
@@ -354,7 +339,7 @@ class Package(ABC):
                     "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
-                if all(w is not None for w in [warnings_tolerance, output_warnings]):
+                if None not in (warnings_tolerance, output_warnings):
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
@@ -363,15 +348,15 @@ class Package(ABC):
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
                         """, category=QMFlows_Warning)
-                        result = Result(None, None, job_name=job_name, dill_path=None,
-                                        properties=properties, status='failed')
+                        result = self.result_type(None, None, job_name=job_name,
+                                                  dill_path=None, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
                 warn(f"Job {job_name} has failed.\n{err}",
                      category=QMFlows_Warning)
-                result = Result(None, None, job_name=job_name, dill_path=None,
-                                properties=properties, status='failed')
+                result = self.result_type(None, None, job_name=job_name,
+                                          dill_path=None, status='failed')
         else:
             warn(f"""
             Job {job_name} has failed. Either the Settings or Molecule
@@ -379,8 +364,8 @@ class Package(ABC):
             """, category=QMFlows_Warning)
 
             # Send an empty object downstream
-            result = Result(None, None, job_name=job_name, dill_path=None,
-                            properties=properties, status='failed')
+            result = self.result_type(None, None, job_name=job_name,
+                                      dill_path=None, status='failed')
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
@@ -411,8 +396,6 @@ class Package(ABC):
             A new settings instance without any generic keys.
 
         """
-        generic_dict = self.get_generic_dict()
-
         specific_from_generic_settings = Settings()
         for k, v in settings.items():
             if k == "specific":
@@ -422,36 +405,11 @@ class Package(ABC):
                     v)
                 continue
 
-            if not generic_dict.get(k):
+            if not self.generic_mapping.get(k):
                 self.handle_special_keywords(
                     specific_from_generic_settings, k, v, mol)
 
         return settings.overlay(specific_from_generic_settings)
-
-    def get_generic_dict(self) -> Settings:
-        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Package.pkg_name`.
-
-        Returns
-        -------
-        :class:`~qmflows.settings.Settings`
-            A new Settings instance specific to :attr:`Package.pkg_name`.
-
-        See Also
-        --------
-        :meth:`Package.generic2specific`
-            Traverse *settings* and convert generic into package specific keys.
-
-        """  # noqa
-        try:
-            path = join("data", "dictionaries", self.generic_dict_file)
-        except TypeError as ex:
-            if self.generic_dict_file is NotImplemented:
-                raise NotImplementedError("The `Package.generic_dict_file` attribute should "
-                                          "be implemented by `Package` subclasses") from ex
-            raise ex
-
-        str_yaml = pkg.resource_string("qmflows", path)
-        return yaml2Settings(str_yaml)
 
     def __repr__(self) -> str:
         """Create a string representation of this instance.
@@ -547,9 +505,9 @@ class Package(ABC):
         """  # noqa
         raise NotImplementedError("trying to call an abstract method")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> Result:
         r"""`Abstract method <https://docs.python.org/3/library/abc.html#abc.abstractmethod>`_; should be implemented by the child class.
@@ -723,7 +681,7 @@ def find_file_pattern(path: Union[str, os.PathLike],
         return iter([])
 
 
-def ignore_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
+def ignore_unused_kwargs(fun: Callable, *args: Any, **kwargs: Any) -> Any:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
     Searches for the keyword arguments which have a nonempty default values

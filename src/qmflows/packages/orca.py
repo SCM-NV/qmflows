@@ -4,19 +4,39 @@ __all__ = ['orca']
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional, ClassVar, List
+from typing import Any, Union, Optional, ClassVar, List, Type
 
 import numpy as np
 from scm import plams
 
-from .packages import Package, Result, package_properties
+from .packages import Package, Result, load_properties
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from ..type_hints import WarnMap, Final
+from ..type_hints import Final, _Settings
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
 
 # ============================= Orca ==========================================
+
+
+class ORCA_Result(Result):
+    """Class providing access to PLAMS OrcaJob results."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='properties')
+
+    @property
+    def molecule(self) -> Optional[plams.Molecule]:
+        """Retrieve the molecule from the output file."""
+        if self.status in {'crashed', 'failed'}:
+            return None
+
+        plams_dir = self.archive["plams_dir"]
+        try:
+            file_name = join(plams_dir, f'{self.job_name}.out')
+        except TypeError:  # plams_dir can be None
+            return None
+        else:
+            return parse_molecule(file_name, self._molecule)
 
 
 class ORCA(Package):
@@ -28,16 +48,17 @@ class ORCA(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2ORCA.yaml'
+    generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
+    result_type: ClassVar[Type[Result]] = ORCA_Result
 
     def __init__(self) -> None:
         super().__init__("orca")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = "ORCAjob",
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> 'ORCA_Result':
+                **kwargs: Any) -> ORCA_Result:
 
         orca_settings = Settings()
         orca_settings.input = settings.specific.orca
@@ -53,8 +74,8 @@ class ORCA(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return ORCA_Result(orca_settings, mol, result.job.name, dill_path,
-                           plams_dir=relative_plams_path, status=job.status)
+        return cls.result_type(orca_settings, mol, result.job.name, dill_path,
+                               plams_dir=relative_plams_path, status=job.status)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
@@ -176,36 +197,6 @@ class ORCA(Package):
         else:
             warn(f'Generic keyword {key!r} not implemented for package ORCA',
                  category=Key_Warning)
-
-
-class ORCA_Result(Result):
-    """Class providing access to PLAMS OrcaJob results."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'done',
-                 warnings: Optional[WarnMap] = None) -> None:
-        super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['orca'],
-                         status=status, warnings=warnings)
-
-    @property
-    def molecule(self) -> Optional[plams.Molecule]:
-        """Retrieve the molecule from the output file."""
-        if self.status in {'crashed', 'failed'}:
-            return None
-
-        plams_dir = self.archive["plams_dir"]
-        try:
-            file_name = join(plams_dir, f'{self.job_name}.out')
-        except TypeError:  # plams_dir can be None
-            return None
-        else:
-            return parse_molecule(file_name, self._molecule)
 
 
 #: An instance :class:`ORCA`.

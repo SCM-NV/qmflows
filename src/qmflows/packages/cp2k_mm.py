@@ -14,17 +14,17 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Mapping, Dict, Optional
+from typing import Union, Any, ClassVar, Dict, Type
 
 from scm import plams
 
-from .packages import Result, parse_output_warnings, package_properties
+from .packages import Result, parse_output_warnings, load_properties
 from .cp2k_package import CP2K
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special, WarnMap, Final
+from ..type_hints import Generic2Special, Final, _Settings
 
 __all__ = ['cp2k_mm']
 
@@ -32,18 +32,7 @@ __all__ = ['cp2k_mm']
 class CP2KMM_Result(Result):
     """Class providing access to CP2KMM result."""
 
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
-        """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, dill_path, plams_dir,
-                         work_dir=work_dir, properties=package_properties['cp2k_mm'],
-                         status=status, warnings=warnings)
+    prop_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='properties')
 
 
 class CP2KMM(CP2K):
@@ -56,7 +45,8 @@ class CP2KMM(CP2K):
 
     """  # noqa
 
-    generic_dict_file: ClassVar[str] = 'generic2CP2K.yaml'
+    generic_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='generic2')
+    result_type: ClassVar[Type[Result]] = CP2KMM_Result
 
     def __init__(self) -> None:
         super().__init__()
@@ -99,8 +89,8 @@ class CP2KMM(CP2K):
             settings.prm = str(prm_name)
         """
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> CP2KMM_Result:
@@ -136,8 +126,8 @@ class CP2KMM(CP2K):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return CP2KMM_Result(cp2k_settings, mol, job_name, r.job.path, dill_path,
-                             work_dir=work_dir, status=job.status, warnings=warnings)
+        return cls.result_type(cp2k_settings, mol, job_name, r.job.path, dill_path,
+                               work_dir=work_dir, status=job.status, warnings=warnings)
 
     @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,

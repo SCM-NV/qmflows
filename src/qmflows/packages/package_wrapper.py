@@ -92,19 +92,19 @@ API
 
 import os
 from os.path import join
-from typing import Type, Optional, TypeVar, Union, ClassVar, Any, Dict
+from typing import Type, TypeVar, Union, ClassVar, Any, Dict
 from warnings import warn
 
 from scm import plams
 from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
-from .packages import Package, Result, package_properties
+from .packages import Package, Result, load_properties
 from .SCM import adf, dftb
 from .orca import orca
 from .cp2k_package import cp2k
 from ..settings import Settings
-from ..type_hints import WarnMap
+from ..type_hints import _Settings
 from ..warnings_qmflows import Key_Warning
 
 plams.Job = plams.core.basejob.Job
@@ -126,25 +126,14 @@ RT = TypeVar('RT', bound=Result)
 
 
 class ResultWrapper(Result):
-    """The matching :class:`Result<qmflows.packages.packages.Result>` subclass for :class:`PackageWrapper`."""  # noqa
+    """The matching :class:`~qmflows.packages.packages.Result` subclass for :class:`PackageWrapper`."""  # noqa
 
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
-        """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
-                         work_dir=work_dir, properties=package_properties[None],
-                         status=status, warnings=warnings)
+    prop_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='properties')
 
 
 @has_scheduled_methods
 class PackageWrapper(Package):
-    """A :class:`Package<qmflows.packages.packages.Package>` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
+    """A :class:`~qmflows.packages.packages.Package` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
 
     Will automatically convert the passed Job type into the appropiate
     Package instance upon calling :meth:`PackageWrapper.__call__`.
@@ -179,13 +168,13 @@ class PackageWrapper(Package):
 
     See Also
     --------
-    :data:`JOB_MAP<qmflows.packages.package_wrapper.JOB_MAP>` : :class:`dict` [:class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`], :class:`Package<qmflows.packages.packages.Package>`]
+    :data:`~qmflows.packages.package_wrapper.JOB_MAP` : :class:`dict` [:class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`], :class:`~qmflows.packages.packages.Package`]
         A :class:`dict` mapping PLAMS Job types to appropiate QMFlows Package instances.
 
     """  # noqa
 
-    generic_dict_file: ClassVar[str] = 'generic2None.yaml'
-    generic_package: ClassVar[bool] = True
+    generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
+    result_type: ClassVar[Type[Result]] = ResultWrapper
 
     def __init__(self, job_type: Type[plams.Job]) -> None:
         """Initialize this instance.
@@ -241,8 +230,8 @@ class PackageWrapper(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return ResultWrapper(settings, mol, job_name, r.job.path, dill_path,
-                             work_dir=work_dir, status=job.status, warnings=None)
+        return self.result_type(settings, mol, job_name, r.job.path, dill_path,
+                                work_dir=work_dir, status=job.status, warnings=None)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
