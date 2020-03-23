@@ -182,8 +182,8 @@ class ADF(Package):
     def __init__(self) -> None:
         super(ADF, self).__init__("adf")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'ADFjob', nproc: Optional[int] = None,
                 **kwargs: Any) -> ADF_Result:
         """Execute ADF job.
@@ -220,7 +220,7 @@ class ADF(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        adf_result = self.result_type(
+        adf_result = cls.result_type(
             adf_settings, mol, result.job.name, relative_path_t21, dill_path,
             plams_dir=relative_plams_path, status=job.status)
 
@@ -251,8 +251,8 @@ class DFTB(Package):
     def __init__(self) -> None:
         super().__init__("dftb")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> DFTB_Result:
         """Execute an DFTB job with the AMS driver.
@@ -287,8 +287,8 @@ class DFTB(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return self.result_type(dftb_settings, mol, name, dill_path,
-                                plams_dir=path, status=job.status)
+        return cls.result_type(dftb_settings, mol, name, dill_path,
+                               plams_dir=path, status=job.status)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,

@@ -525,9 +525,9 @@ class Package(metaclass=_MetaPackage):
         """  # noqa
         raise NotImplementedError("trying to call an abstract method")
 
-    @staticmethod
+    @classmethod
     @abstractmethod
-    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> Result:
         r"""`Abstract method <https://docs.python.org/3/library/abc.html#abc.abstractmethod>`_; should be implemented by the child class.

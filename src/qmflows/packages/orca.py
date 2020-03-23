@@ -51,8 +51,8 @@ class ORCA(Package):
     def __init__(self) -> None:
         super().__init__("orca")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = "ORCAjob",
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> ORCA_Result:
@@ -71,8 +71,8 @@ class ORCA(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return self.result_type(orca_settings, mol, result.job.name, dill_path,
-                                plams_dir=relative_plams_path, status=job.status)
+        return cls.result_type(orca_settings, mol, result.job.name, dill_path,
+                               plams_dir=relative_plams_path, status=job.status)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,

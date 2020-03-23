@@ -86,8 +86,8 @@ class CP2KMM(CP2K):
             settings.prm = str(prm_name)
         """
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> CP2KMM_Result:
@@ -123,8 +123,8 @@ class CP2KMM(CP2K):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return self.result_type(cp2k_settings, mol, job_name, r.job.path, dill_path,
-                                work_dir=work_dir, status=job.status, warnings=warnings)
+        return cls.result_type(cp2k_settings, mol, job_name, r.job.path, dill_path,
+                               work_dir=work_dir, status=job.status, warnings=warnings)
 
     @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,
