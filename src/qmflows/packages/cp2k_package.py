@@ -3,7 +3,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Any, Union, Tuple
+from typing import Any, Union, Tuple, ClassVar, Type
 from warnings import warn
 
 from scm import plams
@@ -17,6 +17,22 @@ from ..type_hints import Final
 __all__ = ['cp2k']
 
 
+class CP2K_Result(Result):
+    """Class providing access to CP2K result."""
+
+    @property
+    def molecule(self) -> plams.Molecule:
+        """Return the current geometry.
+
+        If the job is an optimization, try to read the ` *-pos-1.xyz` file.
+        Otherwise return the input molecule.
+        """
+        try:
+            return self.get_property('geometry')
+        except FileNotFoundError:
+            return self._molecule
+
+
 class CP2K(Package):
     """This class setup the requirement to run a `CP2K Job <https://www.cp2k.org/>`_.
 
@@ -27,6 +43,8 @@ class CP2K(Package):
 
     """
 
+    result_type: ClassVar[Type[Result]] = CP2K_Result
+
     def __init__(self) -> None:
         super().__init__("cp2k")
 
@@ -34,7 +52,7 @@ class CP2K(Package):
     def run_job(settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
-                **kwargs: Any) -> 'CP2K_Result':
+                **kwargs: Any) -> CP2K_Result:
         """Call the Cp2K binary using plams interface.
 
         :param settings: Job Settings.
@@ -70,9 +88,9 @@ class CP2K(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        result = CP2K_Result(cp2k_settings, mol, job_name, dill_path=dill_path,
-                             plams_dir=r.job.path, work_dir=work_dir, status=job.status,
-                             warnings=warnings)
+        result = self.result_type(cp2k_settings, mol, job_name, dill_path=dill_path,
+                                  plams_dir=r.job.path, work_dir=work_dir,
+                                  status=job.status, warnings=warnings)
         return result
 
     @staticmethod
@@ -165,22 +183,6 @@ class CP2K(Package):
         else:
             warn(f'Generic keyword {key!r} not implemented for package CP2K',
                  category=Key_Warning)
-
-
-class CP2K_Result(Result):
-    """Class providing access to CP2K result."""
-
-    @property
-    def molecule(self) -> plams.Molecule:
-        """Return the current geometry.
-
-        If the job is an optimization, try to read the ` *-pos-1.xyz` file.
-        Otherwise return the input molecule.
-        """
-        try:
-            return self.get_property('geometry')
-        except FileNotFoundError:
-            return self._molecule
 
 
 #: An instance :class:`CP2K`.

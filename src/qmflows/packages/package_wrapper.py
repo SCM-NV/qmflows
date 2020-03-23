@@ -171,7 +171,7 @@ class PackageWrapper(Package):
 
     """  # noqa
 
-    generic_dict_file: ClassVar[str] = 'generic2None.yaml'
+    result_type: ClassVar[Type[Result]] = ResultWrapper
 
     def __init__(self, job_type: Type[plams.Job]) -> None:
         """Initialize this instance.
@@ -227,8 +227,8 @@ class PackageWrapper(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return ResultWrapper(settings, mol, job_name, r.job.path, dill_path,
-                             work_dir=work_dir, status=job.status, warnings=None)
+        return self.result_type(settings, mol, job_name, r.job.path, dill_path,
+                                work_dir=work_dir, status=job.status, warnings=None)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,

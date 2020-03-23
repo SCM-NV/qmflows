@@ -13,8 +13,7 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Union, ClassVar,
-                    Iterable, Mapping, Iterator)
+from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type)
 
 import numpy as np
 import pkg_resources as pkg
@@ -182,8 +181,7 @@ class Result(metaclass=_MetaResult):
 
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
-            kwargs['plams_dir'] = plams_dir
-            ret = ignore_unused_kwargs(fun, [file_out], kwargs)
+            ret = ignore_unused_kwargs(fun, [file_out], plams_dir=plams_dir, **kwargs)
 
             # Cache the property and return
             if sys.getsizeof(ret) < 10e5:
@@ -256,6 +254,9 @@ class _MetaPackage(ABCMeta):
         """Metaclass of :class:`Package`."""
         cls = super().__new__(mcls, name, bases, namespace, **kwargs)
         if name != 'Package':
+            if cls.result_type is NotImplemented:
+                raise AttributeError(f"'{cls.__name__}.result_type' must be specified; "
+                                     f"current value: {cls.result_type!r}")
             cls.generic_dict = load_properties(cls.__name__, prefix='generic2')
         return cls
 
@@ -279,6 +280,10 @@ class Package(metaclass=_MetaPackage):
     5. Returning the final :class:`Result` instance at the end of :meth:`Package.__call__`.
 
     """
+
+    #: A class variable pointing to the :class:`Package`-specific :class:`Result` class.
+    #: Should be set when creating a subclass.
+    result_type: ClassVar[Type[Result]] = NotImplemented
 
     #: A class variable with the name of the generic .yaml file.
     #: To-be set by :meth:`_MetaResult.__new__`.
@@ -363,15 +368,15 @@ class Package(metaclass=_MetaPackage):
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
                         """, category=QMFlows_Warning)
-                        result = Result(None, None, job_name=job_name,
-                                        dill_path=None, status='failed')
+                        result = self.result_type(None, None, job_name=job_name,
+                                                  dill_path=None, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
                 warn(f"Job {job_name} has failed.\n{err}",
                      category=QMFlows_Warning)
-                result = Result(None, None, job_name=job_name,
-                                dill_path=None, status='failed')
+                result = self.result_type(None, None, job_name=job_name,
+                                          dill_path=None, status='failed')
         else:
             warn(f"""
             Job {job_name} has failed. Either the Settings or Molecule
@@ -379,7 +384,8 @@ class Package(metaclass=_MetaPackage):
             """, category=QMFlows_Warning)
 
             # Send an empty object downstream
-            result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
+            result = self.result_type(None, None, job_name=job_name,
+                                      dill_path=None, status='failed')
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream
@@ -695,7 +701,7 @@ def find_file_pattern(path: Union[str, os.PathLike],
         return iter([])
 
 
-def ignore_unused_kwargs(fun: Callable, args: Iterable, kwargs: Mapping) -> Any:
+def ignore_unused_kwargs(fun: Callable, *args: Any, **kwargs: Any) -> Any:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
     Searches for the keyword arguments which have a nonempty default values

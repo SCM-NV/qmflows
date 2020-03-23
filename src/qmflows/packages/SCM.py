@@ -5,7 +5,7 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 import os
 import struct
 from os.path import join
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, Type
 from warnings import warn
 
 import numpy as np
@@ -94,83 +94,6 @@ def handle_SCM_special_keywords(settings: Settings, key: str,
              category=Key_Warning)
 
 
-class ADF(Package):
-    """:class:`~qmflows.packages.packages.Package` subclass for ADF.
-
-    This class takes care of calling the *ADF* quantum package.
-    it uses both Plams and the Templates module to create the input
-    files, while Plams takes care of running
-    the :class:`plams.ADFJob<scm.plams.interfaces.adfsuite.adf.ADFJob>`.
-    It returns a :class:`ADF_Result` instance containing the output data.
-
-    """
-
-    generic_dict_file: ClassVar[str] = 'generic2ADF.yaml'
-
-    def __init__(self) -> None:
-        super(ADF, self).__init__("adf")
-
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
-                job_name: str = 'ADFjob', nproc: Optional[int] = None,
-                **kwargs: Any) -> 'ADF_Result':
-        """Execute ADF job.
-
-        :param settings: user input settings.
-        :type settings: |Settings|
-        :param mol: Molecule to run the simulation
-        :type mol: Plams Molecule
-        :parameter input_file_name: The user can provide a name for the
-                                    job input.
-        :type input_file_name: String
-        :parameter out_file_name: The user can provide a name for the
-                                  job output.
-        :type out_file_name: String
-        :returns: :class:`~qmflows.packages.SCM.ADF_Result`
-
-        """
-        adf_settings = Settings()
-        if nproc:
-            adf_settings.runscript.nproc = nproc
-        adf_settings.input = settings.specific.adf
-        job = plams.ADFJob(name=job_name, molecule=mol,
-                           settings=adf_settings)
-        result = job.run()
-        # Path to the tape 21 file
-        path_t21 = result._kf.path
-
-        # Relative path to the CWD
-        relative_path_t21 = join(*str(path_t21).split(os.sep)[-3:])
-
-        # Relative job path
-        relative_plams_path = join(*str(result.job.path).split(os.sep)[-2:])
-
-        # Absolute path to the .dill file
-        dill_path = join(job.path, f'{job.name}.dill')
-
-        adf_result = ADF_Result(
-            adf_settings, mol, result.job.name, relative_path_t21, dill_path,
-            plams_dir=relative_plams_path, status=job.status)
-
-        return adf_result
-
-    @staticmethod
-    def handle_special_keywords(settings: Settings, key: str,
-                                value: Any, mol: plams.Molecule) -> None:
-        """Handle special ADF/DFTB specific keywords.
-
-        Some keywords provided by the user do not have a straightforward
-        translation to *ADF* input and require some hooks that handles the
-        special behaviour of the following keywords:
-
-        * ``freeze``
-        * ``selected_atoms``
-        * ``initHess``
-        * ``Constraint``
-        """
-        handle_SCM_special_keywords(settings, key, value, mol, "adf")
-
-
 class ADF_Result(Result):
     """Class providing access to PLAMS ADFJob result results."""
 
@@ -243,10 +166,87 @@ class DFTB_Result(Result):
         return m
 
 
+class ADF(Package):
+    """:class:`~qmflows.packages.packages.Package` subclass for ADF.
+
+    This class takes care of calling the *ADF* quantum package.
+    it uses both Plams and the Templates module to create the input
+    files, while Plams takes care of running
+    the :class:`plams.ADFJob<scm.plams.interfaces.adfsuite.adf.ADFJob>`.
+    It returns a :class:`ADF_Result` instance containing the output data.
+
+    """
+
+    result_type: ClassVar[Type[Result]] = ADF_Result
+
+    def __init__(self) -> None:
+        super(ADF, self).__init__("adf")
+
+    @staticmethod
+    def run_job(settings: Settings, mol: plams.Molecule,
+                job_name: str = 'ADFjob', nproc: Optional[int] = None,
+                **kwargs: Any) -> ADF_Result:
+        """Execute ADF job.
+
+        :param settings: user input settings.
+        :type settings: |Settings|
+        :param mol: Molecule to run the simulation
+        :type mol: Plams Molecule
+        :parameter input_file_name: The user can provide a name for the
+                                    job input.
+        :type input_file_name: String
+        :parameter out_file_name: The user can provide a name for the
+                                  job output.
+        :type out_file_name: String
+        :returns: :class:`~qmflows.packages.SCM.ADF_Result`
+
+        """
+        adf_settings = Settings()
+        if nproc:
+            adf_settings.runscript.nproc = nproc
+        adf_settings.input = settings.specific.adf
+        job = plams.ADFJob(name=job_name, molecule=mol,
+                           settings=adf_settings)
+        result = job.run()
+        # Path to the tape 21 file
+        path_t21 = result._kf.path
+
+        # Relative path to the CWD
+        relative_path_t21 = join(*str(path_t21).split(os.sep)[-3:])
+
+        # Relative job path
+        relative_plams_path = join(*str(result.job.path).split(os.sep)[-2:])
+
+        # Absolute path to the .dill file
+        dill_path = join(job.path, f'{job.name}.dill')
+
+        adf_result = self.result_type(
+            adf_settings, mol, result.job.name, relative_path_t21, dill_path,
+            plams_dir=relative_plams_path, status=job.status)
+
+        return adf_result
+
+    @staticmethod
+    def handle_special_keywords(settings: Settings, key: str,
+                                value: Any, mol: plams.Molecule) -> None:
+        """Handle special ADF/DFTB specific keywords.
+
+        Some keywords provided by the user do not have a straightforward
+        translation to *ADF* input and require some hooks that handles the
+        special behaviour of the following keywords:
+
+        * ``freeze``
+        * ``selected_atoms``
+        * ``initHess``
+        * ``Constraint``
+        """
+        handle_SCM_special_keywords(settings, key, value, mol, "adf")
+
+
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
-    generic_dict_file: ClassVar[str] = 'generic2DFTB.yaml'
+    result_type: ClassVar[Type[Result]] = DFTB_Result
 
     def __init__(self) -> None:
         super().__init__("dftb")
@@ -287,8 +287,8 @@ class DFTB(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return DFTB_Result(dftb_settings, mol, name, dill_path,
-                           plams_dir=path, status=job.status)
+        return self.result_type(dftb_settings, mol, name, dill_path,
+                                plams_dir=path, status=job.status)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
