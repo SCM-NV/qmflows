@@ -3,6 +3,8 @@
    :target: https://travis-ci.org/SCM-NV/qmflows
 .. image:: https://github.com/SCM-NV/qmflows/workflows/build%20with%20conda/badge.svg
    :target: https://github.com/SCM-NV/qmflows/actions
+.. image:: https://codecov.io/gh/SCM-NV/qmflows/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/SCM-NV/qmflows
 .. image:: https://readthedocs.org/projects/qmflows/badge/?version=latest
    :target: https://qmflows.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
