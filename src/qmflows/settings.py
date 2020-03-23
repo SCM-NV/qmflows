@@ -108,6 +108,26 @@ class Settings(plams.core.settings.Settings, ):
                 self[name] = other[name]
 
 
+def _unsuported_operation(meth: Callable) -> Callable[..., NoReturn]:
+    """Decorate a method such that it raises a :exc:`TypeError`."""
+    @wraps(meth)
+    def new_meth(self, *args, **kwargs) -> NoReturn:
+        raise TypeError(f"{self.__class__.__name__!r} does not "
+                        "support item assignment or deletion")
+    return new_meth
+
+
+def _super_method(meth: Callable[..., '_Settings']) -> Callable[..., '_Settings']:
+    """Decorate a method such that it's body is executed by the super-class."""
+    @wraps(meth)
+    def new_meth(self, *args, **kwargs) -> '_Settings':
+        cls = type(self)
+        func = getattr(super(), meth.__name__)
+        ret = func(*args, **kwargs)
+        return cls(ret)
+    return new_meth
+
+
 class _Settings(Settings):
     """Immutable-ish counterpart of :class:`Settings`."""
 
@@ -122,34 +142,16 @@ class _Settings(Settings):
             elif isinstance(v, list):
                 set_item(k, [cls(i) if isinstance(i, dict) else i for i in v])
 
-    @staticmethod
-    def unsuported_operation(meth: Callable) -> Callable[..., NoReturn]:
-        """Decorate a method such that it raises a :exc:`TypeError`."""
-        @wraps(meth)
-        def new_meth(self, *args, **kwargs) -> NoReturn:
-            raise TypeError(f"{self.__class__.__name__!r} does not "
-                            "support item assignment or deletion")
-        return new_meth
+    __setitem__ = _unsuported_operation(Settings.__setitem__)
+    __delitem__ = _unsuported_operation(Settings.__delitem__)
+    clear = _unsuported_operation(Settings.clear)
+    popitem = _unsuported_operation(Settings.popitem)
+    setdefault = _unsuported_operation(Settings.setdefault)
+    update = _unsuported_operation(Settings.update)
 
-    @staticmethod
-    def super_method(meth: Callable[..., '_Settings']) -> Callable[..., '_Settings']:
-        """Decorate a method such that it's body is executed by the super-class."""
-        @wraps(meth)
-        def new_meth(self, *args, **kwargs) -> '_Settings':
-            cls = type(self)
-            func = getattr(super(), meth.__name__)
-            ret = func(*args, **kwargs)
-            return cls(ret)
-        return new_meth
+    overlay = _super_method(Settings.overlay)
+    merge = _super_method(Settings.merge)
+    copy = _super_method(Settings.copy)
+    flatten = _super_method(Settings.flatten)
 
-    __setitem__ = unsuported_operation(Settings.__setitem__)
-    __delitem__ = unsuported_operation(Settings.__delitem__)
-    clear = unsuported_operation(Settings.clear)
-    popitem = unsuported_operation(Settings.popitem)
-    setdefault = unsuported_operation(Settings.setdefault)
-    update = unsuported_operation(Settings.update)
-
-    overlay = super_method(Settings.overlay)
-    merge = super_method(Settings.merge)
-    copy = super_method(Settings.copy)
-    flatten = super_method(Settings.flatten)
+    __init__.__doc__ = Settings.__init__.__doc__

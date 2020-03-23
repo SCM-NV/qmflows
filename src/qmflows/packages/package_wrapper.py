@@ -99,7 +99,7 @@ from scm import plams
 from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
-from .packages import Package, Result, package_properties
+from .packages import Package, Result
 from .SCM import adf, dftb
 from .orca import orca
 from .cp2k_package import cp2k
@@ -126,25 +126,12 @@ RT = TypeVar('RT', bound=Result)
 
 
 class ResultWrapper(Result):
-    """The matching :class:`Result<qmflows.packages.packages.Result>` subclass for :class:`PackageWrapper`."""  # noqa
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
-        """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, plams_dir, dill_path,
-                         work_dir=work_dir, properties=package_properties[None],
-                         status=status, warnings=warnings)
+    """The matching :class:`~qmflows.packages.packages.Result` subclass for :class:`PackageWrapper`."""  # noqa
 
 
 @has_scheduled_methods
 class PackageWrapper(Package):
-    """A :class:`Package<qmflows.packages.packages.Package>` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
+    """A :class:`~qmflows.packages.packages.Package` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
 
     Will automatically convert the passed Job type into the appropiate
     Package instance upon calling :meth:`PackageWrapper.__call__`.
@@ -179,13 +166,12 @@ class PackageWrapper(Package):
 
     See Also
     --------
-    :data:`JOB_MAP<qmflows.packages.package_wrapper.JOB_MAP>` : :class:`dict` [:class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`], :class:`Package<qmflows.packages.packages.Package>`]
+    :data:`~qmflows.packages.package_wrapper.JOB_MAP` : :class:`dict` [:class:`type` [:class:`plams.Job<scm.plams.core.basejob.Job>`], :class:`~qmflows.packages.packages.Package`]
         A :class:`dict` mapping PLAMS Job types to appropiate QMFlows Package instances.
 
     """  # noqa
 
     generic_dict_file: ClassVar[str] = 'generic2None.yaml'
-    generic_package: ClassVar[bool] = True
 
     def __init__(self, job_type: Type[plams.Job]) -> None:
         """Initialize this instance.

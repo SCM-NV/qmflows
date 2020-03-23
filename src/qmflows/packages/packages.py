@@ -354,7 +354,7 @@ class Package(metaclass=_MetaPackage):
                     "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
-                if all(w is not None for w in [warnings_tolerance, output_warnings]):
+                if None not in (warnings_tolerance, output_warnings):
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
