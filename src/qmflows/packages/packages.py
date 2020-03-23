@@ -157,7 +157,7 @@ class Result(metaclass=_MetaResult):
         ds = self.prop_dict[prop]
 
         # extension of the output file containing the property value
-        file_ext = ds['file_ext']
+        file_ext = ds.get('file_ext')
 
         # If there is not work_dir returns None
         work_dir = self.archive.get('work_dir')

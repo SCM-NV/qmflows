@@ -142,6 +142,9 @@ class _Settings(Settings):
             elif isinstance(v, list):
                 set_item(k, [cls(i) if isinstance(i, dict) else i for i in v])
 
+    def __missing__(self, name: str) -> NoReturn:
+        raise KeyError(name)
+
     __setitem__ = _unsuported_operation(Settings.__setitem__)
     __delitem__ = _unsuported_operation(Settings.__delitem__)
     clear = _unsuported_operation(Settings.clear)
