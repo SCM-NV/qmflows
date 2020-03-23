@@ -9,10 +9,10 @@ from typing import Any, Union, Optional, ClassVar, List
 import numpy as np
 from scm import plams
 
-from .packages import Package, Result, package_properties
+from .packages import Package, Result
 from ..parsers.orca_parser import parse_molecule
 from ..settings import Settings
-from ..type_hints import WarnMap, Final
+from ..type_hints import Final
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
 
@@ -180,18 +180,6 @@ class ORCA(Package):
 
 class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'done',
-                 warnings: Optional[WarnMap] = None) -> None:
-        super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['orca'],
-                         status=status, warnings=warnings)
 
     @property
     def molecule(self) -> Optional[plams.Molecule]:

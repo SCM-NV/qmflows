@@ -7,7 +7,7 @@ import inspect
 import os
 import sys
 import warnings
-from abc import abstractmethod, ABC
+from abc import abstractmethod, ABCMeta
 from types import ModuleType
 from pathlib import Path
 from functools import partial
@@ -34,26 +34,31 @@ from ..settings import Settings
 from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType
 from ..warnings_qmflows import QMFlows_Warning
 
-__all__ = ['package_properties',
-           'Package', 'run', 'registry', 'Result',
-           'SerMolecule', 'SerSettings']
-
-_BASE_PATH = Path('data') / 'dictionaries'
-
-#: A dictionary mapping package names to .yaml files.
-package_properties: Dict[Optional[str], Path] = {
-    None: _BASE_PATH / 'propertiesNone.yaml',
-    'adf': _BASE_PATH / 'propertiesADF.yaml',
-    'dftb': _BASE_PATH / 'propertiesDFTB.yaml',
-    'cp2k': _BASE_PATH / 'propertiesCP2K.yaml',
-    'cp2k_mm': _BASE_PATH / 'propertiesCP2KMM.yaml',
-    'orca': _BASE_PATH / 'propertiesORCA.yaml'
-}
-del _BASE_PATH
+__all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
 
-class Result:
+def load_properties(name: str, prefix: str = 'properties') -> Settings:
+    """Load the properties-defining .yaml file."""
+    file_name = os.path.join('data', 'dictionaries', f'{prefix}{name}.yaml')
+    xs = pkg.resource_string("qmflows", file_name)
+    return yaml2Settings(xs)
+
+
+class _MetaResult(type):
+    def __new__(mcls, name, bases, namespace, **kwargs):
+        """Metaclass of :class:`Result`."""
+        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
+        if name != 'Result':
+            cls.prop_dict = load_properties(cls.__name__, prefix='properties')
+        return cls
+
+
+class Result(metaclass=_MetaResult):
     """Class containing the results associated with a quantum chemistry simulation."""
+
+    #: A :class:`Settings` instance with :class:`Result`-specific properties.
+    #: To-be set by :meth:`_MetaResult.__new__`.
+    prop_dict: ClassVar[Settings] = NotImplemented
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
@@ -85,12 +90,10 @@ class Result:
 
         """
         plams_dir = None if plams_dir is None else Path(plams_dir)
+
         self.settings = settings
         self._molecule = molecule
-        xs = pkg.resource_string("qmflows", str(properties))
-        self.prop_dict = yaml2Settings(xs)
-        self.archive = {"plams_dir": plams_dir,
-                        'work_dir': work_dir}
+        self.archive = {"plams_dir": plams_dir, 'work_dir': work_dir}
         self.job_name = job_name
         self.status = status
         self.warnings = warnings
@@ -260,8 +263,17 @@ class Result:
             self._results = results
 
 
+class _MetaPackage(ABCMeta):
+    def __new__(mcls, name, bases, namespace, **kwargs):
+        """Metaclass of :class:`Package`."""
+        cls = super().__new__(mcls, name, bases, namespace, **kwargs)
+        if name != 'Package':
+            cls.generic_dict = load_properties(cls.__name__, prefix='generic2')
+        return cls
+
+
 @has_scheduled_methods
-class Package(ABC):
+class Package(metaclass=_MetaPackage):
     """:class:`Package` is the base class to handle the invocation to different quantum package.
 
     The only relevant (instance) attribute of this class is :attr:`Package.pkg_name` which is a
@@ -281,13 +293,8 @@ class Package(ABC):
     """
 
     #: A class variable with the name of the generic .yaml file.
-    #: Should be implemented by :class:`Package` subclasses.
-    generic_dict_file: ClassVar[str] = NotImplemented
-
-    #: A class variable with a special flag for used by the
-    #: :class:`~qmflows.packages.package_wrapper.PackageWrapper` subclass.
-    #: Used for denoting Job types without any generic .yaml files.
-    generic_package: ClassVar[bool] = False
+    #: To-be set by :meth:`_MetaResult.__new__`.
+    generic_dict: ClassVar[Settings] = NotImplemented
 
     #: An instance variable with the name of the respective quantum chemical package.
     pkg_name: str
@@ -373,15 +380,13 @@ class Package(ABC):
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
                         """, category=QMFlows_Warning)
-                        result = Result(None, None, job_name=job_name, dill_path=None,
-                                        properties=properties, status='failed')
+                        result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
                 warn(f"Job {job_name} has failed.\n{err}",
                      category=QMFlows_Warning)
-                result = Result(None, None, job_name=job_name, dill_path=None,
-                                properties=properties, status='failed')
+                result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
         else:
             warn(f"""
             Job {job_name} has failed. Either the Settings or Molecule
@@ -389,8 +394,7 @@ class Package(ABC):
             """, category=QMFlows_Warning)
 
             # Send an empty object downstream
-            result = Result(None, None, job_name=job_name, dill_path=None,
-                            properties=properties, status='failed')
+            result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
 
         # Label this calculation as failed if there are not dependecies coming
         # from upstream

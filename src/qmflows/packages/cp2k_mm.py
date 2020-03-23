@@ -14,36 +14,23 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Mapping, Dict, Optional
+from typing import Union, Any, ClassVar, Dict
 
 from scm import plams
 
-from .packages import Result, parse_output_warnings, package_properties
+from .packages import Result, parse_output_warnings
 from .cp2k_package import CP2K
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special, WarnMap, Final
+from ..type_hints import Generic2Special, Final
 
 __all__ = ['cp2k_mm']
 
 
 class CP2KMM_Result(Result):
     """Class providing access to CP2KMM result."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
-        """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, dill_path, plams_dir,
-                         work_dir=work_dir, properties=package_properties['cp2k_mm'],
-                         status=status, warnings=warnings)
 
 
 class CP2KMM(CP2K):

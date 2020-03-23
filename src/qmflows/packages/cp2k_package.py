@@ -3,18 +3,16 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Any, ClassVar, Optional, Union, Tuple
+from typing import Any, Union, Tuple
 from warnings import warn
 
 from scm import plams
 
-from .packages import Package, Result, package_properties, parse_output_warnings
+from .packages import Package, Result, parse_output_warnings
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
-
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
-from ..type_hints import WarnMap, Final
-
+from ..type_hints import Final
 
 __all__ = ['cp2k']
 
@@ -28,8 +26,6 @@ class CP2K(Package):
     :data:`cp2k` function should be called.
 
     """
-
-    generic_dict_file: ClassVar[str] = 'generic2CP2K.yaml'
 
     def __init__(self) -> None:
         super().__init__("cp2k")
@@ -173,19 +169,6 @@ class CP2K(Package):
 
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
-        """Initialize this instance."""
-        super().__init__(settings, molecule, job_name, dill_path=dill_path, plams_dir=plams_dir,
-                         work_dir=work_dir, properties=package_properties['cp2k'],
-                         status=status, warnings=warnings)
 
 
 #: An instance :class:`CP2K`.

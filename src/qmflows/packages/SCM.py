@@ -14,7 +14,7 @@ from scm import plams
 from ..settings import Settings
 from ..type_hints import Final, WarnMap
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
-from .packages import Package, Result, package_properties
+from .packages import Package, Result
 from ..utils import get_tmpfile_name
 # ========================= ADF ============================
 
@@ -185,8 +185,7 @@ class ADF_Result(Result):
                  warnings: Optional[WarnMap] = None) -> None:
         # Load available property parser from yaml file.
         super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['adf'],
-                         status=status, warnings=warnings)
+                         plams_dir=plams_dir, status=status, warnings=warnings)
 
         # Create a KF reader instance
         self.kf = plams.KFFile(path_t21)
@@ -222,8 +221,7 @@ class DFTB_Result(Result):
                  warnings: Optional[WarnMap] = None) -> None:
         # Read available propiety parsers from a yaml file
         super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['dftb'],
-                         status=status, warnings=warnings)
+                         plams_dir=plams_dir, status=status, warnings=warnings)
 
         if plams_dir is not None:
             kf_filename = join(plams_dir, 'dftb.rkf')
