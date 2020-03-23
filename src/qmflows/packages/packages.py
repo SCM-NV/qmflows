@@ -13,7 +13,7 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Dict, Union, ClassVar,
+from typing import (Any, Callable, Optional, Union, ClassVar,
                     Iterable, Mapping, Iterator)
 
 import numpy as np
@@ -30,18 +30,18 @@ from rdkit import Chem
 from scm import plams
 
 from ..fileFunctions import yaml2Settings
-from ..settings import Settings
+from ..settings import Settings, _Settings
 from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType
 from ..warnings_qmflows import QMFlows_Warning
 
 __all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
 
-def load_properties(name: str, prefix: str = 'properties') -> Settings:
-    """Load the properties-defining .yaml file."""
+def load_properties(name: str, prefix: str = 'properties') -> _Settings:
+    """Load the properties-defining .yaml file from ."""
     file_name = os.path.join('data', 'dictionaries', f'{prefix}{name}.yaml')
     xs = pkg.resource_string("qmflows", file_name)
-    return yaml2Settings(xs)
+    return yaml2Settings(xs, mapping_type=_Settings)
 
 
 class _MetaResult(type):
@@ -58,7 +58,7 @@ class Result(metaclass=_MetaResult):
 
     #: A :class:`Settings` instance with :class:`Result`-specific properties.
     #: To-be set by :meth:`_MetaResult.__new__`.
-    prop_dict: ClassVar[Settings] = NotImplemented
+    prop_dict: ClassVar[_Settings] = NotImplemented
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
@@ -66,7 +66,6 @@ class Result(metaclass=_MetaResult):
                  dill_path: Union[None, str, os.PathLike] = None,
                  plams_dir: Union[None, str, os.PathLike] = None,
                  work_dir: Union[None, str, os.PathLike] = None,
-                 properties: Union[None, str, os.PathLike] = None,
                  status: str = 'done',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize a :class:`Result` instance.
@@ -84,9 +83,6 @@ class Result(metaclass=_MetaResult):
         :param work_dir: scratch or another directory different from
         the `plams_dir`.
         type work_dir: str
-        :param properties: path to the `yaml` file containing the data to
-                           load the parser on the fly.
-        :type properties: str
 
         """
         plams_dir = None if plams_dir is None else Path(plams_dir)
@@ -104,8 +100,10 @@ class Result(metaclass=_MetaResult):
     def __deepcopy__(self, memo: Optional[dict] = None) -> 'Result':
         """Return a deep copy of this instance."""
         cls = type(self)
+
         # Construct an empty instance while bypassing __init__()
         copy_instance = cls.__new__(cls)
+
         # Manually set all instance variables
         copy_instance.__dict__ = self.__dict__.copy()
         return copy_instance
@@ -284,7 +282,7 @@ class Package(metaclass=_MetaPackage):
 
     #: A class variable with the name of the generic .yaml file.
     #: To-be set by :meth:`_MetaResult.__new__`.
-    generic_dict: ClassVar[Settings] = NotImplemented
+    generic_dict: ClassVar[_Settings] = NotImplemented
 
     #: An instance variable with the name of the respective quantum chemical package.
     pkg_name: str
@@ -327,11 +325,6 @@ class Package(metaclass=_MetaPackage):
             A new Result instance.
 
         """  # noqa
-        if self.generic_package:
-            properties = package_properties[None]
-        else:
-            properties = package_properties[self.pkg_name]
-
         # Ensure that these variables have an actual value
         # Precaution against passing unbound variables to self.postrun()
         output_warnings = plams_mol = job_settings = None
@@ -370,13 +363,15 @@ class Package(metaclass=_MetaPackage):
                         Workflow: {issues}\n
                         The results from Job: {job_name} are discarded.
                         """, category=QMFlows_Warning)
-                        result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
+                        result = Result(None, None, job_name=job_name,
+                                        dill_path=None, status='failed')
 
             # Otherwise pass an empty Result instance downstream
             except plams.core.errors.PlamsError as err:
                 warn(f"Job {job_name} has failed.\n{err}",
                      category=QMFlows_Warning)
-                result = Result(None, None, job_name=job_name, dill_path=None, status='failed')
+                result = Result(None, None, job_name=job_name,
+                                dill_path=None, status='failed')
         else:
             warn(f"""
             Job {job_name} has failed. Either the Settings or Molecule
@@ -415,8 +410,6 @@ class Package(metaclass=_MetaPackage):
             A new settings instance without any generic keys.
 
         """
-        generic_dict = self.get_generic_dict()
-
         specific_from_generic_settings = Settings()
         for k, v in settings.items():
             if k == "specific":
@@ -426,36 +419,11 @@ class Package(metaclass=_MetaPackage):
                     v)
                 continue
 
-            if not generic_dict.get(k):
+            if not self.generic_dict.get(k):
                 self.handle_special_keywords(
                     specific_from_generic_settings, k, v, mol)
 
         return settings.overlay(specific_from_generic_settings)
-
-    def get_generic_dict(self) -> Settings:
-        """Load the .yaml file containing the translation from generic to the specific keywords of :attr:`Package.pkg_name`.
-
-        Returns
-        -------
-        :class:`~qmflows.settings.Settings`
-            A new Settings instance specific to :attr:`Package.pkg_name`.
-
-        See Also
-        --------
-        :meth:`Package.generic2specific`
-            Traverse *settings* and convert generic into package specific keys.
-
-        """  # noqa
-        try:
-            path = join("data", "dictionaries", self.generic_dict_file)
-        except TypeError as ex:
-            if self.generic_dict_file is NotImplemented:
-                raise NotImplementedError("The `Package.generic_dict_file` attribute should "
-                                          "be implemented by `Package` subclasses") from ex
-            raise ex
-
-        str_yaml = pkg.resource_string("qmflows", path)
-        return yaml2Settings(str_yaml)
 
     def __repr__(self) -> str:
         """Create a string representation of this instance.
