@@ -19,7 +19,6 @@ from ..common import InfoMO
 from ..type_hints import PathLike
 
 Vector = np.ndarray
-Matrix = np.ndarray
 
 
 def parse_molecule(file_name: PathLike, mol: Optional_[Molecule] = None) -> Molecule:
@@ -49,7 +48,7 @@ def parse_molecule_traj(file_traj: PathLike) -> Molecule:
     return plams_mol
 
 
-def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> Matrix:
+def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> np.ndarray:
     """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
 
     :returns: Numpy array
@@ -57,13 +56,13 @@ def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> Matrix:
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_normal_modes(file_hess: PathLike) -> Matrix:
+def parse_normal_modes(file_hess: PathLike) -> np.ndarray:
     """Return the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_frequencies(file_hess: PathLike) -> Matrix:
+def parse_frequencies(file_hess: PathLike) -> np.ndarray:
     """Parse the vibrational frequencies from the job_name.hess file."""
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
@@ -71,7 +70,7 @@ def parse_frequencies(file_hess: PathLike) -> Matrix:
     return np.array([x.split()[-1] for x in lines[1:]], dtype=float)
 
 
-def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
+def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> np.ndarray:
     """Read a matrix printed in block format.
 
     :param  start: token identifying the start of the block.
@@ -96,7 +95,7 @@ def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> Matrix:
     return np.concatenate(blocks, axis=1)
 
 
-def read_block(lines: Sequence[str]) -> Matrix:
+def read_block(lines: Sequence[str]) -> np.ndarray:
     """Read a block containing the values of the block matrix.
 
     The format is similar to:
