@@ -170,6 +170,18 @@ class CP2K(Package):
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
 
+    @property
+    def molecule(self) -> plams.Molecule:
+        """Return the current geometry.
+
+        If the job is an optimization, try to read the ` *-pos-1.xyz` file.
+        Otherwise return the input molecule.
+        """
+        try:
+            return self.get_property('geometry')
+        except FileNotFoundError:
+            return self._molecule
+
 
 #: An instance :class:`CP2K`.
 #: Only one instance of this class should exist at any given momemt;

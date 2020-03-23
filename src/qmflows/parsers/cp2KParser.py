@@ -93,16 +93,7 @@ def read_cp2k_coefficients(path_mos: PathLike,
     added_mos, range_mos = read_mos_data_input(path_in)
 
     # Read the range of printed MOs from the input
-    if range_mos is not None:
-        printed_orbitals = range_mos[1] - range_mos[0] + 1
-
-    # Otherwise read the added_mos parameter
-    elif added_mos is not None:
-        printed_orbitals = orbitals_info.added_mos * 2
-
-    # Otherwise read the occupied orbitals
-    else:
-        printed_orbitals = orbitals_info.nOccupied
+    printed_orbitals = range_mos[1] - range_mos[0] + 1
 
     return readCp2KCoeff(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
 

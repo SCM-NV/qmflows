@@ -49,8 +49,9 @@ setup(
                       'plams@git+https://github.com/SCM-NV/PLAMS@master',
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
-        'test': ['pytest', 'pytest-cov', 'pytest-mock', 'typing_extensions',
-                 'assertionlib', 'pycodestyle', 'mypy'],
+        'test': ['assertionlib', 'mypy', 'pytest', 'pytest-cov',
+                 'pytest-mock', 'pytest-pycodestyle', 'pytest-pydocstyle',
+                 'typing_extensions'],
         'doc': ['sphinx>=2.1', 'sphinx-autodoc-typehints', 'sphinx_rtd_theme', 'nbsphinx']
     }
 )

@@ -1,1 +1,1 @@
-from .test_xyz_parser import *
+"""Testing module."""
