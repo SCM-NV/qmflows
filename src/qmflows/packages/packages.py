@@ -181,7 +181,7 @@ class Result(metaclass=_MetaResult):
 
             # Read the keywords arguments from the properties dictionary
             kwargs = ds.get('kwargs', {})
-            ret = ignore_unused_kwargs(fun, [file_out], plams_dir=plams_dir, **kwargs)
+            ret = ignore_unused_kwargs(fun, file_out, plams_dir=plams_dir, **kwargs)
 
             # Cache the property and return
             if sys.getsizeof(ret) < 10e5:
