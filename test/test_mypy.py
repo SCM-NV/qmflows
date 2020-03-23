@@ -14,7 +14,7 @@ PACKAGE = join(*_ROOT, 'src', 'qmflows')
 INI = abspath(PATH / 'mypy.ini')
 
 Action = Literal['raise', 'warn', 'ignore']  #: Type annotation for the 'action' keyword.
-ACTION = frozenset(Action.__args__)
+ACTION = frozenset(['raise', 'warn', 'ignore'])
 
 
 def test_mypy(action: Action = 'warn') -> None:
