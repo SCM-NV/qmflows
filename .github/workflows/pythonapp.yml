@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@master
+    - name: Install cp2k
+      run: sudo apt install cp2k
     - name: Setup conda
       uses: s-weigand/setup-conda@master
       with:
