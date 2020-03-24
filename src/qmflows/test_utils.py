@@ -5,6 +5,7 @@ Index
 .. currentmodule:: qmflows.test_utils
 .. autosummary::
     delete_output
+    fill_cp2k_defaults
     get_mm_settings
     PATH
     PATH_MOLECULES
@@ -12,6 +13,7 @@ Index
 API
 ---
 .. autofunction:: delete_output
+.. autofunction:: fill_cp2k_defaults
 .. autofunction:: get_mm_settings
 .. autodata:: PATH
     :annotation: : pathlib.Path
@@ -26,6 +28,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Union
 
+from .fileFunctions import yaml2Settings
 from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
 
@@ -36,6 +39,47 @@ PATH = Path('test') / 'test_files'
 
 #: The path to the ``tests/test_files/molecules`` directory.
 PATH_MOLECULES = PATH / "molecules"
+
+#: Basisset specification for CP2K calculations
+kinds_template = yaml2Settings("""
+specific:
+  cp2k:
+     force_eval:
+       subsys:
+         kind:
+           C:
+             basis_set: DZVP-MOLOPT-SR-GTH-q4
+             potential: GTH-PBE-q4
+           H:
+             basis_set: DZVP-MOLOPT-SR-GTH-q1
+             potential: GTH-PBE-q1
+           O:
+             basis_set: DZVP-MOLOPT-SR-GTH-q6
+             potential: GTH-PBE-q6
+""")
+
+
+def fill_cp2k_defaults(s: Settings) -> Settings:
+    """Fill missing values from a job template."""
+    s.periodic = "None"
+    s.cell_parameters = 10
+    s = s.overlay(kinds_template)
+
+    # functional
+    s.specific.cp2k.force_eval.dft.xc.xc_functional.pbe = {}
+
+    # basis and potential
+    add_basis_potential(s)
+
+    return s
+
+
+def add_basis_potential(s: Settings) -> None:
+    """Add basis and potential path to the settings."""
+    s.specific.cp2k.force_eval.dft.potential_file_name = (
+        PATH / "GTH_POTENTIALS").absolute().as_posix()
+    s.specific.cp2k.force_eval.dft.basis_set_file_name = (
+        PATH / "BASIS_MOLOPT").absolute().as_posix()
 
 
 def delete_output(delete_db: Union[Callable, bool] = True,
