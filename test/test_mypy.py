@@ -2,18 +2,19 @@
 
 import warnings
 import subprocess
-from os.path import join
+from os.path import join, abspath
 from pathlib import Path
 
+from typing_extensions import Literal
+
 from qmflows.test_utils import PATH, Assertion_Warning
-from qmflows.backports import Literal
 
 _ROOT = Path(__file__).parts[:-2]
 PACKAGE = join(*_ROOT, 'src', 'qmflows')
-INI = str(PATH / 'mypy.ini')
+INI = abspath(PATH / 'mypy.ini')
 
-ACTION = frozenset({'raise', 'warn', 'ignore'})
-Action = Literal[tuple(ACTION)]  #: Type annotation for the 'action' keyword.
+Action = Literal['raise', 'warn', 'ignore']  #: Type annotation for the 'action' keyword.
+ACTION = frozenset(['raise', 'warn', 'ignore'])
 
 
 def test_mypy(action: Action = 'warn') -> None:

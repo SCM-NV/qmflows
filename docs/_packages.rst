@@ -20,7 +20,6 @@ The Package Class
     Package.run_job
     Package.postrun
     Package.generic2specific
-    Package.get_generic_dict
     Package.handle_special_keywords
 
 Package Subclasses
@@ -50,7 +49,7 @@ API
 |
 
 .. autoclass:: qmflows.packages.packages.Package
-    :members: generic_dict_file, generic_package, pkg_name
+    :members: generic_mapping, result_type, pkg_name
 
 .. automethod:: qmflows.packages.packages.Package.__init__
 .. automethod:: qmflows.packages.packages.Package.__repr__
@@ -59,7 +58,7 @@ API
 .. automethod:: qmflows.packages.packages.Package.run_job
 .. automethod:: qmflows.packages.packages.Package.postrun
 .. automethod:: qmflows.packages.packages.Package.generic2specific
-.. automethod:: qmflows.packages.packages.Package.get_generic_dict
+.. automethod:: qmflows.packages.packages.Package.get_generic_mapping
 .. automethod:: qmflows.packages.packages.Package.handle_special_keywords
 
 |

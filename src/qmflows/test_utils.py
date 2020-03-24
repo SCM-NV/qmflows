@@ -28,8 +28,7 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Union
 
-from qmflows.fileFunctions import yaml2Settings
-
+from .fileFunctions import yaml2Settings
 from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
 

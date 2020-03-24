@@ -5,16 +5,16 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 import os
 import struct
 from os.path import join
-from typing import Any, ClassVar, Optional, Union
+from typing import Any, ClassVar, Optional, Union, Type
 from warnings import warn
 
 import numpy as np
 from scm import plams
 
+from .packages import Package, Result, load_properties
 from ..settings import Settings
-from ..type_hints import Final, WarnMap
+from ..type_hints import Final, WarnMap, _Settings
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
-from .packages import Package, Result, package_properties
 from ..utils import get_tmpfile_name
 # ========================= ADF ============================
 
@@ -94,6 +94,82 @@ def handle_SCM_special_keywords(settings: Settings, key: str,
              category=Key_Warning)
 
 
+class ADF_Result(Result):
+    """Class providing access to PLAMS ADFJob result results."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='properties')
+
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 path_t21: Union[str, os.PathLike],
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
+        # Load available property parser from yaml file.
+        super().__init__(settings, molecule, job_name, dill_path,
+                         plams_dir=plams_dir, status=status, warnings=warnings)
+
+        # Create a KF reader instance
+        self.kf = plams.KFFile(path_t21)
+
+    def get_property_kf(self, prop: str, section: Optional[str] = None) -> Any:
+        """Interface for :meth:`plams.KFFile.read()<scm.plams.tools.kftools.KFFile.read>`."""
+        return self.kf.read(section, prop)
+
+    @property
+    def molecule(self) -> Optional[plams.Molecule]:
+        """WARNING: Cheap copy from PLAMS, do not keep this!!!."""
+        try:
+            m = self._molecule.copy()
+        except AttributeError:
+            return None  # self._molecule can be None
+        # Find out correct location
+        coords = self.kf.read('Geometry', 'xyz InputOrder')
+        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
+        m.from_array(coords)
+        return m
+
+
+class DFTB_Result(Result):
+    """Class providing access to PLAMS DFTBJob result results."""
+
+    prop_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='properties')
+
+    def __init__(self, settings: Optional[Settings],
+                 molecule: Optional[plams.Molecule],
+                 job_name: str,
+                 dill_path: Union[None, str, os.PathLike] = None,
+                 plams_dir: Union[None, str, os.PathLike] = None,
+                 work_dir: Union[None, str, os.PathLike] = None,
+                 status: str = 'done',
+                 warnings: Optional[WarnMap] = None) -> None:
+        # Read available propiety parsers from a yaml file
+        super().__init__(settings, molecule, job_name, dill_path,
+                         plams_dir=plams_dir, status=status, warnings=warnings)
+
+        if plams_dir is not None:
+            kf_filename = join(plams_dir, 'dftb.rkf')
+            # create a kf reader instance
+            self.kf = plams.KFFile(kf_filename)
+        else:
+            self.kf = None
+
+    @property
+    def molecule(self) -> plams.Molecule:
+        """Read molecule from output."""
+        try:
+            m = self._molecule.copy()
+        except AttributeError:
+            return None  # self._molecule can be None
+        coords = self.kf.read('Molecule', 'Coords')
+        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
+        m.from_array(coords)
+        return m
+
+
 class ADF(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for ADF.
 
@@ -105,15 +181,16 @@ class ADF(Package):
 
     """
 
-    generic_dict_file: ClassVar[str] = 'generic2ADF.yaml'
+    generic_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='generic2')
+    result_type: ClassVar[Type[Result]] = ADF_Result
 
     def __init__(self) -> None:
         super(ADF, self).__init__("adf")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'ADFjob', nproc: Optional[int] = None,
-                **kwargs: Any) -> 'ADF_Result':
+                **kwargs: Any) -> ADF_Result:
         """Execute ADF job.
 
         :param settings: user input settings.
@@ -148,7 +225,7 @@ class ADF(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        adf_result = ADF_Result(
+        adf_result = cls.result_type(
             adf_settings, mol, result.job.name, relative_path_t21, dill_path,
             plams_dir=relative_plams_path, status=job.status)
 
@@ -171,90 +248,17 @@ class ADF(Package):
         handle_SCM_special_keywords(settings, key, value, mol, "adf")
 
 
-class ADF_Result(Result):
-    """Class providing access to PLAMS ADFJob result results."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 path_t21: Union[str, os.PathLike],
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'done',
-                 warnings: Optional[WarnMap] = None) -> None:
-        # Load available property parser from yaml file.
-        super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['adf'],
-                         status=status, warnings=warnings)
-
-        # Create a KF reader instance
-        self.kf = plams.KFFile(path_t21)
-
-    def get_property_kf(self, prop: str, section: Optional[str] = None) -> Any:
-        """Interface for :meth:`plams.KFFile.read()<scm.plams.tools.kftools.KFFile.read>`."""
-        return self.kf.read(section, prop)
-
-    @property
-    def molecule(self) -> Optional[plams.Molecule]:
-        """WARNING: Cheap copy from PLAMS, do not keep this!!!."""
-        try:
-            m = self._molecule.copy()
-        except AttributeError:
-            return None  # self._molecule can be None
-        # Find out correct location
-        coords = self.kf.read('Geometry', 'xyz InputOrder')
-        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
-        m.from_array(coords)
-        return m
-
-
-class DFTB_Result(Result):
-    """Class providing access to PLAMS DFTBJob result results."""
-
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
-                 job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
-                 status: str = 'done',
-                 warnings: Optional[WarnMap] = None) -> None:
-        # Read available propiety parsers from a yaml file
-        super().__init__(settings, molecule, job_name, dill_path,
-                         plams_dir=plams_dir, properties=package_properties['dftb'],
-                         status=status, warnings=warnings)
-
-        if plams_dir is not None:
-            kf_filename = join(plams_dir, 'dftb.rkf')
-            # create a kf reader instance
-            self.kf = plams.KFFile(kf_filename)
-        else:
-            self.kf = None
-
-    @property
-    def molecule(self) -> plams.Molecule:
-        """Read molecule from output."""
-        try:
-            m = self._molecule.copy()
-        except AttributeError:
-            return None  # self._molecule can be None
-        coords = self.kf.read('Molecule', 'Coords')
-        coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
-        m.from_array(coords)
-        return m
-
-
 class DFTB(Package):
     """:class:`~qmflows.packages.packages.Package` subclass for DFTB."""
 
-    generic_dict_file: ClassVar[str] = 'generic2DFTB.yaml'
+    generic_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='generic2')
+    result_type: ClassVar[Type[Result]] = DFTB_Result
 
     def __init__(self) -> None:
         super().__init__("dftb")
 
-    @staticmethod
-    def run_job(settings: Settings, mol: plams.Molecule, job_name: str,
+    @classmethod
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
                 **kwargs: Any) -> DFTB_Result:
         """Execute an DFTB job with the AMS driver.
@@ -289,8 +293,8 @@ class DFTB(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return DFTB_Result(dftb_settings, mol, name, dill_path,
-                           plams_dir=path, status=job.status)
+        return cls.result_type(dftb_settings, mol, name, dill_path,
+                               plams_dir=path, status=job.status)
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,

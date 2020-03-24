@@ -42,7 +42,8 @@ __all__ = [
     'Generic2Special',
     'PathLike',
     'MolType',
-    'PromisedObject'
+    'PromisedObject',
+    '_Settings'
 ]
 
 #: Alias for :data:`typing.Literal`.
@@ -87,6 +88,10 @@ PathLike = Union[AnyStr, _PathLike]
 #: An rdkit or PLAMS molecule.
 MolType = Union[Mol, Molecule]
 
+#: Type annotation for the private :class:`~qmflows.settings._Settings` class.
+#: The purpose of this annotation is to override the signature of dict (the baseclass),
+#: the latter being actually mutable.
+_Settings = Mapping[str, Any]
 
 __doc__ = __doc__.format(
     autosummary='\n'.join(f'    {i}' for i in __all__),

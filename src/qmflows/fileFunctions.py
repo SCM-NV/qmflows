@@ -2,14 +2,18 @@
 
 __all__ = ['yaml2Settings']
 
+from typing import AnyStr, Callable
+
 import yaml
-from typing import AnyStr
+
 from .settings import Settings
+from .type_hints import T
 
 
-def yaml2Settings(xs: AnyStr) -> Settings:
+def yaml2Settings(xs: AnyStr, mapping_type: Callable[[dict], T] = Settings) -> T:
     """Transform a string containing some data in .yaml format to a Settings object."""
     if isinstance(xs, bytes):
         xs = xs.decode()
-    s = yaml.load(xs, Loader=yaml.FullLoader)  # yaml object must be string
-    return Settings(s)
+
+    dct = yaml.load(xs, Loader=yaml.FullLoader)  # yaml object must be string
+    return mapping_type(dct)
