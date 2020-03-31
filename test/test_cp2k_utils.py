@@ -9,7 +9,7 @@ from assertionlib import assertion
 from qmflows import Settings
 from qmflows.cp2k_utils import (CP2K_KEYS_ALIAS, LengthError, _construct_df,
                                 _get_key_path, _parse_unit, _validate_unit,
-                                map_psf_atoms, set_prm)
+                                map_psf_atoms, set_prm, prm_to_df)
 from qmflows.test_utils import PATH_MOLECULES
 
 PSF_STR = """
@@ -194,3 +194,29 @@ def test_set_prm() -> None:
     assertion.eq(s2, ref)
     assertion.eq(s3, ref)
     assertion.eq(s4, ref)
+
+
+def test_prm_to_df() -> None:
+    """Tests for :func:`prm_to_df`."""
+    s = Settings()
+    s.lennard_jones = {
+        'param': ('epsilon', 'sigma'),
+        'unit': ('kcalmol', 'angstrom'),
+        'Cs': (1, 1),
+        'Cd': (2, 2),
+        'O': (3, 3),
+        'H': (4, 4)
+    }
+
+    ref = {'param': {'epsilon': 'epsilon', 'sigma': 'sigma'},
+           'unit': {'epsilon': 'kcalmol', 'sigma': 'angstrom'},
+           'Cs': {'epsilon': 1.0, 'sigma': 1.0},
+           'Cd': {'epsilon': 2.0, 'sigma': 2.0},
+           'O': {'epsilon': 3.0, 'sigma': 3.0},
+           'H': {'epsilon': 4.0, 'sigma': 4.0}}
+    prm_to_df(s)
+    assertion.eq(s['lennard_jones'].to_dict(), ref)
+
+    # The 'param' key is missing
+    s2 = {'lennard-jones': {'Cs': (1, 2)}}
+    assertion.assert_(prm_to_df, s2, exception=KeyError)

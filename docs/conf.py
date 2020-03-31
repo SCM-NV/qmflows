@@ -195,7 +195,8 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/', None),
     'plams': ('https://www.scm.com/doc/plams/', None),
     'noodles': ('https://noodles.readthedocs.io/en/latest/', None),
-    'rdkit': ('https://www.rdkit.org/docs/', None)
+    'rdkit': ('https://www.rdkit.org/docs/', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
 }
 
 
