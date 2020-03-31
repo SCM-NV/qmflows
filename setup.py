@@ -36,7 +36,8 @@ setup(
               "qmflows.parsers",
               "qmflows.templates"],
     package_data={
-        "qmflows": ['data/dictionaries/*yaml']
+        "qmflows": ['data/dictionaries/*yaml',
+                    'py.typed']
     },
     classifiers=[
         'Intended Audience :: Science/Research',
