@@ -42,7 +42,7 @@ from .settings import Settings
 from .utils import to_runtime_error, file_to_context
 from .type_hints import MappingScalar, MappingSequence, PathLike
 
-__all__ = ['set_prm', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
+__all__ = ['set_prm', 'prm_to_df', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
 _BASE_PATH = ('specific', 'cp2k', 'force_eval', 'mm', 'forcefield')
 
@@ -366,13 +366,9 @@ def _(unit: Optional[str]) -> List[str]:
 
 @overload
 def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame: ...
-
-
 @overload
 def _construct_df(columns: str, prm_map: MappingScalar) -> pd.DataFrame: ...
-
-
-def _construct_df(columns, prm_map) -> pd.DataFrame:
+def _construct_df(columns, prm_map) -> pd.DataFrame:  # noqa: E302
     """Convert *prm_map* into a :class:`pandas.DataFrame` of strings with *columns* as columns.
 
     The main purpose of the DataFrame construction is to catch any errors
@@ -475,7 +471,7 @@ def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
     * The first two keys are ``"specific"`` and ``"cp2k"`` followed by the key path.
     * *key* is equivalent to the key path, lacking any prepended keys.
 
-    """  # noqa
+    """  # noqa: E501
     if isinstance(key, tuple):  # It's a tuple with the key path alias
         if key[0] == 'input':
             return ('specific', 'cp2k') + key[1:]
@@ -488,6 +484,73 @@ def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
         return CP2K_KEYS_ALIAS[key]
     except KeyError as ex:
         raise KeyError(f"{key!r} section: no alias available for {key!r}") from ex
+
+
+def prm_to_df(settings: MutableMapping) -> None:
+    """Traverse the passed CP2K settings and convert all forcefield parameter blocks into instances of :class:`pandas.DataFrame`.
+
+    Parameter blocks are recognized by their keys in one of the following two ways:
+    * The key is also present in :data:`CP2K_KEYS_ALIAS`.
+    * The key is a :class:`tuple`.
+
+    Performs an inplace update of *settings*.
+
+    Examples
+    --------
+    .. code:: python
+
+        >>> from qmflows import Settings
+        >>> from qmflows.cp2k_utils import prm_to_df
+
+        >>> s = Settings()
+        >>> s.lennard_jones = {
+        ...     'param': ('epsilon', 'sigma'),
+        ...     'unit': ('kcalmol', 'angstrom'),
+        ...     'Cs': (1, 1),
+        ...     'Cd': (2, 2),
+        ...     'O': (3, 3),
+        ...     'H': (4, 4)
+        ... }
+
+        >>> prm_to_df(s)
+
+        >>> print(type(s.lennard_jones))
+        <class 'pandas.core.frame.DataFrame'>
+
+        >>> print(s)
+        lennard_jones:             param      unit   Cs   Cd    O    H
+                        epsilon  epsilon   kcalmol  1.0  2.0  3.0  4.0
+                        sigma      sigma  angstrom  1.0  2.0  3.0  4.0
+
+
+    Parameters
+    ----------
+    settings : :class:`~qmflows.settings.Settings`
+        The CP2K input Settings
+
+    See Also
+    --------
+    :data:`CP2K_KEYS_ALIAS`
+        A dictionary mapping ``key_path`` aliases to the actual keys.
+
+    """  # noqa: E501
+    key_alias = CP2K_KEYS_ALIAS.keys()
+    items = ((k, v) for k, v in settings.items() if k in key_alias or isinstance(k, tuple))
+    for k, prm_map in items:
+        try:
+            columns = prm_map['param']
+        except KeyError as ex:
+            raise KeyError(f"{k} section: 'param' has not been specified") from ex
+
+        df = _construct_df(columns, prm_map).T
+
+        # All columns are now of the 'object' dtype; convert them into floats where possible
+        for key, series in df.items():
+            try:
+                df[key] = series.astype(float)
+            except ValueError:  # Nop, not possible
+                pass
+        settings[k] = df
 
 
 def _cp2k_keys_alias(indent: str = 8 * ' ') -> str:
