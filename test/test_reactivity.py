@@ -3,6 +3,7 @@ from qmflows import Settings
 from qmflows.components import reactivity
 from scm.plams import Molecule
 from qmflows.test_utils import PATH_MOLECULES
+from assertionlib import assertion
 
 mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
@@ -12,7 +13,7 @@ def test_Distance():
     d = reactivity.Distance(1, 2)
     s = d.get_settings(mol=mol)
 
-    assert isinstance(s, Settings)
+    assertion.isinstance(s, Settings)
 
 
 def test_Angle():
@@ -20,7 +21,7 @@ def test_Angle():
     ang = reactivity.Angle(1, 2, 3)
     s = ang.get_settings(mol=mol)
 
-    assert isinstance(s, Settings)
+    assertion.isinstance(s, Settings)
 
 
 def test_Dihedral():
@@ -28,4 +29,4 @@ def test_Dihedral():
     dihed = reactivity.Dihedral(1, 2, 3, 4)
     s = dihed.get_settings(mol=mol)
 
-    assert isinstance(s, Settings)
+    assertion.isinstance(s, Settings)

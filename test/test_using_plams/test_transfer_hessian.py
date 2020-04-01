@@ -3,7 +3,7 @@ import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
 from noodles import gather
 
-from qmflows import Settings, templates
+from qmflows import Settings, templates, logger
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
@@ -27,4 +27,4 @@ def test_hessian_transfer():
 
     wf = gather(energy, dipole)
 
-    print(run(wf))
+    logger.info(run(wf))

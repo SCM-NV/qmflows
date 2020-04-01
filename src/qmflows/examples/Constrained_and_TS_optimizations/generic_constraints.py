@@ -1,8 +1,8 @@
 __all__ = ['example_generic_constraints']
 
-from noodles import gather
-from qmflows import (dftb, adf, orca, run, Settings, templates)
 import scm.plams.interfaces.molecule.rdkit as molkit
+from noodles import gather
+from qmflows import (dftb, adf, orca, run, Settings, templates, logger)
 
 
 def example_generic_constraints():
@@ -44,7 +44,7 @@ def example_generic_constraints():
         for distance in ['1.0', '1.1', '1.2']:
             val = table[package][distance] - table[package]['1.0']
             row.append(round(val * hartree_to_kcalpermol, 2))
-        print('{:10s} {:10.2f} {:10.2f} {:10.2f}'.format(*row))
+        logger.info('{:10s} {:10.2f} {:10.2f} {:10.2f}'.format(*row))
 
     return names, energies
 

@@ -1,7 +1,9 @@
 """Test freq calculations."""
-from qmflows import (dftb, run, templates)
-from scm.plams import Molecule
+
 import pytest
+from scm.plams import Molecule
+from assertionlib import assertion
+from qmflows import (dftb, run, templates)
 from qmflows.test_utils import PATH_MOLECULES
 
 
@@ -12,5 +14,5 @@ def test_freq():
     geo_opt = dftb(templates.geometry, mol)
     freq_calc = dftb(templates.freq, geo_opt.molecule, job_name="freq")
     r = run(freq_calc)
-    assert int(r.frequencies[0]) == 831
-    assert len(r.frequencies) == 12
+    assertion.eq(int(r.frequencies[0]), 831)
+    assertion.len_eq(r.frequencies, 12)

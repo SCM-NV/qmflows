@@ -1,7 +1,7 @@
 """Test merging of the Settings."""
 from assertionlib import assertion
 
-from qmflows import Settings, templates
+from qmflows import Settings, templates, logger
 
 
 def test_overlay_cp2k_singlepoint():
@@ -44,8 +44,8 @@ def test_overlay_cp2k_singlepoint():
 
     r = templates.singlepoint.overlay(s)
 
-    print("created:\n", s.specific.cp2k.force_eval)
-    print("expected:\n", r.specific.cp2k.force_eval)
+    logger.info(f"created:\n{s.specific.cp2k.force_eval}")
+    logger.info(f"expected:\n{r.specific.cp2k.force_eval}")
 
     assertion.eq(s.specific.cp2k, r.specific.cp2k)
 
@@ -68,6 +68,6 @@ def test_overlay_adf_freq():
     s.specific.adf.basis.type = "DZP"
     s.specific.adf.basis.core = "None"
 
-    print(s.specific.adf)
-    print(r.specific.adf)
+    logger.info(s.specific.adf)
+    logger.info(r.specific.adf)
     assertion.eq(s.specific.adf, r.specific.adf)
