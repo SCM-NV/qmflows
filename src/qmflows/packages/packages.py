@@ -1,6 +1,5 @@
 """Common funcionality to call all the quantum packages."""
 
-import base64
 import fnmatch
 import importlib
 import inspect
@@ -16,18 +15,20 @@ from warnings import warn
 from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict)
 
 import numpy as np
+import pandas as pd
 import pkg_resources as pkg
 import scm.plams.interfaces.molecule.rdkit as molkit
 from more_itertools import collapse
 from noodles import has_scheduled_methods, schedule, serial
 from noodles.run.threading.sqlite3 import run_parallel
-from noodles.serial import AsDict, Registry, Serialiser
+from noodles.serial import AsDict, Registry
 from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
 from noodles.serial.path import SerPath
 from noodles.serial.reasonable import SerReasonableObject
 from rdkit import Chem
 from scm import plams
 
+from .serializer import SerMolecule, SerMol, SerSettings, SerNDFrame
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 from ..settings import _Settings as _SettingsType
@@ -597,45 +598,6 @@ def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Re
         db_file='cache.db', always_cache=always_cache, echo_log=False)
 
 
-class SerMolecule(Serialiser):
-    """Based on the Plams molecule this class encode and decode the information related to the molecule using the JSON format."""  # noqa
-
-    def __init__(self):
-        super(SerMolecule, self).__init__(plams.Molecule)
-
-    def encode(self, obj, make_rec):
-        return make_rec(obj.as_dict())
-
-    def decode(self, cls, data):
-        return plams.Molecule.from_dict(data)
-
-
-class SerMol(Serialiser):
-    """Based on the RDKit molecule this class encodes and decodes the information related to the molecule using a string."""  # noqa
-
-    def __init__(self):
-        super(SerMol, self).__init__(Chem.Mol)
-
-    def encode(self, obj, make_rec):
-        return make_rec(base64.b64encode(obj.ToBinary()).decode('ascii'))
-
-    def decode(self, cls, data):
-        return Chem.Mol(base64.b64decode(data.encode('ascii')))
-
-
-class SerSettings(Serialiser):
-    """Class to encode and decode the :class:`~qmflows.Settings` class using its internal dictionary structure."""  # noqa
-
-    def __init__(self):
-        super(SerSettings, self).__init__(Settings)
-
-    def encode(self, obj, make_rec):
-        return make_rec(obj.as_dict())
-
-    def decode(self, cls, data):
-        return Settings(data)
-
-
 #: A :class:`Registry` instance to-be returned by :func:`registry`.
 REGISTRY: Registry = Registry(
     parent=serial.base() + arrays_to_hdf5(),
@@ -649,7 +611,9 @@ REGISTRY: Registry = Registry(
         plams.KFFile: SerReasonableObject(plams.KFFile),
         plams.KFReader: SerReasonableObject(plams.KFReader),
         np.floating: SerNumpyScalar(),
-        np.integer: SerNumpyScalar()
+        np.integer: SerNumpyScalar(),
+        pd.DataFrame: SerNDFrame(pd.DataFrame),
+        pd.Series: SerNDFrame(pd.Series)
     }
 )
 
