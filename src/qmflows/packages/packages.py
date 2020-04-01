@@ -638,8 +638,6 @@ def import_parser(ds: Mapping[str, str], module_root: str = "qmflows.parsers") -
 def find_file_pattern(path: Union[str, os.PathLike],
                       folder: Union[None, str, os.PathLike] = None) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
-        print("folder: ", folder)
-        print("path: ", path)
         return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])
