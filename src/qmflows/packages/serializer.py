@@ -11,7 +11,8 @@ if TYPE_CHECKING:
     from rdkit.Chem import Mol
     from pandas.core.generic import NDFrame
     from pandas import DataFrame, Series
-else:
+
+else:  # Don't bother importing all this stuff when not type checking
     Settings = 'qmflows.settings.Settings'
     Molecule = 'scm.plams.mol.molecule.Molecule'
     Mol = 'rdkit.Chem.rdchem.Mol'
@@ -22,7 +23,9 @@ else:
 __all__ = ['SerMolecule', 'SerMol', 'SerSettings', 'SerNDFrame']
 
 T = TypeVar('T')
-MakeRec = Callable[[T], Dict[str, T]]
+
+ReturnDict = Dict[str, T]  # This should technically be a :class:`typing.TypedDict`
+MakeRec = Callable[[T], ReturnDict]
 
 
 class SerMolecule(Serialiser):
@@ -31,7 +34,7 @@ class SerMolecule(Serialiser):
     def __init__(self) -> None:
         super().__init__(Molecule)
 
-    def encode(self, obj: Molecule, make_rec: MakeRec) -> Dict[str, T]:
+    def encode(self, obj: Molecule, make_rec: MakeRec) -> ReturnDict:
         return make_rec(obj.as_dict())
 
     def decode(self, cls: Type[Molecule], data: Mapping) -> Molecule:
@@ -44,7 +47,7 @@ class SerMol(Serialiser):
     def __init__(self) -> None:
         super().__init__(Mol)
 
-    def encode(self, obj: Mol, make_rec: MakeRec) -> Dict[str, T]:
+    def encode(self, obj: Mol, make_rec: MakeRec) -> ReturnDict:
         return make_rec(base64.b64encode(obj.ToBinary()).decode('ascii'))
 
     def decode(self, cls: Type[Mol], data: str) -> Mol:
@@ -57,7 +60,7 @@ class SerSettings(Serialiser):
     def __init__(self) -> None:
         super().__init__(Settings)
 
-    def encode(self, obj: Settings, make_rec: MakeRec) -> Dict[str, T]:
+    def encode(self, obj: Settings, make_rec: MakeRec) -> ReturnDict:
         return make_rec(obj.as_dict())
 
     def decode(self, cls: Type[Settings], data: Mapping) -> Settings:
@@ -67,10 +70,10 @@ class SerSettings(Serialiser):
 class SerNDFrame(Serialiser):
     """Class to encode and decode the :class:`pandas.Series` and :class:`pandas.DataFrame` instances."""  # noqa: E501
 
-    def __init__(self, name: Any = NDFrame):
+    def __init__(self, name: Any = NDFrame) -> None:
         super().__init__(name)
 
-    def encode(self, obj: NDFrame, make_rec: MakeRec) -> Dict[str, T]:
+    def encode(self, obj: NDFrame, make_rec: MakeRec) -> ReturnDict:
         return make_rec(obj.to_dict())
 
     def decode(self, cls: Type[NDFrame], data: Mapping) -> NDFrame:
