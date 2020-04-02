@@ -5,8 +5,9 @@ from math import sqrt
 import pytest
 from more_itertools import collapse
 from scm.plams import Molecule
+from assertionlib import assertion
 
-from qmflows import Settings, templates
+from qmflows import Settings, templates, logger
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
@@ -36,10 +37,10 @@ def test_opt_orca():
     expected_dipole = [0.82409, 0.1933, -0.08316]
     diff = sqrt(sum((x - y) ** 2 for x, y in zip(final_result,
                                                  expected_dipole)))
-    print("Expected dipole computed with Orca 3.0.3 is:", expected_dipole)
-    print("Actual dipole is:", final_result)
+    logger.info(f"Expected dipole computed with Orca 3.0.3 is: {expected_dipole}")
+    logger.info(f"Actual dipole is: {final_result}")
 
-    assert diff < 1e-2
+    assertion.lt(diff, 1e-2)
 
 
 @pytest.mark.slow
@@ -56,7 +57,7 @@ def test_methanol_opt_orca():
     # extract coordinates
     mol_opt = run(opt.molecule)
     coords = collapse([a.coords for a in mol_opt.atoms])
-    print(coords)
+    logger.info(coords)
 
 
 if __name__ == "__main__":

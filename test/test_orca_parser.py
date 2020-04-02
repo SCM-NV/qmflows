@@ -2,6 +2,7 @@
 from assertionlib import assertion
 from scm import plams
 
+from qmflows import logger
 from qmflows.parsers.generic_parsers import awk_file
 from qmflows.parsers.orca_parser import (parse_hessian, parse_molecule,
                                          parse_molecule_traj)
@@ -16,7 +17,7 @@ PATH_OUTPUT = PATH / "output_orca" / "ORCAjob" / "ORCAjob.out"
 def test_orca_mol_trj():
     """Test the result of reading a `job.trj` file."""
     mol = parse_molecule_traj(PATH_TRJ)
-    print(mol)
+    logger.info(mol)
 
     assertion.isinstance(mol, plams.Molecule)
 

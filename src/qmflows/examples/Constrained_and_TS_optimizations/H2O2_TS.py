@@ -1,7 +1,7 @@
 __all__ = ['example_H2O2_TS']
 
-from qmflows import (orca, dftb, templates, Dihedral, run, Settings)
 import scm.plams.interfaces.molecule.rdkit as molkit
+from qmflows import (orca, dftb, templates, Dihedral, run, Settings, logger)
 
 
 def example_H2O2_TS():
@@ -39,8 +39,8 @@ def example_H2O2_TS():
     ts_dihe = round(dihe.get_current_value(result.molecule))
     n_optcycles = result.optcycles
 
-    print('Dihedral angle (degrees): {:.0f}'.format(ts_dihe))
-    print('Number of optimization cycles: {:d}'.format(n_optcycles))
+    logger.info(f'Dihedral angle (degrees): {ts_dihe:.0f}')
+    logger.info(f'Number of optimization cycles: {n_optcycles:d}')
 
     return ts_dihe, n_optcycles
 

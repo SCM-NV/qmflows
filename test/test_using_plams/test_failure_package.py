@@ -5,7 +5,7 @@ import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
-from qmflows import Settings, run, templates
+from qmflows import Settings, run, templates, logger
 from qmflows.packages import adf, dftb, orca
 from qmflows.test_utils import PATH_MOLECULES, delete_output
 from qmflows.warnings_qmflows import QMFlows_Warning
@@ -30,7 +30,7 @@ def test_fail_scm(tmpdir):
                         job_name="failed_DFTB")
         fail_adf = adf(None, opt_dftb.molecule, job_name="fail_adf")
         result = run(fail_adf.molecule, path=tmpdir)
-        print(result)
+        logger.info(result)
         assertion.eq(result, None)
 
 
