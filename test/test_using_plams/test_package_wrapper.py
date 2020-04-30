@@ -17,7 +17,7 @@ from qmflows.packages.SCM import ADF_Result
 from qmflows.packages.package_wrapper import ResultWrapper
 from qmflows.test_utils import delete_output, PATH
 
-ADF_ENVIRON = frozenset({'ADFBIN', 'ADFHOME', 'ADFRESOURCES', 'SCMLICENSE'})
+ADF_ENVIRON = frozenset({'AMSBIN', 'AMSHOME', 'AMSRESOURCES', 'SCMLICENSE'})
 HAS_ADF: bool = ADF_ENVIRON.issubset(os.environ.keys())
 
 

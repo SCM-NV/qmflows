@@ -1,5 +1,5 @@
 #!/bin/sh
 
 unset AMS_SWITCH_LOGFILE_AND_STDOUT
-AMS_JOBNAME="dftb_freq" AMS_RESULTSDIR=. $ADFBIN/ams <"dftb_freq.in"
+AMS_JOBNAME="dftb_freq" AMS_RESULTSDIR=. $AMSBIN/ams <"dftb_freq.in"
 
