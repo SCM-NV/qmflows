@@ -1,40 +1,23 @@
 """Tests for :mod:`qmflows.backports`."""
 
 import sys
-from typing import Type, Union
+from typing import Type, Any
 
 from assertionlib import assertion
 
-from qmflows.backports import (Literal, Final, nullcontext,
-                               _LiteralBackup, _FinalBackup, _NullContextBackup)
+from qmflows.backports import (
+    Literal, Final, nullcontext, _NullContextBackup
+)
 
 
 def test_literal():
     """Tests for :data:`Literal` and :data:`_LiteralBackup`."""
-    if sys.version_info.minor >= 8:
-        assertion.eq(Literal.__module__, 'typing')
-    else:
-        assertion.eq(Literal.__module__, 'typing_extensions')
-
-    literal = _LiteralBackup()
-    assertion.eq(literal[1], int)
-    assertion.eq(literal[int], Type[int])
-    assertion.eq(literal[1, 2], Union[int])
-    assertion.eq(literal[1, 2.0, int, float], Union[int, float, Type[int], Type[float]])
+    assertion.is_(Literal[1], Any)
 
 
 def test_final():
     """Tests for :data:`Final` and :data:`_FinalBackup`."""
-    if sys.version_info.minor >= 8:
-        assertion.eq(Final.__module__, 'typing')
-    else:
-        assertion.eq(Final.__module__, 'typing_extensions')
-
-    final = _FinalBackup()
-    assertion.eq(final[int], int)
-
-    assertion.assert_(final.__getitem__, 1, exception=TypeError)
-    assertion.assert_(final.__getitem__, (int, float), exception=TypeError)
+    assertion.is_(Final[int], Any)
 
 
 def test_nullcontext():

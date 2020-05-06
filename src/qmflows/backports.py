@@ -1,7 +1,8 @@
 """A module with backports of objects added after Python 3.6."""
 
+import sys
 from contextlib import AbstractContextManager
-from typing import Any, Union, overload, Tuple, TypeVar, Type, Optional
+from typing import Any, TypeVar, Optional, TYPE_CHECKING
 
 __all__ = ['nullcontext']
 
@@ -10,31 +11,17 @@ T = TypeVar('T')
 
 
 class _LiteralBackup:
-    @staticmethod
-    def to_type(item: Any) -> type:
-        """Return ``typing.Type[item]`` if *item* is a :class:`type` instance; return ``type(item)`` otherwhise."""  # noqa
-        return Type[item] if isinstance(item, type) else type(item)
-
-    @overload
-    def __getitem__(self, name: Tuple[Union[Type[T], T], ...]) -> Union[Type[T]]: ...
-
-    @overload
-    def __getitem__(self, name: Union[Type[T], T]) -> Type[T]: ...
+    """A runtime-only placeholder for :class:`typing.Literal`."""
 
     def __getitem__(self, name):
-        if isinstance(name, tuple):
-            type_tup = tuple(self.to_type(i) for i in name)
-            return Union[type_tup]
-        else:
-            return self.to_type(name)
+        return Any
 
 
 class _FinalBackup:
+    """A runtime-only placeholder for :class:`typing.Final`."""
+
     def __getitem__(self, name):
-        if not isinstance(name, type):
-            raise TypeError(f'{self.__class__.__name__} accepts only single '
-                            f'type Got {name!r:.100}.')
-        return name
+        return Any
 
 
 class _NullContextBackup(AbstractContextManager):
@@ -61,34 +48,23 @@ class _NullContextBackup(AbstractContextManager):
         pass
 
 
-try:
-    from contextlib import nullcontext  # type:ignore
-except ImportError:  # nullcontext was added in python 3.7
+# nullcontext was added in python 3.7
+if sys.version_info >= (3, 7):
+    from contextlib import nullcontext
+else:
     nullcontext = _NullContextBackup
-    nullcontext.__name__ = 'nullcontext'  # type: ignore
+    nullcontext.__name__ = nullcontext.__qualname__ = 'nullcontext'
 
 
-try:  # Plan A: literal was added in Python 3.8
-    from typing import Literal  # type:ignore
-except ImportError:
-    try:  # Plan B: literal was previously available in a third party package
-        from typing_extensions import Literal  # type:ignore
-
-    except ImportError:
-        # Plan C; Literal.__getitem__ will now simply return the type
-        # of the passed object; for example: Literal[True] == bool
-        _LiteralBackup.__name__ = 'Literal'
-        Literal = _LiteralBackup()
-
-
-try:  # Plan A: Final was added in Python 3.8
-    from typing import Final  # type:ignore
-except ImportError:
-    try:  # Plan B: Final was previously available in a third party package
-        from typing_extensions import Final  # type:ignore
-
-    except ImportError:
-        # Plan C; Final.__getitem__ will now simply return the type
-        # of the passed object; for example: Final[bool] == bool
-        _FinalBackup.__name__ = 'Final'
-        Final = _FinalBackup()
+# Literal and Final were added to Python in 3.8;
+# they were previously available in typing_extensions
+if TYPE_CHECKING:
+    if sys.version_info >= (3, 8):
+        from typing import Literal, Final
+    else:
+        from typing_extensions import Literal, Final
+else:
+    _LiteralBackup.__name__ = _LiteralBackup.__qualname__ = 'Literal'
+    _FinalBackup.__name__ = _FinalBackup.__qualname__ = 'Final'
+    Literal = _LiteralBackup()
+    Final = _FinalBackup()
