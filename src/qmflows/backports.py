@@ -68,7 +68,7 @@ else:
     nullcontext.__name__ = nullcontext.__qualname__ = 'nullcontext'
 
 
-# Literal and Literal were added to Python in 3.8;
+# Literal and Final were added to Python in 3.8;
 # they were previously available in typing_extensions
 if TYPE_CHECKING:
     if sys.version_info >= (3, 8):
