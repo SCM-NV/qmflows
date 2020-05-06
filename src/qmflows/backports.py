@@ -2,7 +2,7 @@
 
 import sys
 from contextlib import AbstractContextManager
-from typing import Any, Union, overload, Tuple, TypeVar, Type, Optional, TYPE_CHECKING
+from typing import Any, TypeVar, Optional, TYPE_CHECKING
 
 __all__ = ['nullcontext']
 
@@ -11,29 +11,17 @@ T = TypeVar('T')
 
 
 class _LiteralBackup:
-    @staticmethod
-    def _to_type(item: Any) -> type:
-        """Return ``typing.Type[item]`` if *item* is a :class:`type` instance; return ``type(item)`` otherwhise."""  # noqa
-        return Type[item] if isinstance(item, type) else type(item)
+    """A runtime-only placeholder for :class:`typing.Literal`."""
 
-    @overload
-    def __getitem__(self, name: Tuple[Union[Type[T], T], ...]) -> Union[Type[T]]: ...
-    @overload
-    def __getitem__(self, name: Union[Type[T], T]) -> Type[T]: ...
     def __getitem__(self, name):
-        if isinstance(name, tuple):
-            type_tup = tuple(self._to_type(i) for i in name)
-            return Union[type_tup]
-        else:
-            return self._to_type(name)
+        return Any
 
 
 class _FinalBackup:
-    def __getitem__(self, name: type) -> type:
-        if not isinstance(name, type):
-            raise TypeError(f'{self.__class__.__name__} accepts only single '
-                            f'type Got {name!r:.100}.')
-        return name
+    """A runtime-only placeholder for :class:`typing.Final`."""
+
+    def __getitem__(self, name):
+        return Any
 
 
 class _NullContextBackup(AbstractContextManager):
