@@ -11,10 +11,7 @@ from qmflows.backports import (Literal, Final, nullcontext,
 
 def test_literal():
     """Tests for :data:`Literal` and :data:`_LiteralBackup`."""
-    if sys.version_info.minor >= 8:
-        assertion.eq(Literal.__module__, 'typing')
-    else:
-        assertion.eq(Literal.__module__, 'typing_extensions')
+    assertion.eq(Literal.__module__, 'qmflows.backports')
 
     literal = _LiteralBackup()
     assertion.eq(literal[1], int)
@@ -25,10 +22,7 @@ def test_literal():
 
 def test_final():
     """Tests for :data:`Final` and :data:`_FinalBackup`."""
-    if sys.version_info.minor >= 8:
-        assertion.eq(Final.__module__, 'typing')
-    else:
-        assertion.eq(Final.__module__, 'typing_extensions')
+    assertion.eq(Final.__module__, 'qmflows.backports')
 
     final = _FinalBackup()
     assertion.eq(final[int], int)
