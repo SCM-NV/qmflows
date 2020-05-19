@@ -6,12 +6,14 @@ Index
 .. autosummary::
     set_prm
     map_psf_atoms
+    prm_to_df
     CP2K_KEYS_ALIAS
 
 API
 ---
 .. autofunction:: set_prm
 .. autofunction:: map_psf_atoms
+.. autofunction:: prm_to_df
 .. autodata:: CP2K_KEYS_ALIAS
     :annotation: : dict[str, tuple[str, ...]]
 
@@ -29,8 +31,8 @@ from io import TextIOBase
 from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
-from typing import (Union, Optional, List, Dict, Tuple, overload, MutableMapping, NoReturn,
-                    Sequence, Any, Iterable, Iterator)
+from typing import (Union, Optional, List, Dict, Tuple, MutableMapping, NoReturn,
+                    Sequence, Any, Iterable, Iterator, overload, cast)
 
 import numpy as np
 import pandas as pd
@@ -82,7 +84,7 @@ del _BASE_PATH
 
 
 class LengthError(ValueError):
-    """A :exc:`ValueError` subclass for exceptions caused by incorrect lengths of a :class:`Mapping<collections.abc.Mapping>` or :class:`Sequence<collections.abc.Sequence>`."""  # noqa
+    """A :exc:`ValueError` subclass for exceptions caused by incorrect lengths of a :class:`~collections.abc.Mapping` or :class:`~collections.abc.Sequence`."""  # noqa: E501
 
 
 @to_runtime_error
@@ -133,7 +135,7 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
         Note that passed file-like objects should return strings (not bytes) upon iteration;
         consider wrapping *file* in :func:`codecs.iterdecode` if its iteration will yield bytes.
 
-    /**kwargs : :data:`Any<typing.Any>`
+    /**kwargs : :data:`~typing.Any`
         Further keyword arguments for :func:`open`.
         Only relevant when *file* is a path-like object.
 
@@ -143,7 +145,7 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
         A dictionary mapping atom types to atom names.
         Atom types/names are extracted from the passed .psf file.
 
-    """  # noqa
+    """  # noqa: E501
     context_manager = file_to_context(file, **kwargs)
 
     with context_manager as f:
@@ -170,10 +172,13 @@ def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str,
                              f"'atom type'-containing rows in {f!r};\n{ex}") from ex
 
 
+PrmMapping = Union[MappingScalar, Sequence[MappingScalar],
+                   MappingSequence, Sequence[MappingSequence]]
+
+
 @to_runtime_error
 def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
-            value: Union[MappingScalar, Sequence[MappingScalar], MappingSequence],
-            mol: Optional[plams.Molecule]) -> None:
+            value: PrmMapping, mol: Optional[plams.Molecule]) -> None:
     """Assign a set of forcefield parameters to *settings* as specific keys.
 
     Examples
@@ -223,7 +228,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     key : :class:`str` or :class:`tuple` [:class:`str`, ...]
         A path of CP2K keys or an alias for a pre-defined path (see :data:`CP2K_KEYS_ALIAS`).
 
-    value : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ``T`` or :class:`Sequence<collections.abc.Sequence>` [``T``]]
+    value : :class:`~collections.abc.MutableMapping` [:class:`str`, ``T`` or :class:`~collections.abc.Sequence` [``T``]]
         A dictionary with the to-be added parameters.
         Scalars and sequences **cannot** be freely mixed in the dictionary values;
         it should be one or the other.
@@ -243,16 +248,16 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     :data:`CP2K_KEYS_ALIAS` : :class:`dict` [:class:`str`, :class:`tuple` [:class:`str`, ...]]
         A dictionary mapping ``key_path`` aliases to the actual keys.
 
-    """  # noqa
+    """  # noqa: E501
     if isinstance(value, abc.Sequence):
-        for prm_map in value:
+        for prm_map in value:  # type: Union[MappingScalar, MappingSequence]
             set_prm(settings, key, prm_map, mol)
         return
     else:
         prm_map = copy.copy(value)
 
     try:
-        prm_key = prm_map.pop('param')
+        prm_key = cast(Union[str, Sequence[str]], prm_map.pop('param'))
     except KeyError as ex:
         raise KeyError(f"'param' has not been specified") from ex
     else:  # Extract the key path
@@ -283,31 +288,27 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 def set_prm_values(prm_key: str, prm_map: MappingScalar,
                    atom_map: MutableMapping[Optional[str], int],
                    settings_base: List[Settings], atom_key: str) -> None: ...
-
-
 @overload
 def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
                    atom_map: MutableMapping[Optional[str], int],
                    settings_base: List[Settings], atom_key: str) -> None: ...
-
-
 def set_prm_values(prm_key, prm_map, atom_map,
-                   settings_base, atom_key) -> None:
+                   settings_base, atom_key) -> None:  # noqa: E302
     """Assign the actual values specified in :func:`set_prm`.
 
     Parameters
     ----------
-    prm_key : :class:`str` or :class:`Sequence<collections.abc.Sequence>` [:class:`str`]
+    prm_key : :class:`str` or :class:`~collections.abc.Sequence` [:class:`str`]
         The name(s) of the to-be set CP2K key(s), *e.g.* ``"sigma"`` and/or ``"epsilon"``.
         If ``iterable=False`` then this value should be a string;
         a sequence of strings is expected otherwise.
 
-    prm_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, ...]
+    prm_map : :class:`~collections.abc.MutableMapping` [:class:`str`, :data:`~typing.Any`]
         A dictionary containing the to-be set values.
         If ``iterable=False`` then its values should be scalars;
         sequences are expected otherwise.
 
-    atom_map : :class:`MutableMapping<collections.abc.MutableMapping>` [:class:`str`, :class:`int`]
+    atom_map : :class:`~collections.abc.MutableMapping` [:class:`str`, :class:`int`]
         A dictionary for keeping track of which *atom_key* blocks are present in *settings_base*.
 
     settings_base : :class:`list` [:class:`qmflows.Settings<qmflows.settings.Settings>`]
@@ -562,7 +563,7 @@ def _cp2k_keys_alias(indent: str = 8 * ' ') -> str:
     width = 4 + max(len(k) for k in CP2K_KEYS_ALIAS)
     _mid = ',\n'.join(f'{(repr(k)+":"):{width}}{v!r}' for k, v in CP2K_KEYS_ALIAS.items())
 
-    top = '{indent}>>> CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {\n'
+    top = f'{indent}>>> CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = ' + '{\n'
     mid = textwrap.indent(_mid, f'{indent}...     ')
     bot = f'\n{indent}... ' + '}'
     return f'{top}{mid}{bot}'
