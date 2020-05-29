@@ -19,9 +19,9 @@ def test_adf_mock(mocker):
     jobname = "ADFjob"
     dill_path = WORKDIR / jobname / "ADFjob.dill"
     plams_dir = WORKDIR / jobname
-    path_t21 = WORKDIR / jobname / "ADFjob.t21"
-    run_mocked.return_value = ADF_Result(templates.geometry, mol, jobname, path_t21,
-                                         dill_path=dill_path, plams_dir=plams_dir)
+    run_mocked.return_value = ADF_Result(templates.geometry, mol, jobname,
+                                         dill_path=dill_path, work_dir=plams_dir,
+                                         plams_dir=plams_dir)
     rs = run_mocked(job)
     assertion.isfinite(rs.energy)
     assertion.isfinite(rs.homo)

@@ -4,7 +4,7 @@ __all__ = ['ADF_Result', 'DFTB_Result', 'adf', 'dftb']
 
 import os
 import struct
-from os.path import join
+from os.path import join, basename, normpath
 from typing import Any, ClassVar, Optional, Union, Type
 from warnings import warn
 
@@ -102,7 +102,6 @@ class ADF_Result(Result):
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
                  job_name: str,
-                 path_t21: Union[str, os.PathLike],
                  dill_path: Union[None, str, os.PathLike] = None,
                  plams_dir: Union[None, str, os.PathLike] = None,
                  work_dir: Union[None, str, os.PathLike] = None,
@@ -113,7 +112,13 @@ class ADF_Result(Result):
                          plams_dir=plams_dir, status=status, warnings=warnings)
 
         # Create a KF reader instance
-        self.kf = plams.KFFile(path_t21)
+        if work_dir is not None:
+            # The t21 path has to be absolute: use workdir instead of plams_dir
+            name_t21 = basename(normpath(work_dir))
+            path_t21 = join(plams_dir, f'{name_t21}.t21')
+            self.kf = plams.KFFile(path_t21)
+        else:
+            self.kf = None
 
     def get_property_kf(self, prop: str, section: Optional[str] = None) -> Any:
         """Interface for :meth:`plams.KFFile.read()<scm.plams.tools.kftools.KFFile.read>`."""
@@ -221,11 +226,6 @@ class ADF(Package):
         job = plams.ADFJob(name=job_name, molecule=mol,
                            settings=adf_settings)
         result = job.run()
-        # Path to the tape 21 file
-        path_t21 = result._kf.path
-
-        # Relative path to the CWD
-        relative_path_t21 = join(*str(path_t21).split(os.sep)[-3:])
 
         # Relative job path
         relative_plams_path = join(*str(result.job.path).split(os.sep)[-2:])
@@ -234,8 +234,9 @@ class ADF(Package):
         dill_path = join(job.path, f'{job.name}.dill')
 
         adf_result = cls.result_type(
-            adf_settings, mol, result.job.name, relative_path_t21, dill_path,
-            plams_dir=relative_plams_path, status=job.status)
+            adf_settings, mol, result.job.name, dill_path,
+            plams_dir=relative_plams_path,
+            work_dir=result.job.path, status=job.status)
 
         return adf_result
 
