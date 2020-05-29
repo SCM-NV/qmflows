@@ -65,7 +65,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
 
     # Molecular orbitals
     orbs = rs.orbitals
-    assertion.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
+    assertion.assert_(np.isfinite, orbs.eigenVals, post_process=np.all)  # eigenvalues
     assertion.shape_eq(orbs.coeffs, (46, 40))
 
 
