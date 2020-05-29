@@ -132,6 +132,10 @@ class ADF_Result(Result):
         m.from_array(coords)
         return m
 
+    @property
+    def geometry(self) -> Optional[plams.Molecule]:
+        return self.molecule
+
 
 class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results."""
@@ -168,6 +172,10 @@ class DFTB_Result(Result):
         coords = np.array([coords[i: i + 3] for i in range(0, len(coords), 3)])
         m.from_array(coords)
         return m
+
+    @property
+    def geometry(self) -> Optional[plams.Molecule]:
+        return self.molecule
 
 
 class ADF(Package):
