@@ -112,8 +112,9 @@ class ADF_Result(Result):
                          plams_dir=plams_dir, status=status, warnings=warnings)
 
         # Create a KF reader instance
-        if plams_dir is not None:
-            name_t21 = basename(normpath(plams_dir))
+        if workdir is not None:
+            # The t21 path has to be absolute: use workdir instead of plams_dir
+            name_t21 = basename(normpath(workdir))
             path_t21 = join(plams_dir, f'{name_t21}.t21')
             self.kf = plams.KFFile(path_t21)
         else:
@@ -226,7 +227,8 @@ class ADF(Package):
 
         adf_result = cls.result_type(
             adf_settings, mol, result.job.name, dill_path,
-            plams_dir=relative_plams_path, status=job.status)
+            plams_dir=relative_plams_path,
+            workdir=result.job.path, status=job.status)
 
         return adf_result
 
