@@ -54,6 +54,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
     s.specific.cp2k.force_eval.dft.print.mo.mo_index_range = "7 46"
     s.specific.cp2k.force_eval.dft.scf.added_mos = 20
 
+    # Construct a result objects
     job = cp2k(s, ETHYLENE)
     jobname = "cp2k_job"
     run_mocked = mock_runner(mocker, jobname)
@@ -64,7 +65,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
 
     # Molecular orbitals
     orbs = rs.orbitals
-    assertion.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
+    assertion.assert_(np.isfinite, orbs.eigenVals, post_process=np.all)  # eigenvalues
     assertion.shape_eq(orbs.coeffs, (46, 40))
 
 
