@@ -1,3 +1,10 @@
+# Version 0.10.1 (09/06/2020)
+
+# Changed
+  * Exposed ``InitRestart`` to the main QMFlows ``__init__.py`` file.
+  * Exchanged ``plams.init()`` / ``plams.finish()`` for ``qmflows.InitRestart`` in the ``qmflows.run()`` function.
+  * Store the ``cache.db`` file in the PLAMS working directory.
+
 
 # Version 0.10.0 (XX/03/2020)
 

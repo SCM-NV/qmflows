@@ -29,11 +29,12 @@ from rdkit import Chem
 from scm import plams
 
 from .serializer import SerMolecule, SerMol, SerSettings, SerNDFrame
+from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
+from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 from ..settings import _Settings as _SettingsType
 from ..warnings_qmflows import QMFlows_Warning
-from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 
 __all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
@@ -542,6 +543,7 @@ class Package(ABC):
 def run(job: PromisedObject, runner: Optional[str] = None,
         path: Union[None, str, os.PathLike] = None,
         folder: Union[None, str, os.PathLike] = None,
+        load_jobs: bool = False,
         **kwargs: Any) -> Result:
     r"""Pickup a runner and initialize it.
 
@@ -560,6 +562,9 @@ def run(job: PromisedObject, runner: Optional[str] = None,
     folder : :class:`str` or :class:`~os.PathLike`, optional
         The name of the new PLAMS working directory.
         Will default to ``"plams_workdir"`` if ``None``.
+    load_jobs : :class:`bool`
+        Load all pre-existing Jobs (contained within the working directory) into memory.
+        Note that this can be quite slow if a large number of pre-existing jobs is present.
     \**kwargs : :data:`~typing.Any`
         Further keyword arguments to-be passed to :func:`call_default`.
 
@@ -567,6 +572,7 @@ def run(job: PromisedObject, runner: Optional[str] = None,
     -------
     :class:`Result`
         A new Result instance.
+        The exact type will depend on **job**.
 
     See Also
     --------
@@ -574,17 +580,14 @@ def run(job: PromisedObject, runner: Optional[str] = None,
         Run a workflow in parallel threads, storing results in a Sqlite3 database.
 
     """
-    plams.init(path=path, folder=folder)
-    plams.config.log.stdout = 0
+    with InitRestart(path=path, folder=folder):
+        plams.config.log.stdout = 0
 
-    if runner is None:
-        ret = call_default(job, kwargs.get('n_processes', 1),
-                           kwargs.get('always_cache', True))
-    else:
-        raise ValueError(f"Don't know runner: {runner}")
-
-    plams.finish()
-    return ret
+        if runner is None:
+            return call_default(job, kwargs.get('n_processes', 1),
+                                kwargs.get('always_cache', True))
+        else:
+            raise ValueError(f"Don't know runner: {runner!r}")
 
 
 def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Result:
@@ -593,9 +596,16 @@ def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Re
     Caching can be turned off by specifying ``cache=None``.
 
     """
+    # In case 'default_jobmanager' is not set (for some reason)
+    try:
+        workdir = plams.config.get('default_jobmanager').workdir
+    except AttributeError as ex:
+        raise plams.PlamsError("Failed to initialize the PLAMS jobmanager") from ex
+
+    db_file = join(workdir, 'cache.db')
     return run_parallel(
         wf, n_threads=n_processes, registry=registry,
-        db_file='cache.db', always_cache=always_cache, echo_log=False)
+        db_file=db_file, always_cache=always_cache, echo_log=False)
 
 
 #: A :class:`Registry` instance to-be returned by :func:`registry`.
