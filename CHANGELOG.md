@@ -1,10 +1,15 @@
+# Version 0.10.2
+
+## New
+  * Allow other cp2k executable: ``cp2k.sopt``, ``cp2k.psmp``, etc.
+
+
 # Version 0.10.1 (09/06/2020)
 
-# Changed
+## Changed
   * Exposed ``InitRestart`` to the main QMFlows ``__init__.py`` file.
   * Exchanged ``plams.init()`` / ``plams.finish()`` for ``qmflows.InitRestart`` in the ``qmflows.run()`` function.
   * Store the ``cache.db`` file in the PLAMS working directory.
-
 
 # Version 0.10.0 (XX/03/2020)
 
