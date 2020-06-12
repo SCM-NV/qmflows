@@ -23,8 +23,6 @@ def cp2k_available() -> None:
 def test_cp2k_opt(tmp_path: PathLike):
     """Run a simple molecular optimization."""
     s = fill_cp2k_defaults(templates.geometry)
-    # remove OT section
-    del s.specific.cp2k.force_eval.dft.scf.OT
 
     # Do a single step
     s.specific.cp2k.motion.geo_opt.max_iter = 1
