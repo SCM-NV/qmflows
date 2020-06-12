@@ -77,6 +77,7 @@ class CP2K(Package):
         # Input modifications
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
+        cp2k_settings.executable = settings.get("executable", "cp2k.popt")
 
         # Create a Plams job
         job = plams.interfaces.thirdparty.cp2k.Cp2kJob(
@@ -174,9 +175,13 @@ class CP2K(Package):
             """Set the keyword for periodic calculations."""
             s.specific.cp2k.force_eval.subsys.cell.periodic = value
 
+        def ignore_keyword(s: Settings, value: Any, mol: plams.Molecule, key: str) -> None:
+            pass
+
         funs = {'cell_parameters': write_cell_parameters,
                 'cell_angles': write_cell_angles,
-                'periodic': write_periodic}
+                'periodic': write_periodic,
+                'executable': ignore_keyword}
 
         # Function that handles the special keyword
         f = funs.get(key)
