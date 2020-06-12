@@ -5,6 +5,7 @@
 
 ## Changed
   * Replaced ``requirements.txt`` with ``.readthedocs.yml``.
+  * Fixed the jupyter notebook in the documentation.
 
 
 # Version 0.10.2 (12/06/2020)
