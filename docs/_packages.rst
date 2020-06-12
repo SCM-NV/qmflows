@@ -58,7 +58,6 @@ API
 .. automethod:: qmflows.packages.packages.Package.run_job
 .. automethod:: qmflows.packages.packages.Package.postrun
 .. automethod:: qmflows.packages.packages.Package.generic2specific
-.. automethod:: qmflows.packages.packages.Package.get_generic_mapping
 .. automethod:: qmflows.packages.packages.Package.handle_special_keywords
 
 |
