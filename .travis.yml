@@ -26,7 +26,7 @@ install:
   # Install virtual enviroment
   - conda create --name qmflows python=${PYTHON_VERSION}
   - source activate qmflows
-  - conda install -c conda-forge h5py rdkit nbsphinx pandoc
+  - conda install -c conda-forge h5py rdkit nbsphinx pandoc ipython
 
   # Install qmflows package
   - pip install .[test]
