@@ -18,8 +18,7 @@ docs_require = [
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
     'nbsphinx',
-    'pandoc',
-    'ipython'
+    'jupyter'
 ]
 
 tests_require =  [
