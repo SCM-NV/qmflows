@@ -14,7 +14,7 @@ def readme():
         return f.read()
 
 docs_require = [
-    'sphinx>=2.1',
+    'sphinx>=2.1,!=3.1.1',
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
     'nbsphinx',
