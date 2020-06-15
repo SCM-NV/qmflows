@@ -24,8 +24,8 @@ jobs:
     - run: conda --version
     - run: python --version
     - run: |
-        conda install -c conda-forge h5py rdkit
- 
+        conda install -c conda-forge h5py rdkit nbsphinx jupyter
+
     - name: Install the package
       run: pip install -e .[test]
       env:

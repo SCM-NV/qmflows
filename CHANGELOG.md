@@ -1,4 +1,14 @@
-# Version 0.10.2
+# Version 0.10.3 (12/06/2020)
+
+## New
+  * Added tests for generating the Sphinx documentation.
+
+## Changed
+  * Replaced ``requirements.txt`` with ``.readthedocs.yml``.
+  * Fixed the jupyter notebook in the documentation.
+
+
+# Version 0.10.2 (12/06/2020)
 
 ## New
   * Allow other cp2k executable: ``cp2k.sopt``, ``cp2k.psmp``, etc.
