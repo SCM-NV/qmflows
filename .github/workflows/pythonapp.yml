@@ -21,9 +21,9 @@ jobs:
         update-conda: true
         python-version: ${{ matrix.version }}
         conda-channels: anaconda
-    - run: conda --version
-    - run: python --version
-    - run: |
+
+    - name: Install conda-based dependencies
+      run: |
         conda install -c conda-forge h5py rdkit nbsphinx jupyter
 
     - name: Install the package
@@ -31,12 +31,17 @@ jobs:
       env:
         CONDA_PREFIX: /usr/share/miniconda
 
+    - name: Conda info
+      run: conda info
+
+    - name: Conda list
+      run: conda list
+
     - name: Test with pytest
       env:
         CONDA_PREFIX: /usr/share/miniconda
-      run: |
-        pip install pytest pytest-cov
-        pytest -m "not (slow or long)" test
+      run: pytest -m "not (slow or long)"
+
     - uses: codecov/codecov-action@v1
       with:
         file: ./coverage.xml
