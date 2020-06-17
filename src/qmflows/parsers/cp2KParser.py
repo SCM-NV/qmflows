@@ -143,7 +143,7 @@ def readCp2KCoeff(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     for i, xs in enumerate(chunks):
         j = 2 * i
         es = xs[1]
-        css = [l[4:] for l in xs[3:]]
+        css = [k[4:] for k in xs[3:]]
         # There is an odd number of MO and this is the last one
         if len(es) == 1:
             eigenVals[-1] = float(es[0])
@@ -183,25 +183,34 @@ orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
-parseAtomLabel = (Word(srange("[A-Z]"), max=1) +
-                  Optional(Word(srange("[a-z]"), max=1)))
+parseAtomLabel = (
+    Word(srange("[A-Z]"), max=1) +
+    Optional(Word(srange("[a-z]"), max=1))
+)
 
 parserBasisName = Word(alphanums + "-") + Suppress(restOfLine)
 
 parserFormat = OneOrMore(natural + NotAny(FollowedBy(point)))
 
-parserKey = parseAtomLabel.setResultsName("atom") + \
-    parserBasisName.setResultsName("basisName") + \
+parserKey = (
+    parseAtomLabel.setResultsName("atom") +
+    parserBasisName.setResultsName("basisName") +
     Suppress(Literal("1"))
+)
 
 parserBasisData = OneOrMore(floatNumber)
 
-parserBasis = parserKey + parserFormat.setResultsName("format") + \
+parserBasis = (
+    parserKey +
+    parserFormat.setResultsName("format") +
     parserBasisData.setResultsName("coeffs")
+)
 
-
-topParseBasis = OneOrMore(Suppress(comment)) + \
-    OneOrMore(Group(parserBasis + Suppress(Optional(OneOrMore(comment)))))
+topParseBasis = (
+    OneOrMore(Suppress(comment)) +
+    OneOrMore(Group(parserBasis +
+    Suppress(Optional(OneOrMore(comment)))))
+)
 
 
 # ===============================<>====================================
@@ -224,8 +233,8 @@ def read_mos_data_input(path_input: PathLike) -> Tuple2:
 
 def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
-    def fun_split(l: str) -> str:
-        return l.split()[-1]
+    def fun_split(string: str) -> str:
+        return string.split()[-1]
 
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
                   "Number of orbital functions"]
@@ -291,13 +300,11 @@ ST = TypeVar('ST', bound=Sequence)
 
 
 @overload
-def swapCoeff(n: Literal_[1], rs: ST) -> ST: ...
-
-
+def swapCoeff(n: Literal_[1], rs: ST) -> ST:  # type: ignore
+    ...
 @overload
-def swapCoeff(n: int, rs: ST) -> List[ST]: ...  # type: ignore
-
-
+def swapCoeff(n: int, rs: ST) -> List[ST]:
+    ...
 def swapCoeff(n, rs):
     if n == 1:
         return rs
@@ -387,7 +394,7 @@ QUANTITY_MAPPING: Dict[str, str] = {
 
 QUANTITY_SET: FrozenSet[str] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
 
-Quantity = Literal_[tuple(QUANTITY_SET)]
+Quantity = Literal_['E', 'ZPE', 'H', 'S', 'G']
 
 
 def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
