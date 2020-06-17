@@ -1,3 +1,5 @@
+"""A module containing the :class:`Coordinate` baseclass and its subclasses."""
+
 from typing import Callable, Any, ClassVar, Tuple, overload
 
 import scm.plams.interfaces.molecule.rdkit as molkit

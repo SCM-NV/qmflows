@@ -1,3 +1,5 @@
+"""A set of modules for managing various quantum-chemical packages."""
+
 from .packages import (
     Package, Result, SerMolecule, SerSettings, load_properties,
     run, registry)

@@ -139,6 +139,7 @@ class ADF_Result(Result):
 
     @property
     def geometry(self) -> Optional[plams.Molecule]:
+        """An alias for :attr:`ADF_Result.molecule`."""
         return self.molecule
 
 
@@ -180,6 +181,7 @@ class DFTB_Result(Result):
 
     @property
     def geometry(self) -> Optional[plams.Molecule]:
+        """An alias for :attr:`DFTB_Result.molecule`."""
         return self.molecule
 
 

@@ -36,7 +36,7 @@ class CP2K_Result(Result):
 
 
 class CP2K(Package):
-    """This class setup the requirement to run a `CP2K Job <https://www.cp2k.org/>`_.
+    """A Package subclass for running `CP2K Jobs <https://www.cp2k.org/>`_.
 
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the binary CP2K code.
