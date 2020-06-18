@@ -5,16 +5,18 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
 
     strategy:
       fail-fast: false
       matrix:
+        os:  [macos-latest, ubuntu-latest]
         version: [3.7, 3.8]
 
     steps:
-    - uses: actions/checkout@master
-    - name: Install cp2k
+    - uses: actions/checkout@v2
+    - name: Optionally Install cp2k
+      if: matrix.os == 'ubuntu-latest'
       run: sudo apt install cp2k
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
