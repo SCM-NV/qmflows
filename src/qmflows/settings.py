@@ -9,14 +9,15 @@ from scm import plams
 
 
 class Settings(plams.core.settings.Settings, ):
-    """A subclass of the :class:`plams.core.settings.Settings`.
+    """A subclass of :class:`<plams.Settings>scm.plams.core.settings.Settings`.
 
     The difference with respect to plams' Settings are:
-    - settings['a.b'] is equivalent to settings['a']['b'] = settings.a.b
-    - in update(): settings.__block_replace = True results in removal of all
+    
+    - :code:`settings['a.b']` is equivalent to :code:`settings['a']['b'] = settings.a.b`
+    - in :meth:`update`: :code:`settings.__block_replace = True` results in removal of all
     existing key value pairs.
 
-      __block_replace can be either in the updated settings or in the updating settings object.
+      ``__block_replace`` can be either in the updated settings or in the updating settings object.
     """
 
     def __getitem__(self, name):
@@ -26,7 +27,7 @@ class Settings(plams.core.settings.Settings, ):
     def __setitem__(self, name, value):
         """Implement :meth:`self[name] = value<object.__setitem__>`.
 
-        Like :meth:`dict.__getitem__` but passed dictionaries are converted
+        Like its counterpart in :class:`dict` but passed dictionaries are converted
         into instances of :class:`type(self)<Settings>`.
         """
         if isinstance(value, dict):
