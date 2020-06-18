@@ -20,14 +20,14 @@ class Settings(plams.core.settings.Settings, ):
     """
 
     def __getitem__(self, name):
-        """Implement :func:`self[name]<object.__getitem__>`."""
+        """Implement :meth:`self[name]<object.__getitem__>`."""
         return dict.__getitem__(self, name)
 
     def __setitem__(self, name, value):
-        """Implement :func:`self[name] = value<object.__setitem__>`.
+        """Implement :meth:`self[name] = value<object.__setitem__>`.
 
         Like :meth:`dict.__getitem__` but passed dictionaries are converted
-        into :class:`type(self)<Settings>`.
+        into instances of :class:`type(self)<Settings>`.
         """
         if isinstance(value, dict):
             cls = type(self)
@@ -35,11 +35,15 @@ class Settings(plams.core.settings.Settings, ):
         dict.__setitem__(self, name, value)
 
     def __delitem__(self, name):
-        """Implement :func:`del self[name]<object.__delitem__>`."""
+        """Implement :meth:`del self[name]<object.__delitem__>`."""
         dict.__delitem__(self, name)
 
     def copy(self):
-        """Create a deep(-ish) copy of this instance."""
+        """Create a deep(-ish) copy of this instance.
+        
+        All nested settings instances embedded within *self* are copied recursively;
+        all other objects set without copying.
+        """
         cls = type(self)
         ret = cls()
         for name in self:
@@ -63,7 +67,7 @@ class Settings(plams.core.settings.Settings, ):
         return ret
 
     def update(self, other):
-        """Implement :func:`self.update(other)<dict.update>`.
+        """Implement :meth:`self.update(other)<dict.update>`.
 
         Like PLAMS update, but:
         __block_replace = True results in removing all existing key value pairs
@@ -148,7 +152,7 @@ class _Settings(Settings):
                 set_item(k, [cls(i) if isinstance(i, dict) else i for i in v])
 
     def __missing__(self, name: str) -> NoReturn:
-        """Raise a :exc:`TypeError`."""
+        """Raise a :exc:`KeyError`."""
         raise KeyError(name)
 
     __setitem__ = _unsuported_operation(Settings.__setitem__)
