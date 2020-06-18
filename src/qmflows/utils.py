@@ -38,14 +38,18 @@ def to_runtime_error(func: Callable) -> Callable:
         ...     raise Exception('error')
 
         >>> @to_runtime_error
-        >>> def func2(settings, key, value, mol):
+        ... def func2(settings, key, value, mol):
         ...     raise Exception('error')
 
         >>> func1(None, 'func1', None, None)
-        Exception('error')
+        Traceback (most recent call last):
+          ...
+        Exception: error
 
-        >>> func1(None, 'func2', None, None)
-        Exception('"func2" section: error')
+        >>> func2(None, 'func2', None, None)
+        Traceback (most recent call last):
+          ...
+        RuntimeError: 'func2' section: error
 
     """
     @wraps(func)
@@ -71,18 +75,24 @@ def file_to_context(file: Union[int, PathLike, IO],
 
     Examples
     --------
+    .. testsetup:: python
+
+        >>> from pathlib import Path
+
+        >>> path_like = Path('test') / 'test_files' / 'mypy.ini'
+
     .. code:: python
 
         >>> from io import StringIO
 
-        >>> path_like = 'file_name.txt'
+        >>> path_like = 'file_name.txt'  # doctest: +SKIP
         >>> file_like = StringIO('this is a file-like object')
 
         >>> context1 = file_to_context(path_like)
         >>> context2 = file_to_context(file_like)
 
-        >>> with context1 as f1, with context2 as f2:
-        ...     ... # insert operations here
+        >>> with context1 as f1, context2 as f2:
+        ...     pass # insert operations here
 
 
     Parameters
@@ -174,7 +184,7 @@ class InitRestart(AbstractContextManager):
     .. code:: python
 
         >>> path = "path/to/my/workdir"
-        >>> with InitRestart(path):
+        >>> with InitRestart(path):  # doctest: +SKIP
         ...     ...  # Run any PLAMS Jobs here
 
 

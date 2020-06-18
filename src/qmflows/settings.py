@@ -40,6 +40,7 @@ class Settings(plams.core.settings.Settings, ):
 
     def copy(self):
         """Create a deep(-ish) copy of this instance.
+
         All nested settings instances embedded within *self* are copied recursively;
         all other objects set without copying.
         """

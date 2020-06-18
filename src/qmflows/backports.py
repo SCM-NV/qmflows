@@ -30,11 +30,17 @@ class _NullContextBackup(AbstractContextManager):
     Used as a stand-in for a normal context manager, when a particular
     block of code is only sometimes used with a normal context manager:
 
+    .. testsetup:: python
+
+        >>> cm = ...
+        >>> condition = False
+
     .. code:: python
 
-        >>> cm = optional_cm if condition else nullcontext()
-        >>> with cm:
-        ...     ...  # Perform operation, using optional_cm if condition is True
+        >>> cm = optional_cm if condition else nullcontext(1)
+        >>> with cm as f:
+        ...     print(f)
+        1
 
     """
 

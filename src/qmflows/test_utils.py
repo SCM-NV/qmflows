@@ -95,11 +95,11 @@ def delete_output(delete_db: Union[Callable, bool] = True,
         >>> from qmflows.test_utils import delete_output
 
         >>> @delete_output
-        >>> def test1(...):
+        ... def test1(*args, **kwargs):
         ...     ...
 
         >>> @delete_output(delete_db=True, delete_workdir=False)
-        >>> def test2(...):
+        ... def test2(*args, **kwargs):
         ...     ...
 
     Parameters
