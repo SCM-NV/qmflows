@@ -9,14 +9,13 @@ from scm import plams
 
 
 class Settings(plams.core.settings.Settings, ):
-    """A subclass of :class:`<plams.Settings>scm.plams.core.settings.Settings`.
+    """A subclass of :class:`plams.Settings<scm.plams.core.settings.Settings`>.
 
     The difference with respect to plams' Settings are:
     
     - :code:`settings['a.b']` is equivalent to :code:`settings['a']['b'] = settings.a.b`
-    - in :meth:`update`: :code:`settings.__block_replace = True` results in removal of all
-    existing key value pairs.
-
+    - in :meth:`Settings.update`: :code:`settings.__block_replace = True` results in removal 
+      of all existing key value pairs.
       ``__block_replace`` can be either in the updated settings or in the updating settings object.
     """
 
@@ -71,7 +70,7 @@ class Settings(plams.core.settings.Settings, ):
         """Implement :meth:`self.update(other)<dict.update>`.
 
         Like PLAMS update, but:
-        __block_replace = True results in removing all existing key value pairs
+        :code:`__block_replace = True` results in removing all existing key value pairs
         in the current node of the settings tree
 
         For example:
