@@ -287,11 +287,13 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 @overload
 def set_prm_values(prm_key: str, prm_map: MappingScalar,
                    atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None: ...
-@overload
+                   settings_base: List[Settings], atom_key: str) -> None:
+    ...
+@overload  # noqa: E302
 def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
                    atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None: ...
+                   settings_base: List[Settings], atom_key: str) -> None:
+    ...
 def set_prm_values(prm_key, prm_map, atom_map,
                    settings_base, atom_key) -> None:  # noqa: E302
     """Assign the actual values specified in :func:`set_prm`.
@@ -366,9 +368,11 @@ def _(unit: Optional[str]) -> List[str]:
 
 
 @overload
-def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame: ...
-@overload
-def _construct_df(columns: str, prm_map: MappingScalar) -> pd.DataFrame: ...
+def _construct_df(columns: Sequence[str], prm_map: MappingSequence) -> pd.DataFrame:
+    ...
+@overload  # noqa: E302
+def _construct_df(columns: str, prm_map: MappingScalar) -> pd.DataFrame:
+    ...
 def _construct_df(columns, prm_map) -> pd.DataFrame:  # noqa: E302
     """Convert *prm_map* into a :class:`pandas.DataFrame` of strings with *columns* as columns.
 

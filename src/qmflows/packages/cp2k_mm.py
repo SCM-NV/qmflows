@@ -30,20 +30,20 @@ __all__ = ['cp2k_mm']
 
 
 class CP2KMM_Result(Result):
-    """Class providing access to CP2KMM result."""
+    """A class providing access to CP2KMM result."""
 
     prop_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='properties')
 
 
 class CP2KMM(CP2K):
-    """This class setup the requirement to run a `CP2K Job <https://www.cp2k.org/>`_ for classical forcefield calculations.
+    """A Package subclass for running `CP2K Jobs <https://www.cp2k.org/>`_ for classical forcefield calculations.
 
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
     :data:`cp2k_mm` function should be called.
 
-    """  # noqa
+    """  # noqa: E501
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='generic2')
     result_type: ClassVar[Type[Result]] = CP2KMM_Result

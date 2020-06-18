@@ -1,3 +1,5 @@
+"""An example workflow for generic constrained geometry optimizations."""
+
 __all__ = ['example_generic_constraints']
 
 import scm.plams.interfaces.molecule.rdkit as molkit
@@ -7,10 +9,10 @@ from qmflows import (dftb, adf, orca, run, Settings, templates, logger)
 
 def example_generic_constraints():
     """Run different job with geometric constrains.
-    This examples illustrates that, by using generic keywords, it is possible
-    to call different packages interchangeably with the same Settings
-    """
 
+    This examples illustrates that, by using generic keywords, it is possible
+    to call different packages interchangeably with the same Settings.
+    """
     # build hydrogen fluoride molecule
     hydrogen_fluoride = molkit.from_smiles('F[H]')
 

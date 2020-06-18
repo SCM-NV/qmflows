@@ -1,3 +1,5 @@
+"""A module containing the example :func:`example_partial_geometry_opt` function."""
+
 __all__ = ['example_partial_geometry_opt']
 
 import scm.plams.interfaces.molecule.rdkit as molkit
@@ -6,9 +8,7 @@ from qmflows import (adf, run, Settings, templates)
 
 
 def example_partial_geometry_opt():
-    """
-    Performa partial optimization freezing the Hydrogen atoms
-    """
+    """Performa partial optimization freezing the Hydrogen atoms."""
     methanol = molkit.from_smiles('CO')
 
     # optimize only H atoms

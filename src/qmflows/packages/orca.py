@@ -40,7 +40,7 @@ class ORCA_Result(Result):
 
 
 class ORCA(Package):
-    """This class prepare the input to run a Orca job using both PLAMS and templates.
+    """A class for preparing the input for running a Orca job using both PLAMS and templates.
 
     It also does the manangement of the input/output files resulting
     from running Orca and returns a Results object that containing the methods

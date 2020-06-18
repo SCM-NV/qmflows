@@ -1,3 +1,5 @@
+"""A module with examples related to frequency calculations."""
+
 __all__ = ['example_freqs']
 
 from noodles import gather
@@ -6,16 +8,14 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 
 
 def is_successful(result):
-    """
-    Define the condition for a successful calculation
-    """
-    return result.status not in ["failed", "crashed"]
+    """Define the condition for a successful calculation."""
+    return result.status not in {"failed", "crashed"}
 
 
 def example_freqs():
-    """
-    This examples illustrates the possibility to use different packages interchangeably.
-    Analytical frequencies are not available for B3LYP in ADF
+    """An examples which illustrates the possibility using different packages interchangeably.
+
+    Analytical frequencies are not available for B3LYP in ADF.
     This workflow captures the resulting error and submits the same job to ORCA.
     """
     # Generate water molecule

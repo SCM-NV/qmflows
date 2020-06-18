@@ -1,3 +1,5 @@
+"""A module holding the :func:`example_H2O2_TS` example function."""
+
 __all__ = ['example_H2O2_TS']
 
 import scm.plams.interfaces.molecule.rdkit as molkit
@@ -5,13 +7,11 @@ from qmflows import (orca, dftb, templates, Dihedral, run, Settings, logger)
 
 
 def example_H2O2_TS():
-    """
-    This example generates an approximate TS for rotation in hydrogen peroxide
-    using DFTB, and performs a full TS optimization in Orca.
-    It illustrates using a hessian from one package, DFTB in this case,
-    to initialize a TS optimization in another, i.e. Orca in this case
-    """
+    """Am example which generates an approximate TS for rotation in hydrogen peroxide using DFTB, and performs a full TS optimization in Orca.
 
+    It illustrates using a hessian from one package, DFTB in this case,
+    to initialize a TS optimization in another, *i.e.* Orca in this case
+    """  # noqa: E501
     # Generate hydrogen peroxide molecule
     h2o2 = molkit.from_smarts('[H]OO[H]')
 
