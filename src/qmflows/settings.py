@@ -9,7 +9,7 @@ from scm import plams
 
 
 class Settings(plams.core.settings.Settings, ):
-    """A subclass of :class:`plams.Settings<scm.plams.core.settings.Settings`>.
+    """A subclass of :class:`plams.Settings<scm.plams.core.settings.Settings>`.
 
     The difference with respect to plams' Settings are:
     
