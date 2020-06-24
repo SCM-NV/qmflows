@@ -32,7 +32,6 @@ class _NullContextBackup(AbstractContextManager):
 
     .. testsetup:: python
 
-        >>> cm = ...
         >>> condition = False
 
     .. code:: python
