@@ -108,10 +108,10 @@ class Result:
 
         ..code:: python
 
-            >>> from qmflows.packages.packages import Results
+            >>> from qmflows.packages.packages import Result
 
-            >>> result = Result(...)
-            >>> dipole = result.dipole
+            >>> result = Result(...)  # doctest: +SKIP
+            >>> dipole = result.dipole  # doctest: +SKIP
 
         """
         is_private = prop.startswith('__') and prop.endswith('__')

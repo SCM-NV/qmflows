@@ -522,10 +522,10 @@ def prm_to_df(settings: MutableMapping) -> None:
         >>> print(type(s.lennard_jones))
         <class 'pandas.core.frame.DataFrame'>
 
-        >>> print(s)
-        lennard_jones:             param      unit   Cs   Cd    O    H
-                        epsilon  epsilon   kcalmol  1.0  2.0  3.0  4.0
-                        sigma      sigma  angstrom  1.0  2.0  3.0  4.0
+        >>> print(s)  # doctest: +NORMALIZE_WHITESPACE
+        lennard_jones:                param      unit   Cs   Cd    O    H
+                           epsilon  epsilon   kcalmol  1.0  2.0  3.0  4.0
+                           sigma      sigma  angstrom  1.0  2.0  3.0  4.0
 
 
     Parameters

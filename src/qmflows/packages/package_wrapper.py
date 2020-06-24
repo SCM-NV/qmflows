@@ -27,6 +27,13 @@ The therein embedded results can be still extracted by calling the
 
 For example:
 
+.. testsetup:: python
+
+    >>> from scm.plams import from_smiles
+
+    >>> mol = from_smiles('C')
+    >>> settings = Settings()
+
 .. code:: python
 
     >>> from scm.plams import AMSJob, Molecule, Settings
@@ -34,16 +41,16 @@ For example:
     >>> from qmflows import run, PackageWrapper
     >>> from qmflows.packages.package_wrapper import ResultWrapper
 
-    >>> mol = Molecule(...)
-    >>> settings = Settings(...)
+    >>> mol = Molecule(...)  # doctest: +SKIP
+    >>> settings = Settings(...)  # doctest: +SKIP
 
     >>> pkg = PackageWrapper(AMSJob)
     >>> job = pkg(settings, mol, name='amsjob')
-    >>> result: ResultWrapper = run(job, ...)
+    >>> result: ResultWrapper = run(job)
 
-    >>> energy = result.get_energy()  # Alias for AMSResults.get_energy()
-    >>> mol = result.get_molecule()  # Alias for AMSResults.get_molecule()
-    >>> freq = result.get_frequencies()  # Alias for AMSResults.get_frequencies()
+    >>> energy = result.get_energy()  # doctest: +SKIP
+    >>> mol = result.get_molecule()  # doctest: +SKIP
+    >>> freq = result.get_frequencies()  # doctest: +SKIP
 
 
 Index
@@ -144,7 +151,7 @@ class PackageWrapper(Package):
 
         >>> from scm.plams import ADFJob, AMSJob
 
-        >>> from qmflows PackageWrapper, run
+        >>> from qmflows import PackageWrapper, run
         >>> from qmflows.packages.package_wrapper import ResultWrapper
         >>> from qmflows.packages.SCM import ADF_Result
 
@@ -153,8 +160,8 @@ class PackageWrapper(Package):
         >>> pkg_ams = PackageWrapper(AMSJob)
 
         # End up with two different Result instances
-        >>> result_adf: ADF_Result = run(pkg_adf(...), ...)
-        >>> result_ams: ResultWrapper = run(pkg_ams(...), ...)
+        >>> result_adf: ADF_Result = run(pkg_adf(...), ...)  # doctest: +SKIP
+        >>> result_ams: ResultWrapper = run(pkg_ams(...), ...)  # doctest: +SKIP
 
     Attributes
     ----------

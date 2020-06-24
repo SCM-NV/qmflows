@@ -40,6 +40,7 @@ extensions = [
     'sphinx.ext.githubpages',
     'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
+    'sphinx.ext.doctest',
     'nbsphinx',
     # Workaround for this issue: https://github.com/spatialaudio/nbsphinx/issues/24
     'IPython.sphinxext.ipython_console_highlighting'

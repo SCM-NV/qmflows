@@ -12,9 +12,9 @@ class Settings(plams.core.settings.Settings, ):
     """A subclass of :class:`plams.Settings<scm.plams.core.settings.Settings>`.
 
     The difference with respect to plams' Settings are:
-    
+
     - :code:`settings['a.b']` is equivalent to :code:`settings['a']['b'] = settings.a.b`
-    - in :meth:`Settings.update`: :code:`settings.__block_replace = True` results in removal 
+    - in :meth:`Settings.update`: :code:`settings.__block_replace = True` results in removal
       of all existing key value pairs.
       ``__block_replace`` can be either in the updated settings or in the updating settings object.
     """
@@ -40,7 +40,7 @@ class Settings(plams.core.settings.Settings, ):
 
     def copy(self):
         """Create a deep(-ish) copy of this instance.
-        
+
         All nested settings instances embedded within *self* are copied recursively;
         all other objects set without copying.
         """
