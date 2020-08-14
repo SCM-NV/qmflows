@@ -1,3 +1,7 @@
+# Version 0.10.4 (unreleased)
+## Fix
+ * Improve CP2K error reporting (#209)
+
 # Version 0.10.3 (12/06/2020)
 
 ## New
