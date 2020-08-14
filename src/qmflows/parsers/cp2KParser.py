@@ -111,10 +111,12 @@ Its value is {range_mos}"""
 def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     """Read the coefficients from the plain text output.
 
-    Notes:
-    * MO coefficients are stored in Column-major order.
-    * CP2K molecular orbitals output looks like:
- MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
+    Notes
+    -----
+    MO coefficients are stored in Column-major order.
+    CP2K molecular orbitals output looks like:
+
+    MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
 
                               5                      6
                           -0.2590267204166110    -0.1785544120250688
