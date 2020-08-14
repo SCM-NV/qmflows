@@ -156,8 +156,8 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     """
     def remove_trailing(xs):
         """Remove the last lines of the MOs output."""
-        words = ('Fermi', 'HOMO-LUMO')
-        if any([x in words for x in xs[-1]]):
+        words = {'Fermi', 'HOMO-LUMO'}
+        if any(x in words for x in xs[-1]):
             xs.pop(-1)
             return remove_trailing(xs)
         else:
