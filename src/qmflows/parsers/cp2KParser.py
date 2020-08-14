@@ -3,32 +3,35 @@
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals']
 
-import os
 import fnmatch
+import logging
+import os
 import subprocess
 from io import TextIOBase
-from pathlib import Path
 from itertools import islice
-from typing import (Union, Any, Type, Generator, Iterable, Tuple,
-                    List, Sequence, TypeVar, overload, FrozenSet, Dict)
+from pathlib import Path
+from typing import Any, Dict, FrozenSet, Generator, Iterable, List
 from typing import Optional as Optional_
+from typing import Sequence, Tuple, Type, TypeVar, Union, overload
 
 import numpy as np
-from scm.plams import Units, Molecule
 from more_itertools import chunked
-from pyparsing import (
-    FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
-    Suppress, Word, alphanums, alphas, nums, oneOf, restOfLine, srange,
-    ZeroOrMore, SkipTo
-)
+from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
+                       SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
+                       nums, oneOf, restOfLine, srange)
+from scm.plams import Molecule, Units
 
-from .parser import floatNumber, minusOrplus, natural, point, try_search_pattern
-from .xyzParser import manyXYZ, tuplesXYZ_to_plams
-from ..utils import file_to_context
 from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata
-from ..warnings_qmflows import QMFlows_Warning
-from ..type_hints import WarnMap, WarnDict, PathLike, T
 from ..type_hints import Literal as Literal_
+from ..type_hints import PathLike, T, WarnDict, WarnMap
+from ..utils import file_to_context
+from ..warnings_qmflows import QMFlows_Warning
+from .parser import (floatNumber, minusOrplus, natural, point,
+                     try_search_pattern)
+from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+
+# Starting logger
+logger = logging.getLogger(__name__)
 
 
 def read_xyz_file(file_name: PathLike) -> Molecule:
@@ -90,29 +93,71 @@ def read_cp2k_coefficients(path_mos: PathLike,
     path_out = plams_dir / file_out
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
-    added_mos, range_mos = read_mos_data_input(path_in)
+    _, range_mos = read_mos_data_input(path_in)
 
-    # Read the range of printed MOs from the input
-    printed_orbitals = range_mos[1] - range_mos[0] + 1
+    try:
+        # Read the range of printed MOs from the input
+        printed_orbitals = range_mos[1] - range_mos[0] + 1
 
-    return readCp2KCoeff(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
+        return read_coefficients(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
+    except ValueError as err:
+        msg = f"""There was a problem reading the molecular orbitals from:{path_mos}\n
+contact the developers!!\nValueError: {err}"""
+        logger.error(msg)
+        raise
+    except TypeError:
+        msg = f"""There was a problem reading the ``range_mos` parameter.
+Its value is {range_mos}"""
+        logger.error(msg)
+        raise
 
 
-def readCp2KCoeff(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
+def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     """Read the coefficients from the plain text output.
 
+    Notes
+    -----
     MO coefficients are stored in Column-major order.
+    CP2K molecular orbitals output looks like:
 
-    :parameter path: Path to the file containing the MO coefficients
-    :type path: String
-    :parameter nOrbitals: Number of MO to read
-    :param nOrbFuns: Number of orbital functions
-    :returns: Molecular orbitals and orbital energies
+    MO EIGENVALUES, MO OCCUPATION NUMBERS, AND SPHERICAL MO EIGENVECTORS
+
+                              5                      6
+                          -0.2590267204166110    -0.1785544120250688
+
+                           2.0000000000000000     2.0000000000000000
+
+     1     1  C  2s        0.0021482361354044     0.0000000235522485
+     2     1  C  3s       -0.0007100065367389     0.0000000102096730
+     3     1  C  3py      -0.1899052318987045     0.0000000059435027
+     4     1  C  3pz       0.0000000178537720    -0.5500605729231620
+     5     1  C  3px       0.3686765614894165     0.0000000228716009
+     6     1  C  4py       0.0014072130025389     0.0000000019199413
+     7     1  C  4pz      -0.0000000014121887     0.0293850516018881
+     8     1  C  4px      -0.0028383911872079     0.0000000042372601
+     9     1  C  4d-2      0.0311183981707317     0.0000000014108937
+    10     1  C  4d-1      0.0000000095952723     0.0253837978837068
+    11     1  C  4d0       0.0005419630026689     0.0000000391888080
+    12     1  C  4d+1     -0.0000000210955114     0.0147105486663415
+    13     1  C  4d+2      0.0534202997324328     0.0000000021056315
+
+    Parameters
+    ----------
+    path
+        Path to the file containing the MO coefficients
+    nOrbitals
+        Number of MO to read
+    nOrbFuns
+        Number of orbital functions
+
+    Returns
+    -------
+        Molecular orbitals and orbital energies
     """
     def remove_trailing(xs):
         """Remove the last lines of the MOs output."""
-        words = ['Fermi', 'HOMO-LUMO']
-        if any([x in words for x in xs[-1]]):
+        words = {'Fermi', 'HOMO-LUMO'}
+        if any(x in words for x in xs[-1]):
             xs.pop(-1)
             return remove_trailing(xs)
         else:
@@ -123,8 +168,8 @@ def readCp2KCoeff(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
         xs = list(islice(f, 4))
     if "AFTER SCF STEP -1" in ''.join(xs):
         move_restart_coeff(path)
-
     # Open the MO file
+
     with open(path, 'r') as f:
         xss = f.readlines()
 
@@ -136,26 +181,26 @@ def readCp2KCoeff(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     # in block cotaining a maximum of two columns of MOs
     chunks = chunked(rs, nOrbFuns + 3)
 
-    eigenVals = np.empty(nOrbitals)
+    energies = np.empty(nOrbitals)
     coefficients = np.empty((nOrbFuns, nOrbitals))
 
-    convert_to_float = np.vectorize(float)
-    for i, xs in enumerate(chunks):
+    for i, lines in enumerate(chunks):
         j = 2 * i
-        es = xs[1]
-        css = [k[4:] for k in xs[3:]]
+        es = lines[1]
+        # There could be a single or double column
+        css = [k[4:] for k in lines[3:]]
         # There is an odd number of MO and this is the last one
         if len(es) == 1:
-            eigenVals[-1] = float(es[0])
-            coefficients[:, -1] = convert_to_float(np.concatenate(css))
+            energies[-1] = float(es[0])
+            coefficients[:, -1] = np.concatenate(css)
         else:
-            # rearrange the coeff
-            css = np.transpose(convert_to_float(css))
-            eigenVals[j: j + 2] = es
+            # rearrange the coefficients
+            css = np.transpose(css)
+            energies[j: j + 2] = es
             coefficients[:, j] = css[0]
             coefficients[:, j + 1] = css[1]
 
-    return InfoMO(eigenVals, coefficients)
+    return InfoMO(energies, coefficients)
 
 # =====================> Orbital Parsers <===================
 
@@ -183,33 +228,32 @@ orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 # ====================> Basis File <==========================
 comment = Literal("#") + restOfLine
 
-parseAtomLabel = (
+parser_atom_label = (
     Word(srange("[A-Z]"), max=1) +
     Optional(Word(srange("[a-z]"), max=1))
 )
 
-parserBasisName = Word(alphanums + "-") + Suppress(restOfLine)
+parser_basis_name = Word(alphanums + "-") + Suppress(restOfLine)
 
-parserFormat = OneOrMore(natural + NotAny(FollowedBy(point)))
+parser_format = OneOrMore(natural + NotAny(FollowedBy(point)))
 
-parserKey = (
-    parseAtomLabel.setResultsName("atom") +
-    parserBasisName.setResultsName("basisName") +
+parser_key = (
+    parser_atom_label.setResultsName("atom") +
+    parser_basis_name.setResultsName("basisName") +
     Suppress(Literal("1"))
 )
 
-parserBasisData = OneOrMore(floatNumber)
+parser_basis_data = OneOrMore(floatNumber)
 
-parserBasis = (
-    parserKey +
-    parserFormat.setResultsName("format") +
-    parserBasisData.setResultsName("coeffs")
+parser_basis = (
+    parser_key +
+    parser_format.setResultsName("format") +
+    parser_basis_data.setResultsName("coeffs")
 )
 
-topParseBasis = (
-    OneOrMore(Suppress(comment)) +
-    OneOrMore(Group(parserBasis +
-    Suppress(Optional(OneOrMore(comment)))))
+top_parser_basis = (
+    OneOrMore(Suppress(comment)) + OneOrMore(
+        Group(parser_basis + Suppress(Optional(OneOrMore(comment)))))
 )
 
 
@@ -278,7 +322,7 @@ Tuple2List = Tuple[List[AtomBasisKey], List[AtomBasisData]]
 
 def readCp2KBasis(path: PathLike) -> Tuple2List:
     """Read the Contracted Gauss function primitives format from a text file."""
-    bss = topParseBasis.parseFile(path)
+    bss = top_parser_basis.parseFile(path)
     atoms = [''.join(xs.atom[:]).lower() for xs in bss]
     names = [' '.join(xs.basisName[:]).upper() for xs in bss]
     formats = [list(map(int, xs.format[:])) for xs in bss]
@@ -287,8 +331,8 @@ def readCp2KBasis(path: PathLike) -> Tuple2List:
     # of Coefficients + 1 lists of exponents
     nCoeffs = [int(sum(xs[4:]) + 1) for xs in formats]
     coefficients = [list(map(float, cs.coeffs[:])) for cs in bss]
-    rss = [swapCoeff(*args) for args in zip(nCoeffs, coefficients)]
-    tss = [headTail(xs) for xs in rss]
+    rss = [swap_coefficients(*args) for args in zip(nCoeffs, coefficients)]
+    tss = [get_head_and_tail(xs) for xs in rss]
     basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
     basiskey = [AtomBasisKey(at, name, fmt) for at, name, fmt in zip(atoms, names, formats)]
 
@@ -300,19 +344,23 @@ ST = TypeVar('ST', bound=Sequence)
 
 
 @overload
-def swapCoeff(n: Literal_[1], rs: ST) -> ST:  # type: ignore
+def swap_coefficients(n: Literal_[1], rs: ST) -> ST:  # type: ignore
     ...
+
+
 @overload
-def swapCoeff(n: int, rs: ST) -> List[ST]:
+def swap_coefficients(n: int, rs: ST) -> List[ST]:
     ...
-def swapCoeff(n, rs):
+
+
+def swap_coefficients(n, rs):
     if n == 1:
         return rs
     else:
         return [rs[i::n] for i in range(n)]
 
 
-def headTail(xs: Iterable[T]) -> Tuple[T, List[T]]:
+def get_head_and_tail(xs: Iterable[T]) -> Tuple[T, List[T]]:
     """Return the head and tail from a list."""
     head, *tail = xs
     return (head, tail)
