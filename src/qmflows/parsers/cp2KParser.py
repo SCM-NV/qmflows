@@ -4,6 +4,7 @@ __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals']
 
 import fnmatch
+import logging
 import os
 import subprocess
 from io import TextIOBase
@@ -28,6 +29,9 @@ from ..warnings_qmflows import QMFlows_Warning
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+
+# Starting logger
+logger = logging.getLogger(__name__)
 
 
 def read_xyz_file(file_name: PathLike) -> Molecule:
@@ -98,13 +102,13 @@ def read_cp2k_coefficients(path_mos: PathLike,
         return read_coefficients(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
     except ValueError as err:
         msg = f"""There was a problem reading the molecular orbitals from:{path_mos}\n
-contact the developers!!\n"""
-        print(msg, "ValueError: ", err)
+contact the developers!!\nValueError: {err}"""
+        logger.error(msg)
         raise
     except TypeError:
-        msg = """There was a problem reading the ``range_mos` parameter.
+        msg = f"""There was a problem reading the ``range_mos` parameter.
 Its value is {range_mos}"""
-        print(msg)
+        logger.error(msg)
         raise
 
 
@@ -180,7 +184,6 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     energies = np.empty(nOrbitals)
     coefficients = np.empty((nOrbFuns, nOrbitals))
 
-    convert_to_float = np.vectorize(float)
     for i, lines in enumerate(chunks):
         j = 2 * i
         es = lines[1]
@@ -189,10 +192,10 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
         # There is an odd number of MO and this is the last one
         if len(es) == 1:
             energies[-1] = float(es[0])
-            coefficients[:, -1] = convert_to_float(np.concatenate(css))
+            coefficients[:, -1] = np.concatenate(css)
         else:
             # rearrange the coefficients
-            css = np.transpose(convert_to_float(css))
+            css = np.transpose(css)
             energies[j: j + 2] = es
             coefficients[:, j] = css[0]
             coefficients[:, j + 1] = css[1]
