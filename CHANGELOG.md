@@ -1,4 +1,4 @@
-# Version 0.10.4 (unreleased)
+# Version 0.10.4 (07/09/2020)
 ## New
  * Introduced a flag for keeping the Log files
 
