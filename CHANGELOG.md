@@ -1,4 +1,7 @@
 # Version 0.10.4 (unreleased)
+## New
+ * Introduced a flag for keeping the Log files
+
 ## Fix
  * Improve CP2K error reporting (#209)
 
