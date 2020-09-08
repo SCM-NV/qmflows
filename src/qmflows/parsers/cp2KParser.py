@@ -77,7 +77,7 @@ def assign_warning(warning_type: Type[Warning], msg: str,
 
 
 def read_cp2k_coefficients(path_mos: PathLike,
-                           plams_dir: Optional_[PathLike] = None) -> InfoMO:
+                           plams_dir: Optional_[PathLike] = None) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -98,6 +98,7 @@ def read_cp2k_coefficients(path_mos: PathLike,
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
 
+    print("orbitals_info: ", orbitals_info)
     try:
         # Read the range of printed MOs from the input
         printed_orbitals = range_mos[1] - range_mos[0] + 1
@@ -116,7 +117,7 @@ Its value is {range_mos}"""
         raise
 
 
-def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) -> InfoMO:
+def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """
     Read the orbitals from the Log file.
 
@@ -144,7 +145,10 @@ def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) ->
     if orbitals_info.nspinstates == 1:
         return read_coefficients(path, norbitals, orbitals_info.nOrbFuns)
     else:
-        raise NotImplementedError("There is not parser for alpha/beta molecular orbitals")
+        path_alphas, path_betas = split_unrestricted_log_file(path)
+        alphas = read_coefficients(path_alphas, norbitals, orbitals_info.nOrbFuns)
+        betas = read_coefficients(path_betas, norbitals - 1, orbitals_info.nOrbFuns)
+        return alphas, betas
 
 
 def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -> InfoMO:
@@ -293,16 +297,24 @@ def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
     def fun_split(string: Optional_[str]) -> int:
         if string is not None:
-            return int(string.split()[-1])
+            return int(string.rsplit(maxsplit=1)[-1])
         else:
             return 0
 
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
                   "Number of orbital functions"]
 
-    meta = MO_metadata(*[fun_split(try_search_pattern(x, file_name)) for x in properties])
+    values = [fun_split(try_search_pattern(x, file_name)) for x in properties]
 
-    if any(getattr(meta, att) == 0 for att in ("nOrbitals", "nOccupied", "nOrbFuns")):
+    # Search for the spin states number
+    spin_states = try_search_pattern("Number of spin states", file_name)
+    if spin_states is not None:
+        values.append(fun_split(spin_states))
+
+    # construct the metadata inmutable object
+    meta = MO_metadata(*values)
+
+    if not all(meta):
         raise RuntimeError(f"Failed to identify orbitals in {file_name!r}")
 
     return meta
@@ -324,25 +336,33 @@ def move_restart_coeff(path: PathLike) -> None:
     """Rename Molecular Orbital Coefficients and EigenValues."""
     root, file_name = os.path.split(path)
 
-    # Current work directory
-    cwd = os.path.realpath('.')
-
-    # Change directory
-    os.chdir(root)
-
     # Split File into the old and new set of coefficients
-    cmd = 'csplit -f coeffs -n 1 {} "/HOMO-LUMO/+2"'.format(file_name)
+    cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
     subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL)
+                    stderr=subprocess.DEVNULL, cwd=root)
 
     # Move the new set of coefficients to the Log file
-    os.rename('coeffs1', file_name)
+    os.rename(Path(root, 'coeffs1'), path)
 
     # Remove old set of coefficients
-    os.remove('coeffs0')
+    os.remove(Path(root, 'coeffs0'))
 
-    # Return to CWD
-    os.chdir(cwd)
+
+def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
+    """Split the log file into alpha and beta molecular orbitals."""
+    root, file_name = os.path.split(path)
+    cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
+    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL, cwd=root)
+
+    alphas = Path(root, "alphas.log")
+    betas = Path(root, "betas.log")
+
+    # Move the new set of coefficients to their corresponding names
+    os.rename(Path(root, 'coeffs0'), alphas)
+    os.rename(Path(root, 'coeffs1'), betas)
+
+    return alphas, betas
 
 
 #: A 2-tuple; output of :func:`readCp2KBasis`.

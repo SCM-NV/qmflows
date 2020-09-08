@@ -58,7 +58,7 @@ specific:
                 cell:
                     periodic: xyz
         global:
-            print_level: low
+            print_level: medium
             project: cp2k
             run_type: energy
 
