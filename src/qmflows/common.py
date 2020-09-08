@@ -52,7 +52,7 @@ class InfoMO(NamedTuple):
 
 
 class MO_metadata(NamedTuple):
-    """Molecular Orbitals Parsing.
+    """Metadata for the molecular orbitals.
 
     .. code::
 
@@ -72,9 +72,10 @@ class MO_metadata(NamedTuple):
 
     """
 
-    nOccupied: Any
-    nOrbitals: Any
-    nOrbFuns: Any
+    nOccupied: int
+    nOrbitals: int
+    nOrbFuns: int
+    nspinstates: int = 1
 
 
 class ParseWarning(NamedTuple):

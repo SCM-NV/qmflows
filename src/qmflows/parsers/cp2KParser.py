@@ -1,8 +1,5 @@
 """Utilities to read cp2k out files."""
 
-__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
-           'read_cp2k_number_of_orbitals']
-
 import fnmatch
 import logging
 import os
@@ -29,6 +26,10 @@ from ..warnings_qmflows import QMFlows_Warning
 from .parser import (floatNumber, minusOrplus, natural, point,
                      try_search_pattern)
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+
+__all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
+           'read_cp2k_number_of_orbitals']
+
 
 # Starting logger
 logger = logging.getLogger(__name__)
@@ -82,7 +83,9 @@ def read_cp2k_coefficients(path_mos: PathLike,
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
     cp2k output and then read the molecular orbitals.
 
-    :returns: NamedTuple containing the Eigenvalues and the Coefficients
+    Returns
+    -------
+        NamedTuple containing the Eigenvalues and the Coefficients
     """
     plams_dir = Path(plams_dir) if plams_dir else Path(os.getcwd())
 
@@ -99,7 +102,8 @@ def read_cp2k_coefficients(path_mos: PathLike,
         # Read the range of printed MOs from the input
         printed_orbitals = range_mos[1] - range_mos[0] + 1
 
-        return read_coefficients(path_mos, printed_orbitals, orbitals_info.nOrbFuns)
+        return read_log_file(path_mos, printed_orbitals, orbitals_info)
+
     except ValueError as err:
         msg = f"""There was a problem reading the molecular orbitals from:{path_mos}\n
 contact the developers!!\nValueError: {err}"""
@@ -112,11 +116,38 @@ Its value is {range_mos}"""
         raise
 
 
-def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
-    """Read the coefficients from the plain text output.
+def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) -> InfoMO:
+    """
+    Read the orbitals from the Log file.
 
     Notes
     -----
+    IF IT IS A UNRESTRICTED CALCULATION, THERE ARE TWO SEPARATED SET OF MO
+    FOR THE ALPHA AND BETA
+
+    Parameters
+    ----------
+    path
+        Path to the file containing the MO coefficients
+    norbitals
+        Number of MO to read
+    norbital_functions
+        Number of orbital functions
+    Returns
+    -------
+        Molecular orbitals and orbital energies
+    """
+    # remove Molecular orbitals coming from a restart
+    move_restart_coefficients_recursively(path)
+
+    # There is a single set of MOs
+    if orbitals_info.nspinstates == 1:
+        return read_coefficients(path, norbitals, orbitals_info.nOrbFuns)
+
+
+def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -> InfoMO:
+    """Read the coefficients from the plain text output.
+
     MO coefficients are stored in Column-major order.
     CP2K molecular orbitals output looks like:
 
@@ -140,36 +171,7 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
     11     1  C  4d0       0.0005419630026689     0.0000000391888080
     12     1  C  4d+1     -0.0000000210955114     0.0147105486663415
     13     1  C  4d+2      0.0534202997324328     0.0000000021056315
-
-    Parameters
-    ----------
-    path
-        Path to the file containing the MO coefficients
-    nOrbitals
-        Number of MO to read
-    nOrbFuns
-        Number of orbital functions
-
-    Returns
-    -------
-        Molecular orbitals and orbital energies
     """
-    def remove_trailing(xs):
-        """Remove the last lines of the MOs output."""
-        words = {'Fermi', 'HOMO-LUMO'}
-        if any(x in words for x in xs[-1]):
-            xs.pop(-1)
-            return remove_trailing(xs)
-        else:
-            return xs
-
-    # Check if the Molecular orbitals came from a restart
-    with open(path, 'r') as f:
-        xs = list(islice(f, 4))
-    if "AFTER SCF STEP -1" in ''.join(xs):
-        move_restart_coeff(path)
-    # Open the MO file
-
     with open(path, 'r') as f:
         xss = f.readlines()
 
@@ -179,10 +181,10 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
 
     # Split the list in chunks containing the orbitals info
     # in block cotaining a maximum of two columns of MOs
-    chunks = chunked(rs, nOrbFuns + 3)
+    chunks = chunked(rs, norbital_functions + 3)
 
-    energies = np.empty(nOrbitals)
-    coefficients = np.empty((nOrbFuns, nOrbitals))
+    energies = np.empty(norbitals)
+    coefficients = np.empty((norbital_functions, norbitals))
 
     for i, lines in enumerate(chunks):
         j = 2 * i
@@ -201,6 +203,16 @@ def read_coefficients(path: PathLike, nOrbitals: int, nOrbFuns: int) -> InfoMO:
             coefficients[:, j + 1] = css[1]
 
     return InfoMO(energies, coefficients)
+
+
+def remove_trailing(xs: List[List[str]]) -> List[List[str]]:
+    """Remove the last lines of the MOs output."""
+    words = {'Fermi', 'HOMO-LUMO'}
+    if any(x in words for x in xs[-1]):
+        xs.pop(-1)
+        return remove_trailing(xs)
+    else:
+        return xs
 
 # =====================> Orbital Parsers <===================
 
@@ -261,7 +273,7 @@ top_parser_basis = (
 # Parsing From File
 
 #: A tuple with 2 elements; output of :func:`read_mos_data_input`.
-Tuple2 = Tuple[Optional_[str], Optional_[List[int]]]
+Tuple2 = Tuple[Optional_[int], Optional_[Tuple[int, int]]]
 
 
 def read_mos_data_input(path_input: PathLike) -> Tuple2:
@@ -269,26 +281,41 @@ def read_mos_data_input(path_input: PathLike) -> Tuple2:
     l1 = try_search_pattern("ADDED_MOS", path_input)
     l2 = try_search_pattern("MO_INDEX_RANGE", path_input)
 
-    added_mos = l1.split()[-1] if l1 is not None else None
-    range_mos = list(map(int, l2.split()[1:])) if l2 is not None else None
+    added_mos = int(l1.split()[-1]) if l1 is not None else None
+    range_mos = tuple(map(int, l2.split()[1:])) if l2 is not None else None
 
     return added_mos, range_mos
 
 
 def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
-    def fun_split(string: str) -> str:
-        return string.split()[-1]
+    def fun_split(string: Optional_[str]) -> int:
+        if string is not None:
+            return int(string.split()[-1])
+        else:
+            return 0
 
     properties = ["Number of occupied orbitals", "Number of molecular orbitals",
                   "Number of orbital functions"]
 
-    try:
-        xs = [fun_split(try_search_pattern(x, file_name)) for x in properties]  # type: ignore
-    except AttributeError as ex:  # try_search_pattern() can return None
-        raise RuntimeError(f"Failed to identify orbitals in {file_name!r}") from ex
+    meta = MO_metadata(*[fun_split(try_search_pattern(x, file_name)) for x in properties])
 
-    return MO_metadata(*[int(x) for x in xs])
+    if any(getattr(meta, att) == 0 for att in ("nOrbitals", "nOccupied", "nOrbFuns")):
+        raise RuntimeError(f"Failed to identify orbitals in {file_name!r}")
+
+    return meta
+
+
+def move_restart_coefficients_recursively(path: PathLike) -> None:
+    """Remove all the coefficients belonging to a restart."""
+    while True:
+        with open(path, 'r') as f:
+            has_restart_coefficients = "AFTER SCF STEP -1" in f.read()
+
+        if has_restart_coefficients:
+            move_restart_coeff(path)
+        else:
+            break
 
 
 def move_restart_coeff(path: PathLike) -> None:
