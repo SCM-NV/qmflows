@@ -143,6 +143,8 @@ def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) ->
     # There is a single set of MOs
     if orbitals_info.nspinstates == 1:
         return read_coefficients(path, norbitals, orbitals_info.nOrbFuns)
+    else:
+        raise NotImplementedError("There is not parser for alpha/beta molecular orbitals")
 
 
 def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -> InfoMO:
