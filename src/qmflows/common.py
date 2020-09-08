@@ -47,12 +47,12 @@ class CGF(NamedTuple):
 class InfoMO(NamedTuple):
     """Energies and coefficients of the molecular orbitals."""
 
-    eigenVals: np.ndarray  # Orbitals eigenvalues
-    coeffs: np.ndarray  # Orbitals eigenvectors
+    eigenvalues: np.ndarray  # Orbitals eigenvalues
+    eigenvectors: np.ndarray  # Orbitals eigenvectors
 
 
 class MO_metadata(NamedTuple):
-    """Molecular Orbitals Parsing.
+    """Metadata for the molecular orbitals.
 
     .. code::
 
@@ -72,9 +72,10 @@ class MO_metadata(NamedTuple):
 
     """
 
-    nOccupied: Any
-    nOrbitals: Any
-    nOrbFuns: Any
+    nOccupied: int
+    nOrbitals: int
+    nOrbFuns: int
+    nspinstates: int = 1
 
 
 class ParseWarning(NamedTuple):

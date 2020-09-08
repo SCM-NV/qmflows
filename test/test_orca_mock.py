@@ -49,7 +49,7 @@ def test_orca_mock(mocker):
 
     # Orbitals
     orbs = rs.orbitals
-    assert np.isfinite(np.sum(orbs.eigenVals))  # eigenvalues
+    assert np.isfinite(np.sum(orbs.eigenvalues))  # eigenvalues
 
     # Molecule
     mol = rs.molecule

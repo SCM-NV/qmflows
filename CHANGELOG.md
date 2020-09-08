@@ -1,3 +1,12 @@
+# Version 0.10.5 (Unreleased)
+
+## New
+ * Read molecular orbitals from unrestricted calculations (#211)
+
+## Fix
+ * Solve CP2K molecular orbital parsing issue (#212)
+
+
 # Version 0.10.4 (07/09/2020)
 ## New
  * Introduced a flag for keeping the Log files
