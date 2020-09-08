@@ -98,7 +98,6 @@ def read_cp2k_coefficients(path_mos: PathLike,
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
 
-    print("orbitals_info: ", orbitals_info)
     try:
         # Read the range of printed MOs from the input
         printed_orbitals = range_mos[1] - range_mos[0] + 1
