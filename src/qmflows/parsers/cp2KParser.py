@@ -305,10 +305,12 @@ def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
 
     values = [fun_split(try_search_pattern(x, file_name)) for x in properties]
 
-    # Search for the spin states number
-    spin_states = try_search_pattern("Number of spin states", file_name)
-    if spin_states is not None:
-        values.append(fun_split(spin_states))
+    # Search for the spin states
+    spin_1 = try_search_pattern("Spin 1", file_name)
+    spin_2 = try_search_pattern("Spin 2", file_name)
+    if all(x is not None for x in (spin_1, spin_2)):
+        # There are two spin states
+        values.append(2)  # It is a triplet state
 
     # construct the metadata inmutable object
     meta = MO_metadata(*values)
