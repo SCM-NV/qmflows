@@ -365,12 +365,12 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     beta_orbitals = Path(root, "betas.log")
 
     # Move the new set of coefficients to their corresponding names
-try:
-    os.rename(Path(root, 'coeffs0'), alpha_orbitals)
-    os.rename(Path(root, 'coeffs1'), beta_orbitals)
-except FileNotFoundError as ex:
-    msg = "There is a problem splitting the coefficients in alpha and beta components!"
-    raise RuntimeError(msg) from ex
+    try:
+        os.rename(Path(root, 'coeffs0'), alpha_orbitals)
+        os.rename(Path(root, 'coeffs1'), beta_orbitals)
+    except FileNotFoundError as ex:
+        msg = "There is a problem splitting the coefficients in alpha and beta components!"
+        raise RuntimeError(msg) from ex
 
     return alpha_orbitals, beta_orbitals
 
