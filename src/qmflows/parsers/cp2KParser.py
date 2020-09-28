@@ -353,17 +353,22 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
     root, file_name = os.path.split(path)
     cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
-    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL, cwd=root)
+    subprocess.check_output(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
-    alphas = Path(root, "alphas.log")
-    betas = Path(root, "betas.log")
+    # Check that the files exists
+    predicate = all(Path(f).exists() for f in ('coeffs0', 'coeffs1'))
+    if not predicate:
+        msg = "There is a problem splitting the coefficients in alpha and beta components!"
+        raise RuntimeError(msg)
+
+    alpha_orbitals = Path(root, "alphas.log")
+    beta_orbitals = Path(root, "betas.log")
 
     # Move the new set of coefficients to their corresponding names
-    os.rename(Path(root, 'coeffs0'), alphas)
-    os.rename(Path(root, 'coeffs1'), betas)
+    os.rename(Path(root, 'coeffs0'), alpha_orbitals)
+    os.rename(Path(root, 'coeffs1'), beta_orbitals)
 
-    return alphas, betas
+    return alpha_orbitals, beta_orbitals
 
 
 #: A 2-tuple; output of :func:`readCp2KBasis`.
