@@ -339,8 +339,8 @@ def move_restart_coeff(path: PathLike) -> None:
 
     # Split File into the old and new set of coefficients
     cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
-    subprocess.call(cmd, shell=True, stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL, cwd=root)
+    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL,
+                          stderr=subprocess.DEVNULL, cwd=root)
 
     # Move the new set of coefficients to the Log file
     os.rename(Path(root, 'coeffs1'), path)
@@ -353,7 +353,7 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
     root, file_name = os.path.split(path)
     cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
-    subprocess.check_output(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
+    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
     # Check that the files exists
     predicate = all(Path(f).exists() for f in ('coeffs0', 'coeffs1'))
