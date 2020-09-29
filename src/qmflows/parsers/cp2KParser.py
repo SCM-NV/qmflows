@@ -356,7 +356,8 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
     # Check that the files exists
-    predicate = all(Path(f).exists() for f in ('coeffs0', 'coeffs1'))
+    root = Path(root)
+    predicate = all((root / f).exists() for f in ('coeffs0', 'coeffs1'))
     if not predicate:
         msg = "There is a problem splitting the coefficients in alpha and beta components!"
         raise RuntimeError(msg)
