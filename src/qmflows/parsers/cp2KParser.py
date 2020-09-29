@@ -2,6 +2,7 @@
 
 import fnmatch
 import logging
+import mmap
 import os
 import subprocess
 from io import TextIOBase
@@ -352,7 +353,8 @@ def move_restart_coeff(path: PathLike) -> None:
 def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
     root, file_name = os.path.split(path)
-    cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
+    string = "HOMO-LUMO" if is_string_in_file("HOMO-LUMO", path) else "Fermi"
+    cmd = f'csplit -f coeffs -n 1 {file_name} "/{string}/+2"'
     subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
     # Check that the files exists
@@ -549,3 +551,14 @@ def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
     energy_dict['G'] = energy_dict['H'] - energy_dict['T'] * energy_dict['S']
 
     return energy_dict[quantity] * Units.conversion_ratio('kj/mol', unit)
+
+
+def is_string_in_file(string: str, path: PathLike) -> bool:
+    """Check if ``string`` is in file.
+
+    .. Note::
+       The search is case sensitive.
+    """
+    with open(path, 'r') as handler:
+        s_mmap = mmap.mmap(handler.fileno(), 0, access=mmap.ACCESS_READ)
+        return s_mmap.find(string.encode()) != -1
