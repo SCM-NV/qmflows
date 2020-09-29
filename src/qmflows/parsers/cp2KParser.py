@@ -353,7 +353,7 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
     root, file_name = os.path.split(path)
     cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
-    subprocess.check_output(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
+    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
     # Check that the files exists
     predicate = all(Path(f).exists() for f in ('coeffs0', 'coeffs1'))
