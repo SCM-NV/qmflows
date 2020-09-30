@@ -339,9 +339,7 @@ def move_restart_coeff(path: PathLike) -> None:
     root, file_name = os.path.split(path)
 
     # Split File into the old and new set of coefficients
-    cmd = f'csplit -f coeffs -n 1 {file_name} "/HOMO-LUMO/+2"'
-    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL,
-                          stderr=subprocess.DEVNULL, cwd=root)
+    split_log_file(path, root, file_name)
 
     # Move the new set of coefficients to the Log file
     os.rename(Path(root, 'coeffs1'), path)
@@ -353,9 +351,7 @@ def move_restart_coeff(path: PathLike) -> None:
 def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
     root, file_name = os.path.split(path)
-    string = "HOMO-LUMO" if is_string_in_file("HOMO-LUMO", path) else "Fermi"
-    cmd = f'csplit -f coeffs -n 1 {file_name} "/{string}/+2"'
-    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
+    split_log_file(path, root, file_name)
 
     # Check that the files exists
     root = Path(root)
@@ -376,6 +372,13 @@ def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
         raise RuntimeError(msg) from ex
 
     return alpha_orbitals, beta_orbitals
+
+
+def split_log_file(path: PathLike, root: str, file_name: str) -> None:
+    """Split the log file into two files with their own orbitals."""
+    string = "HOMO-LUMO" if is_string_in_file("HOMO-LUMO", path) else "Fermi"
+    cmd = f'csplit -f coeffs -n 1 {file_name} "/{string}/+2"'
+    subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
 
 
 #: A 2-tuple; output of :func:`readCp2KBasis`.
