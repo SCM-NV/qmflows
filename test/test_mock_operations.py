@@ -2,12 +2,15 @@
 import numpy as np
 from assertionlib import assertion
 from noodles import run_single
-from pytest_mock import mocker
+from pytest_mock import MockFixture
+from typing import Any, List, Optional
 
 from qmflows.components.operations import select_max, select_min
 
 
-def generate_mocked_results(mocker, target, instances=10, expected=None):
+def generate_mocked_results(
+        mocker: MockFixture, target: str, instances: int=10,
+        expected: Optional[int]=None) -> List[Any]:
     """Generate a list of mocked results with property `prop`.
 
     One of the results is set to `expected`  and the rest are random values.
@@ -27,7 +30,7 @@ def generate_mocked_results(mocker, target, instances=10, expected=None):
     return results
 
 
-def test_select_max_list(mocker):
+def test_select_max_list(mocker: MockFixture):
     """Test select_max using mocked results."""
     results = generate_mocked_results(
         mocker, 'qmflows.packages.SCM.ADF_Result', expected=1e3)
@@ -37,7 +40,7 @@ def test_select_max_list(mocker):
     assertion.eq(xs.prop, 1e3)
 
 
-def test_select_min(mocker):
+def test_select_min(mocker: MockFixture):
     """Test select_min using mocked results."""
     results = generate_mocked_results(
         mocker, 'qmflows.packages.SCM.DFTB_Result', expected=-1e3)

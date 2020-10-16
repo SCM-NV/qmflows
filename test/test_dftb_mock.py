@@ -2,7 +2,7 @@
 import numpy as np
 import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
-from pytest_mock import mocker
+from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import dftb, templates
@@ -23,7 +23,7 @@ def mock_runner(mocker_instance, jobname: str) -> DFTB_Result:
     return run_mocked
 
 
-def test_dftb_opt_mock(mocker):
+def test_dftb_opt_mock(mocker: MockFixture):
     """Mock a geometry optimization using DFTB."""
     jobname = "dftb_geometry"
     job = dftb(templates.geometry, WATER, job_name=jobname)
@@ -37,7 +37,7 @@ def test_dftb_opt_mock(mocker):
     assertion.isinstance(rs.molecule, Molecule)
 
 
-def test_dftb_freq_mock(mocker):
+def test_dftb_freq_mock(mocker: MockFixture):
     """Mock a geometry optimization using DFTB."""
     jobname = "dftb_freq"
     job = dftb(templates.geometry, WATER, job_name=jobname)

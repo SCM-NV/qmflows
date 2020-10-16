@@ -1,6 +1,6 @@
 """Mock the ADF output."""
 from assertionlib import assertion
-from pytest_mock import mocker
+from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import adf, templates
@@ -10,7 +10,7 @@ from qmflows.test_utils import PATH, PATH_MOLECULES
 WORKDIR = PATH / "output_adf"
 
 
-def test_adf_mock(mocker):
+def test_adf_mock(mocker: MockFixture):
     """Mock the ADF output."""
     mol = Molecule(PATH_MOLECULES / "acetonitrile.xyz")
     job = adf(templates.geometry, mol)

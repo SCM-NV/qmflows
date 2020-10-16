@@ -1,7 +1,7 @@
 """Mock orca funcionality."""
 import numpy as np
 from assertionlib import assertion
-from pytest_mock import mocker
+from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import Settings, orca
@@ -11,7 +11,7 @@ from qmflows.test_utils import PATH, PATH_MOLECULES
 WORKDIR = PATH / "output_orca"
 
 
-def test_orca_mock(mocker):
+def test_orca_mock(mocker: MockFixture):
     """Mock a call to orca."""
     methanol = Molecule(PATH_MOLECULES / "methanol.xyz")
 
