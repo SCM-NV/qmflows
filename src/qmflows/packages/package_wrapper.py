@@ -237,8 +237,11 @@ class PackageWrapper(Package):
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
 
-        return self.result_type(settings, mol, job_name, r.job.path, dill_path,
-                                work_dir=work_dir, status=job.status, warnings=None)
+        return self.result_type(
+            settings, mol, job_name,
+            dill_path=dill_path, plams_dir=r.job.path,
+            work_dir=work_dir, status=job.status, warnings=None
+        )
 
     @staticmethod
     def handle_special_keywords(settings: Settings, key: str,
