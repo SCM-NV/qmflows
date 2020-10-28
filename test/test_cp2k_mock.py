@@ -1,6 +1,7 @@
 """Mock CP2K funcionality."""
 import copy
 
+import pytest
 import numpy as np
 from assertionlib import assertion
 from pytest_mock import MockFixture, mocker
@@ -43,6 +44,8 @@ def test_deepcopy():
     assertion.eq(copy_result.settings, result.settings)
 
 
+# See https://github.com/SCM-NV/qmflows/issues/225
+@pytest.mark.xfail(raises=AssertionError)
 def test_cp2k_singlepoint_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
     # single point calculation
