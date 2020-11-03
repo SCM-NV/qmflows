@@ -23,7 +23,7 @@ jobs:
       with:
         update-conda: true
         python-version: ${{ matrix.version }}
-        conda-channels: conda-forge
+        conda-channels: anaconda
 
     - name: Install conda-based dependencies
       run: |
