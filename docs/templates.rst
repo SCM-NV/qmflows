@@ -23,9 +23,6 @@ For Example, the default parameter for a single point calculation for several pa
       adf:
          basis:
            type: SZ
-         xc:
-           __block_replace: true
-           lda: ""
          numericalquality:
            normal
          scf:
