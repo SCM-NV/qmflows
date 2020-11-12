@@ -286,6 +286,11 @@ class Package(ABC):
         """
         self.pkg_name = pkg_name
 
+        # Ensure compatibility with the (typing-only) `builtins.function` class
+        self.__name__: str = pkg_name
+        self.__qualname__: str = pkg_name
+        self.__annotations__: Dict[str, Any] = type(self).__call__.__annotations__
+
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
