@@ -68,7 +68,7 @@ setup(
         'Topic :: Scientific/Engineering :: Chemistry'
     ],
     install_requires=['more-itertools', 'h5py', 'numpy', 'pandas', 'noodles==0.3.3',
-                      'plams@git+https://github.com/SCM-NV/PLAMS@a5696ce62c09153a9fa67b2b03a750913e1d0924',
+                      'plams@git+https://github.com/SCM-NV/PLAMS@master',
                       'pyparsing', 'pyyaml>=5.1', 'filelock'],
     extras_require={
         'test': tests_require,
