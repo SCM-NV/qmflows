@@ -5,7 +5,7 @@ import shutil
 
 import numpy as np
 from assertionlib import assertion
-from pytest_mock import mocker, MockFixture
+from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md

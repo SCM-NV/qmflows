@@ -4,7 +4,7 @@ import copy
 import pytest
 import numpy as np
 from assertionlib import assertion
-from pytest_mock import MockFixture, mocker
+from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import cp2k, templates
