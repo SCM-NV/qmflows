@@ -13,9 +13,6 @@ specific:
     adf:
         basis:
             type: SZ
-        xc:
-            __block_replace: true
-            lda: ""
         numericalquality:
             normal
         scf:
@@ -109,9 +106,6 @@ specific:
     adf:
         basis:
             type: SZ
-        xc:
-            __block_replace: true
-            lda: ""
         numericalquality: good
         scf:
             converge: 1e-6
@@ -211,9 +205,6 @@ specific:
     adf:
         basis:
             type: SZ
-        xc:
-            "__block_replace": true
-            lda: ""
         numericalquality: good
         scf:
             converge: 1e-6
@@ -249,9 +240,6 @@ specific:
             core: None
             type: DZP
 
-        xc:
-            "__block_replace": true
-            lda: ""
         numericalquality: good
 
     ams:

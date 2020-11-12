@@ -3,7 +3,7 @@
 __all__ = ['Settings']
 
 from functools import wraps
-from typing import NoReturn, Any, Callable
+from typing import Callable, NoReturn
 
 from scm import plams
 
@@ -14,9 +14,6 @@ class Settings(plams.core.settings.Settings, ):
     The difference with respect to plams' Settings are:
 
     - :code:`settings['a.b']` is equivalent to :code:`settings['a']['b'] = settings.a.b`
-    - in :meth:`Settings.update`: :code:`settings.__block_replace = True` results in removal
-      of all existing key value pairs.
-      ``__block_replace`` can be either in the updated settings or in the updating settings object.
     """
 
     def __getitem__(self, name):
@@ -65,55 +62,6 @@ class Settings(plams.core.settings.Settings, ):
         ret = self.copy()
         ret.update(other)
         return ret
-
-    def update(self, other):
-        """Implement :meth:`self.update(other)<dict.update>`.
-
-        Like PLAMS update, but:
-        :code:`__block_replace = True` results in removing all existing key value pairs
-        in the current node of the settings tree
-
-        For example:
-
-        .. code:: python
-
-            >>> from qmflows import Settings
-
-            >>> t=Settings()
-            >>> t.input.xc.lda = ""
-
-            >>> u = Settings()
-            >>> u.input.xc.hybrid = 'b3lyp'
-            >>> print(t.overlay(u))
-            input:
-                xc:
-                    hybrid:     b3lyp
-                    lda:
-
-            >>> u.input.xc.__block_replace = True
-            >>> print(t.overlay(u))
-            input:
-                xc:
-                    __block_replace:     True
-                    hybrid:     b3lyp
-
-        """
-        cls = type(self)
-        for name in other:
-            if isinstance(other[name], cls):
-                if name not in self or not isinstance(self[name], cls):
-                    self[name] = other[name].copy()
-                else:
-                    # _block_replace can be used to remove all existing key value pairs
-                    # in an input block
-                    br = '__block_replace'
-                    pred1 = (br in other[name] and other[name][br])
-                    pred2 = (br in self[name] and self[name][br])
-                    if pred1 or pred2:
-                        self[name] = cls()
-                    self[name].update(other[name])
-            else:
-                self[name] = other[name]
 
 
 def _unsuported_operation(meth: Callable) -> Callable[..., NoReturn]:
