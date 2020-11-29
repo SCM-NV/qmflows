@@ -12,7 +12,9 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict)
+from typing import (
+    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict, TypeVar, Tuple
+)
 
 import numpy as np
 import pandas as pd
@@ -28,7 +30,7 @@ from noodles.serial.reasonable import SerReasonableObject
 from rdkit import Chem
 from scm import plams
 
-from .serializer import SerMolecule, SerMol, SerSettings, SerNDFrame
+from .serializer import SerMolecule, SerMol, SerSettings, SerNDFrame, SerReduce
 from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
@@ -243,6 +245,9 @@ class Result:
             self._results = results
 
 
+PT = TypeVar("PT", bound="Package")
+
+
 @has_scheduled_methods
 class Package(ABC):
     """:class:`Package` is the base class to handle the invocation to different quantum package.
@@ -290,6 +295,10 @@ class Package(ABC):
         self.__name__: str = pkg_name
         self.__qualname__: str = pkg_name
         self.__annotations__: Dict[str, Any] = type(self).__call__.__annotations__
+
+    def __reduce__(self: PT) -> Tuple[Type[PT], Tuple[str]]:
+        """A helper function for :mod:`pickle`."""
+        return type(self), (self.pkg_name,)
 
     @schedule(
         display="Running {self.pkg_name} {job_name}...",
@@ -617,7 +626,7 @@ def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Re
 REGISTRY: Registry = Registry(
     parent=serial.base() + arrays_to_hdf5(),
     types={
-        Package: AsDict(Package),
+        Package: SerReduce(Package),
         Path: SerPath(),
         plams.Molecule: SerMolecule(),
         Chem.Mol: SerMol(),
@@ -628,7 +637,7 @@ REGISTRY: Registry = Registry(
         np.floating: SerNumpyScalar(),
         np.integer: SerNumpyScalar(),
         pd.DataFrame: SerNDFrame(pd.DataFrame),
-        pd.Series: SerNDFrame(pd.Series)
+        pd.Series: SerNDFrame(pd.Series),
     }
 )
 

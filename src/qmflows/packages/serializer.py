@@ -1,9 +1,17 @@
 """Various serialisers used in QMFlows."""
 
+import sys
 import base64
-from typing import Type, TypeVar, Callable, Any, Dict, Mapping, TYPE_CHECKING
+from typing import (
+    Type, TypeVar, Callable, Any, Dict, Mapping, TYPE_CHECKING, Iterable, Tuple, Optional
+)
 
 from noodles.serial import Serialiser
+
+if sys.version_info >= (3, 7):
+    from builtins import dict as OrderedDict
+else:
+    from collections import OrderedDict
 
 if TYPE_CHECKING:
     from ..settings import Settings
@@ -20,7 +28,7 @@ else:  # Don't bother importing all this stuff when not type checking
     DataFrame = 'pandas.core.frame.DataFrame'
     Series = 'pandas.core.series.Series'
 
-__all__ = ['SerMolecule', 'SerMol', 'SerSettings', 'SerNDFrame']
+__all__ = ['SerMolecule', 'SerMol', 'SerSettings', 'SerNDFrame', 'SerReduce']
 
 T = TypeVar('T')
 
@@ -87,3 +95,27 @@ class SerNDFrame(Serialiser):
     def decode(self, cls: Type[NDFrame], data: Mapping) -> NDFrame:
         """Decode the passed data into a pandas Series or DataFrame."""
         return cls(data)
+
+
+class SerReduce(Serialiser):
+    """Class to encode :meth:`object.__reduce__`-able objects."""
+
+    def __init__(self, name: Any) -> None:
+        """Initialize a :class:`SerReduce` instance."""
+        super().__init__(name)
+
+    def encode(
+        self, obj: Any, make_rec: Callable[[Any], Any]
+    ) -> Tuple[Tuple[Any, ...], Optional[Any]]:
+        """Encode the passed reduce-able object."""
+        _, args, *tail = obj.__reduce__()
+        state = tail[0] if len(tail) else None
+        return args, state
+
+    def decode(self, cls: Type[T], data: Tuple[Iterable[Any], Optional[Any]]) -> T:
+        """Decode the passed data into a PLAMS Molecule."""
+        args, state = data
+        ret = cls(*args)
+        if state is not None:
+            ret.__setstate__(state)
+        return ret
