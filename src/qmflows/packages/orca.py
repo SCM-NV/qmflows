@@ -51,8 +51,8 @@ class ORCA(Package):
     generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ORCA_Result
 
-    def __init__(self) -> None:
-        super().__init__("orca")
+    def __init__(self, pkg_name: str = "orca") -> None:
+        super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,

@@ -199,8 +199,8 @@ class ADF(Package):
     generic_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ADF_Result
 
-    def __init__(self) -> None:
-        super(ADF, self).__init__("adf")
+    def __init__(self, pkg_name: str = "adf") -> None:
+        super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
@@ -265,8 +265,8 @@ class DFTB(Package):
     generic_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='generic2')
     result_type: ClassVar[Type[Result]] = DFTB_Result
 
-    def __init__(self) -> None:
-        super().__init__("dftb")
+    def __init__(self, pkg_name: str = "dftb") -> None:
+        super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,

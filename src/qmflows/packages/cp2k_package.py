@@ -48,8 +48,8 @@ class CP2K(Package):
     generic_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='generic2')
     result_type: ClassVar[Type[Result]] = CP2K_Result
 
-    def __init__(self) -> None:
-        super().__init__("cp2k")
+    def __init__(self, pkg_name: str = "cp2k") -> None:
+        super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,

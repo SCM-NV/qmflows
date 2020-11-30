@@ -99,7 +99,7 @@ API
 
 import os
 from os.path import join
-from typing import Type, TypeVar, Union, ClassVar, Any, Dict
+from typing import Type, TypeVar, Union, ClassVar, Any, Dict, Optional, TypeVar, Generic, Tuple
 from warnings import warn
 
 from scm import plams
@@ -119,6 +119,8 @@ plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
 
 __all__ = ['PackageWrapper']
 
+JT = TypeVar("JT", bound=plams.core.basejob.Job)
+
 #: A :class:`dict` mapping PLAMS :class:`Job<scm.plams.core.basejob.Job>` types
 #: to appropiate QMFlows :class:`Package<qmflows.packages.packages.Package>` instance
 JOB_MAP: Dict[Type[plams.Job], Package] = {
@@ -131,6 +133,8 @@ JOB_MAP: Dict[Type[plams.Job], Package] = {
 #: TypeVar for Result objects and its subclasses.
 RT = TypeVar('RT', bound=Result)
 
+PT = TypeVar('PT', bound="PackageWrapper")
+
 
 class ResultWrapper(Result):
     """The matching :class:`~qmflows.packages.packages.Result` subclass for :class:`PackageWrapper`."""  # noqa
@@ -139,7 +143,7 @@ class ResultWrapper(Result):
 
 
 @has_scheduled_methods
-class PackageWrapper(Package):
+class PackageWrapper(Package, Generic[JT]):
     """A :class:`~qmflows.packages.packages.Package` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
 
     Will automatically convert the passed Job type into the appropiate
@@ -182,8 +186,9 @@ class PackageWrapper(Package):
 
     generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
     result_type: ClassVar[Type[Result]] = ResultWrapper
+    job_type: Type[JT]
 
-    def __init__(self, job_type: Type[plams.Job]) -> None:
+    def __init__(self, job_type: Type[JT], name: Optional[str] = None) -> None:
         """Initialize this instance.
 
         Parameters
@@ -198,9 +203,16 @@ class PackageWrapper(Package):
             See also :attr:`PackageWrapper.job_type`.
 
         """
-        pkg_name = job_type.__class__.__name__.lower().rstrip('job')
+        if name is None:
+            pkg_name = job_type.__class__.__name__.lower().rstrip('job')
+        else:
+            pkg_name = name
         super().__init__(pkg_name)
         self.job_type = job_type
+
+    def __reduce__(self: PT) -> Tuple[Type[PT], Tuple[Type[JT], str]]:
+        """A helper function for :mod:`pickle`."""
+        return type(self), (self.job_type, self.pkg_name)
 
     @schedule(display="Running {self.pkg_name} {job_name}...", store=True, confirm=True)
     def __call__(self, settings: Settings,
