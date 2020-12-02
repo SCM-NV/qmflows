@@ -304,8 +304,8 @@ class Package(ABC):
         display="Running {self.pkg_name} {job_name}...",
         store=True, confirm=True)
     def __call__(self, settings: Settings,
-                 mol: MolType,
-                 job_name: str = '', **kwargs: Any) -> Result:
+                 mol: MolType, job_name: str = '',
+                 validate_output: bool = True, **kwargs: Any) -> Result:
         r"""Perform a job with the package specified by :attr:`Package.pkg_name`.
 
         Parameters
@@ -316,6 +316,10 @@ class Package(ABC):
             A PLAMS or RDKit molecule to-be passed to the calculation.
         job_name : :class:`str`
             The name of the job.
+        validate_output : :class:`bool`
+            If :data:`True`, perform a package-specific validation of the output files' content.
+            Only relevant if the particular :class:`Package` subclass has
+            actually implemented output validation.
         \**kwargs : :data:`~typing.Any`
             Further keyword arguments to-be passed to :meth:`Package.prerun`,
             :meth:`Package.run_job` and :meth:`Package.post_run`.
@@ -326,6 +330,8 @@ class Package(ABC):
             A new Result instance.
 
         """  # noqa
+        kwargs['validate_output'] = validate_output
+
         # Ensure that these variables have an actual value
         # Precaution against passing unbound variables to self.postrun()
         output_warnings = plams_mol = job_settings = None
@@ -525,6 +531,7 @@ class Package(ABC):
     @abstractmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
+                validate_output: bool = False,
                 **kwargs: Any) -> Result:
         r"""`Abstract method <https://docs.python.org/3/library/abc.html#abc.abstractmethod>`_; should be implemented by the child class.
 
@@ -541,6 +548,10 @@ class Package(ABC):
             The name of the job.
         workdir : :class:`str` or :class:`~os.PathLike`, optional
             The path+folder name of the PLAMS working directory.
+        validate_output : :class:`bool`
+            If :data:`True`, perform a package-specific validation of the output files' content.
+            Only relevant if the particular :class:`Package` subclass has
+            actually implemented output validation.
         \**kwargs : :data:`~typing.Any`
             Further keyword arguments.
 

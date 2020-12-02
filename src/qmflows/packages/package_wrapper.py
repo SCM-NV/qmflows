@@ -232,6 +232,7 @@ class PackageWrapper(Package, Generic[JT]):
     def run_job(self, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'job',
                 work_dir: Union[None, str, os.PathLike] = None,
+                validate_output: bool = True,
                 **kwargs: Any) -> ResultWrapper:
         """Run the job and pass the resulting :class:`plams.Results<scm.plams.core.results.Results>` object to :class:`ResultWrapper`."""  # noqa
         # Input modifications

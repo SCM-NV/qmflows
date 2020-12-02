@@ -93,6 +93,7 @@ class CP2KMM(CP2K):
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
                 work_dir: Union[None, str, os.PathLike] = None,
+                validate_output: bool = True,
                 **kwargs: Any) -> CP2KMM_Result:
         """Call the Cp2K binary using plams interface.
 
@@ -120,8 +121,12 @@ class CP2KMM(CP2K):
 
         work_dir = work_dir if work_dir is not None else job.path
 
-        warnings = parse_output_warnings(job_name, r.job.path,
-                                         parse_cp2k_warnings, cp2k_warnings)
+        if validate_output:
+            warnings = parse_output_warnings(
+                job_name, r.job.path, parse_cp2k_warnings, cp2k_warnings
+            )
+        else:
+            warnings = None
 
         # Absolute path to the .dill file
         dill_path = join(job.path, f'{job.name}.dill')
