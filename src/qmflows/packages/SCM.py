@@ -205,6 +205,7 @@ class ADF(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'ADFjob', nproc: Optional[int] = None,
+                validate_output: bool = True,
                 **kwargs: Any) -> ADF_Result:
         """Execute ADF job.
 
@@ -271,6 +272,7 @@ class DFTB(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
                 work_dir: Union[None, str, os.PathLike] = None,
+                validate_output: bool = True,
                 **kwargs: Any) -> DFTB_Result:
         """Execute an DFTB job with the AMS driver.
 

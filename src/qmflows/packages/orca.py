@@ -58,6 +58,7 @@ class ORCA(Package):
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = "ORCAjob",
                 work_dir: Union[None, str, os.PathLike] = None,
+                validate_output: bool = True,
                 **kwargs: Any) -> ORCA_Result:
 
         orca_settings = Settings()

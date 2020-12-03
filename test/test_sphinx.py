@@ -23,7 +23,9 @@ def test_sphinx_build() -> None:
         if "Max retries exceeded" not in str(ex):
             raise
         else:
-            warnings.warn(ex)
+            warning = RuntimeWarning(str(ex))
+            warning.__cause__ = ex
+            warnings.warn(warning)
     finally:
         if isdir(OUTDIR):
             shutil.rmtree(OUTDIR)
