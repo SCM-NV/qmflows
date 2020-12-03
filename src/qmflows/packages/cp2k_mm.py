@@ -168,7 +168,9 @@ class CP2KMM(CP2K):
         """Assign a .psf file."""
         subsys = settings.specific.cp2k.force_eval.subsys
         if value is None:
-            subsys.topology.use_element_as_kind = '.TRUE.'
+            symbol_list = sorted({at.symbol for at in mol})
+            for symbol in symbol_list:
+                subsys[f'kind {symbol}'].element = symbol
             return
 
         symbol_map = _map_psf_atoms(None, key, value, None)
