@@ -185,4 +185,5 @@ def get_mm_settings() -> Settings:
     s.charge = charge
     s.lennard_jones = lj
     s.periodic = 'none'
+    s.cell_parameters = [50, 50, 50]
     return s

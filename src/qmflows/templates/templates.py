@@ -81,7 +81,6 @@ specific:
                         ewald_type: NONE
             subsys:
                 cell:
-                    abc: '[angstrom] 50.0 50.0 50.0'
                     periodic: NONE
                 topology:
                     coord_file_format: 'OFF'
@@ -174,7 +173,6 @@ specific:
                         ewald_type: NONE
             subsys:
                 cell:
-                    abc: '[angstrom] 50.0 50.0 50.0'
                     periodic: NONE
                 topology:
                     coord_file_format: 'OFF'
@@ -276,7 +274,6 @@ specific:
                         ewald_type: NONE
             subsys:
                 cell:
-                    abc: '[angstrom] 50.0 50.0 50.0'
                     periodic: NONE
                 topology:
                     coord_file_format: 'OFF'
@@ -331,7 +328,6 @@ specific:
                         ewald_type: NONE
             subsys:
                 cell:
-                    abc: '[angstrom] 50.0 50.0 50.0'
                     periodic: NONE
                 topology:
                     coord_file_format: 'OFF'
