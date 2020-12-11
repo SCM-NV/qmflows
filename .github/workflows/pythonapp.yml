@@ -15,35 +15,35 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - name: Optionally Install cp2k
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install cp2k
+
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
       with:
         update-conda: true
-        python-version: ${{ matrix.version }}
         conda-channels: anaconda
 
-    - name: Install conda-based dependencies
-      run: |
-        conda install -c conda-forge h5py rdkit nbsphinx jupyter
+    - name: Install dependencies
+      run: conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter
 
     - name: Install the package
-      run: pip install -e .[test]
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
+      run: |
+        source $CONDA/bin/activate test
+        pip install -e .[test]
 
     - name: Conda info
       run: conda info
 
     - name: Conda list
-      run: conda list
+      run: conda list -n test
 
     - name: Test with pytest
-      env:
-        CONDA_PREFIX: /usr/share/miniconda
-      run: pytest -m "not (slow or long)"
+      run: |
+        source $CONDA/bin/activate test
+        pytest -m "not (slow or long)"
 
     - uses: codecov/codecov-action@v1
       with:
