@@ -130,7 +130,10 @@ class Result:
             # Do not issue this warning if the Results object is still pickled
             else:  # Unpickle the Results instance and try again
                 self._unpack_results()
-                return self.__getattr__(prop)
+                try:
+                    return vars(self)[prop]  # Avoid recursive `getattr` calls
+                except KeyError:
+                    warn(f"Generic property {prop!r} not defined", category=QMFlows_Warning)
 
         elif has_crashed and not is_private:
             warn(f"""
