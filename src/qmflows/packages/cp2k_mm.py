@@ -19,7 +19,7 @@ from typing import Union, Any, ClassVar, Dict, Type
 from scm import plams
 
 from .packages import Result, parse_output_warnings, load_properties
-from .cp2k_package import CP2K
+from .cp2k_package import CP2K, CP2K_Result
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
@@ -29,7 +29,7 @@ from ..type_hints import Generic2Special, Final, _Settings
 __all__ = ['cp2k_mm']
 
 
-class CP2KMM_Result(Result):
+class CP2KMM_Result(CP2K_Result):
     """A class providing access to CP2KMM result."""
 
     prop_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='properties')
