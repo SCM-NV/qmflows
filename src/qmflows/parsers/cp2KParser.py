@@ -594,9 +594,9 @@ def _read_cp2k_xyz(f: Iterable[str], n_atom: int) -> Generator[Iterator[str], No
 def read_cp2k_table(
     path: PathLike,
     column: int,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
-    step: Optional[int] = None,
+    start: Optional_[int] = None,
+    stop: Optional_[int] = None,
+    step: Optional_[int] = None,
     dtype: Any = np.float64,
 ) -> np.ndarray:
     """Extract a 1D array from the specified **column** in **path**.
