@@ -25,3 +25,25 @@ free_energy:
     kwargs:
         quantity: G
     parser: cp2KParser
+forces:
+    file_pattern: '*-frc-1.xyz'
+    function: read_cp2k_xyz
+    parser: cp2KParser
+coordinates:
+    file_pattern: '*-pos-1.xyz'
+    function: read_cp2k_xyz
+    parser: cp2KParser
+temperature:
+    file_pattern: '*-1.ener'
+    function: read_cp2k_table
+    parser: cp2KParser
+    kwargs:
+        column: 3
+        start: 1
+volume:
+    file_pattern: '*-1.cell'
+    function: read_cp2k_table
+    parser: cp2KParser
+    kwargs:
+        column: -1
+        start: 1
