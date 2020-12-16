@@ -6,11 +6,11 @@ import mmap
 import os
 import subprocess
 from io import TextIOBase
-from itertools import islice
+from itertools import islice, chain
 from pathlib import Path
 from typing import Any, Dict, FrozenSet, Generator, Iterable, List
 from typing import Optional as Optional_
-from typing import Sequence, Tuple, Type, TypeVar, Union, overload
+from typing import Sequence, Tuple, Type, TypeVar, Union, overload, Iterator
 
 import numpy as np
 from more_itertools import chunked
@@ -29,7 +29,7 @@ from .parser import (floatNumber, minusOrplus, natural, point,
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
-           'read_cp2k_number_of_orbitals']
+           'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table']
 
 
 # Starting logger
@@ -565,3 +565,45 @@ def is_string_in_file(string: str, path: PathLike) -> bool:
     with open(path, 'r') as handler:
         s_mmap = mmap.mmap(handler.fileno(), 0, access=mmap.ACCESS_READ)
         return s_mmap.find(string.encode()) != -1
+
+
+def read_cp2k_xyz(path: PathLike, dtype: Any = np.float64) -> np.ndarray:
+    """Extract a 3D array from **path** with the atomic forces of all molecules.
+
+    Requires a CP2K ``*.xyz`` file.
+
+    """
+    with open(path, 'r') as f:
+        n_atom = int(next(f))
+        flat_iter = chain.from_iterable(_read_cp2k_xyz(f, n_atom))
+        ret = np.fromiter(flat_iter, dtype=dtype)
+        ret.shape = -1, n_atom, 3  # (n_mol, n_atom, 3)
+    return ret
+
+
+def _read_cp2k_xyz(f: Iterable[str], n_atom: int) -> Generator[Iterator[str], None, None]:
+    """Create a generator for :func:`read_cp2k_xyz`."""
+    stop = 1 + n_atom
+    # Account for the fact that `read_cp2k_xyz` already iterated through
+    # the first element
+    yield chain.from_iterable(at.split()[1:] for at in islice(f, 1, stop))
+    for _ in f:
+        yield chain.from_iterable(at.split()[1:] for at in islice(f, 1, stop))
+
+
+def read_cp2k_table(
+    path: PathLike,
+    column: int,
+    start: Optional[int] = None,
+    stop: Optional[int] = None,
+    step: Optional[int] = None,
+    dtype: Any = np.float64,
+) -> np.ndarray:
+    """Extract a 1D array from the specified **column** in **path**.
+
+    **start**, **stop** and **step** can be used for specifiying the to-be parsed rows.
+
+    """
+    with open(path, 'r') as f:
+        flat_iter = (i.split()[column] for i in islice(f, start, stop, step))
+        return np.fromiter(flat_iter, dtype=dtype)
