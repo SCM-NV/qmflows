@@ -684,18 +684,16 @@ def find_file_pattern(path: Union[str, os.PathLike],
 def ignore_unused_kwargs(fun: Callable, *args: Any, **kwargs: Any) -> Any:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
-    Searches for the keyword arguments which have a nonempty default values
-    and then the dict `kwargs` those key-value pairs ignoring the rest.
+    Searches for the keyword arguments that are present in both `**kwargs`
+    and the supplied `fun`; all others are discarded.
 
     """
+    # Find the intersction between `kwargs` and
+    # the (potential) parameters of `fun`
     ps = inspect.signature(fun).parameters
+    valid_keys = kwargs.keys() & ps.keys()
 
-    # Look for the arguments with the nonempty defaults.
-    defaults = filter(lambda t: t[1].default != inspect._empty, ps.items())
-
-    # *kwargs* may contain keyword arguments not supported by *fun*
-    # Extract from *kwargs* only the used keyword arguments
-    kwargs2 = {k: kwargs[k] for k, _ in defaults if k in kwargs}
+    kwargs2 = {k: kwargs[k] for k in valid_keys}
     return fun(*args, **kwargs2)
 
 
