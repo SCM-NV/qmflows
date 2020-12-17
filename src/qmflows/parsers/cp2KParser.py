@@ -29,7 +29,8 @@ from .parser import (floatNumber, minusOrplus, natural, point,
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
-           'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table']
+           'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
+           'read_cp2k_table_slc']
 
 
 # Starting logger
@@ -607,3 +608,31 @@ def read_cp2k_table(
     with open(path, 'r') as f:
         flat_iter = (i.split()[column] for i in islice(f, start, stop, step))
         return np.fromiter(flat_iter, dtype=dtype)
+
+
+def read_cp2k_table_slc(
+    path: PathLike,
+    shape: Sequence[int],
+    column_start: Optional_[int] = None,
+    column_stop: Optional_[int] = None,
+    column_step: Optional_[int] = None,
+    row_start: Optional_[int] = None,
+    row_stop: Optional_[int] = None,
+    row_step: Optional_[int] = None,
+    dtype: Any = np.float64,
+) -> np.ndarray:
+    """Extract an ND array of the given **shape** from **path**.
+
+    **column_start**, **column_stop** and **column_step** can be used for
+    specifiying the to-be parsed columns.
+    **start**, **stop** and **step** can be used for specifiying the to-be parsed rows.
+
+    """
+    with open(path, 'r') as f:
+        clm_slc = slice(column_start, column_stop, column_step)
+        row_slc = islice(f, row_start, row_stop, row_step)
+        flat_iter = chain.from_iterable(i.split()[clm_slc] for i in row_slc)
+
+        ret = np.fromiter(flat_iter, dtype=dtype)
+        ret.shape = shape
+        return ret
