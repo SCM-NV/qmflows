@@ -3,9 +3,10 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Any, Union, Tuple, ClassVar, Type
+from typing import Any, Union, Iterable, ClassVar, Type
 from warnings import warn
 
+import numpy as np
 from scm import plams
 
 from .packages import Package, Result, parse_output_warnings, load_properties
@@ -157,21 +158,21 @@ class CP2K(Package):
             &END CELL
 
             """
-            def fun(xs: Tuple[Any, Any, Any]) -> str:
+            def fun(xs: Iterable[Any]) -> str:
                 return '{:.2f} {:.2f} {:.2f}'.format(*xs)
 
-            if not isinstance(value, list):
-                abc = [value] * 3
-                abc_cell = f' [angstrom] {fun(abc)}'
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc_cell
-            elif isinstance(value[0], list):
-                a, b, c = value
+            ar = np.asarray(value, dtype=np.float64)
+            if ar.ndim == 0:
+                abc = f' [angstrom] {fun(np.repeat(ar, 3))}'
+                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
+            elif ar.ndim == 1:
+                abc = f' [angstrom] {fun(ar)}'
+                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
+            elif ar.ndim == 2:
+                a, b, c = ar
                 s.specific.cp2k.force_eval.subsys.cell.A = fun(a)
                 s.specific.cp2k.force_eval.subsys.cell.B = fun(b)
                 s.specific.cp2k.force_eval.subsys.cell.C = fun(c)
-            elif isinstance(value, list):
-                abc = f' [angstrom] {fun(value)}'
-                s.specific.cp2k.force_eval.subsys.cell.ABC = abc
             else:
                 raise RuntimeError(
                     f"cell parameter:{value!r}\nformat not recognized")
