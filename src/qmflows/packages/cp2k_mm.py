@@ -201,7 +201,7 @@ class CP2KMM(CP2K):
         if value.lower() == 'none':
             ewald.ewald_type = value
         elif not ewald.ewald_type:
-            ewald.ewald_type = 'EWALD'
+            ewald.ewald_type = 'SPME'
 
     @staticmethod
     def _parse_gmax(s: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
