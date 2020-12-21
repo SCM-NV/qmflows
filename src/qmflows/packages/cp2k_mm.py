@@ -16,6 +16,7 @@ import os
 from os.path import join, abspath
 from typing import Union, Any, ClassVar, Dict, Type
 
+import numpy as np
 from scm import plams
 
 from .packages import Result, parse_output_warnings, load_properties
@@ -202,11 +203,27 @@ class CP2KMM(CP2K):
         elif not ewald.ewald_type:
             ewald.ewald_type = 'EWALD'
 
+    @staticmethod
+    def _parse_gmax(s: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
+        """Set the keyword for the ``gmax`` parameter."""
+        ar = np.asarray(value)
+        if not issubclass(ar.dtype.type, np.str_):
+            ar = ar.astype(np.int64, copy=False, casting='same_kind')
+
+        ewald = s.specific.cp2k.force_eval.mm.poisson.ewald
+        if ar.ndim == 0:
+            ewald.gmax = str(ar.item())
+        elif ar.ndim == 1:
+            ewald.gmax = " ".join(str(i) for i in ar)
+        else:
+            raise RuntimeError(f"gmax:{value!r}\nformat not recognized")
+
 
 CP2KMM.SPECIAL_FUNCS = {
     'psf': CP2KMM._parse_psf,
     'prm': CP2KMM._parse_prm,
-    'periodic': CP2KMM._parse_periodic
+    'periodic': CP2KMM._parse_periodic,
+    'gmax': CP2KMM._parse_gmax,
 }
 
 for k in CP2K_KEYS_ALIAS:
