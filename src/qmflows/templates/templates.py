@@ -383,6 +383,7 @@ specific:
                     periodic: xyz
                     ewald:
                         ewald_type: spme
+                        o_spline: 4
             subsys:
                 cell:
                     periodic: xyz
