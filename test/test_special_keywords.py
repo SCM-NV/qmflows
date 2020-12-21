@@ -262,6 +262,8 @@ def test_adf_constrains():
 def test_cp2k_mm_keywords():
     """Test the translation from settings to CP2KMM specific keywords."""
     s = get_mm_settings()
+    s.periodic = 'xyz'
+    s.gmax = [22, 22, 22]
 
     CP2KMM.prerun(None, s, None)
     CP2KMM.handle_special_keywords(s, 'psf', s.psf, None)
@@ -269,6 +271,7 @@ def test_cp2k_mm_keywords():
     CP2KMM.handle_special_keywords(s, 'lennard_jones', s.lennard_jones, None)
     CP2KMM.handle_special_keywords(s, 'charge', s.charge, None)
     CP2KMM.handle_special_keywords(s, 'periodic', s.periodic, None)
+    CP2KMM.handle_special_keywords(s, 'gmax', s.gmax, None)
 
     # Change absolute to relative path names for the purpose of testing
     s.specific.cp2k.force_eval.subsys.topology.conn_file_name = basename(

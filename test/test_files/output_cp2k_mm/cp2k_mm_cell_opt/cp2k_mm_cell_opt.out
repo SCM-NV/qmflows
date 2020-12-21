@@ -1,0 +1,2354 @@
+ DBCSR| Multiplication driver                                               BLAS
+ DBCSR| Multrec recursion limit                                              512
+ DBCSR| Multiplication stack size                                           1000
+ DBCSR| Maximum elements for images                                    UNLIMITED
+ DBCSR| Multiplicative factor virtual images                                   1
+ DBCSR| Multiplication size stacks                                             3
+
+
+  **** **** ******  **  PROGRAM STARTED AT               2020-12-21 15:50:40.561
+ ***** ** ***  *** **   PROGRAM STARTED ON                     bass-macbook.home
+ **    ****   ******    PROGRAM STARTED BY                              bvanbeek
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 95172
+  **** **  *******  **  PROGRAM STARTED IN /Users/bvanbeek/Documents/GitHub/qmfl
+                                           ows/test/test_files/plams_workdir/cp2
+                                           k_mm_cell_opt
+
+ CP2K| version string:                                          CP2K version 6.1
+ CP2K| source code revision number:                                    svn:18464
+ CP2K| cp2kflags: omp no_statm_access accelerate                                
+ CP2K| is freely available from                            https://www.cp2k.org/
+ CP2K| Program compiled at                         Fri Apr 19 11:24:34 CEST 2019
+ CP2K| Program compiled on                                         192.168.1.124
+ CP2K| Program compiled for                       Darwin-IntelMacintosh-gfortran
+ CP2K| Data directory path            /Users/bvanbeek/Documents/GitHub/cp2k/data
+ CP2K| Input file name                                       cp2k_mm_cell_opt.in
+
+ GLOBAL| Force Environment number                                              1
+ GLOBAL| Basis set file name                                           BASIS_SET
+ GLOBAL| Potential file name                                           POTENTIAL
+ GLOBAL| MM Potential file name                                     MM_POTENTIAL
+ GLOBAL| Coordinate file name                                      __STD_INPUT__
+ GLOBAL| Method name                                                        CP2K
+ GLOBAL| Project name                                                       cp2k
+ GLOBAL| Preferred FFT library                                             FFTW3
+ GLOBAL| Preferred diagonalization lib.                                       SL
+ GLOBAL| Run type                                                       CELL_OPT
+ GLOBAL| All-to-all communication in single precision                          F
+ GLOBAL| FFTs using library dependent lengths                                  F
+ GLOBAL| Global print level                                                  LOW
+ GLOBAL| Total number of message passing processes                             1
+ GLOBAL| Number of threads for this process                                    4
+ GLOBAL| This output is from process                                           0
+ GLOBAL| CPU model name : UNKNOWN
+
+ MEMORY| system memory details [Kb]
+ MEMORY|                        rank 0           min           max       average
+ MEMORY| MemTotal                    0             0             0             0
+ MEMORY| MemFree                     0             0             0             0
+ MEMORY| Buffers                     0             0             0             0
+ MEMORY| Cached                      0             0             0             0
+ MEMORY| Slab                        0             0             0             0
+ MEMORY| SReclaimable                0             0             0             0
+ MEMORY| MemLikelyFree               0             0             0             0
+
+ WARNING : FFT library FFTW3 is not available  Trying FFTSG as a default
+
+
+                      ************* ******** ***********   
+                     ************* **********************  
+                     ****     **** ****      ***********   
+                     ******** ****  *******     ****       
+                     *******  ****   *******   ****        
+                     ****     ****       ****  ****        
+                     ****     **** **********  ****        
+                      ****     **** ********    ****       
+                     FRONTIERS IN SIMULATION TECHNOLOGY    
+                                                           
+                        C.J. Mundy, S. Balasubramanian,    
+                     Ken Bagchi, J. Hutter, Ari Seitsonen  
+                      IFW Kuo, T. Laino, J. VandeVondele   
+                                 Version 1.0               
+
+                                                           
+
+
+ EWALD| Summation is done by:                                               SPME
+ EWALD| Alpha parameter [       ANGSTROM^-1]                              0.3500
+ EWALD| Real Space Cutoff [          ANGSTROM]                            9.6398
+ EWALD| G-space max. Miller index                         22        22        22
+ EWALD| Spline interpolation order                                             6
+
+ GENERATE|  Preliminary Number of Bonds generated:                             0
+ GENERATE|  Achieved consistency in connectivity generation.
+ Charge Checking ::BRBR                                                                              
+ Charge Checking ::CSBR                                                                              
+ Charge Checking ::PBBR                                                                              
+ Charge Checking ::BRPB                                                                              
+ Charge Checking ::CSPB                                                                              
+ Charge Checking ::PBPB                                                                              
+ Charge Checking ::BRCS                                                                              
+ Charge Checking ::CSCS                                                                              
+ Charge Checking ::PBCS                                                                              
+ CHARGE_INFO| Total Charge of the Classical System:                     0.000000
+ Matching kinds for MM_RADIUS :: 'BR' with 'BR'
+ Matching kinds for MM_RADIUS :: 'BR' with 'CS'
+ Matching kinds for MM_RADIUS :: 'BR' with 'PB'
+ Matching kinds for MM_RADIUS :: 'PB' with 'BR'
+ Matching kinds for MM_RADIUS :: 'PB' with 'CS'
+ Matching kinds for MM_RADIUS :: 'PB' with 'PB'
+ Matching kinds for MM_RADIUS :: 'CS' with 'BR'
+ Matching kinds for MM_RADIUS :: 'CS' with 'CS'
+ Matching kinds for MM_RADIUS :: 'CS' with 'PB'
+ Total number of particles with a shell ::            0
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+
+ FORCEFIELD| Missing Spline_Bond_Env   (  BR,  BR)                              
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+
+ SPLINE_INFO| Generating 6 splines for NONBONDED14 interactions 
+              Due to 3 different atomic kinds
+  ...1  ...2  ...3  ...4  ...5  ...6
+ SPLINE_INFO| Number of unique splines computed:            1
+ SPLINE_INFO| Done
+     TESTING BRBR with BRBR
+     FOUND BR BR
+     TESTING BRBR with BRPB
+     TESTING BRBR with BRSE
+     TESTING BRBR with CSCS
+     TESTING BRBR with CSPB
+     TESTING BRBR with PBPB
+     TESTING BRPB with BRBR
+     TESTING BRPB with BRPB
+     FOUND BR PB
+     TESTING BRPB with BRSE
+     TESTING BRPB with CSCS
+     TESTING BRPB with CSPB
+     TESTING BRPB with PBPB
+     TESTING BRCS with BRBR
+     TESTING BRCS with BRPB
+     TESTING BRCS with BRSE
+     TESTING BRCS with CSCS
+     TESTING BRCS with CSPB
+     TESTING BRCS with PBPB
+     TESTING PBPB with BRBR
+     TESTING PBPB with BRPB
+     TESTING PBPB with BRSE
+     TESTING PBPB with CSCS
+     TESTING PBPB with CSPB
+     TESTING PBPB with PBPB
+     FOUND PB PB
+     TESTING PBCS with BRBR
+     TESTING PBCS with BRPB
+     TESTING PBCS with BRSE
+     TESTING PBCS with CSCS
+     TESTING PBCS with CSPB
+     FOUND PB CS
+     TESTING PBCS with PBPB
+     TESTING CSCS with BRBR
+     TESTING CSCS with BRPB
+     TESTING CSCS with BRSE
+     TESTING CSCS with CSCS
+     FOUND CS CS
+     TESTING CSCS with CSPB
+     TESTING CSCS with PBPB
+
+ FORCEFIELD| WARNING: A non Critical ForceField parameter is missing! CP2K GOES!
+ FORCEFIELD| Non critical parameters are:Urey-Bradley,Torsions,Impropers, Opbends and 1-4
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+
+ FORCEFIELD| Missing Spline_Non_Bond_En(  BR,  CS)                              
+
+ FORCEFIELD| WARNING: Ignoring missing critical FF parameters! CP2K GOES!
+ FORCEFIELD| Critical parameters are: Bonds, Bends and Charges
+ FORCEFIELD| All missing parameters will not contribute to the potential energy!
+
+ SPLINE_INFO| Generating 6 splines for NONBONDED interactions 
+              Due to 3 different atomic kinds
+  ...1  ...2  ...3  ...4  ...5  ...6
+ SPLINE_INFO| Number of unique splines computed:            6
+ SPLINE_INFO| Done
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br1 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br2 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br3 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br4 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br5 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br6 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br7 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br8 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br9 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br10 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br11 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br12 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br13 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br14 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br15 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br16 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br17 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br18 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br19 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br20 charge =  -0.20000000000000001     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb21 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb22 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb23 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb24 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb25 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb26 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb27 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb28 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb29 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb30 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb31 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb32 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb33 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb34 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb35 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb36 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb37 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb38 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb39 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb40 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb41 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb42 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb43 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb44 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb45 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb46 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb47 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb48 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb49 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb50 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb51 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb52 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb53 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb54 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb55 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb56 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb57 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb58 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb59 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb60 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb61 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb62 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb63 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb64 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb65 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb66 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb67 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb68 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb69 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb70 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb71 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb72 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb73 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb74 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb75 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb76 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb77 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb78 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb79 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb80 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb81 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb82 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb83 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb84 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb85 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb86 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb87 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb88 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb89 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb90 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb91 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb92 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb93 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb94 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb95 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb96 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb97 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb98 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb99 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb100 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb101 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb102 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb103 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb104 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb105 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb106 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb107 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb108 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb109 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb110 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb111 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb112 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb113 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb114 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb115 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb116 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb117 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb118 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb119 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb120 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb121 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb122 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb123 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb124 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb125 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb126 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb127 charge =   0.40000000000000002     
+       atom            1  Pb charge =   0.40000000000000002     
+     Mol Kind Pb128 charge =   0.40000000000000002     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs129 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs130 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs131 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs132 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs133 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs134 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs135 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs136 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs137 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs138 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs139 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs140 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs141 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs142 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs143 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs144 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs145 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs146 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs147 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs148 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs149 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs150 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs151 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs152 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs153 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs154 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs155 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs156 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs157 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs158 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs159 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs160 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs161 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs162 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs163 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs164 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs165 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs166 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs167 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs168 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs169 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs170 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs171 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs172 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs173 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs174 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs175 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs176 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs177 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs178 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs179 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs180 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs181 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs182 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs183 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs184 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs185 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs186 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs187 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs188 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs189 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs190 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs191 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs192 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs193 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs194 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs195 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs196 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs197 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs198 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs199 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs200 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs201 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs202 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs203 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs204 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs205 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs206 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs207 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs208 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs209 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs210 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs211 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs212 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs213 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs214 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs215 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs216 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs217 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs218 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs219 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs220 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs221 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs222 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs223 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs224 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs225 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs226 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs227 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs228 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs229 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs230 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs231 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs232 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs233 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs234 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs235 charge =   0.20000000000000001     
+       atom            1  Cs charge =   0.20000000000000001     
+     Mol Kind Cs236 charge =   0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br237 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br238 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br239 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br240 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br241 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br242 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br243 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br244 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br245 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br246 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br247 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br248 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br249 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br250 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br251 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br252 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br253 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br254 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br255 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br256 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br257 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br258 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br259 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br260 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br261 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br262 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br263 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br264 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br265 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br266 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br267 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br268 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br269 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br270 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br271 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br272 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br273 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br274 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br275 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br276 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br277 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br278 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br279 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br280 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br281 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br282 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br283 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br284 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br285 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br286 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br287 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br288 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br289 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br290 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br291 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br292 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br293 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br294 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br295 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br296 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br297 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br298 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br299 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br300 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br301 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br302 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br303 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br304 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br305 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br306 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br307 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br308 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br309 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br310 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br311 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br312 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br313 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br314 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br315 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br316 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br317 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br318 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br319 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br320 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br321 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br322 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br323 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br324 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br325 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br326 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br327 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br328 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br329 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br330 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br331 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br332 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br333 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br334 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br335 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br336 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br337 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br338 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br339 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br340 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br341 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br342 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br343 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br344 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br345 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br346 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br347 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br348 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br349 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br350 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br351 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br352 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br353 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br354 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br355 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br356 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br357 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br358 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br359 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br360 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br361 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br362 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br363 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br364 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br365 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br366 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br367 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br368 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br369 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br370 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br371 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br372 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br373 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br374 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br375 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br376 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br377 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br378 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br379 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br380 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br381 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br382 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br383 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br384 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br385 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br386 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br387 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br388 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br389 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br390 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br391 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br392 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br393 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br394 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br395 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br396 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br397 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br398 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br399 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br400 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br401 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br402 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br403 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br404 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br405 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br406 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br407 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br408 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br409 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br410 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br411 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br412 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br413 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br414 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br415 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br416 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br417 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br418 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br419 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br420 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br421 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br422 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br423 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br424 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br425 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br426 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br427 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br428 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br429 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br430 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br431 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br432 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br433 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br434 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br435 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br436 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br437 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br438 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br439 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br440 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br441 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br442 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br443 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br444 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br445 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br446 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br447 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br448 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br449 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br450 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br451 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br452 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br453 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br454 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br455 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br456 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br457 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br458 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br459 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br460 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br461 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br462 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br463 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br464 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br465 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br466 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br467 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br468 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br469 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br470 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br471 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br472 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br473 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br474 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br475 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br476 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br477 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br478 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br479 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br480 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br481 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br482 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br483 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br484 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br485 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br486 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br487 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br488 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br489 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br490 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br491 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br492 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br493 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br494 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br495 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br496 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br497 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br498 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br499 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br500 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br501 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br502 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br503 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br504 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br505 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br506 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br507 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br508 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br509 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br510 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br511 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br512 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br513 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br514 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br515 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br516 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br517 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br518 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br519 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br520 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br521 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br522 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br523 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br524 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br525 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br526 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br527 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br528 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br529 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br530 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br531 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br532 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br533 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br534 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br535 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br536 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br537 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br538 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br539 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+     Mol Kind Br540 charge =  -0.20000000000000001     
+       atom            1  Br charge =  -0.20000000000000001     
+       atom            2  Br charge =  -0.20000000000000001     
+       atom            3  Br charge =  -0.20000000000000001     
+       atom            4  Br charge =  -0.20000000000000001     
+       atom            5  Br charge =  -0.20000000000000001     
+       atom            6  Br charge =  -0.20000000000000001     
+       atom            7  Br charge =  -0.20000000000000001     
+       atom            8  Br charge =  -0.20000000000000001     
+       atom            9  Br charge =  -0.20000000000000001     
+       atom           10  Br charge =  -0.20000000000000001     
+       atom           11  Br charge =  -0.20000000000000001     
+       atom           12  Br charge =  -0.20000000000000001     
+       atom           13  Br charge =  -0.20000000000000001     
+       atom           14  Br charge =  -0.20000000000000001     
+       atom           15  Br charge =  -0.20000000000000001     
+       atom           16  Br charge =  -0.20000000000000001     
+       atom           17  Br charge =  -0.20000000000000001     
+       atom           18  Br charge =  -0.20000000000000001     
+       atom           19  Br charge =  -0.20000000000000001     
+       atom           20  Br charge =  -0.20000000000000001     
+       atom           21  Pb charge =   0.40000000000000002     
+       atom           22  Pb charge =   0.40000000000000002     
+       atom           23  Pb charge =   0.40000000000000002     
+       atom           24  Pb charge =   0.40000000000000002     
+       atom           25  Pb charge =   0.40000000000000002     
+       atom           26  Pb charge =   0.40000000000000002     
+       atom           27  Pb charge =   0.40000000000000002     
+       atom           28  Pb charge =   0.40000000000000002     
+       atom           29  Pb charge =   0.40000000000000002     
+       atom           30  Pb charge =   0.40000000000000002     
+       atom           31  Pb charge =   0.40000000000000002     
+       atom           32  Pb charge =   0.40000000000000002     
+       atom           33  Pb charge =   0.40000000000000002     
+       atom           34  Pb charge =   0.40000000000000002     
+       atom           35  Pb charge =   0.40000000000000002     
+       atom           36  Pb charge =   0.40000000000000002     
+       atom           37  Pb charge =   0.40000000000000002     
+       atom           38  Pb charge =   0.40000000000000002     
+       atom           39  Pb charge =   0.40000000000000002     
+       atom           40  Pb charge =   0.40000000000000002     
+       atom           41  Pb charge =   0.40000000000000002     
+       atom           42  Pb charge =   0.40000000000000002     
+       atom           43  Pb charge =   0.40000000000000002     
+       atom           44  Pb charge =   0.40000000000000002     
+       atom           45  Pb charge =   0.40000000000000002     
+       atom           46  Pb charge =   0.40000000000000002     
+       atom           47  Pb charge =   0.40000000000000002     
+       atom           48  Pb charge =   0.40000000000000002     
+       atom           49  Pb charge =   0.40000000000000002     
+       atom           50  Pb charge =   0.40000000000000002     
+       atom           51  Pb charge =   0.40000000000000002     
+       atom           52  Pb charge =   0.40000000000000002     
+       atom           53  Pb charge =   0.40000000000000002     
+       atom           54  Pb charge =   0.40000000000000002     
+       atom           55  Pb charge =   0.40000000000000002     
+       atom           56  Pb charge =   0.40000000000000002     
+       atom           57  Pb charge =   0.40000000000000002     
+       atom           58  Pb charge =   0.40000000000000002     
+       atom           59  Pb charge =   0.40000000000000002     
+       atom           60  Pb charge =   0.40000000000000002     
+       atom           61  Pb charge =   0.40000000000000002     
+       atom           62  Pb charge =   0.40000000000000002     
+       atom           63  Pb charge =   0.40000000000000002     
+       atom           64  Pb charge =   0.40000000000000002     
+       atom           65  Pb charge =   0.40000000000000002     
+       atom           66  Pb charge =   0.40000000000000002     
+       atom           67  Pb charge =   0.40000000000000002     
+       atom           68  Pb charge =   0.40000000000000002     
+       atom           69  Pb charge =   0.40000000000000002     
+       atom           70  Pb charge =   0.40000000000000002     
+       atom           71  Pb charge =   0.40000000000000002     
+       atom           72  Pb charge =   0.40000000000000002     
+       atom           73  Pb charge =   0.40000000000000002     
+       atom           74  Pb charge =   0.40000000000000002     
+       atom           75  Pb charge =   0.40000000000000002     
+       atom           76  Pb charge =   0.40000000000000002     
+       atom           77  Pb charge =   0.40000000000000002     
+       atom           78  Pb charge =   0.40000000000000002     
+       atom           79  Pb charge =   0.40000000000000002     
+       atom           80  Pb charge =   0.40000000000000002     
+       atom           81  Pb charge =   0.40000000000000002     
+       atom           82  Pb charge =   0.40000000000000002     
+       atom           83  Pb charge =   0.40000000000000002     
+       atom           84  Pb charge =   0.40000000000000002     
+       atom           85  Pb charge =   0.40000000000000002     
+       atom           86  Pb charge =   0.40000000000000002     
+       atom           87  Pb charge =   0.40000000000000002     
+       atom           88  Pb charge =   0.40000000000000002     
+       atom           89  Pb charge =   0.40000000000000002     
+       atom           90  Pb charge =   0.40000000000000002     
+       atom           91  Pb charge =   0.40000000000000002     
+       atom           92  Pb charge =   0.40000000000000002     
+       atom           93  Pb charge =   0.40000000000000002     
+       atom           94  Pb charge =   0.40000000000000002     
+       atom           95  Pb charge =   0.40000000000000002     
+       atom           96  Pb charge =   0.40000000000000002     
+       atom           97  Pb charge =   0.40000000000000002     
+       atom           98  Pb charge =   0.40000000000000002     
+       atom           99  Pb charge =   0.40000000000000002     
+       atom          100  Pb charge =   0.40000000000000002     
+       atom          101  Pb charge =   0.40000000000000002     
+       atom          102  Pb charge =   0.40000000000000002     
+       atom          103  Pb charge =   0.40000000000000002     
+       atom          104  Pb charge =   0.40000000000000002     
+       atom          105  Pb charge =   0.40000000000000002     
+       atom          106  Pb charge =   0.40000000000000002     
+       atom          107  Pb charge =   0.40000000000000002     
+       atom          108  Pb charge =   0.40000000000000002     
+       atom          109  Pb charge =   0.40000000000000002     
+       atom          110  Pb charge =   0.40000000000000002     
+       atom          111  Pb charge =   0.40000000000000002     
+       atom          112  Pb charge =   0.40000000000000002     
+       atom          113  Pb charge =   0.40000000000000002     
+       atom          114  Pb charge =   0.40000000000000002     
+       atom          115  Pb charge =   0.40000000000000002     
+       atom          116  Pb charge =   0.40000000000000002     
+       atom          117  Pb charge =   0.40000000000000002     
+       atom          118  Pb charge =   0.40000000000000002     
+       atom          119  Pb charge =   0.40000000000000002     
+       atom          120  Pb charge =   0.40000000000000002     
+       atom          121  Pb charge =   0.40000000000000002     
+       atom          122  Pb charge =   0.40000000000000002     
+       atom          123  Pb charge =   0.40000000000000002     
+       atom          124  Pb charge =   0.40000000000000002     
+       atom          125  Pb charge =   0.40000000000000002     
+       atom          126  Pb charge =   0.40000000000000002     
+       atom          127  Pb charge =   0.40000000000000002     
+       atom          128  Pb charge =   0.40000000000000002     
+       atom          129  Cs charge =   0.20000000000000001     
+       atom          130  Cs charge =   0.20000000000000001     
+       atom          131  Cs charge =   0.20000000000000001     
+       atom          132  Cs charge =   0.20000000000000001     
+       atom          133  Cs charge =   0.20000000000000001     
+       atom          134  Cs charge =   0.20000000000000001     
+       atom          135  Cs charge =   0.20000000000000001     
+       atom          136  Cs charge =   0.20000000000000001     
+       atom          137  Cs charge =   0.20000000000000001     
+       atom          138  Cs charge =   0.20000000000000001     
+       atom          139  Cs charge =   0.20000000000000001     
+       atom          140  Cs charge =   0.20000000000000001     
+       atom          141  Cs charge =   0.20000000000000001     
+       atom          142  Cs charge =   0.20000000000000001     
+       atom          143  Cs charge =   0.20000000000000001     
+       atom          144  Cs charge =   0.20000000000000001     
+       atom          145  Cs charge =   0.20000000000000001     
+       atom          146  Cs charge =   0.20000000000000001     
+       atom          147  Cs charge =   0.20000000000000001     
+       atom          148  Cs charge =   0.20000000000000001     
+       atom          149  Cs charge =   0.20000000000000001     
+       atom          150  Cs charge =   0.20000000000000001     
+       atom          151  Cs charge =   0.20000000000000001     
+       atom          152  Cs charge =   0.20000000000000001     
+       atom          153  Cs charge =   0.20000000000000001     
+       atom          154  Cs charge =   0.20000000000000001     
+       atom          155  Cs charge =   0.20000000000000001     
+       atom          156  Cs charge =   0.20000000000000001     
+       atom          157  Cs charge =   0.20000000000000001     
+       atom          158  Cs charge =   0.20000000000000001     
+       atom          159  Cs charge =   0.20000000000000001     
+       atom          160  Cs charge =   0.20000000000000001     
+       atom          161  Cs charge =   0.20000000000000001     
+       atom          162  Cs charge =   0.20000000000000001     
+       atom          163  Cs charge =   0.20000000000000001     
+       atom          164  Cs charge =   0.20000000000000001     
+       atom          165  Cs charge =   0.20000000000000001     
+       atom          166  Cs charge =   0.20000000000000001     
+       atom          167  Cs charge =   0.20000000000000001     
+       atom          168  Cs charge =   0.20000000000000001     
+       atom          169  Cs charge =   0.20000000000000001     
+       atom          170  Cs charge =   0.20000000000000001     
+       atom          171  Cs charge =   0.20000000000000001     
+       atom          172  Cs charge =   0.20000000000000001     
+       atom          173  Cs charge =   0.20000000000000001     
+       atom          174  Cs charge =   0.20000000000000001     
+       atom          175  Cs charge =   0.20000000000000001     
+       atom          176  Cs charge =   0.20000000000000001     
+       atom          177  Cs charge =   0.20000000000000001     
+       atom          178  Cs charge =   0.20000000000000001     
+       atom          179  Cs charge =   0.20000000000000001     
+       atom          180  Cs charge =   0.20000000000000001     
+       atom          181  Cs charge =   0.20000000000000001     
+       atom          182  Cs charge =   0.20000000000000001     
+       atom          183  Cs charge =   0.20000000000000001     
+       atom          184  Cs charge =   0.20000000000000001     
+       atom          185  Cs charge =   0.20000000000000001     
+       atom          186  Cs charge =   0.20000000000000001     
+       atom          187  Cs charge =   0.20000000000000001     
+       atom          188  Cs charge =   0.20000000000000001     
+       atom          189  Cs charge =   0.20000000000000001     
+       atom          190  Cs charge =   0.20000000000000001     
+       atom          191  Cs charge =   0.20000000000000001     
+       atom          192  Cs charge =   0.20000000000000001     
+       atom          193  Cs charge =   0.20000000000000001     
+       atom          194  Cs charge =   0.20000000000000001     
+       atom          195  Cs charge =   0.20000000000000001     
+       atom          196  Cs charge =   0.20000000000000001     
+       atom          197  Cs charge =   0.20000000000000001     
+       atom          198  Cs charge =   0.20000000000000001     
+       atom          199  Cs charge =   0.20000000000000001     
+       atom          200  Cs charge =   0.20000000000000001     
+       atom          201  Cs charge =   0.20000000000000001     
+       atom          202  Cs charge =   0.20000000000000001     
+       atom          203  Cs charge =   0.20000000000000001     
+       atom          204  Cs charge =   0.20000000000000001     
+       atom          205  Cs charge =   0.20000000000000001     
+       atom          206  Cs charge =   0.20000000000000001     
+       atom          207  Cs charge =   0.20000000000000001     
+       atom          208  Cs charge =   0.20000000000000001     
+       atom          209  Cs charge =   0.20000000000000001     
+       atom          210  Cs charge =   0.20000000000000001     
+       atom          211  Cs charge =   0.20000000000000001     
+       atom          212  Cs charge =   0.20000000000000001     
+       atom          213  Cs charge =   0.20000000000000001     
+       atom          214  Cs charge =   0.20000000000000001     
+       atom          215  Cs charge =   0.20000000000000001     
+       atom          216  Cs charge =   0.20000000000000001     
+       atom          217  Cs charge =   0.20000000000000001     
+       atom          218  Cs charge =   0.20000000000000001     
+       atom          219  Cs charge =   0.20000000000000001     
+       atom          220  Cs charge =   0.20000000000000001     
+       atom          221  Cs charge =   0.20000000000000001     
+       atom          222  Cs charge =   0.20000000000000001     
+       atom          223  Cs charge =   0.20000000000000001     
+       atom          224  Cs charge =   0.20000000000000001     
+       atom          225  Cs charge =   0.20000000000000001     
+       atom          226  Cs charge =   0.20000000000000001     
+       atom          227  Cs charge =   0.20000000000000001     
+       atom          228  Cs charge =   0.20000000000000001     
+       atom          229  Cs charge =   0.20000000000000001     
+       atom          230  Cs charge =   0.20000000000000001     
+       atom          231  Cs charge =   0.20000000000000001     
+       atom          232  Cs charge =   0.20000000000000001     
+       atom          233  Cs charge =   0.20000000000000001     
+       atom          234  Cs charge =   0.20000000000000001     
+       atom          235  Cs charge =   0.20000000000000001     
+       atom          236  Cs charge =   0.20000000000000001     
+       atom          237  Br charge =  -0.20000000000000001     
+       atom          238  Br charge =  -0.20000000000000001     
+       atom          239  Br charge =  -0.20000000000000001     
+       atom          240  Br charge =  -0.20000000000000001     
+       atom          241  Br charge =  -0.20000000000000001     
+       atom          242  Br charge =  -0.20000000000000001     
+       atom          243  Br charge =  -0.20000000000000001     
+       atom          244  Br charge =  -0.20000000000000001     
+       atom          245  Br charge =  -0.20000000000000001     
+       atom          246  Br charge =  -0.20000000000000001     
+       atom          247  Br charge =  -0.20000000000000001     
+       atom          248  Br charge =  -0.20000000000000001     
+       atom          249  Br charge =  -0.20000000000000001     
+       atom          250  Br charge =  -0.20000000000000001     
+       atom          251  Br charge =  -0.20000000000000001     
+       atom          252  Br charge =  -0.20000000000000001     
+       atom          253  Br charge =  -0.20000000000000001     
+       atom          254  Br charge =  -0.20000000000000001     
+       atom          255  Br charge =  -0.20000000000000001     
+       atom          256  Br charge =  -0.20000000000000001     
+       atom          257  Br charge =  -0.20000000000000001     
+       atom          258  Br charge =  -0.20000000000000001     
+       atom          259  Br charge =  -0.20000000000000001     
+       atom          260  Br charge =  -0.20000000000000001     
+       atom          261  Br charge =  -0.20000000000000001     
+       atom          262  Br charge =  -0.20000000000000001     
+       atom          263  Br charge =  -0.20000000000000001     
+       atom          264  Br charge =  -0.20000000000000001     
+       atom          265  Br charge =  -0.20000000000000001     
+       atom          266  Br charge =  -0.20000000000000001     
+       atom          267  Br charge =  -0.20000000000000001     
+       atom          268  Br charge =  -0.20000000000000001     
+       atom          269  Br charge =  -0.20000000000000001     
+       atom          270  Br charge =  -0.20000000000000001     
+       atom          271  Br charge =  -0.20000000000000001     
+       atom          272  Br charge =  -0.20000000000000001     
+       atom          273  Br charge =  -0.20000000000000001     
+       atom          274  Br charge =  -0.20000000000000001     
+       atom          275  Br charge =  -0.20000000000000001     
+       atom          276  Br charge =  -0.20000000000000001     
+       atom          277  Br charge =  -0.20000000000000001     
+       atom          278  Br charge =  -0.20000000000000001     
+       atom          279  Br charge =  -0.20000000000000001     
+       atom          280  Br charge =  -0.20000000000000001     
+       atom          281  Br charge =  -0.20000000000000001     
+       atom          282  Br charge =  -0.20000000000000001     
+       atom          283  Br charge =  -0.20000000000000001     
+       atom          284  Br charge =  -0.20000000000000001     
+       atom          285  Br charge =  -0.20000000000000001     
+       atom          286  Br charge =  -0.20000000000000001     
+       atom          287  Br charge =  -0.20000000000000001     
+       atom          288  Br charge =  -0.20000000000000001     
+       atom          289  Br charge =  -0.20000000000000001     
+       atom          290  Br charge =  -0.20000000000000001     
+       atom          291  Br charge =  -0.20000000000000001     
+       atom          292  Br charge =  -0.20000000000000001     
+       atom          293  Br charge =  -0.20000000000000001     
+       atom          294  Br charge =  -0.20000000000000001     
+       atom          295  Br charge =  -0.20000000000000001     
+       atom          296  Br charge =  -0.20000000000000001     
+       atom          297  Br charge =  -0.20000000000000001     
+       atom          298  Br charge =  -0.20000000000000001     
+       atom          299  Br charge =  -0.20000000000000001     
+       atom          300  Br charge =  -0.20000000000000001     
+       atom          301  Br charge =  -0.20000000000000001     
+       atom          302  Br charge =  -0.20000000000000001     
+       atom          303  Br charge =  -0.20000000000000001     
+       atom          304  Br charge =  -0.20000000000000001     
+       atom          305  Br charge =  -0.20000000000000001     
+       atom          306  Br charge =  -0.20000000000000001     
+       atom          307  Br charge =  -0.20000000000000001     
+       atom          308  Br charge =  -0.20000000000000001     
+       atom          309  Br charge =  -0.20000000000000001     
+       atom          310  Br charge =  -0.20000000000000001     
+       atom          311  Br charge =  -0.20000000000000001     
+       atom          312  Br charge =  -0.20000000000000001     
+       atom          313  Br charge =  -0.20000000000000001     
+       atom          314  Br charge =  -0.20000000000000001     
+       atom          315  Br charge =  -0.20000000000000001     
+       atom          316  Br charge =  -0.20000000000000001     
+       atom          317  Br charge =  -0.20000000000000001     
+       atom          318  Br charge =  -0.20000000000000001     
+       atom          319  Br charge =  -0.20000000000000001     
+       atom          320  Br charge =  -0.20000000000000001     
+       atom          321  Br charge =  -0.20000000000000001     
+       atom          322  Br charge =  -0.20000000000000001     
+       atom          323  Br charge =  -0.20000000000000001     
+       atom          324  Br charge =  -0.20000000000000001     
+       atom          325  Br charge =  -0.20000000000000001     
+       atom          326  Br charge =  -0.20000000000000001     
+       atom          327  Br charge =  -0.20000000000000001     
+       atom          328  Br charge =  -0.20000000000000001     
+       atom          329  Br charge =  -0.20000000000000001     
+       atom          330  Br charge =  -0.20000000000000001     
+       atom          331  Br charge =  -0.20000000000000001     
+       atom          332  Br charge =  -0.20000000000000001     
+       atom          333  Br charge =  -0.20000000000000001     
+       atom          334  Br charge =  -0.20000000000000001     
+       atom          335  Br charge =  -0.20000000000000001     
+       atom          336  Br charge =  -0.20000000000000001     
+       atom          337  Br charge =  -0.20000000000000001     
+       atom          338  Br charge =  -0.20000000000000001     
+       atom          339  Br charge =  -0.20000000000000001     
+       atom          340  Br charge =  -0.20000000000000001     
+       atom          341  Br charge =  -0.20000000000000001     
+       atom          342  Br charge =  -0.20000000000000001     
+       atom          343  Br charge =  -0.20000000000000001     
+       atom          344  Br charge =  -0.20000000000000001     
+       atom          345  Br charge =  -0.20000000000000001     
+       atom          346  Br charge =  -0.20000000000000001     
+       atom          347  Br charge =  -0.20000000000000001     
+       atom          348  Br charge =  -0.20000000000000001     
+       atom          349  Br charge =  -0.20000000000000001     
+       atom          350  Br charge =  -0.20000000000000001     
+       atom          351  Br charge =  -0.20000000000000001     
+       atom          352  Br charge =  -0.20000000000000001     
+       atom          353  Br charge =  -0.20000000000000001     
+       atom          354  Br charge =  -0.20000000000000001     
+       atom          355  Br charge =  -0.20000000000000001     
+       atom          356  Br charge =  -0.20000000000000001     
+       atom          357  Br charge =  -0.20000000000000001     
+       atom          358  Br charge =  -0.20000000000000001     
+       atom          359  Br charge =  -0.20000000000000001     
+       atom          360  Br charge =  -0.20000000000000001     
+       atom          361  Br charge =  -0.20000000000000001     
+       atom          362  Br charge =  -0.20000000000000001     
+       atom          363  Br charge =  -0.20000000000000001     
+       atom          364  Br charge =  -0.20000000000000001     
+       atom          365  Br charge =  -0.20000000000000001     
+       atom          366  Br charge =  -0.20000000000000001     
+       atom          367  Br charge =  -0.20000000000000001     
+       atom          368  Br charge =  -0.20000000000000001     
+       atom          369  Br charge =  -0.20000000000000001     
+       atom          370  Br charge =  -0.20000000000000001     
+       atom          371  Br charge =  -0.20000000000000001     
+       atom          372  Br charge =  -0.20000000000000001     
+       atom          373  Br charge =  -0.20000000000000001     
+       atom          374  Br charge =  -0.20000000000000001     
+       atom          375  Br charge =  -0.20000000000000001     
+       atom          376  Br charge =  -0.20000000000000001     
+       atom          377  Br charge =  -0.20000000000000001     
+       atom          378  Br charge =  -0.20000000000000001     
+       atom          379  Br charge =  -0.20000000000000001     
+       atom          380  Br charge =  -0.20000000000000001     
+       atom          381  Br charge =  -0.20000000000000001     
+       atom          382  Br charge =  -0.20000000000000001     
+       atom          383  Br charge =  -0.20000000000000001     
+       atom          384  Br charge =  -0.20000000000000001     
+       atom          385  Br charge =  -0.20000000000000001     
+       atom          386  Br charge =  -0.20000000000000001     
+       atom          387  Br charge =  -0.20000000000000001     
+       atom          388  Br charge =  -0.20000000000000001     
+       atom          389  Br charge =  -0.20000000000000001     
+       atom          390  Br charge =  -0.20000000000000001     
+       atom          391  Br charge =  -0.20000000000000001     
+       atom          392  Br charge =  -0.20000000000000001     
+       atom          393  Br charge =  -0.20000000000000001     
+       atom          394  Br charge =  -0.20000000000000001     
+       atom          395  Br charge =  -0.20000000000000001     
+       atom          396  Br charge =  -0.20000000000000001     
+       atom          397  Br charge =  -0.20000000000000001     
+       atom          398  Br charge =  -0.20000000000000001     
+       atom          399  Br charge =  -0.20000000000000001     
+       atom          400  Br charge =  -0.20000000000000001     
+       atom          401  Br charge =  -0.20000000000000001     
+       atom          402  Br charge =  -0.20000000000000001     
+       atom          403  Br charge =  -0.20000000000000001     
+       atom          404  Br charge =  -0.20000000000000001     
+       atom          405  Br charge =  -0.20000000000000001     
+       atom          406  Br charge =  -0.20000000000000001     
+       atom          407  Br charge =  -0.20000000000000001     
+       atom          408  Br charge =  -0.20000000000000001     
+       atom          409  Br charge =  -0.20000000000000001     
+       atom          410  Br charge =  -0.20000000000000001     
+       atom          411  Br charge =  -0.20000000000000001     
+       atom          412  Br charge =  -0.20000000000000001     
+       atom          413  Br charge =  -0.20000000000000001     
+       atom          414  Br charge =  -0.20000000000000001     
+       atom          415  Br charge =  -0.20000000000000001     
+       atom          416  Br charge =  -0.20000000000000001     
+       atom          417  Br charge =  -0.20000000000000001     
+       atom          418  Br charge =  -0.20000000000000001     
+       atom          419  Br charge =  -0.20000000000000001     
+       atom          420  Br charge =  -0.20000000000000001     
+       atom          421  Br charge =  -0.20000000000000001     
+       atom          422  Br charge =  -0.20000000000000001     
+       atom          423  Br charge =  -0.20000000000000001     
+       atom          424  Br charge =  -0.20000000000000001     
+       atom          425  Br charge =  -0.20000000000000001     
+       atom          426  Br charge =  -0.20000000000000001     
+       atom          427  Br charge =  -0.20000000000000001     
+       atom          428  Br charge =  -0.20000000000000001     
+       atom          429  Br charge =  -0.20000000000000001     
+       atom          430  Br charge =  -0.20000000000000001     
+       atom          431  Br charge =  -0.20000000000000001     
+       atom          432  Br charge =  -0.20000000000000001     
+       atom          433  Br charge =  -0.20000000000000001     
+       atom          434  Br charge =  -0.20000000000000001     
+       atom          435  Br charge =  -0.20000000000000001     
+       atom          436  Br charge =  -0.20000000000000001     
+       atom          437  Br charge =  -0.20000000000000001     
+       atom          438  Br charge =  -0.20000000000000001     
+       atom          439  Br charge =  -0.20000000000000001     
+       atom          440  Br charge =  -0.20000000000000001     
+       atom          441  Br charge =  -0.20000000000000001     
+       atom          442  Br charge =  -0.20000000000000001     
+       atom          443  Br charge =  -0.20000000000000001     
+       atom          444  Br charge =  -0.20000000000000001     
+       atom          445  Br charge =  -0.20000000000000001     
+       atom          446  Br charge =  -0.20000000000000001     
+       atom          447  Br charge =  -0.20000000000000001     
+       atom          448  Br charge =  -0.20000000000000001     
+       atom          449  Br charge =  -0.20000000000000001     
+       atom          450  Br charge =  -0.20000000000000001     
+       atom          451  Br charge =  -0.20000000000000001     
+       atom          452  Br charge =  -0.20000000000000001     
+       atom          453  Br charge =  -0.20000000000000001     
+       atom          454  Br charge =  -0.20000000000000001     
+       atom          455  Br charge =  -0.20000000000000001     
+       atom          456  Br charge =  -0.20000000000000001     
+       atom          457  Br charge =  -0.20000000000000001     
+       atom          458  Br charge =  -0.20000000000000001     
+       atom          459  Br charge =  -0.20000000000000001     
+       atom          460  Br charge =  -0.20000000000000001     
+       atom          461  Br charge =  -0.20000000000000001     
+       atom          462  Br charge =  -0.20000000000000001     
+       atom          463  Br charge =  -0.20000000000000001     
+       atom          464  Br charge =  -0.20000000000000001     
+       atom          465  Br charge =  -0.20000000000000001     
+       atom          466  Br charge =  -0.20000000000000001     
+       atom          467  Br charge =  -0.20000000000000001     
+       atom          468  Br charge =  -0.20000000000000001     
+       atom          469  Br charge =  -0.20000000000000001     
+       atom          470  Br charge =  -0.20000000000000001     
+       atom          471  Br charge =  -0.20000000000000001     
+       atom          472  Br charge =  -0.20000000000000001     
+       atom          473  Br charge =  -0.20000000000000001     
+       atom          474  Br charge =  -0.20000000000000001     
+       atom          475  Br charge =  -0.20000000000000001     
+       atom          476  Br charge =  -0.20000000000000001     
+       atom          477  Br charge =  -0.20000000000000001     
+       atom          478  Br charge =  -0.20000000000000001     
+       atom          479  Br charge =  -0.20000000000000001     
+       atom          480  Br charge =  -0.20000000000000001     
+       atom          481  Br charge =  -0.20000000000000001     
+       atom          482  Br charge =  -0.20000000000000001     
+       atom          483  Br charge =  -0.20000000000000001     
+       atom          484  Br charge =  -0.20000000000000001     
+       atom          485  Br charge =  -0.20000000000000001     
+       atom          486  Br charge =  -0.20000000000000001     
+       atom          487  Br charge =  -0.20000000000000001     
+       atom          488  Br charge =  -0.20000000000000001     
+       atom          489  Br charge =  -0.20000000000000001     
+       atom          490  Br charge =  -0.20000000000000001     
+       atom          491  Br charge =  -0.20000000000000001     
+       atom          492  Br charge =  -0.20000000000000001     
+       atom          493  Br charge =  -0.20000000000000001     
+       atom          494  Br charge =  -0.20000000000000001     
+       atom          495  Br charge =  -0.20000000000000001     
+       atom          496  Br charge =  -0.20000000000000001     
+       atom          497  Br charge =  -0.20000000000000001     
+       atom          498  Br charge =  -0.20000000000000001     
+       atom          499  Br charge =  -0.20000000000000001     
+       atom          500  Br charge =  -0.20000000000000001     
+       atom          501  Br charge =  -0.20000000000000001     
+       atom          502  Br charge =  -0.20000000000000001     
+       atom          503  Br charge =  -0.20000000000000001     
+       atom          504  Br charge =  -0.20000000000000001     
+       atom          505  Br charge =  -0.20000000000000001     
+       atom          506  Br charge =  -0.20000000000000001     
+       atom          507  Br charge =  -0.20000000000000001     
+       atom          508  Br charge =  -0.20000000000000001     
+       atom          509  Br charge =  -0.20000000000000001     
+       atom          510  Br charge =  -0.20000000000000001     
+       atom          511  Br charge =  -0.20000000000000001     
+       atom          512  Br charge =  -0.20000000000000001     
+       atom          513  Br charge =  -0.20000000000000001     
+       atom          514  Br charge =  -0.20000000000000001     
+       atom          515  Br charge =  -0.20000000000000001     
+       atom          516  Br charge =  -0.20000000000000001     
+       atom          517  Br charge =  -0.20000000000000001     
+       atom          518  Br charge =  -0.20000000000000001     
+       atom          519  Br charge =  -0.20000000000000001     
+       atom          520  Br charge =  -0.20000000000000001     
+       atom          521  Br charge =  -0.20000000000000001     
+       atom          522  Br charge =  -0.20000000000000001     
+       atom          523  Br charge =  -0.20000000000000001     
+       atom          524  Br charge =  -0.20000000000000001     
+       atom          525  Br charge =  -0.20000000000000001     
+       atom          526  Br charge =  -0.20000000000000001     
+       atom          527  Br charge =  -0.20000000000000001     
+       atom          528  Br charge =  -0.20000000000000001     
+       atom          529  Br charge =  -0.20000000000000001     
+       atom          530  Br charge =  -0.20000000000000001     
+       atom          531  Br charge =  -0.20000000000000001     
+       atom          532  Br charge =  -0.20000000000000001     
+       atom          533  Br charge =  -0.20000000000000001     
+       atom          534  Br charge =  -0.20000000000000001     
+       atom          535  Br charge =  -0.20000000000000001     
+       atom          536  Br charge =  -0.20000000000000001     
+       atom          537  Br charge =  -0.20000000000000001     
+       atom          538  Br charge =  -0.20000000000000001     
+       atom          539  Br charge =  -0.20000000000000001     
+       atom          540  Br charge =  -0.20000000000000001     
+    Total system charge =        -0.0000000000
+    Total system mass   = 114149796.0527659953
+
+ CELL_OPT| Pressure tolerance [bar]:                                       100.0
+ CELL_OPT| Keep angles between the cell vectors:                              NO
+ CELL_OPT| Keep cell symmetry:                                                NO
+ CELL_OPT| Constraint:                                                      NONE
+
+ *******************************************************************************
+ ***                     STARTING   CELL   OPTIMIZATION                      ***
+ ***                                 L-BFGS                                  ***
+ *******************************************************************************
+
+ --------------------------
+ OPTIMIZATION STEP:      1
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            22394.867
+ CELL| Vector a [angstrom]:      25.450     0.000     0.000    |a| =      25.450
+ CELL| Vector b [angstrom]:       0.000    35.990     0.000    |b| =      35.990
+ CELL| Vector c [angstrom]:       0.000     0.000    24.450    |c| =      24.450
+ CELL| Angle (b,c), alpha [degree]:                                       90.000
+ CELL| Angle (a,c), beta  [degree]:                                       90.000
+ CELL| Angle (a,b), gamma [degree]:                                       90.000
+ CELL| Numerically orthorhombic:                                             YES
+ WARNING| Particles:     308    327 at distance [au]:     4.95123135 less than:      5.24078599; increase EMAX_SPLINE.
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -0.978711528881994
+
+
+ CELL| Volume [angstrom^3]:                                            22668.566
+ CELL| Vector a [angstrom]:      25.536     0.000     0.000    |a| =      25.536
+ CELL| Vector b [angstrom]:      -0.003    36.046     0.000    |b| =      36.046
+ CELL| Vector c [angstrom]:       0.007     0.011    24.627    |c| =      24.627
+ CELL| Angle (b,c), alpha [degree]:                                       89.975
+ CELL| Angle (a,c), beta  [degree]:                                       89.983
+ CELL| Angle (a,b), gamma [degree]:                                       90.005
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -2.431545026951890
+
+
+ --------  Informations at step =     1 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -2.4315450270
+  Internal Pressure [bar]    =     36660.9045392926
+  Real energy change         =        -1.4528334981
+  Decrease in energy         =                  YES
+  Used time                  =                0.050
+
+  Convergence check :
+  Max. step size             =         0.4777072597
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0247993175
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.5562555501
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0284148113
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =     36560.9045392926
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      2
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            23104.002
+ CELL| Vector a [angstrom]:      25.685     0.000     0.000    |a| =      25.685
+ CELL| Vector b [angstrom]:      -0.007    36.150     0.000    |b| =      36.150
+ CELL| Vector c [angstrom]:       0.013     0.028    24.883    |c| =      24.883
+ CELL| Angle (b,c), alpha [degree]:                                       89.935
+ CELL| Angle (a,c), beta  [degree]:                                       89.970
+ CELL| Angle (a,b), gamma [degree]:                                       90.011
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -3.364537011738164
+
+
+ --------  Informations at step =     2 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -3.3645370117
+  Internal Pressure [bar]    =     27607.0836575438
+  Real energy change         =        -0.9329919848
+  Decrease in energy         =                  YES
+  Used time                  =                0.017
+
+  Convergence check :
+  Max. step size             =         0.4849537295
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0250156441
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.4007094656
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0184015205
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =     27507.0836575439
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      3
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            24328.863
+ CELL| Vector a [angstrom]:      26.116     0.000     0.000    |a| =      26.116
+ CELL| Vector b [angstrom]:      -0.013    36.476     0.000    |b| =      36.476
+ CELL| Vector c [angstrom]:       0.034     0.061    25.539    |c| =      25.539
+ CELL| Angle (b,c), alpha [degree]:                                       89.863
+ CELL| Angle (a,c), beta  [degree]:                                       89.925
+ CELL| Angle (a,b), gamma [degree]:                                       90.020
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -4.532997992835877
+
+
+ --------  Informations at step =     3 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -4.5329979928
+  Internal Pressure [bar]    =     14960.7868769794
+  Real energy change         =        -1.1684609811
+  Decrease in energy         =                  YES
+  Used time                  =                0.027
+
+  Convergence check :
+  Max. step size             =         1.2394785446
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0542320645
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.2069702134
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0090847092
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =     14860.7868769794
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      4
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            25840.946
+ CELL| Vector a [angstrom]:      26.641     0.000     0.000    |a| =      26.641
+ CELL| Vector b [angstrom]:      -0.015    36.929     0.000    |b| =      36.929
+ CELL| Vector c [angstrom]:       0.053     0.085    26.266    |c| =      26.266
+ CELL| Angle (b,c), alpha [degree]:                                       89.815
+ CELL| Angle (a,c), beta  [degree]:                                       89.885
+ CELL| Angle (a,b), gamma [degree]:                                       90.023
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.170006933880177
+
+
+ --------  Informations at step =     4 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.1700069339
+  Internal Pressure [bar]    =      7071.9881549920
+  Real energy change         =        -0.6370089410
+  Decrease in energy         =                  YES
+  Used time                  =                0.016
+
+  Convergence check :
+  Max. step size             =         1.3730766188
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0592741109
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0961665215
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0043978188
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =      6971.9881549920
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      5
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            27323.717
+ CELL| Vector a [angstrom]:      27.113     0.000     0.000    |a| =      27.113
+ CELL| Vector b [angstrom]:      -0.013    37.431     0.000    |b| =      37.431
+ CELL| Vector c [angstrom]:       0.073     0.096    26.924    |c| =      26.924
+ CELL| Angle (b,c), alpha [degree]:                                       89.795
+ CELL| Angle (a,c), beta  [degree]:                                       89.845
+ CELL| Angle (a,b), gamma [degree]:                                       90.020
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.477250006367803
+
+
+ --------  Informations at step =     5 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.4772500064
+  Internal Pressure [bar]    =      2618.4897360359
+  Real energy change         =        -0.3072430725
+  Decrease in energy         =                  YES
+  Used time                  =                0.025
+
+  Convergence check :
+  Max. step size             =         1.2435485392
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0594236276
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0348987780
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0019502050
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =      2518.4897360359
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      6
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            28288.695
+ CELL| Vector a [angstrom]:      27.349     0.000     0.000    |a| =      27.349
+ CELL| Vector b [angstrom]:      -0.009    37.840     0.000    |b| =      37.840
+ CELL| Vector c [angstrom]:       0.096     0.098    27.335    |c| =      27.335
+ CELL| Angle (b,c), alpha [degree]:                                       89.795
+ CELL| Angle (a,c), beta  [degree]:                                       89.799
+ CELL| Angle (a,b), gamma [degree]:                                       90.013
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.607215566498483
+
+
+ --------  Informations at step =     6 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.6072155665
+  Internal Pressure [bar]    =       540.3612546159
+  Real energy change         =        -0.1299655601
+  Decrease in energy         =                  YES
+  Used time                  =                0.014
+
+  Convergence check :
+  Max. step size             =         0.7772162424
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0528815252
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0077432736
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0009165875
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =       440.3612546159
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      7
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            28632.885
+ CELL| Vector a [angstrom]:      27.318     0.000     0.000    |a| =      27.318
+ CELL| Vector b [angstrom]:       0.000    38.127     0.000    |b| =      38.127
+ CELL| Vector c [angstrom]:       0.125     0.088    27.490    |c| =      27.491
+ CELL| Angle (b,c), alpha [degree]:                                       89.817
+ CELL| Angle (a,c), beta  [degree]:                                       89.740
+ CELL| Angle (a,b), gamma [degree]:                                       90.000
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.685491131797523
+
+
+ --------  Informations at step =     7 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.6854911318
+  Internal Pressure [bar]    =      -386.6625736984
+  Real energy change         =        -0.0782755653
+  Decrease in energy         =                  YES
+  Used time                  =                0.015
+
+  Convergence check :
+  Max. step size             =         0.5436634236
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0598321038
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0085059084
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0006019277
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =      -486.6625736984
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      8
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            28245.752
+ CELL| Vector a [angstrom]:      26.976     0.000     0.000    |a| =      26.976
+ CELL| Vector b [angstrom]:       0.015    38.290     0.000    |b| =      38.290
+ CELL| Vector c [angstrom]:       0.150     0.057    27.346    |c| =      27.347
+ CELL| Angle (b,c), alpha [degree]:                                       89.881
+ CELL| Angle (a,c), beta  [degree]:                                       89.685
+ CELL| Angle (a,b), gamma [degree]:                                       89.977
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.758970146448061
+
+
+ --------  Informations at step =     8 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.7589701464
+  Internal Pressure [bar]    =      -519.7066867810
+  Real energy change         =        -0.0734790147
+  Decrease in energy         =                  YES
+  Used time                  =                0.025
+
+  Convergence check :
+  Max. step size             =         0.6470696049
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.0959371674
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0096798864
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0004849700
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =      -619.7066867810
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:      9
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            27616.968
+ CELL| Vector a [angstrom]:      26.760     0.000     0.000    |a| =      26.760
+ CELL| Vector b [angstrom]:       0.035    38.281     0.000    |b| =      38.281
+ CELL| Vector c [angstrom]:       0.072    -0.012    26.959    |c| =      26.959
+ CELL| Angle (b,c), alpha [degree]:                                       90.024
+ CELL| Angle (a,c), beta  [degree]:                                       89.847
+ CELL| Angle (a,b), gamma [degree]:                                       89.948
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.823509024850035
+
+
+ --------  Informations at step =     9 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.8235090249
+  Internal Pressure [bar]    =      -344.2730794254
+  Real energy change         =        -0.0645388784
+  Decrease in energy         =                  YES
+  Used time                  =                0.024
+
+  Convergence check :
+  Max. step size             =         0.7317603687
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.1518283446
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0053916809
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0003765999
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =      -444.2730794254
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ --------------------------
+ OPTIMIZATION STEP:     10
+ --------------------------
+
+ CELL| Volume [angstrom^3]:                                            26779.205
+ CELL| Vector a [angstrom]:      26.472     0.000     0.000    |a| =      26.472
+ CELL| Vector b [angstrom]:       0.022    37.879     0.000    |b| =      37.879
+ CELL| Vector c [angstrom]:      -0.039    -0.001    26.706    |c| =      26.706
+ CELL| Angle (b,c), alpha [degree]:                                       90.003
+ CELL| Angle (a,c), beta  [degree]:                                       90.083
+ CELL| Angle (a,b), gamma [degree]:                                       89.967
+ CELL| Numerically orthorhombic:                                              NO
+
+ ENERGY| Total FORCE_EVAL ( FIST ) energy (a.u.):             -5.857020455664389
+
+
+ --------  Informations at step =    10 ------------
+  Optimization Method        =                LBFGS
+  Total Energy               =        -5.8570204557
+  Internal Pressure [bar]    =       352.6210687942
+  Real energy change         =        -0.0335114308
+  Decrease in energy         =                  YES
+  Used time                  =                0.017
+
+  Convergence check :
+  Max. step size             =         0.7591471237
+  Conv. limit for step size  =         0.0030000000
+  Convergence in step size   =                   NO
+  RMS step size              =         0.1527031739
+  Conv. limit for RMS step   =         0.0015000000
+  Convergence in RMS step    =                   NO
+  Max. gradient              =         0.0061656466
+  Conv. limit for gradients  =         0.0004500000
+  Conv. for gradients        =                   NO
+  RMS gradient               =         0.0003828392
+  Conv. limit for RMS grad.  =         0.0003000000
+  Conv. for gradients        =                   NO
+  Pressure Deviation [bar]   =       252.6210687942
+  Pressure Tolerance [bar]   =       100.0000000000
+  Conv. for  PRESSURE        =                   NO
+ ---------------------------------------------------
+
+ *** MAXIMUM NUMBER OF OPTIMIZATION STEPS REACHED ***
+ ***        EXITING GEOMETRY OPTIMIZATION         ***
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                DBCSR STATISTICS                             -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ COUNTER                                    TOTAL       BLAS       SMM       ACC
+ flops inhomo. stacks                           0       0.0%      0.0%      0.0%
+ flops total                         0.000000E+00       0.0%      0.0%      0.0%
+ flops max/rank                      0.000000E+00       0.0%      0.0%      0.0%
+ matmuls inhomo. stacks                         0       0.0%      0.0%      0.0%
+ matmuls total                                  0       0.0%      0.0%      0.0%
+ number of processed stacks                     0       0.0%      0.0%      0.0%
+ average stack size                                     0.0       0.0       0.0
+ marketing flops                     0.000000E+00
+ -------------------------------------------------------------------------------
+
+ MEMORY| Estimated peak process memory [MiB]                                   0
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                           R E F E R E N C E S                               -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ 
+ CP2K version 6.1, the CP2K developers group (2018).
+ CP2K is freely available from https://www.cp2k.org/ .
+
+ Schuett, Ole; Messmer, Peter; Hutter, Juerg; VandeVondele, Joost. 
+ Electronic Structure Calculations on Graphics Processing Units, John Wiley & Sons, Ltd, 173-190 (2016). 
+ GPU-Accelerated Sparse Matrix-Matrix Multiplication for Linear Scaling Density Functional Theory.
+ http://dx.doi.org/10.1002/9781118670712.ch8
+
+
+ Borstnik, U; VandeVondele, J; Weber, V; Hutter, J. 
+ PARALLEL COMPUTING, 40 (5-6), 47-58 (2014). 
+ Sparse matrix multiplication: The distributed block-compressed sparse
+ row library.
+ http://dx.doi.org/10.1016/j.parco.2014.03.012
+
+
+ Hutter, J; Iannuzzi, M; Schiffmann, F; VandeVondele, J. 
+ WILEY INTERDISCIPLINARY REVIEWS-COMPUTATIONAL MOLECULAR SCIENCE, 4 (1), 15-25 (2014). 
+ CP2K: atomistic simulations of condensed matter systems.
+ http://dx.doi.org/10.1002/wcms.1159
+
+
+ Frigo, M; Johnson, SG. 
+ PROCEEDINGS OF THE IEEE, 93 (2), 216-231 (2005). 
+ The design and implementation of FFTW3.
+ http://dx.doi.org/10.1109/JPROC.2004.840301
+
+
+ ESSMANN, U; PERERA, L; BERKOWITZ, ML; DARDEN, T; LEE, H; PEDERSEN, LG. 
+ JOURNAL OF CHEMICAL PHYSICS, 103 (19), 8577-8593 (1995). 
+ A SMOOTH PARTICLE MESH EWALD METHOD.
+ http://dx.doi.org/10.1063/1.470117
+
+
+ BYRD, RH; LU, PH; NOCEDAL, J; ZHU, CY. 
+ SIAM JOURNAL ON SCIENTIFIC COMPUTING, 16 (5), 1190-1208 (1995). 
+ A LIMITED MEMORY ALGORITHM FOR BOUND CONSTRAINED OPTIMIZATION.
+ http://dx.doi.org/10.1137/0916069
+
+
+ -------------------------------------------------------------------------------
+ -                                                                             -
+ -                                T I M I N G                                  -
+ -                                                                             -
+ -------------------------------------------------------------------------------
+ SUBROUTINE                       CALLS  ASD         SELF TIME        TOTAL TIME
+                                MAXIMUM       AVERAGE  MAXIMUM  AVERAGE  MAXIMUM
+ CP2K                                 1  1.0    0.003    0.003    0.359    0.359
+ cp_cell_opt                          1  2.0    0.000    0.000    0.332    0.332
+ geoopt_lbfgs                         1  3.0    0.000    0.000    0.332    0.332
+ cp_opt_gopt_step                    10  4.0    0.004    0.004    0.331    0.331
+ cp_eval_at                          11  5.0    0.002    0.002    0.229    0.229
+ fist_calc_energy_force              11  6.0    0.001    0.001    0.225    0.225
+ force_nonbond                       11  7.0    0.112    0.112    0.112    0.112
+ write_restart                       10  5.0    0.034    0.034    0.069    0.069
+ build_fist_neighbor_lists            6  8.0    0.000    0.000    0.064    0.064
+ list_control                        11  7.0    0.000    0.000    0.061    0.061
+ build_neighbor_lists                 6  9.0    0.053    0.053    0.054    0.054
+ spme_evaluate                       11  7.0    0.014    0.014    0.049    0.049
+ update_input                        10  6.0    0.000    0.000    0.035    0.035
+ update_subsys                       10  7.0    0.000    0.000    0.035    0.035
+ section_coord_val_set               10  8.0    0.035    0.035    0.035    0.035
+ write_trajectory                    20  5.0    0.005    0.005    0.030    0.030
+ pw_transfer                         99  8.6    0.000    0.000    0.028    0.028
+ fft_wrap_pw1pw2                     44  9.0    0.000    0.000    0.026    0.026
+ fft_wrap_pw1pw2_10                  44 10.0    0.004    0.004    0.026    0.026
+ write_particle_coordinates          20  6.0    0.025    0.025    0.025    0.025
+ fist_create_force_env                1  2.0    0.000    0.000    0.023    0.023
+ fist_init                            1  3.0    0.001    0.001    0.023    0.023
+ fft3d_s                             46 10.6    0.018    0.018    0.018    0.018
+ topology_control                     1  4.0    0.000    0.000    0.015    0.015
+ sort_neighbor_lists                  6  9.0    0.010    0.010    0.010    0.010
+ -------------------------------------------------------------------------------
+
+ The number of warnings for this run is : 0
+ 
+ -------------------------------------------------------------------------------
+  **** **** ******  **  PROGRAM ENDED AT                 2020-12-21 15:50:40.998
+ ***** ** ***  *** **   PROGRAM RAN ON                         bass-macbook.home
+ **    ****   ******    PROGRAM RAN BY                                  bvanbeek
+ ***** **    ** ** **   PROGRAM PROCESS ID                                 95172
+  **** **  *******  **  PROGRAM STOPPED IN /Users/bvanbeek/Documents/GitHub/qmfl
+                                           ows/test/test_files/plams_workdir/cp2
+                                           k_mm_cell_opt

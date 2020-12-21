@@ -50,11 +50,12 @@ cp2k:
         parmtype: CHM
       poisson:
         ewald:
-          ewald_type: none
-        periodic: none
+          ewald_type: SPME
+          gmax: '22 22 22'
+        periodic: xyz
     subsys:
       cell:
-        periodic: none
+        periodic: xyz
       kind C2O3:
         element: C
       kind C331:

@@ -3,7 +3,7 @@ import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
-from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md
+from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
 from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
@@ -98,7 +98,7 @@ def test_freq() -> None:
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
 def test_md() -> None:
-    """Test CP2K frequency calculations with the :class:`CP2K_MM` class."""
+    """Test CP2K molecular dynamics calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(
         PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
     s = SETTINGS.copy()
@@ -111,3 +111,38 @@ def test_md() -> None:
 
     plams_results = result.results
     assertion.isfile(plams_results['cp2k-1_1000.restart'])
+
+
+@pytest.mark.slow
+@delete_output(delete_workdir=True)
+def test_c2pk_cell_opt() -> None:
+    """Test CP2K cell optimization calculations with the :class:`CP2K_MM` class."""
+    mol = Molecule(PATH / 'cspbbr3_3d.xyz')
+
+    s = Settings()
+    s.specific.cp2k += cell_opt.specific.cp2k_mm.copy()
+    s.specific.cp2k.motion.cell_opt.max_iter = 10
+    s.specific.cp2k.motion.print['forces low'].filename = ''
+
+    s.gmax = [22, 22, 22]
+    s.cell_parameters = [25.452, 35.995, 24.452]
+    s.charge = {
+        'param': 'charge',
+        'Cs': 0.2,
+        'Pb': 0.4,
+        'Br': -0.2,
+    }
+    s.lennard_jones = {
+        'param': ('sigma', 'epsilon'),
+        'unit': ('nm', 'kjmol'),
+        'Cs Cs': (0.585, 1),
+        'Cs Pb': (0.510, 1),
+        'Br Se': (0.385, 1),
+        'Pb Pb': (0.598, 1),
+        'Br Pb': (0.290, 1),
+        'Br Br': (0.426, 1),
+    }
+
+    job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_cell_opt')
+    result = run(job, path=PATH)
+    assertion.eq(result.status, 'successful')

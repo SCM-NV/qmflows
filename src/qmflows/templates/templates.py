@@ -1,6 +1,6 @@
 """Default options to call some quantum packages."""
 
-__all__ = ['freq', 'geometry', 'singlepoint', 'ts', 'md']
+__all__ = ['freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt']
 
 import yaml
 
@@ -347,4 +347,60 @@ specific:
             print_level: low
             project: cp2k
             run_type: MD
+""", Loader=yaml.FullLoader))
+
+#: Templates for cell optimization calculations.
+cell_opt = Settings(yaml.load("""
+specific:
+    adf: Null
+
+    ams: Null
+
+    dftb: Null
+
+    cp2k: Null
+
+    orca: Null
+
+    cp2k_mm:
+        force_eval:
+            stress_tensor: analytical
+            method: FIST
+            mm:
+                print:
+                    ff_info low:
+                        spline_data: .FALSE.
+                        spline_info: .FALSE.
+                forcefield:
+                    ei_scale14: 1.0
+                    vdw_scale14: 1.0
+                    ignore_missing_critical_params: ''
+                    do_nonbonded: ''
+                    shift_cutoff: .TRUE.
+                    spline:
+                        r0_nb: 0.25
+                poisson:
+                    periodic: xyz
+                    ewald:
+                        ewald_type: spme
+                        o_spline: 4
+            subsys:
+                cell:
+                    periodic: xyz
+                topology:
+                    coord_file_format: 'OFF'
+                    center_coordinates:
+                        center_point: 0.0 0.0 0.0
+        motion:
+            cell_opt:
+                type: direct_cell_opt
+                optimizer: lbfgs
+                max_iter: 500
+            print:
+                cell low:
+                    filename: ''
+        global:
+            print_level: low
+            project: cp2k
+            run_type: cell_opt
 """, Loader=yaml.FullLoader))
