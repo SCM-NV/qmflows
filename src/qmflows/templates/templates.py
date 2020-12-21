@@ -79,6 +79,7 @@ specific:
                     periodic: NONE
                     ewald:
                         ewald_type: NONE
+                        o_spline: 4
             subsys:
                 cell:
                     periodic: NONE
@@ -171,6 +172,7 @@ specific:
                     periodic: NONE
                     ewald:
                         ewald_type: NONE
+                        o_spline: 4
             subsys:
                 cell:
                     periodic: NONE
@@ -272,6 +274,7 @@ specific:
                     periodic: NONE
                     ewald:
                         ewald_type: NONE
+                        o_spline: 4
             subsys:
                 cell:
                     periodic: NONE
@@ -326,6 +329,7 @@ specific:
                     periodic: NONE
                     ewald:
                         ewald_type: NONE
+                        o_spline: 4
             subsys:
                 cell:
                     periodic: NONE
