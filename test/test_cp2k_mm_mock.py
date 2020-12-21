@@ -8,7 +8,7 @@ from assertionlib import assertion
 from pytest_mock import MockFixture
 from scm.plams import Molecule
 
-from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md
+from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
 from qmflows.utils import InitRestart
 from qmflows.packages.cp2k_mm import CP2KMM_Result
 from qmflows.test_utils import get_mm_settings, PATH, PATH_MOLECULES
@@ -139,3 +139,47 @@ def test_c2pk_md_mock(mocker) -> None:
     assertion.eq(result.status, 'successful')
 
     assertion.isfile(result.results['cp2k-1_1000.restart'])
+
+
+def test_c2pk_cell_opt_mock(mocker) -> None:
+    """Mock a call to CP2K."""
+    mol = Molecule(PATH / 'cspbbr3_3d.xyz')
+
+    s = Settings()
+    s.specific.cp2k += cell_opt.specific.cp2k_mm.copy()
+    s.specific.cp2k.motion.cell_opt.max_iter = 10
+    s.specific.cp2k.motion.print['forces low'].filename = ''
+
+    s.gmax = [22, 22, 22]
+    s.cell_parameters = [25.452, 35.995, 24.452]
+    s.charge = {
+        'param': 'charge',
+        'Cs': 0.2,
+        'Pb': 0.4,
+        'Br': -0.2,
+    }
+    s.lennard_jones = {
+        'param': ('sigma', 'epsilon'),
+        'unit': ('nm', 'kjmol'),
+        'Cs Cs': (0.585, 1),
+        'Cs Pb': (0.510, 1),
+        'Br Se': (0.385, 1),
+        'Pb Pb': (0.598, 1),
+        'Br Pb': (0.290, 1),
+        'Br Br': (0.426, 1),
+    }
+
+    job = cp2k_mm(s, mol)
+    run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_cell_opt")
+    result = run_mocked(job)
+    assertion.eq(result.status, 'successful')
+
+    ref_volume = np.load(PATH / 'volume.npy')
+    ref_coordinates = np.load(PATH / 'coordinates.npy')
+    ref_forces = np.load(PATH / 'forces.npy')
+    ref_lattice = np.load(PATH / 'lattice.npy')
+
+    np.testing.assert_allclose(result.volume, ref_volume)
+    np.testing.assert_allclose(result.coordinates, ref_coordinates)
+    np.testing.assert_allclose(result.forces, ref_forces)
+    np.testing.assert_allclose(result.lattice, ref_lattice)
