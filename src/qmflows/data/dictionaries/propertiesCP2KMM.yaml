@@ -56,3 +56,10 @@ lattice:
         column_start: 2
         column_stop: 11
         row_start: 1
+pressure:
+    file_ext: out
+    function: extract_line_values
+    kwargs:
+        pattern: MD| Pressure
+        pos: 3
+    parser: generic_parsers

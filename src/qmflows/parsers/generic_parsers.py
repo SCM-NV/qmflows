@@ -1,10 +1,11 @@
 """Use the AWK command line to read output files."""
 
-__all__ = ['awk_file', 'extract_line_value']
+__all__ = ['awk_file', 'extract_line_value', 'extract_line_values']
 
 import subprocess
-from typing import Union, List, Optional
+from typing import Union, List, Optional, Any
 
+import numpy as np
 from pyparsing import OneOrMore, SkipTo, Suppress
 
 from .parser import parse_file
@@ -72,3 +73,24 @@ def extract_line_value(file_name: PathLike,
     last_line = properties[-1].split()
 
     return float(last_line[pos])
+
+
+def extract_line_values(
+    file_name: PathLike,
+    pattern: Optional[str] = None,
+    pos: int = 0,
+    start: Optional[int] = None,
+    stop: Optional[int] = None,
+    step: Optional[int] = None,
+    dtype: Any = np.float64,
+) -> np.ndarray:
+    """Get multiply field records from a file.
+
+    Search for lines containing `pattern` and return all line
+    containing that value in the range defined by `start`, `stop` and `step`.
+    :returns: value at position `pos` in all found lines, containing pattern.
+    """
+    parse_Line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
+    properties = parse_file(parse_Line, file_name)
+    iterator = (i.split()[pos] for i in properties[start:stop:step])
+    return np.fromiter(iterator, dtype=dtype)
