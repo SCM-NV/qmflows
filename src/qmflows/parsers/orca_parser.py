@@ -156,9 +156,9 @@ def read_column_orbitals(lines: Sequence[str]) -> Tuple[np.ndarray, np.ndarray]:
     0H   1px        0.002631  0.023125  0.025515 -0.010664  0.005733  0.008004
     0H   1py       -0.001684 -0.022031 -0.006086 -0.022644 -0.013760  0.008735
     """
-    energies = np.array(lines[1].split(), dtype=np.float)
+    energies = np.array(lines[1].split(), dtype=np.float64)
 
     coefficients = np.array(
-        [z.split()[2:] for z in lines[4:]], dtype=np.float)
+        [z.split()[2:] for z in lines[4:]], dtype=np.float64)
 
     return energies, coefficients
