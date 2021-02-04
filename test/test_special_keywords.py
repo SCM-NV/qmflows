@@ -203,7 +203,7 @@ def test_orca_init_hessian():
 
     # Test that the hessian is readable
     new_hess = parse_hessian(s.specific.orca.geom.InHessName)
-    new_hess = np.array(new_hess, dtype=np.float)
+    new_hess = np.array(new_hess, dtype=np.float64)
     assertion.truth(np.allclose(hess, new_hess, atol=1e-5))
 
 
