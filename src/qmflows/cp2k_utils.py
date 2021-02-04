@@ -419,6 +419,8 @@ def _raise_df_exc_seq(columns: Sequence[str], prm_map: MappingSequence, ex: Exce
         pass
     elif msg.startswith('Shape of passed values is '):
         pass
+    elif msg.startswith('setting an array element with a sequence'):
+        pass
     else:
         raise ex  # an Exception was raised due to some other unforseen reason
 
