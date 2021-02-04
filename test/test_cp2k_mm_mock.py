@@ -63,7 +63,7 @@ def mock_runner(mocker_instance: MockFixture,
     return run_mocked
 
 
-def test_cp2k_singlepoint_mock(mocker) -> None:
+def test_cp2k_singlepoint_mock(mocker: MockFixture) -> None:
     """Mock a call to CP2K."""
     s = SETTINGS.copy()
     s.specific.cp2k += geometry.specific.cp2k_mm
@@ -79,7 +79,7 @@ def test_cp2k_singlepoint_mock(mocker) -> None:
     assertion.isclose(result.energy, ref, rel_tol=10**-4)
 
 
-def test_c2pk_opt_mock(mocker) -> None:
+def test_c2pk_opt_mock(mocker: MockFixture) -> None:
     """Mock a call to CP2K."""
     s = SETTINGS.copy()
     s.specific.cp2k += singlepoint.specific.cp2k_mm
@@ -105,7 +105,7 @@ def test_c2pk_opt_mock(mocker) -> None:
     assertion.le(r_mean, 0.1)
 
 
-def test_c2pk_freq_mock(mocker) -> None:
+def test_c2pk_freq_mock(mocker: MockFixture) -> None:
     """Mock a call to CP2K."""
     s = SETTINGS.copy()
     s.specific.cp2k += freq.specific.cp2k_mm
@@ -127,7 +127,7 @@ def test_c2pk_freq_mock(mocker) -> None:
     assertion.isclose(H, H_ref, rel_tol=0.1)
 
 
-def test_c2pk_md_mock(mocker) -> None:
+def test_c2pk_md_mock(mocker: MockFixture) -> None:
     """Mock a call to CP2K."""
     s = SETTINGS.copy()
     s.specific.cp2k += md.specific.cp2k_mm
@@ -141,7 +141,7 @@ def test_c2pk_md_mock(mocker) -> None:
     assertion.isfile(result.results['cp2k-1_1000.restart'])
 
 
-def test_c2pk_cell_opt_mock(mocker) -> None:
+def test_c2pk_cell_opt_mock(mocker: MockFixture) -> None:
     """Mock a call to CP2K."""
     mol = Molecule(PATH / 'cspbbr3_3d.xyz')
 
@@ -183,3 +183,14 @@ def test_c2pk_cell_opt_mock(mocker) -> None:
     np.testing.assert_allclose(result.coordinates, ref_coordinates)
     np.testing.assert_allclose(result.forces, ref_forces)
     np.testing.assert_allclose(result.lattice, ref_lattice)
+
+
+def test_c2pk_npt_mock(mocker: MockFixture) -> None:
+    """Mock a call to CP2K."""
+    s = Settings()
+    job = cp2k_mm(s, None)
+    run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_npt")
+    result = run_mocked(job)
+
+    ref_pressure = np.load(PATH / 'pressure.npy')
+    np.testing.assert_allclose(result.pressure, ref_pressure)
