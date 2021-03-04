@@ -58,8 +58,5 @@ lattice:
         row_start: 1
 pressure:
     file_ext: out
-    function: extract_line_values
-    kwargs:
-        pattern: MD| Pressure
-        pos: 3
-    parser: generic_parsers
+    function: read_cp2k_pressure
+    parser: cp2KParser
