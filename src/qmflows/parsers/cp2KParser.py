@@ -8,7 +8,7 @@ import subprocess
 from io import TextIOBase
 from itertools import islice, chain
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Generator, Iterable, List
+from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
 from typing import Optional as Optional_
 from typing import Sequence, Tuple, Type, TypeVar, Union, overload, Iterator
 
@@ -636,3 +636,54 @@ def read_cp2k_table_slc(
         ret = np.fromiter(flat_iter, dtype=dtype)
         ret.shape = shape
         return ret
+
+
+def _get_pressure_iter(major: int, f: IO[str]) -> Generator[str, None, None]:
+    """Helper function for :func:`read_cp2k_pressure`."""
+    # NOTE: CP2K 8.* changed the strucure of its `.out` files,
+    # hence the different prefix
+    prefix1 = " MD_PAR| Pressure" if major >= 8 else " MD| Pressure"
+    prefix2 = " MD| Pressure" if major >= 8 else " PRESSURE"
+
+    # Read the initial pressure
+    for i in f:
+        if i.startswith(prefix1):
+            yield i.split()[-1]
+            break
+    else:
+        raise RuntimeError("Failed to identify the initial pressure")
+
+    # Read all subsequent pressures
+    for i in f:
+        if i.startswith(prefix2):
+            yield i.split()[-2]
+
+
+def read_cp2k_pressure(
+    path: PathLike,
+    start: Optional_[int] = None,
+    stop: Optional_[int] = None,
+    step: Optional_[int] = None,
+    dtype: Any = np.float64,
+) -> np.ndarray:
+    """Return all pressures from the passed cp2k ``.out`` file as an array."""
+    # Identify the CP2K version
+    major = 0
+    with open(path, 'r') as f:
+        for i in f:
+            if i.startswith(" CP2K| version string:"):
+                version_str = i.split()[-1]
+                major_str = version_str.split(".")[0]
+
+                # if an error is encoutered here then we must be dealing with
+                # a very old CP2K version; fall back to `major = 0` in such case
+                try:
+                    major = int(major_str)
+                except ValueError:
+                    pass
+                break
+
+    # Read the pressures
+    with open(path, 'r') as f:
+        iterator = _get_pressure_iter(major, f)
+        return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)

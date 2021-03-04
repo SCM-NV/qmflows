@@ -13,7 +13,7 @@ API
 """
 
 from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Union,
-                    Sequence, Any, AnyStr, TYPE_CHECKING)
+                    Sequence, Any, TYPE_CHECKING)
 
 from .common import ParseWarning
 from .backports import Literal, T, Final
@@ -83,7 +83,7 @@ Generic2Special = Callable[[Settings, str, Any, Molecule], None]
 
 #: An alias for all path-like objects.
 #: Includes the likes of :class:`str`, :class:`bytes` and :class:`pathlib.Path`.
-PathLike = Union[AnyStr, _PathLike]
+PathLike = Union[str, bytes, _PathLike]
 
 #: An rdkit or PLAMS molecule.
 MolType = Union[Mol, Molecule]
