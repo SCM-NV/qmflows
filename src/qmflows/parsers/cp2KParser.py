@@ -8,7 +8,7 @@ import subprocess
 from io import TextIOBase
 from itertools import islice, chain
 from pathlib import Path
-from typing import Any, Dict, FrozenSet, Generator, Iterable, List
+from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
 from typing import Optional as Optional_
 from typing import Sequence, Tuple, Type, TypeVar, Union, overload, Iterator
 
@@ -638,6 +638,27 @@ def read_cp2k_table_slc(
         return ret
 
 
+def _get_pressure_iter(major: int, f: IO[str]) -> Generator[str, None, None]:
+    """Helper function for :func:`read_cp2k_pressure`."""
+    # NOTE: CP2K 8.* changed the strucure of its `.out` files,
+    # hence the different prefix
+    prefix1 = " MD_PAR| Pressure" if major >= 8 else " MD| Pressure"
+    prefix2 = " MD| Pressure" if major >= 8 else " PRESSURE"
+
+    # Read the initial pressure
+    for i in f:
+        if i.startswith(prefix1):
+            yield i.split()[-1]
+            break
+    else:
+        raise RuntimeError("Failed to identify the initial pressure")
+
+    # Read all subsequent pressures
+    for i in f:
+        if i.startswith(prefix2):
+            yield i.split()[-2]
+
+
 def read_cp2k_pressure(
     path: PathLike,
     start: Optional_[int] = None,
@@ -662,11 +683,7 @@ def read_cp2k_pressure(
                     pass
                 break
 
-    # Read the pressure
+    # Read the pressures
     with open(path, 'r') as f:
-        # NOTE: CP2K 8.* changed the strucure of its `.out` files,
-        # hence the different prefix
-        prefix = " MD| Pressure" if major >= 8 else " PRESSURE"
-        slc = islice(f, start, stop, step)
-        iterator = (i.split()[-2] for i in slc if i.startswith(prefix))
-        return np.fromiter(iterator, dtype=dtype)
+        iterator = _get_pressure_iter(major, f)
+        return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)
