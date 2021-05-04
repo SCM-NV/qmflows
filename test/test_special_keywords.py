@@ -151,7 +151,7 @@ def test_cp2k_cell_parameters():
 
     # compare with the reference
     ref = Settings()
-    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 5.96 7.60 15.61"
+    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 5.958 7.596 15.61"
     assertion.eq(s.specific, ref.specific)
 
     # cubic cell
@@ -164,7 +164,7 @@ def test_cp2k_cell_parameters():
 
     # compare with the reference
     ref = Settings()
-    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 10.00 10.00 10.00"
+    ref.specific.cp2k.force_eval.subsys.cell.ABC = " [angstrom] 10.0 10.0 10.0"
     assertion.eq(s.specific, ref.specific)
 
     # Matrix
@@ -178,12 +178,9 @@ def test_cp2k_cell_parameters():
 
     # compare with the reference
     ref = Settings()
-    ref.specific.cp2k.force_eval.subsys.cell.A = '{:.2f} {:.2f} {:.2f}'.format(
-        *abc[0])
-    ref.specific.cp2k.force_eval.subsys.cell.B = '{:.2f} {:.2f} {:.2f}'.format(
-        *abc[1])
-    ref.specific.cp2k.force_eval.subsys.cell.C = '{:.2f} {:.2f} {:.2f}'.format(
-        *abc[2])
+    ref.specific.cp2k.force_eval.subsys.cell.A = '{:} {:} {:}'.format(*abc[0])
+    ref.specific.cp2k.force_eval.subsys.cell.B = '{:} {:} {:}'.format(*abc[1])
+    ref.specific.cp2k.force_eval.subsys.cell.C = '{:} {:} {:}'.format(*abc[2])
     assertion.eq(s.specific, ref.specific)
 
 
