@@ -40,14 +40,14 @@ def _construct_mapping(
     deep: bool = False,
 ) -> Dict[Any, Any]:
     """A helper function for handling :meth:`~yaml.BaseConstructor.construct_mapping` methods."""
-    if isinstance(loader, SafeConstructor) and isinstance(node, MappingNode):
-        loader.flatten_mapping(node)
-
     if not isinstance(node, MappingNode):
         raise ConstructorError(
             None, None,
             f"expected a mapping node, but found {node.id}", node.start_mark,
         )
+
+    if isinstance(loader, SafeConstructor):
+        loader.flatten_mapping(node)
 
     mapping = {}
     for key_node, value_node in node.value:
