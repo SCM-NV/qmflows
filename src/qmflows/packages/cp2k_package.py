@@ -159,7 +159,7 @@ class CP2K(Package):
 
             """
             def fun(xs: Iterable[Any]) -> str:
-                return '{:.2f} {:.2f} {:.2f}'.format(*xs)
+                return '{:} {:} {:}'.format(*xs)
 
             ar = np.asarray(value, dtype=np.float64)
             if ar.ndim == 0:
