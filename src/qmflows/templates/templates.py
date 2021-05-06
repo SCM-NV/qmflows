@@ -5,6 +5,7 @@ __all__ = ['freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt']
 import yaml
 
 from ..settings import Settings
+from ..yaml_utils import UniqueSafeLoader
 
 
 #: Templates for single-point calculations.
@@ -98,7 +99,7 @@ specific:
             functional: lda
         basis:
             basis: sto_sz
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
 
 #: Templates for geometry optimization calculations.
 geometry = Settings(yaml.load("""
@@ -197,7 +198,7 @@ specific:
             runtyp: opt
         basis:
             basis: sto_sz
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
 
 #: Templates for transition state calculations.
 ts = Settings(yaml.load("""
@@ -229,7 +230,7 @@ specific:
             ts_search: ef
         basis:
             basis: sto_sz
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
 
 #: Templates for frequency analyses calculations.
 freq = Settings(yaml.load("""
@@ -296,7 +297,7 @@ specific:
         basis:
             basis: sto_sz
         main: freq
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
 
 #: Templates for molecular dynamics (MD) calculations.
 md = Settings(yaml.load("""
@@ -351,7 +352,7 @@ specific:
             print_level: low
             project: cp2k
             run_type: MD
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
 
 #: Templates for cell optimization calculations.
 cell_opt = Settings(yaml.load("""
@@ -407,4 +408,4 @@ specific:
             print_level: low
             project: cp2k
             run_type: cell_opt
-""", Loader=yaml.FullLoader))
+""", Loader=UniqueSafeLoader))
