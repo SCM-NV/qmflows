@@ -1,7 +1,10 @@
 """Test that the templates behave correctly."""
-from qmflows import Settings
+import qmflows
+from qmflows import Settings, templates
 from qmflows.templates import freq, geometry, singlepoint, ts
 from assertionlib import assertion
+
+import pytest
 
 
 def transform(x: Settings) -> Settings:
@@ -17,3 +20,12 @@ def test_templates():
     b4 = ts == transform(ts)
 
     assertion.truth(all((b1, b2, b3, b4)))
+
+
+@pytest.mark.parametrize("name", templates.__all__)
+def test_id(name: str) -> None:
+    """Test that getting a template returns a copy."""
+    s1 = getattr(qmflows, name)
+    s2 = getattr(qmflows, name)
+    assertion.eq(s1, s2)
+    assertion.is_not(s1, s2)
