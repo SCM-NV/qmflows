@@ -66,6 +66,7 @@ CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {
     'buck4ranges': _BASE_PATH + ('nonbonded', 'buck4ranges'),
     'buckmorse': _BASE_PATH + ('nonbonded', 'buckmorse'),
     'eam': _BASE_PATH + ('nonbonded', 'eam'),
+    'gal19': _BASE_PATH + ('nonbonded', 'gal19'),
     'genpot': _BASE_PATH + ('nonbonded', 'genpot'),
     'goodwin': _BASE_PATH + ('nonbonded', 'goodwin'),
     'ipbv': _BASE_PATH + ('nonbonded', 'ipbv'),
