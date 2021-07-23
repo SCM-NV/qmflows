@@ -19,7 +19,6 @@ from typing import (
 import numpy as np
 import pandas as pd
 import pkg_resources as pkg
-import scm.plams.interfaces.molecule.rdkit as molkit
 from more_itertools import collapse
 from noodles import has_scheduled_methods, schedule, serial
 from noodles.run.threading.sqlite3 import run_parallel
@@ -27,7 +26,6 @@ from noodles.serial import AsDict, Registry
 from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
 from noodles.serial.path import SerPath
 from noodles.serial.reasonable import SerReasonableObject
-from rdkit import Chem
 from scm import plams
 
 from .serializer import SerMolecule, SerMol, SerSettings, SerNDFrame, SerReduce
@@ -37,6 +35,14 @@ from ..fileFunctions import yaml2Settings
 from ..settings import Settings
 from ..settings import _Settings as _SettingsType
 from ..warnings_qmflows import QMFlows_Warning
+
+try:
+    from rdkit import Chem
+    from scm.plams import from_rdmol
+except ImportError:
+    Chem = None
+    def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
+        return mol
 
 __all__ = ['Package', 'run', 'registry', 'Result', 'SerMolecule', 'SerSettings']
 
@@ -345,8 +351,7 @@ class Package(ABC):
             #  Check if plams finishes normally
             try:
                 # If molecule is an RDKIT molecule translate it to plams
-                plams_mol = molkit.from_rdmol(
-                    mol) if isinstance(mol, Chem.Mol) else mol
+                plams_mol = from_rdmol(mol)
 
                 if job_name != '':
                     kwargs['job_name'] = job_name
@@ -636,23 +641,26 @@ def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Re
         db_file=db_file, always_cache=always_cache, echo_log=False)
 
 
+_REGISTRY_TYPES = {
+    Package: SerReduce(Package),
+    Path: SerPath(),
+    plams.Molecule: SerMolecule(),
+    Result: AsDict(Result),
+    Settings: SerSettings(),
+    plams.KFFile: SerReasonableObject(plams.KFFile),
+    plams.KFReader: SerReasonableObject(plams.KFReader),
+    np.floating: SerNumpyScalar(),
+    np.integer: SerNumpyScalar(),
+    pd.DataFrame: SerNDFrame(pd.DataFrame),
+    pd.Series: SerNDFrame(pd.Series),
+}
+if Chem is not None:
+    _REGISTRY_TYPES[Chem.Mol] = SerMol()
+
 #: A :class:`Registry` instance to-be returned by :func:`registry`.
-REGISTRY: Registry = Registry(
+REGISTRY = Registry(
     parent=serial.base() + arrays_to_hdf5(),
-    types={
-        Package: SerReduce(Package),
-        Path: SerPath(),
-        plams.Molecule: SerMolecule(),
-        Chem.Mol: SerMol(),
-        Result: AsDict(Result),
-        Settings: SerSettings(),
-        plams.KFFile: SerReasonableObject(plams.KFFile),
-        plams.KFReader: SerReasonableObject(plams.KFReader),
-        np.floating: SerNumpyScalar(),
-        np.integer: SerNumpyScalar(),
-        pd.DataFrame: SerNDFrame(pd.DataFrame),
-        pd.Series: SerNDFrame(pd.Series),
-    }
+    types=_REGISTRY_TYPES,
 )
 
 
