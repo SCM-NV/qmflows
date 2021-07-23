@@ -1,13 +1,18 @@
 """Test reactivity utilities."""
+
+import pytest
 from qmflows import Settings
-from qmflows.components import reactivity
 from scm.plams import Molecule
-from qmflows.test_utils import PATH_MOLECULES
+from qmflows.test_utils import PATH_MOLECULES, HAS_RDKIT
 from assertionlib import assertion
+
+if HAS_RDKIT:
+    from qmflows.components import reactivity
 
 mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
 
 
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_Distance():
     """Test Distance reactivity functionality."""
     d = reactivity.Distance(1, 2)
@@ -16,6 +21,7 @@ def test_Distance():
     assertion.isinstance(s, Settings)
 
 
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_Angle():
     """Test Angle reactivity functionality."""
     ang = reactivity.Angle(1, 2, 3)
@@ -24,6 +30,7 @@ def test_Angle():
     assertion.isinstance(s, Settings)
 
 
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_Dihedral():
     """Test Angle reactivity functionality."""
     dihed = reactivity.Dihedral(1, 2, 3, 4)

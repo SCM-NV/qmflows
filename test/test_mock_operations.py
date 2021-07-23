@@ -1,11 +1,16 @@
 """Mock utilities."""
+
+import pytest
 import numpy as np
 from assertionlib import assertion
 from noodles import run_single
 from pytest_mock import MockFixture
 from typing import Any, List, Optional
 
-from qmflows.components.operations import select_max, select_min
+from qmflows.test_utils import HAS_RDKIT
+
+if HAS_RDKIT:
+    from qmflows.components.operations import select_max, select_min
 
 
 def generate_mocked_results(
@@ -30,6 +35,7 @@ def generate_mocked_results(
     return results
 
 
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_select_max_list(mocker: MockFixture):
     """Test select_max using mocked results."""
     results = generate_mocked_results(
@@ -40,6 +46,7 @@ def test_select_max_list(mocker: MockFixture):
     assertion.eq(xs.prop, 1e3)
 
 
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_select_min(mocker: MockFixture):
     """Test select_min using mocked results."""
     results = generate_mocked_results(

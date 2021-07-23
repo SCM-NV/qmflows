@@ -1,11 +1,15 @@
 """Test molecule serialization."""
 from qmflows import packages
-import scm.plams.interfaces.molecule.rdkit as molkit
+from qmflows.test_utils import PATH
+from scm.plams import Molecule
+
+WATER = Molecule(PATH / "water.xyz")
+WATER.guess_bonds()
 
 
 def test_SerMolecule():
     """Test molecule serialization."""
-    mol = molkit.from_smiles("c1ccccc1CC")
+    mol = WATER
     registry = packages.registry()
     encoded_molecule = registry.deep_encode(mol)
     decoded_molecule = registry.deep_decode(encoded_molecule)

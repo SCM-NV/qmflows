@@ -3,7 +3,6 @@
 from os.path import basename
 
 import numpy as np
-import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from scm.plams import Molecule
 
@@ -27,10 +26,16 @@ dftb_const = {
 orca_const = {
     'orca': {'geom': {'Constraints': {'_end': '{ C 0 C }{ C 1 C }'}}}}
 
+WATER = Molecule(PATH / "water.xyz")
+WATER.guess_bonds()
+
+METHANOL = Molecule(PATH / "methanol.xyz")
+METHANOL.guess_bonds()
+
 
 def test_freeze_with_adf():
     """Test the freeze keyword with ADF."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.freeze = ["C", "O"]
     expected_settings = Settings(
@@ -44,7 +49,7 @@ def test_freeze_with_adf():
 
 def test_selected_atoms_with_adf():
     """Test the ADF atoms selection features."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.selected_atoms = ["H"]
     expected_settings = Settings(
@@ -59,7 +64,7 @@ def test_selected_atoms_with_adf():
 
 def test_freeze_with_dftb():
     """Test freeze keyword for DFTB."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.freeze = ["C", "O"]
     expected_settings = Settings(
@@ -73,7 +78,7 @@ def test_freeze_with_dftb():
 
 def test_selected_atoms_with_dftb():
     """Test the DFTB selection atoms funcionality."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.selected_atoms = ["H"]
     expected_settings = Settings(
@@ -87,7 +92,7 @@ def test_selected_atoms_with_dftb():
 
 def test_freeze_with_orca():
     """Test freeze keyword for orca."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.freeze = ["C", "O"]
     expected_settings = Settings(
@@ -103,7 +108,7 @@ def test_freeze_with_orca():
 
 def test_selected_atoms_with_orca():
     """Test atom selection features for Orca."""
-    mol = molkit.from_smiles('CO')
+    mol = METHANOL
     s = Settings()
     s.selected_atoms = ["H"]
     expected_settings = Settings(
@@ -190,7 +195,7 @@ def test_orca_init_hessian():
     PATH_RKF = PATH / "output_dftb" / "dftb_freq" / "dftb.rkf"
     assertion.truth(PATH_RKF.exists())
     hess = kfreader(PATH_RKF, section="AMSResults", prop="Hessian")
-    water = molkit.from_smiles('[OH2]', forcefield='mmff')
+    water = WATER
 
     # Tess Hessian initialization
     s = Settings()
