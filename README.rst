@@ -17,9 +17,9 @@ See documentation_ for tutorials and documentation.
 Motivation
 ==========
 Research on modern computational quantum chemistry relies on a set of computational
-tools to carry out calculations. The complexity of the calculations usually requires 
-intercommunication between the aforementioned tools, such communication is usually done 
-through shell scripts that try to automate input/output actions like: launching 
+tools to carry out calculations. The complexity of the calculations usually requires
+intercommunication between the aforementioned tools, such communication is usually done
+through shell scripts that try to automate input/output actions like: launching
 the computations in a cluster, reading the resulting output and feeding the relevant
 numerical result to another program. Such scripts are difficult to maintain and extend,
 requiring a significant programming expertise to work with them. Being then desirable a
@@ -29,7 +29,7 @@ heterogeneous hardware platforms.
 This library tackles the construction and efficient execution of computational chemistry workflows.
 This allows computational chemists to use the emerging massively parallel compute environments in
 an easy manner and focus on interpretation of scientific data rather than on tedious job submission
-procedures and manual data processing. 
+procedures and manual data processing.
 
 Description
 ===========
@@ -52,19 +52,19 @@ Installation
 
 - Download miniconda for python3: miniconda_ (also you can install the complete anaconda_ version).
 
-- Install according to: installConda_. 
+- Install according to: installConda_.
 
 - Create a new virtual environment using the following commands:
 
-  - ``conda create -n qmflows`` 
+  - ``conda create -n qmflows``
 
 - Activate the new virtual environment
-  
+
   - ``source activate qmflows``
 
 To exit the virtual environment type  ``source deactivate``.
-    
-    
+
+
 .. _dependecies:
 
 Dependencies installation
@@ -72,25 +72,27 @@ Dependencies installation
 
 - Type in your terminal:
 
-  ``conda activate qmflows``  
+  ``conda activate qmflows``
 
-Using the conda environment the following packages should be installed:    
+Using the conda environment the following packages should be installed:
 
 
 - install rdkit_ and h5py_ using conda:
 
   - ``conda install -y -q -c conda-forge rdkit h5py``
-    
+
+  - Note that ``rdkit`` is optional for Python 3.7 and later.
+
 .. _installation:
 
 Package installation
 --------------------
 Finally install the package:
-    
+
 - Install **QMFlows** using pip:
   - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows``
 
-Now you are ready to use *qmflows*.  
+Now you are ready to use *qmflows*.
 
 
   **Notes:**
@@ -98,7 +100,7 @@ Now you are ready to use *qmflows*.
   - Once the libraries and the virtual environment are installed, you only need to type
     ``conda activate qmflows`` each time that you want to use the software.
 
-    
+
 .. _documentation: https://qmflows.readthedocs.io/en/latest/
 .. _miniconda: https://docs.conda.io/en/latest/miniconda.html
 .. _anaconda: https://www.anaconda.com/distribution/#download-section
