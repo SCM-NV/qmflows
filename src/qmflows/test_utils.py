@@ -9,6 +9,7 @@ Index
     get_mm_settings
     PATH
     PATH_MOLECULES
+    HAS_RDKIT
 
 API
 ---
@@ -19,6 +20,8 @@ API
     :annotation: : pathlib.Path
 .. autodata:: PATH_MOLECULES
     :annotation: : pathlib.Path
+.. autodata:: HAS_RDKIT
+    :annotation: : bool
 
 """
 
@@ -32,7 +35,23 @@ from .fileFunctions import yaml2Settings
 from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
 
-__all__ = ['delete_output', 'get_mm_settings', 'PATH', 'PATH_MOLECULES', 'Assertion_Warning']
+__all__ = [
+    'delete_output',
+    'get_mm_settings',
+    'PATH',
+    'PATH_MOLECULES',
+    'Assertion_Warning',
+    'HAS_RDKIT',
+]
+
+try:
+    import rdkit
+except ImportError:
+    #: Whether RDKit has been installed.
+    HAS_RDKIT = False
+else:
+    del rdkit
+    HAS_RDKIT = True
 
 #: The path to the ``tests/test_files`` directory.
 PATH = Path('test') / 'test_files'

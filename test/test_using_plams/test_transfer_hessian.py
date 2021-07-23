@@ -2,17 +2,22 @@
 import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
 from noodles import gather
+from scm.plams import Molecule
 
 from qmflows import Settings, templates, logger
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
+from qmflows.test_utils import PATH
+
+WATER = Molecule(PATH / "water.xyz")
+WATER.guess_bonds()
 
 
 @pytest.mark.slow
 def test_hessian_transfer():
     """Test DFTB -> Orca hessian transfer."""
-    h2o = molkit.from_smiles('O')
+    h2o = WATER.copy()
     h2o.properties.symmetry = 'C1'
 
     h2o_freq = dftb(templates.freq, h2o, job_name="freq").hessian

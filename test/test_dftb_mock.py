@@ -1,6 +1,5 @@
 """Mock the DFTB output."""
 import numpy as np
-import scm.plams.interfaces.molecule.rdkit as molkit
 from assertionlib import assertion
 from pytest_mock import MockFixture
 from scm.plams import Molecule
@@ -10,7 +9,8 @@ from qmflows.packages.SCM import DFTB_Result
 from qmflows.test_utils import PATH
 
 WORKDIR = PATH / "output_dftb"
-WATER = molkit.from_smiles('[OH2]', forcefield='mmff')
+WATER = Molecule(PATH / "water.xyz")
+WATER.guess_bonds()
 
 
 def mock_runner(mocker_instance, jobname: str) -> DFTB_Result:

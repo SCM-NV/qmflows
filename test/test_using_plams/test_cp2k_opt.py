@@ -10,10 +10,9 @@ from qmflows.test_utils import PATH_MOLECULES, fill_cp2k_defaults, delete_output
 from qmflows.type_hints import PathLike
 
 
-def cp2k_available() -> None:
+def cp2k_available() -> bool:
     """Check if cp2k is installed."""
     path = find_executable("cp2k.popt")
-
     return path is not None
 
 

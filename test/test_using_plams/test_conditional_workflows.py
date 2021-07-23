@@ -2,10 +2,14 @@
 import numpy as np
 import pytest
 
-from qmflows.examples import example_freqs
+from qmflows.test_utils import HAS_RDKIT
+
+if HAS_RDKIT:
+    from qmflows.examples import example_freqs
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_calc_freqs():
     """Test conditional workflow for freq calculation."""
     test = example_freqs()

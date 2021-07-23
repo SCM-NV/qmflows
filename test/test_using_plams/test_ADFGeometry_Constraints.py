@@ -1,11 +1,17 @@
 """Test the constrained optimization functionality."""
-from qmflows.examples import (
-    example_generic_constraints, example_H2O2_TS, example_partial_geometry_opt)
+
 import numpy as np
 import pytest
+from qmflows.test_utils import HAS_RDKIT
+
+if HAS_RDKIT:
+    from qmflows.examples import (
+        example_generic_constraints, example_H2O2_TS, example_partial_geometry_opt
+    )
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_partial_geometry_opt():
     """Test partial geometry optimization."""
     geom1, geom2 = example_partial_geometry_opt()
@@ -13,6 +19,7 @@ def test_partial_geometry_opt():
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_h2o2_ts():
     """Test a TS optimization.
 
@@ -25,6 +32,7 @@ def test_h2o2_ts():
 
 
 @pytest.mark.slow
+@pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_generic_constraints():
     """
     Test generic distance constraints on all packages

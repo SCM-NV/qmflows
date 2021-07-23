@@ -103,7 +103,6 @@ from typing import Type, TypeVar, Union, ClassVar, Any, Dict, Optional, TypeVar,
 from warnings import warn
 
 from scm import plams
-from rdkit import Chem
 from noodles import has_scheduled_methods, schedule
 
 from .packages import Package, Result, load_properties
@@ -111,7 +110,7 @@ from .SCM import adf, dftb
 from .orca import orca
 from .cp2k_package import cp2k
 from ..settings import Settings
-from ..type_hints import _Settings
+from ..type_hints import _Settings, MolType
 from ..warnings_qmflows import Key_Warning
 
 plams.Job = plams.core.basejob.Job
@@ -216,7 +215,7 @@ class PackageWrapper(Package, Generic[JT]):
 
     @schedule(display="Running {self.pkg_name} {job_name}...", store=True, confirm=True)
     def __call__(self, settings: Settings,
-                 mol: Union[plams.Molecule, Chem.Mol],
+                 mol: MolType,
                  job_name: str = '', **kwargs: Any) -> RT:
         """If possible, call :meth:`__call__()` of the Package instance appropiate to :attr:`PackageWrapper.job_type`.
 

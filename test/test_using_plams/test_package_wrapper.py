@@ -2,10 +2,11 @@
 import os
 import warnings
 from typing import Type
+from pathlib import Path
 
 import pytest
 from noodles.interface import PromisedObject
-from scm.plams import ADFJob, AMSJob, from_smiles
+from scm.plams import ADFJob, AMSJob, Molecule
 from scm.plams.core.basejob import Job
 from assertionlib import assertion
 
@@ -18,7 +19,10 @@ from qmflows.packages.package_wrapper import ResultWrapper
 from qmflows.test_utils import delete_output, PATH
 
 ADF_ENVIRON = frozenset({'AMSBIN', 'AMSHOME', 'AMSRESOURCES', 'SCMLICENSE'})
-HAS_ADF: bool = ADF_ENVIRON.issubset(os.environ.keys())
+HAS_ADF = ADF_ENVIRON.issubset(os.environ.keys())
+
+WATER = Molecule(PATH / "water.xyz")
+WATER.guess_bonds()
 
 
 def _get_result(promised_object: PromisedObject, job: Type[Job]) -> Result:
@@ -60,7 +64,7 @@ def test_package_wrapper() -> None:
     s2.input.basis.core = 'None'
     s2.input.basis.createoutput = 'None'
 
-    mol = from_smiles('O')  # H2O
+    mol = WATER
 
     job1 = PackageWrapper(AMSJob)(s1, mol, name='amsjob')
     result1 = _get_result(job1, AMSJob)
