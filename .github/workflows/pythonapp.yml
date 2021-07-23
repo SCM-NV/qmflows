@@ -32,11 +32,11 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install cp2k
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'DISABLE'
       run: sudo apt install cp2k --fix-missing
 
     - name: Info CP2K
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.os == 'DISABLE'
       run: cp2k.popt --version
 
     - name: Setup conda
