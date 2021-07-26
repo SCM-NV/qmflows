@@ -1,8 +1,0 @@
-channels:
-    -   conda-forge
-
-dependencies:
-    -   pandoc
-    -   python
-    -   nbsphinx
-    -   jupyter
