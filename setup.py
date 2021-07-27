@@ -37,7 +37,7 @@ setup(
     name='qmflows',
     version=version['__version__'],
     description='Automation of computations in quantum chemistry',
-    license='Apache 2.0',
+    license='LGPLv3',
     url='https://github.com/SCM-NV/qmflows',
     author=['Felipe Zapata'],
     author_email='f.zapata@esciencecenter.nl',
@@ -60,6 +60,7 @@ setup(
     },
     python_requires='>=3.6',
     classifiers=[
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
@@ -67,11 +68,20 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Chemistry'
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Typing :: Typed',
     ],
-    install_requires=['more-itertools', 'h5py', 'numpy', 'pandas', 'noodles==0.3.3',
-                      'plams@git+https://github.com/SCM-NV/PLAMS@master',
-                      'pyparsing', 'pyyaml>=5.1', 'filelock'],
+    install_requires=[
+        'more-itertools',
+        'h5py',
+        'numpy',
+        'pandas',
+        'noodles==0.3.3',
+        'plams>=1.5.1',
+        'pyparsing',
+        'pyyaml>=5.1',
+        'filelock',
+    ],
     extras_require={
         'test': tests_require,
         'doc': tests_require
