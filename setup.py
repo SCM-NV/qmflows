@@ -68,7 +68,8 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Development Status :: 5 - Production/Stable',
         'Intended Audience :: Science/Research',
-        'Topic :: Scientific/Engineering :: Chemistry'
+        'Topic :: Scientific/Engineering :: Chemistry',
+        'Typing :: Typed',
     ],
     install_requires=[
         'more-itertools',
