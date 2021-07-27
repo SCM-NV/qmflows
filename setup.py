@@ -37,7 +37,7 @@ setup(
     name='qmflows',
     version=version['__version__'],
     description='Automation of computations in quantum chemistry',
-    license='Apache 2.0',
+    license='LGPLv3',
     url='https://github.com/SCM-NV/qmflows',
     author=['Felipe Zapata'],
     author_email='f.zapata@esciencecenter.nl',
@@ -60,6 +60,7 @@ setup(
     },
     python_requires='>=3.6',
     classifiers=[
+        'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
