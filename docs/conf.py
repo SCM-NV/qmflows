@@ -183,11 +183,6 @@ texinfo_documents = [
 ]
 
 
-# Output is processed with HTML4 writer.
-# Default is False.
-html4_writer = True
-
-
 # True to use the .. admonition:: directive for the Example and Examples sections.
 # False to use the .. rubric:: directive instead. One may look better than the other depending on what HTML theme is used.
 # Defaults to False.
