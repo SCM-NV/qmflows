@@ -32,11 +32,11 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Install cp2k
-      if: matrix.os == 'DISABLE'
+      if: matrix.os == 'ubuntu-latest'
       run: sudo apt install cp2k --fix-missing
 
     - name: Info CP2K
-      if: matrix.os == 'DISABLE'
+      if: matrix.os == 'ubuntu-latest'
       run: cp2k.popt --version
 
     - name: Setup conda
@@ -48,21 +48,21 @@ jobs:
     - name: Install dependencies
       if: matrix.special == ''
       run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter
+        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter pandoc
         source $CONDA/bin/activate test
         pip install -e .[test]
 
     - name: Install dependencies (pre-release)
       if: matrix.special == 'pre-release'
       run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter
+        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter pandoc
         source $CONDA/bin/activate test
         pip install --pre -e .[test] --upgrade --force-reinstall
 
     - name: Install dependencies (no RDKit)
       if: matrix.special == 'no RDKit'
       run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py nbsphinx jupyter
+        conda create -n test -c conda-forge python=${{ matrix.version }} h5py nbsphinx jupyter pandoc
         source $CONDA/bin/activate test
         pip install -e .[test]
 
