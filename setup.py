@@ -78,7 +78,7 @@ setup(
         'pandas',
         'noodles==0.3.3',
         'plams>=1.5.1',
-        'pyparsing',
+        'pyparsing<3.0',
         'pyyaml>=5.1',
         'filelock',
     ],
