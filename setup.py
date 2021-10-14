@@ -23,7 +23,7 @@ docs_require = [
 ]
 
 tests_require =  [
-    'assertionlib>=2.2.0',
+    'assertionlib>=2.3.0',
     'mypy',
     'pytest>=5.4',
     'pytest-cov',
