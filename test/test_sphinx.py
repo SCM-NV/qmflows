@@ -4,14 +4,22 @@ import shutil
 import warnings
 from os.path import join, isdir
 
-from sphinx.application import Sphinx
-from sphinx.errors import SphinxWarning
+import pytest
+
+try:
+    from sphinx.application import Sphinx
+    from sphinx.errors import SphinxWarning
+except ImportError:
+    HAS_SPHINX = False
+else:
+    HAS_SPHINX = True
 
 SRCDIR = CONFDIR = 'docs'
 OUTDIR = join('test', 'test_files', 'build')
 DOCTREEDIR = join('test', 'test_files', 'build', 'doctrees')
 
 
+@pytest.mark.skipif(not HAS_SPHINX, reason='Requires Sphinx')
 def test_sphinx_build() -> None:
     """Test :meth:`sphinx.application.Sphinx.build`."""
     try:

@@ -22,9 +22,8 @@ docs_require = [
     'pandoc',
 ]
 
-tests_require =  [
+tests_no_optional_require = [
     'assertionlib>=2.3.0',
-    'mypy',
     'pytest>=5.4',
     'pytest-cov',
     'pytest-mock',
@@ -32,6 +31,11 @@ tests_require =  [
     'pytest-pydocstyle>=2.1',
     'typing_extensions'
 ]
+
+tests_require =  [
+    'mypy',
+]
+tests_require += tests_no_optional_require
 tests_require += docs_require
 
 setup(
@@ -85,6 +89,7 @@ setup(
     ],
     extras_require={
         'test': tests_require,
+        'test_no_optional': tests_no_optional_require,
         'doc': docs_require,
     }
 )

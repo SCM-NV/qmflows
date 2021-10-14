@@ -20,7 +20,7 @@ jobs:
             special: 'pre-release'
             version: 3.9
           - os: ubuntu-latest
-            special: 'no RDKit'
+            special: 'no optional'
             version: 3.9
 
     steps:
@@ -58,10 +58,10 @@ jobs:
             source $CONDA/bin/activate test
             pip install --pre -e .[test] --upgrade --force-reinstall
             ;;
-          "no RDKit")
-            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
+          "no optional")
+            conda create -n test -c conda-forge python=${{ matrix.version }}
             source $CONDA/bin/activate test
-            pip install -e .[test]
+            pip install -e .[test_no_optional]
             ;;
           *)
             conda create -n test -c conda-forge python=${{ matrix.version }} rdkit nbsphinx jupyter pandoc
@@ -84,7 +84,7 @@ jobs:
         source $CONDA/bin/activate test
 
         case "${{ matrix.special }}" in
-          "no RDKit")
+          "no optional")
             pytest -m 'not (slow or long)' test ;;
           *)
             pytest -m 'not (slow or long)' ;;
