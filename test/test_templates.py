@@ -32,3 +32,7 @@ def test_id(name: str) -> None:
     s2 = getattr(qmflows, name)
     assertion.eq(s1, s2)
     assertion.is_not(s1, s2)
+
+
+def test_namespace() -> None:
+    assertion.issubset(templates.__all__, dir(qmflows))

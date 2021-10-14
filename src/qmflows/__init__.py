@@ -1,9 +1,7 @@
 """QMFlows API."""
 
 import sys
-import types
-import importlib as _importlib
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from .__version__ import __version__
 
@@ -17,6 +15,13 @@ from .packages import (
 from . import templates
 from .settings import Settings
 
+try:
+    import rdkit
+except ModuleNotFoundError as ex:
+    _RDKIT_EX: "None | ModuleNotFoundError" = ex
+else:
+    _RDKIT_EX = None
+
 __all__ = [
     '__version__',
     'logger',
@@ -26,57 +31,45 @@ __all__ = [
     'example_H2O2_TS', 'example_freqs', 'example_generic_constraints',
     'example_partial_geometry_opt',
     'freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt',
-    'find_first_job', 'select_max', 'select_min']
+    'find_first_job', 'select_max', 'select_min',
+]
 
+# Use `__getattr__` for loading (and copying) the templates in python >= 3.7
 if TYPE_CHECKING or sys.version_info < (3, 7):
     from .templates import freq, geometry, singlepoint, ts, md, cell_opt
+
+# Use `__getattr__` to raise a more descriptive error if RDKit
+# is not installed (requires python >= 3.7)
+if TYPE_CHECKING or sys.version_info < (3, 7) or _RDKIT_EX is None:
     from .components import (
-        Angle, Dihedral, Distance, find_first_job, select_max, select_min
+        Angle,
+        Dihedral,
+        Distance,
+        find_first_job,
+        select_max,
+        select_min,
     )
     from .examples import (
-        example_H2O2_TS, example_freqs, example_generic_constraints, example_partial_geometry_opt
+        example_H2O2_TS,
+        example_freqs,
+        example_generic_constraints,
+        example_partial_geometry_opt,
     )
     from . import components, examples
+
+if sys.version_info >= (3, 7):
+    from ._init_utils import (
+        getattr_method as __getattr__,
+        dir_method as __dir__,
+        RDKIT_SET,
+    )
+    if _RDKIT_EX is not None:
+        __all__ = [name for name in __all__ if name not in RDKIT_SET]
+    del RDKIT_SET
 else:
-    _TEMPLATES = frozenset(templates.__all__)
-    _REQUIRES_RDKIT = types.MappingProxyType({
-        "components": "qmflows.components",
-        "Angle": "qmflows.components",
-        "Dihedral": "qmflows.components",
-        "Distance": "qmflows.components",
-        "find_first_job": "qmflows.components",
-        "select_max": "qmflows.components",
-        "select_min": "qmflows.components",
-        "examples": "qmflows.examples",
-        "example_H2O2_TS": "qmflows.examples",
-        "example_freqs": "qmflows.examples",
-        "example_generic_constraints": "qmflows.examples",
-        "example_partial_geometry_opt": "qmflows.examples",
-    })
-
-    _DIR_CACHE: "None | list[str]" = None
-
-    def __getattr__(name: str) -> Any:
-        """Ensure that the qmflows templates are always copied before returning."""
-        if name in _TEMPLATES:
-            return getattr(templates, name).copy()
-
-        # Lazily load (and cache) the content of `qmflows.examples` and `
-        # qmflows.components` in order to avoid directly importing RDKit
-        module_name = _REQUIRES_RDKIT.get(name)
-        if module_name is not None:
-            globals()[module_name] = module = _importlib.import_module(module_name)
-            globals()[name] = ret = getattr(module, name, module)
-            return ret
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-    def __dir__() -> "list[str]":
-        """Manually insert the qmflows templates into :func:`dir`."""
-        global _DIR_CACHE
-        if _DIR_CACHE is None:
-            _DIR_CACHE = list(globals()) + templates.__all__ + list(_REQUIRES_RDKIT)
-            _DIR_CACHE.sort()
-        return _DIR_CACHE
+    # Initalize the sub-module such that `_RDKIT_EX` can enter its namespace
+    from . import _init_utils
+    del _init_utils
 
 # Clean up the namespace
-del sys, types, TYPE_CHECKING, Any
+del sys, TYPE_CHECKING, _RDKIT_EX
