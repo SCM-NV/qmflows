@@ -91,52 +91,6 @@ class CP2KMM(CP2K):
         """
 
     @classmethod
-    def run_job(cls, settings: Settings, mol: plams.Molecule,
-                job_name: str = 'cp2k_job',
-                work_dir: Union[None, str, os.PathLike] = None,
-                validate_output: bool = True,
-                **kwargs: Any) -> CP2KMM_Result:
-        """Call the Cp2K binary using plams interface.
-
-        :param settings: Job Settings.
-        :type settings: :class:`~qmflows.Settings`
-        :param mol: molecular Geometry
-        :type mol: plams Molecule
-        :param hdf5_file: Path to the HDF5 file that contains the numerical results.
-        :type hdf5_file: String
-        :param input_file_name: Optional name for the input.
-        :type input_file_name: String
-        :param out_file_name: Optional name for the output.
-        :type out_file_name: String
-        :param store_in_hdf5: wether to store the output arrays in HDF5 format.
-        :type store_in_hdf5: Bool
-
-        """
-        # Input modifications
-        cp2k_settings = Settings()
-        cp2k_settings.input = settings.specific.cp2k
-
-        # Create a Plams job
-        job = plams.Cp2kJob(name=job_name, settings=cp2k_settings, molecule=mol)
-        r = job.run()
-
-        work_dir = work_dir if work_dir is not None else job.path
-
-        if validate_output:
-            warnings = parse_output_warnings(
-                job_name, r.job.path, parse_cp2k_warnings, cp2k_warnings
-            )
-        else:
-            warnings = None
-
-        # Absolute path to the .dill file
-        dill_path = join(job.path, f'{job.name}.dill')
-
-        return cls.result_type(cp2k_settings, mol, job_name, dill_path=dill_path,
-                               plams_dir=r.job.path, work_dir=work_dir,
-                               status=job.status, warnings=warnings)
-
-    @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Create the settings input for complex cp2k keys.
