@@ -1,7 +1,7 @@
 """A module with warnings used throughout QMFlows."""
 
 from math import isclose
-from typing import Optional, Collection
+from typing import Optional, Iterable
 
 from pyparsing import ZeroOrMore, Suppress, SkipTo
 
@@ -53,9 +53,10 @@ def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
     return None if condition else msg.rstrip()
 
 
-def _eval_param(msg: str,
-                skip: Collection[str] = ('Urey-Bradley', 'Out of plane bend')
-                ) -> Optional[str]:
+def _eval_param(
+    msg: str,
+    skip: Iterable[str] = ('Urey-Bradley', 'Out of plane bend'),
+) -> Optional[str]:
     """Return missing forcefield warnings in *msg* except for all terms in *skip*."""
     for i in skip:
         if i in msg:

@@ -2,7 +2,7 @@
 
 __all__ = ['yaml2Settings']
 
-from typing import Union, Callable
+from typing import Union, Callable, overload, Dict, Any
 
 import yaml
 
@@ -11,10 +11,12 @@ from .type_hints import T
 from .yaml_utils import UniqueSafeLoader
 
 
-def yaml2Settings(
-    xs: Union[str, bytes],
-    mapping_type: Callable[[dict], T] = Settings,
-) -> T:
+@overload
+def yaml2Settings(xs: Union[str, bytes]) -> Settings: ...
+@overload
+def yaml2Settings(xs: Union[str, bytes], mapping_type: Callable[[Dict[str, Any]], T]) -> T: ...
+
+def yaml2Settings(xs, mapping_type=Settings):
     """Transform a string containing some data in .yaml format to a Settings object."""
     if isinstance(xs, bytes):
         xs = xs.decode()

@@ -3,9 +3,11 @@
 __all__ = ['Settings']
 
 from functools import wraps
-from typing import Callable, NoReturn
+from typing import Callable, NoReturn, Any, TypeVar, Mapping
 
 from scm import plams
+
+_Self = TypeVar("_Self", bound="Settings")
 
 
 class Settings(plams.core.settings.Settings, ):
@@ -16,11 +18,11 @@ class Settings(plams.core.settings.Settings, ):
     - :code:`settings['a.b']` is equivalent to :code:`settings['a']['b'] = settings.a.b`
     """
 
-    def __getitem__(self, name):
+    def __getitem__(self, name: str) -> Any:
         """Implement :meth:`self[name]<object.__getitem__>`."""
         return dict.__getitem__(self, name)
 
-    def __setitem__(self, name, value):
+    def __setitem__(self, name: str, value: Any) -> None:
         """Implement :meth:`self[name] = value<object.__setitem__>`.
 
         Like its counterpart in :class:`dict` but passed dictionaries are converted
@@ -31,11 +33,11 @@ class Settings(plams.core.settings.Settings, ):
             value = cls(value)
         dict.__setitem__(self, name, value)
 
-    def __delitem__(self, name):
+    def __delitem__(self, name: str) -> Any:
         """Implement :meth:`del self[name]<object.__delitem__>`."""
         dict.__delitem__(self, name)
 
-    def copy(self):
+    def copy(self: _Self) -> _Self:
         """Create a deep(-ish) copy of this instance.
 
         All nested settings instances embedded within *self* are copied recursively;
@@ -50,21 +52,21 @@ class Settings(plams.core.settings.Settings, ):
                 ret[name] = self[name]
         return ret
 
-    def __deepcopy__(self, _):
+    def __deepcopy__(self: _Self, _: object) -> _Self:
         """Implement :func:`copy.deepcopy(self)<copy.deepcopy>`.
 
         Serves as an alias for :meth:`Settings.copy`.
         """
         return self.copy()
 
-    def overlay(self, other):
+    def overlay(self: _Self, other: Mapping[str, Any]) -> _Self:
         """Return new instance of |Settings| that is a copy of this instance updated with *other*."""  # noqa: E501
         ret = self.copy()
         ret.update(other)
         return ret
 
 
-def _unsuported_operation(meth: Callable) -> Callable[..., NoReturn]:
+def _unsuported_operation(meth: Callable[..., Any]) -> Callable[..., NoReturn]:
     """Decorate a method such that it raises a :exc:`TypeError`."""
     @wraps(meth)
     def new_meth(self, *args, **kwargs) -> NoReturn:
