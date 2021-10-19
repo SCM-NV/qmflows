@@ -24,7 +24,7 @@ class CP2K_Result(Result):
     prop_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='properties')
 
     @property
-    def molecule(self) -> plams.Molecule:
+    def molecule(self) -> "None | plams.Molecule":
         """Return the current geometry.
 
         If the job is an optimization, try to read the ` *-pos-1.xyz` file.
@@ -47,7 +47,7 @@ class CP2K(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='generic2')
-    result_type: ClassVar[Type[Result]] = CP2K_Result
+    result_type: ClassVar[Type[CP2K_Result]] = CP2K_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)
@@ -55,7 +55,7 @@ class CP2K(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
-                work_dir: Union[None, str, os.PathLike] = None,
+                work_dir: "None | str | os.PathLike[str]" = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> CP2K_Result:
         """Call the Cp2K binary using plams interface.

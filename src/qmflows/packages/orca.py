@@ -31,11 +31,10 @@ class ORCA_Result(Result):
             return None
 
         plams_dir = self.archive["plams_dir"]
-        try:
-            file_name = join(plams_dir, f'{self.job_name}.out')
-        except TypeError:  # plams_dir can be None
+        if plams_dir is None:
             return None
         else:
+            file_name = join(plams_dir, f'{self.job_name}.out')
             return parse_molecule(file_name, self._molecule)
 
 
@@ -49,7 +48,7 @@ class ORCA(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
-    result_type: ClassVar[Type[Result]] = ORCA_Result
+    result_type: ClassVar[Type[ORCA_Result]] = ORCA_Result
 
     def __init__(self, pkg_name: str = "orca") -> None:
         super().__init__(pkg_name)
@@ -57,7 +56,7 @@ class ORCA(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = "ORCAjob",
-                work_dir: Union[None, str, os.PathLike] = None,
+                work_dir: "None | str | os.PathLike[str]" = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> ORCA_Result:
 
@@ -92,10 +91,10 @@ class ORCA(Package):
             value = value if isinstance(value, np.ndarray) else np.array(value)
 
             def format_atom(atom: plams.Atom) -> str:
-                symbol, mass, coords = atom.symbol, atom._getmass(), atom.coords
+                symbol, mass, coords = atom.symbol, atom.mass, atom.coords
                 return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
-            def format_hessian(dim, hess: Union[List[List[float]], np.array]) -> str:
+            def format_hessian(dim, hess: Union[List[List[float]], np.ndarray]) -> str:
                 """Format numpy array to Orca matrix format."""
                 ret = ''
                 for i in range((dim - 1) // 6 + 1):

@@ -184,7 +184,7 @@ class PackageWrapper(Package, Generic[JT]):
     """  # noqa
 
     generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
-    result_type: ClassVar[Type[Result]] = ResultWrapper
+    result_type: ClassVar[Type[ResultWrapper]] = ResultWrapper
     job_type: Type[JT]
 
     def __init__(self, job_type: Type[JT], name: Optional[str] = None) -> None:

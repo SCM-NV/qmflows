@@ -27,12 +27,11 @@ API
 
 import copy
 import textwrap
-from io import TextIOBase
 from functools import singledispatch
 from itertools import repeat, islice
 from collections import abc
 from typing import (Union, Optional, List, Dict, Tuple, MutableMapping, NoReturn,
-                    Sequence, Any, Iterable, Iterator, overload, cast)
+                    Sequence, Any, Iterable, Iterator, overload, cast, IO)
 
 import numpy as np
 import pandas as pd
@@ -90,13 +89,13 @@ class LengthError(ValueError):
 
 @to_runtime_error
 def _map_psf_atoms(settings: None, key: str,
-                   value: Union[PathLike, TextIOBase],
+                   value: Union[PathLike, IO[Any]],
                    mol: None, **kwargs: Any) -> Dict[str, str]:
     """A small wrapper around :func:`map_psf_atoms`."""
     return map_psf_atoms(value, **kwargs)
 
 
-def map_psf_atoms(file: Union[PathLike, TextIOBase], **kwargs: Any) -> Dict[str, str]:
+def map_psf_atoms(file: Union[PathLike, IO[Any]], **kwargs: Any) -> Dict[str, str]:
     r"""Take a .psf file and construct a :class:`dict` mapping atom types to atom names.
 
     Examples

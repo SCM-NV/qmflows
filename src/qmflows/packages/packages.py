@@ -64,9 +64,9 @@ class Result:
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
                  job_name: str,
-                 dill_path: Union[None, str, os.PathLike] = None,
-                 plams_dir: Union[None, str, os.PathLike] = None,
-                 work_dir: Union[None, str, os.PathLike] = None,
+                 dill_path: "None | str | os.PathLike[str]" = None,
+                 plams_dir: "None | str | os.PathLike[str]" = None,
+                 work_dir: "None | str | os.PathLike[str]" = None,
                  status: str = 'done',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize a :class:`Result` instance.
@@ -681,15 +681,17 @@ def import_parser(ds: Mapping[str, str], module_root: str = "qmflows.parsers") -
     return importlib.import_module(module_name)
 
 
-def find_file_pattern(path: Union[str, os.PathLike],
-                      folder: Union[None, str, os.PathLike] = None) -> Iterator[str]:
+def find_file_pattern(
+    path: "str | os.PathLike[str]",
+    folder: "None | str | os.PathLike[str]" = None,
+) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
         return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])
 
 
-def ignore_unused_kwargs(fun: Callable, *args: Any, **kwargs: Any) -> Any:
+def ignore_unused_kwargs(fun: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
     Searches for the keyword arguments that are present in both `**kwargs`

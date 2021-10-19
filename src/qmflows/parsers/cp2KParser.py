@@ -5,7 +5,6 @@ import logging
 import mmap
 import os
 import subprocess
-from io import TextIOBase
 from itertools import islice, chain
 from pathlib import Path
 from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
@@ -78,8 +77,10 @@ def assign_warning(warning_type: Type[Warning], msg: str,
             yield m, QMFlows_Warning
 
 
-def read_cp2k_coefficients(path_mos: PathLike,
-                           plams_dir: Optional_[PathLike] = None) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
+def read_cp2k_coefficients(
+    path_mos: "str | os.PathLike[str]",
+    plams_dir: "None | str | os.PathLike[str]" = None,
+) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -118,7 +119,11 @@ Its value is {range_mos}"""
         raise
 
 
-def read_log_file(path: PathLike, norbitals: int, orbitals_info: MO_metadata) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
+def read_log_file(
+    path: "str | os.PathLike[str]",
+    norbitals: int,
+    orbitals_info: MO_metadata,
+) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """
     Read the orbitals from the Log file.
 
@@ -204,10 +209,10 @@ def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -
             coefficients[:, -1] = np.concatenate(css)
         else:
             # rearrange the coefficients
-            css = np.transpose(css)
+            css2 = np.transpose(css)
             energies[j: j + 2] = es
-            coefficients[:, j] = css[0]
-            coefficients[:, j + 1] = css[1]
+            coefficients[:, j] = css2[0]
+            coefficients[:, j + 1] = css2[1]
 
     return InfoMO(energies, coefficients)
 
@@ -323,7 +328,7 @@ def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     return meta
 
 
-def move_restart_coefficients_recursively(path: PathLike) -> None:
+def move_restart_coefficients_recursively(path: "str | os.PathLike[str]") -> None:
     """Remove all the coefficients belonging to a restart."""
     while True:
         with open(path, 'r') as f:
@@ -335,7 +340,7 @@ def move_restart_coefficients_recursively(path: PathLike) -> None:
             break
 
 
-def move_restart_coeff(path: PathLike) -> None:
+def move_restart_coeff(path: "str | os.PathLike[str]") -> None:
     """Rename Molecular Orbital Coefficients and EigenValues."""
     root, file_name = os.path.split(path)
 
@@ -349,13 +354,13 @@ def move_restart_coeff(path: PathLike) -> None:
     os.remove(Path(root, 'coeffs0'))
 
 
-def split_unrestricted_log_file(path: PathLike) -> Tuple[Path, Path]:
+def split_unrestricted_log_file(path: "str | os.PathLike[str]") -> Tuple[Path, Path]:
     """Split the log file into alpha and beta molecular orbitals."""
-    root, file_name = os.path.split(path)
-    split_log_file(path, root, file_name)
+    _root, file_name = os.path.split(path)
+    split_log_file(path, _root, file_name)
 
     # Check that the files exists
-    root = Path(root)
+    root = Path(_root)
     predicate = all((root / f).exists() for f in ('coeffs0', 'coeffs1'))
     if not predicate:
         msg = "There is a problem splitting the coefficients in alpha and beta components!"
@@ -432,7 +437,7 @@ def get_head_and_tail(xs: Iterable[T]) -> Tuple[T, List[T]]:
     return (head, tail)
 
 
-def get_cp2k_freq(file: Union[PathLike, TextIOBase],
+def get_cp2k_freq(file: Union[PathLike, IO[Any]],
                   unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
     r"""Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format.
 
@@ -632,10 +637,7 @@ def read_cp2k_table_slc(
         clm_slc = slice(column_start, column_stop, column_step)
         row_slc = islice(f, row_start, row_stop, row_step)
         flat_iter = chain.from_iterable(i.split()[clm_slc] for i in row_slc)
-
-        ret = np.fromiter(flat_iter, dtype=dtype)
-        ret.shape = shape
-        return ret
+        return np.fromiter(flat_iter, dtype=dtype).reshape(shape)
 
 
 def _get_pressure_iter(major: int, f: IO[str]) -> Generator[str, None, None]:

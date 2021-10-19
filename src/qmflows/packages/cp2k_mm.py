@@ -14,12 +14,12 @@ API
 
 import os
 from os.path import join, abspath
-from typing import Union, Any, ClassVar, Dict, Type
+from typing import Union, Any, ClassVar, Dict, Type, TYPE_CHECKING
 
 import numpy as np
 from scm import plams
 
-from .packages import Result, parse_output_warnings, load_properties
+from .packages import parse_output_warnings, load_properties
 from .cp2k_package import CP2K, CP2K_Result
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from ..parsers.cp2KParser import parse_cp2k_warnings
@@ -47,7 +47,7 @@ class CP2KMM(CP2K):
     """  # noqa: E501
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='generic2')
-    result_type: ClassVar[Type[Result]] = CP2KMM_Result
+    result_type: ClassVar[Type[CP2KMM_Result]] = CP2KMM_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)
@@ -90,6 +90,18 @@ class CP2KMM(CP2K):
             settings.prm = str(prm_name)
         """
 
+    if TYPE_CHECKING:
+        @classmethod
+        def run_job(
+            cls,
+            settings: Settings,
+            mol: plams.Molecule,
+            job_name: str = 'cp2k_job',
+            work_dir: "None | str | os.PathLike[str]" = ...,
+            validate_output: bool = True,
+            **kwargs: Any,
+        ) -> CP2KMM_Result: ...
+
     @classmethod
     def handle_special_keywords(cls, settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
@@ -119,7 +131,7 @@ class CP2KMM(CP2K):
 
     @staticmethod
     def _parse_psf(settings: Settings, key: str,
-                   value: Any, mol: plams.Molecule) -> None:
+                   value: "None", mol: plams.Molecule) -> None:
         """Assign a .psf file."""
         subsys = settings.specific.cp2k.force_eval.subsys
         if value is None:

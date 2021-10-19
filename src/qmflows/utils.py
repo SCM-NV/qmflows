@@ -5,6 +5,7 @@ __author__ = "Felipe Zapata"
 __all__ = ['to_runtime_error', 'init_restart', 'InitRestart']
 
 import os
+import types
 import shutil
 import tempfile
 from collections import Counter, abc
@@ -12,20 +13,22 @@ from contextlib import AbstractContextManager, redirect_stdout
 from functools import wraps
 from os.path import abspath, join, normpath, splitext
 from pathlib import Path
-from typing import IO, Any, Callable, ContextManager, Iterable, Optional, Union
+from typing import IO, Any, Callable, ContextManager, Iterable, Optional, Union, TypeVar, Type
 
 from scm.plams import JobManager, config, finish, init, load_all
 
 from .backports import nullcontext
 from .type_hints import PathLike
 
+_FT = TypeVar("_FT", bound=Callable[..., Any])
 
-def get_tmpfile_name(name: str = "tmp_qmflows_") -> PathLike:
+
+def get_tmpfile_name(name: str = "tmp_qmflows_") -> Path:
     """Create a temporal file name."""
     return Path(tempfile.mkstemp(prefix=name)[1])
 
 
-def to_runtime_error(func: Callable) -> Callable:
+def to_runtime_error(func: _FT) -> _FT:
     """Decorate a `specific` function, translating any Exceptions into a :exc:`RuntimeError`.
 
     The Exception message is furthermore prepended with *key*.
@@ -62,12 +65,12 @@ def to_runtime_error(func: Callable) -> Callable:
 
             exc = RuntimeError(f"{key!r} section: {ex}")
             raise exc.with_traceback(ex.__traceback__) from ex
-    return wrapper
+    return wrapper  # type: ignore[return-value]
 
 
-def file_to_context(file: Union[int, PathLike, IO],
+def file_to_context(file: Union[int, PathLike, IO[Any]],
                     require_iterator: bool = True,
-                    **kwargs: Any) -> ContextManager[IO]:
+                    **kwargs: Any) -> ContextManager[IO[Any]]:
     r"""Take a path- or file-like object and return an appropiate context manager instance.
 
     Passing a path-like object will supply it to :func:`open`,
@@ -128,9 +131,11 @@ def file_to_context(file: Union[int, PathLike, IO],
         return nullcontext(file)  # type: ignore
 
 
-def init_restart(path: Optional[PathLike] = None,
-                 folder: Optional[PathLike] = None,
-                 load_jobs: bool = False) -> None:
+def init_restart(
+    path: "None | str | os.PathLike[str]" = None,
+    folder: "None | str | os.PathLike[str]" = None,
+    load_jobs: bool = False,
+) -> None:
     """Call the PLAMS |init| function without creating a new directory.
 
     All pre-existing Jobs contained therein can be automatically loaded (see |load_all|)
@@ -202,10 +207,13 @@ class InitRestart(AbstractContextManager):
 
     """
 
-    def __init__(self, path: Optional[PathLike] = None,
-                 folder: Optional[PathLike] = None,
-                 otherJM: Optional[Iterable[JobManager]] = None,
-                 load_jobs: bool = False) -> None:
+    def __init__(
+        self,
+        path: "None | str | os.PathLike[str]" = None,
+        folder: "None | str | os.PathLike[str]" = None,
+        otherJM: Optional[Iterable[JobManager]] = None,
+        load_jobs: bool = False,
+    ) -> None:
         """Initialize the context manager, assign the path, folder and jobmanagers."""
         self.path = path
         self.folder = folder
@@ -217,6 +225,11 @@ class InitRestart(AbstractContextManager):
         init_restart(path=self.path, folder=self.folder,
                      load_jobs=self.load_jobs)
 
-    def __exit__(self, exc_type, exc_value, traceback) -> None:
+    def __exit__(
+        self,
+        exc_type: "Type[BaseException] | None",
+        exc_value: "BaseException | None",
+        traceback: "types.TracebackType | None",
+    ) -> None:
         """Exit the context manager, call :func:`finish<scm.plams.core.functions.finish>`."""
         finish(self.otherJM)

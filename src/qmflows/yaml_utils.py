@@ -27,7 +27,7 @@ try:
         CSafeLoader as SafeLoader,
     )
 except ImportError:
-    from yaml import UnsafeLoader, FullLoader, SafeLoader
+    from yaml import UnsafeLoader, FullLoader, SafeLoader  # type: ignore[misc]
 from yaml.nodes import MappingNode
 from yaml.constructor import ConstructorError, BaseConstructor, SafeConstructor
 
