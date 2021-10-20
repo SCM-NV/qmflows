@@ -131,7 +131,7 @@ class Result:
         elif not (has_crashed or is_private or prop in self.prop_mapping):
             if self._results_open:
                 warn(f"Generic property {prop!r} not defined",
-                     category=QMFlows_Warning)
+                     category=QMFlows_Warning, stacklevel=2)
 
             # Do not issue this warning if the Results object is still pickled
             else:  # Unpickle the Results instance and try again
@@ -139,7 +139,8 @@ class Result:
                 try:
                     return vars(self)[prop]  # Avoid recursive `getattr` calls
                 except KeyError:
-                    warn(f"Generic property {prop!r} not defined", category=QMFlows_Warning)
+                    warn(f"Generic property {prop!r} not defined",
+                         category=QMFlows_Warning, stacklevel=2)
 
         elif has_crashed and not is_private:
             warn(f"""
@@ -148,7 +149,7 @@ class Result:
             Are you sure that you have the package installed or
              you have loaded the package in the cluster. For example:
             `module load AwesomeQuantumPackage/3.141592`
-            """, category=QMFlows_Warning)
+            """, category=QMFlows_Warning, stacklevel=2)
         return None
 
     def get_property(self, prop: str) -> Any:
