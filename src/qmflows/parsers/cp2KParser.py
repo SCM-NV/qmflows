@@ -97,6 +97,7 @@ def read_cp2k_coefficients(
 
     path_in = plams_dir / file_in
     path_out = plams_dir / file_out
+    cp2k_version = get_cp2k_version(path_out)
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
@@ -105,7 +106,7 @@ def read_cp2k_coefficients(
         # Read the range of printed MOs from the input
         printed_orbitals = range_mos[1] - range_mos[0] + 1
 
-        return read_log_file(path_mos, printed_orbitals, orbitals_info)
+        return read_log_file(path_mos, printed_orbitals, orbitals_info, cp2k_version)
 
     except ValueError as err:
         msg = (
@@ -127,6 +128,7 @@ def read_log_file(
     path: "str | os.PathLike[str]",
     norbitals: int,
     orbitals_info: MO_metadata,
+    cp2k_version: Tuple[int, int] = (0, 0),
 ) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """
     Read the orbitals from the Log file.
@@ -144,6 +146,9 @@ def read_log_file(
         Number of MO to read
     norbital_functions
         Number of orbital functions
+    cp2k_version : tuple[int, int]
+        The CP2K major and minor version
+
     Returns
     -------
         Molecular orbitals and orbital energies
@@ -153,15 +158,20 @@ def read_log_file(
 
     # There is a single set of MOs
     if orbitals_info.nspinstates == 1:
-        return read_coefficients(path, norbitals, orbitals_info.nOrbFuns)
+        return read_coefficients(path, norbitals, orbitals_info.nOrbFuns, cp2k_version)
     else:
         path_alphas, path_betas = split_unrestricted_log_file(path)
-        alphas = read_coefficients(path_alphas, norbitals, orbitals_info.nOrbFuns)
-        betas = read_coefficients(path_betas, norbitals - 1, orbitals_info.nOrbFuns)
+        alphas = read_coefficients(path_alphas, norbitals, orbitals_info.nOrbFuns, cp2k_version)
+        betas = read_coefficients(path_betas, norbitals - 1, orbitals_info.nOrbFuns, cp2k_version)
         return alphas, betas
 
 
-def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -> InfoMO:
+def read_coefficients(
+    path: PathLike,
+    norbitals: int,
+    norbital_functions: int,
+    cp2k_version: Tuple[int, int] = (0, 0),
+) -> InfoMO:
     """Read the coefficients from the plain text output.
 
     MO coefficients are stored in Column-major order.
@@ -192,7 +202,11 @@ def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -
         xss = f.readlines()
 
     # remove empty lines and comments
-    rs = list(filter(None, map(lambda x: x.split(), xss)))
+    if cp2k_version >= (8, 2):
+        # Strip the `MO|` prefix added in CP2K 8.2
+        rs = list(filter(None, map(lambda x: x.split()[1:], xss)))
+    else:
+        rs = list(filter(None, map(lambda x: x.split(), xss)))
     rs = remove_trailing(rs[1:])  # remove header and trail comments
 
     # Split the list in chunks containing the orbitals info
