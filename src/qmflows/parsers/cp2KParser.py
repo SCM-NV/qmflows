@@ -18,7 +18,7 @@ from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        nums, oneOf, restOfLine, srange)
 from scm.plams import Molecule, Units
 
-from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata
+from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata, CP2KVersion
 from ..type_hints import Literal as Literal_
 from ..type_hints import PathLike, T, WarnDict, WarnMap
 from ..utils import file_to_context
@@ -29,7 +29,7 @@ from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
-           'read_cp2k_table_slc']
+           'read_cp2k_table_slc', 'get_cp2k_version']
 
 
 # Starting logger
@@ -669,23 +669,28 @@ def read_cp2k_pressure(
     dtype: Any = np.float64,
 ) -> np.ndarray:
     """Return all pressures from the passed cp2k ``.out`` file as an array."""
-    # Identify the CP2K version
-    major = 0
-    with open(path, 'r') as f:
-        for i in f:
-            if i.startswith(" CP2K| version string:"):
-                version_str = i.split()[-1]
-                major_str = version_str.split(".")[0]
-
-                # if an error is encoutered here then we must be dealing with
-                # a very old CP2K version; fall back to `major = 0` in such case
-                try:
-                    major = int(major_str)
-                except ValueError:
-                    pass
-                break
+    major, _ = get_cp2k_version(path)
 
     # Read the pressures
     with open(path, 'r') as f:
         iterator = _get_pressure_iter(major, f)
         return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)
+
+
+def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
+    """Read the CP2K major and minor version from the passed .out file.
+
+    Returns :code:`(0, 0)` if the versions cannot be identified.
+    """
+    with open(out_file, 'r') as f:
+        for i in f:
+            if i.startswith(" CP2K| version string:"):
+                version_str = i.split()[-1]
+
+                # if an error is encoutered here then we must be dealing with
+                # a very old CP2K version; fall back to `major = 0` in such case
+                try:
+                    return CP2KVersion._make(int(i) for i in version_str.split("."))
+                except ValueError:
+                    pass
+        return CP2KVersion(0, 0)
