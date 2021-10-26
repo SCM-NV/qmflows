@@ -18,7 +18,7 @@ from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
                        nums, oneOf, restOfLine, srange)
 from scm.plams import Molecule, Units
 
-from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata
+from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata, CP2KVersion
 from ..type_hints import Literal as Literal_
 from ..type_hints import PathLike, T, WarnDict, WarnMap
 from ..utils import file_to_context
@@ -29,7 +29,7 @@ from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
-           'read_cp2k_table_slc']
+           'read_cp2k_table_slc', 'get_cp2k_version']
 
 
 # Starting logger
@@ -97,6 +97,7 @@ def read_cp2k_coefficients(
 
     path_in = plams_dir / file_in
     path_out = plams_dir / file_out
+    cp2k_version = get_cp2k_version(path_out)
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
@@ -105,17 +106,21 @@ def read_cp2k_coefficients(
         # Read the range of printed MOs from the input
         printed_orbitals = range_mos[1] - range_mos[0] + 1
 
-        return read_log_file(path_mos, printed_orbitals, orbitals_info)
+        return read_log_file(path_mos, printed_orbitals, orbitals_info, cp2k_version)
 
     except ValueError as err:
-        msg = f"""There was a problem reading the molecular orbitals from:{path_mos}\n
-contact the developers!!\nValueError: {err}"""
-        logger.error(msg)
+        msg = (
+            f"There was a problem reading the molecular orbitals from {os.fspath(path_mos)!r},"
+            "contact the developers!!"
+        )
+        logger.error(msg, exc_info=err)
         raise
-    except TypeError:
-        msg = f"""There was a problem reading the ``range_mos` parameter.
-Its value is {range_mos}"""
-        logger.error(msg)
+    except TypeError as err:
+        msg = (
+            "There was a problem reading the ``range_mos` parameter."
+            f"Its value is {range_mos}"
+        )
+        logger.error(msg, exc_info=err)
         raise
 
 
@@ -123,6 +128,7 @@ def read_log_file(
     path: "str | os.PathLike[str]",
     norbitals: int,
     orbitals_info: MO_metadata,
+    cp2k_version: Tuple[int, int] = (0, 0),
 ) -> Union[InfoMO, Tuple[InfoMO, InfoMO]]:
     """
     Read the orbitals from the Log file.
@@ -140,6 +146,9 @@ def read_log_file(
         Number of MO to read
     norbital_functions
         Number of orbital functions
+    cp2k_version : tuple[int, int]
+        The CP2K major and minor version
+
     Returns
     -------
         Molecular orbitals and orbital energies
@@ -149,15 +158,20 @@ def read_log_file(
 
     # There is a single set of MOs
     if orbitals_info.nspinstates == 1:
-        return read_coefficients(path, norbitals, orbitals_info.nOrbFuns)
+        return read_coefficients(path, norbitals, orbitals_info.nOrbFuns, cp2k_version)
     else:
         path_alphas, path_betas = split_unrestricted_log_file(path)
-        alphas = read_coefficients(path_alphas, norbitals, orbitals_info.nOrbFuns)
-        betas = read_coefficients(path_betas, norbitals - 1, orbitals_info.nOrbFuns)
+        alphas = read_coefficients(path_alphas, norbitals, orbitals_info.nOrbFuns, cp2k_version)
+        betas = read_coefficients(path_betas, norbitals - 1, orbitals_info.nOrbFuns, cp2k_version)
         return alphas, betas
 
 
-def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -> InfoMO:
+def read_coefficients(
+    path: PathLike,
+    norbitals: int,
+    norbital_functions: int,
+    cp2k_version: Tuple[int, int] = (0, 0),
+) -> InfoMO:
     """Read the coefficients from the plain text output.
 
     MO coefficients are stored in Column-major order.
@@ -188,7 +202,11 @@ def read_coefficients(path: PathLike, norbitals: int, norbital_functions: int) -
         xss = f.readlines()
 
     # remove empty lines and comments
-    rs = list(filter(None, map(lambda x: x.split(), xss)))
+    if cp2k_version >= (8, 2):
+        # Strip the `MO|` prefix added in CP2K 8.2
+        rs = list(filter(None, map(lambda x: x.split()[1:], xss)))
+    else:
+        rs = list(filter(None, map(lambda x: x.split(), xss)))
     rs = remove_trailing(rs[1:])  # remove header and trail comments
 
     # Split the list in chunks containing the orbitals info
@@ -669,23 +687,28 @@ def read_cp2k_pressure(
     dtype: Any = np.float64,
 ) -> np.ndarray:
     """Return all pressures from the passed cp2k ``.out`` file as an array."""
-    # Identify the CP2K version
-    major = 0
-    with open(path, 'r') as f:
-        for i in f:
-            if i.startswith(" CP2K| version string:"):
-                version_str = i.split()[-1]
-                major_str = version_str.split(".")[0]
-
-                # if an error is encoutered here then we must be dealing with
-                # a very old CP2K version; fall back to `major = 0` in such case
-                try:
-                    major = int(major_str)
-                except ValueError:
-                    pass
-                break
+    major, _ = get_cp2k_version(path)
 
     # Read the pressures
     with open(path, 'r') as f:
         iterator = _get_pressure_iter(major, f)
         return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)
+
+
+def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
+    """Read the CP2K major and minor version from the passed .out file.
+
+    Returns :code:`(0, 0)` if the versions cannot be identified.
+    """
+    with open(out_file, 'r') as f:
+        for i in f:
+            if i.startswith(" CP2K| version string:"):
+                version_str = i.split()[-1]
+
+                # if an error is encoutered here then we must be dealing with
+                # a very old CP2K version; fall back to `major = 0` in such case
+                try:
+                    return CP2KVersion._make(int(i) for i in version_str.split("."))
+                except ValueError:
+                    pass
+        return CP2KVersion(0, 0)

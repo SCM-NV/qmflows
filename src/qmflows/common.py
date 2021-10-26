@@ -10,7 +10,7 @@ else:
     ParserElement = 'pyparsing.ParserElement'
 
 __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
-           'InfoMO', 'MO_metadata', 'ParseWarning']
+           'InfoMO', 'MO_metadata', 'ParseWarning', 'CP2KVersion']
 
 
 class AtomBasisKey(NamedTuple):
@@ -96,3 +96,10 @@ class ParseWarning(NamedTuple):
 
 # Replace NotImplemented with ParseWarning.return_msg()
 ParseWarning.__new__.__defaults__ = (ParseWarning.return_msg,)  # type: ignore
+
+
+class CP2KVersion(NamedTuple):
+    """A named 2-tuple with the CP2K major and minor version."""
+
+    major: int
+    minor: int
