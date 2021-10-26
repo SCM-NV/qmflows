@@ -108,14 +108,18 @@ def read_cp2k_coefficients(
         return read_log_file(path_mos, printed_orbitals, orbitals_info)
 
     except ValueError as err:
-        msg = f"""There was a problem reading the molecular orbitals from:{path_mos}\n
-contact the developers!!\nValueError: {err}"""
-        logger.error(msg)
+        msg = (
+            f"There was a problem reading the molecular orbitals from {os.fspath(path_mos)!r},"
+            "contact the developers!!"
+        )
+        logger.error(msg, exc_info=err)
         raise
-    except TypeError:
-        msg = f"""There was a problem reading the ``range_mos` parameter.
-Its value is {range_mos}"""
-        logger.error(msg)
+    except TypeError as err:
+        msg = (
+            "There was a problem reading the ``range_mos` parameter."
+            f"Its value is {range_mos}"
+        )
+        logger.error(msg, exc_info=err)
         raise
 
 
