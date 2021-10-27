@@ -8,8 +8,8 @@ from sphinx.application import Sphinx
 from sphinx.errors import SphinxWarning
 
 SRCDIR = CONFDIR = 'docs'
-OUTDIR = join('tests', 'test_files', 'build')
-DOCTREEDIR = join('tests', 'test_files', 'build', 'doctrees')
+OUTDIR = join('test', 'test_files', 'build')
+DOCTREEDIR = join('test', 'test_files', 'build', 'doctrees')
 
 
 def test_sphinx_build() -> None:
