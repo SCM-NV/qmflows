@@ -30,6 +30,8 @@ jobs:
         access_token: ${{ github.token }}
 
     - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
 
     - name: Install cp2k
       if: matrix.os == 'ubuntu-latest'
