@@ -1,9 +1,20 @@
 """Test CP2K parser functions."""
 from assertionlib import assertion
+from distutils.spawn import find_executable
 
-from qmflows.parsers.cp2KParser import parse_cp2k_warnings, readCp2KBasis
+import pytest
+from qmflows.parsers.cp2KParser import parse_cp2k_warnings, readCp2KBasis, get_cp2k_version_run
 from qmflows.test_utils import PATH
 from qmflows.warnings_qmflows import QMFlows_Warning, cp2k_warnings
+
+
+def cp2k_available() -> bool:
+    """Check if cp2k is installed."""
+    path = find_executable("cp2k.popt")
+    return path is not None
+
+
+HAS_CP2K = cp2k_available()
 
 
 def test_parse_cp2k_warnings():
@@ -28,3 +39,10 @@ def test_read_basis():
         # There is a list of exponents and coefficinets
         assertion.len(data.exponents)
         assertion.len(data.coefficients[0])
+
+
+
+@pytest.mark.skipif(not HAS_CP2K, reason="CP2K is not install or not loaded")
+def test_get_cp2k_version() -> None:
+    out = get_cp2k_version_run(PATH / "cp2k_freq.run")
+    assertion.truth(out)
