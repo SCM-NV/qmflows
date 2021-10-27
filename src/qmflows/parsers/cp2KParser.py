@@ -756,7 +756,7 @@ def get_cp2k_version_run(run_file: PathLike) -> CP2KVersion:
 
     # Get the `--version` of the executable
     out = subprocess.run(
-        [executable, "--version"], check=True, stdout=subprocess.DEVNULL, encoding="utf8"
+        [executable, "--version"], check=True, stdout=subprocess.PIPE, encoding="utf8"
     )
     match = VERSION_PATTERN.match(out.stdout)
     if match is None:
