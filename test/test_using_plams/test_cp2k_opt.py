@@ -17,7 +17,6 @@ def cp2k_available() -> bool:
 
 
 HAS_CP2K = cp2k_available()
-RUN_FILE = PATH / "output_cp2k" / "cp2k_freq" / "cp2k_freq.run"
 
 
 @delete_output
