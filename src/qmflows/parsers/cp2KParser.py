@@ -96,10 +96,11 @@ def read_cp2k_coefficients(
 
     file_in = fnmatch.filter(os.listdir(plams_dir), '*in')[0]
     file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
+    file_run = fnmatch.filter(os.listdir(plams_dir), '*run')[0]
 
     path_in = plams_dir / file_in
     path_out = plams_dir / file_out
-    cp2k_version = get_cp2k_version(path_out)
+    cp2k_version = get_cp2k_version_run(plams_dir / file_run)
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
