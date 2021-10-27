@@ -6,6 +6,7 @@ import mmap
 import os
 import subprocess
 import warnings
+import re
 from itertools import islice, chain
 from pathlib import Path
 from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
@@ -30,7 +31,7 @@ from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
-           'read_cp2k_table_slc', 'get_cp2k_version']
+           'read_cp2k_table_slc', 'get_cp2k_version', 'get_cp2k_version_run']
 
 
 # Starting logger
@@ -95,10 +96,11 @@ def read_cp2k_coefficients(
 
     file_in = fnmatch.filter(os.listdir(plams_dir), '*in')[0]
     file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
+    file_run = fnmatch.filter(os.listdir(plams_dir), '*run')[0]
 
     path_in = plams_dir / file_in
     path_out = plams_dir / file_out
-    cp2k_version = get_cp2k_version(path_out)
+    cp2k_version = get_cp2k_version_run(plams_dir / file_run)
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
@@ -733,3 +735,30 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
                     pass
     warnings.warn("Failed to identify the CP2K version", QMFlows_Warning, stacklevel=2)
     return CP2KVersion(0, 0)
+
+
+EXECUTABLE_PATTERN = re.compile(r"(mpirun|srun)\s*(\S+)")
+VERSION_PATTERN = re.compile(r"\s+CP2K version (\d+).(\d+)")
+
+
+def get_cp2k_version_run(run_file: PathLike) -> CP2KVersion:
+    """Get the CP2K version using the PLAMS .run."""
+    # Extract the executable
+    with open(run_file, 'r') as f:
+        for i in f:
+            match = EXECUTABLE_PATTERN.match(i)
+            if match is not None:
+                executable = match.groups()[1]
+                break
+        else:
+            filename = os.fsdecode(run_file)
+            raise ValueError(f"Failed to extract the CP2K executable from {filename!r}")
+
+    # Get the `--version` of the executable
+    out = subprocess.run(
+        [executable, "--version"], check=True, stdout=subprocess.PIPE, encoding="utf8"
+    )
+    match = VERSION_PATTERN.match(out.stdout)
+    if match is None:
+        raise ValueError(f"Failed to parse the `{executable} --version` output")
+    return CP2KVersion._make(int(i) for i in match.groups())

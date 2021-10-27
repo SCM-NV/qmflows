@@ -16,10 +16,12 @@ def cp2k_available() -> bool:
     return path is not None
 
 
+HAS_CP2K = cp2k_available()
+
+
 @delete_output
-@pytest.mark.skipif(
-    not cp2k_available(), reason="CP2K is not install or not loaded")
-def test_cp2k_opt(tmp_path: PathLike):
+@pytest.mark.skipif(not HAS_CP2K, reason="CP2K is not install or not loaded")
+def test_cp2k_opt(tmp_path: PathLike) -> None:
     """Run a simple molecular optimization."""
     s = fill_cp2k_defaults(templates.geometry)
 
