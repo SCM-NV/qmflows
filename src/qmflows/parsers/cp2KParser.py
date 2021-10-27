@@ -5,6 +5,7 @@ import logging
 import mmap
 import os
 import subprocess
+import warnings
 from itertools import islice, chain
 from pathlib import Path
 from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
@@ -198,16 +199,10 @@ def read_coefficients(
     12     1  C  4d+1     -0.0000000210955114     0.0147105486663415
     13     1  C  4d+2      0.0534202997324328     0.0000000021056315
     """
-    with open(path, 'r') as f:
-        xss = f.readlines()
-
-    # remove empty lines and comments
     if cp2k_version >= (8, 2):
-        # Strip the `MO|` prefix added in CP2K 8.2
-        rs = list(filter(None, map(lambda x: x.split()[1:], xss)))
+        rs = _get_mos_ge_82(path)
     else:
-        rs = list(filter(None, map(lambda x: x.split(), xss)))
-    rs = remove_trailing(rs[1:])  # remove header and trail comments
+        rs = _get_mos(path)
 
     # Split the list in chunks containing the orbitals info
     # in block cotaining a maximum of two columns of MOs
@@ -233,6 +228,31 @@ def read_coefficients(
             coefficients[:, j + 1] = css2[1]
 
     return InfoMO(energies, coefficients)
+
+
+def _get_mos(path: PathLike) -> List[List[str]]:
+    """Parse CP2k <8.2 MOs."""
+    with open(path, 'r') as f:
+        rs = list(filter(None, (x.rstrip('\n').split() for x in f)))
+    return remove_trailing(rs[1:])
+
+
+def _get_mos_ge_82(path: PathLike) -> List[List[str]]:
+    """Parse CP2k >=8.2 MOs."""
+    # Find the begining and end of the MO-range of interest
+    lineno_range = []
+    with open(path, 'r') as f:
+        for i, item in enumerate(f, start=1):
+            if item == " MO| EIGENVALUES, OCCUPATION NUMBERS, AND SPHERICAL EIGENVECTORS\n":
+                lineno_range.append(i)
+        if not lineno_range:
+            raise ValueError("Failed to identify the start of the MO range")
+        lineno_range.append(i - 4)  # Strip the band gap and Fermi info
+
+    # Only read the relevant MOs
+    with open(path, 'r') as f:
+        iterator = (x.split()[1:] for x in islice(f, *lineno_range[-2:]))
+        return [i for i in iterator if i]
 
 
 def remove_trailing(xs: List[List[str]]) -> List[List[str]]:
@@ -711,4 +731,5 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
                     return CP2KVersion._make(int(i) for i in version_str.split("."))
                 except ValueError:
                     pass
-        return CP2KVersion(0, 0)
+    warnings.warn("Failed to identify the CP2K version", QMFlows_Warning, stacklevel=2)
+    return CP2KVersion(0, 0)
