@@ -1,0 +1,3 @@
+#!/bin/sh
+
+mpirun cp2k.popt -i cp2k_opt.in -o cp2k_opt.out
