@@ -5,6 +5,7 @@ import logging
 import mmap
 import os
 import subprocess
+import warnings
 from itertools import islice, chain
 from pathlib import Path
 from typing import Any, Dict, FrozenSet, Generator, Iterable, List, IO
@@ -730,4 +731,5 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
                     return CP2KVersion._make(int(i) for i in version_str.split("."))
                 except ValueError:
                     pass
-        return CP2KVersion(0, 0)
+    warnings.warn("Failed to identify the CP2K version", QMFlows_Warning, stacklevel=2)
+    return CP2KVersion(0, 0)
