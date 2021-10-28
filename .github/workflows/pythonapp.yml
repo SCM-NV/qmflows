@@ -37,7 +37,10 @@ jobs:
 
     - name: Install cp2k
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install cp2k --fix-missing
+      run: |
+        sudo apt update
+        sudo apt list -a cp2k
+        sudo apt install cp2k --fix-missing
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
