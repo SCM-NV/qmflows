@@ -10,6 +10,10 @@ Index
     PATH
     PATH_MOLECULES
     HAS_RDKIT
+    requires_cp2k
+    requires_orca
+    requires_ams
+    requires_adf
 
 API
 ---
@@ -22,6 +26,10 @@ API
     :annotation: : pathlib.Path
 .. autodata:: HAS_RDKIT
     :annotation: : bool
+.. autodata:: requires_cp2k
+.. autodata:: requires_orca
+.. autodata:: requires_ams
+.. autodata:: requires_adf
 
 """
 
@@ -30,6 +38,9 @@ import shutil
 from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Union
+
+import pytest
+from distutils.spawn import find_executable
 
 from .fileFunctions import yaml2Settings
 from .settings import Settings
@@ -42,6 +53,10 @@ __all__ = [
     'PATH_MOLECULES',
     'Assertion_Warning',
     'HAS_RDKIT',
+    'requires_cp2k',
+    'requires_orca'
+    'requires_ams',
+    'requires_adf',
 ]
 
 try:
@@ -206,3 +221,33 @@ def get_mm_settings() -> Settings:
     s.periodic = 'none'
     s.cell_parameters = [50, 50, 50]
     return s
+
+
+def _has_exec(executable: str) -> bool:
+    """Check if the passed executable is installed."""
+    path = find_executable(executable)
+    return path is not None
+
+
+def _has_env_vars(*env_vars: str) -> bool:
+    """Check if the passed environment variables are available."""
+    return set(env_vars).issubset(os.environ)
+
+
+#: A mark for skipping tests if CP2K is not installed
+requires_cp2k = pytest.mark.skipif(not _has_exec("cp2k.popt"), reason="Requires CP2K")
+
+#: A mark for skipping tests if Orca is not installed
+requires_orca = pytest.mark.skipif(not _has_exec("orca"), reason="Requires Orca")
+
+#: A mark for skipping tests if AMS >=2020 is not installed
+requires_ams = pytest.mark.skipif(
+    not _has_env_vars("AMSBIN", "AMSHOME", "AMSRESOURCES"),
+    reason="Requires AMS >=2020",
+)
+
+#: A mark for skipping tests if ADF <=2019 is not installed
+requires_adf = pytest.mark.skipif(
+    not _has_env_vars("ADFBIN", "ADFHOME", "ADFRESOURCES"),
+    reason="Requires ADF <=2019",
+)

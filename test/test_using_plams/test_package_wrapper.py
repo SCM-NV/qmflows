@@ -16,7 +16,7 @@ from qmflows.utils import InitRestart
 from qmflows.packages.packages import Result
 from qmflows.packages.SCM import ADF_Result
 from qmflows.packages.package_wrapper import ResultWrapper
-from qmflows.test_utils import delete_output, PATH
+from qmflows.test_utils import delete_output, PATH, requires_ams
 
 ADF_ENVIRON = frozenset({'AMSBIN', 'AMSHOME', 'AMSRESOURCES', 'SCMLICENSE'})
 HAS_ADF = ADF_ENVIRON.issubset(os.environ.keys())
@@ -50,6 +50,7 @@ def _get_result(promised_object: PromisedObject, job: Type[Job]) -> Result:
 
 @pytest.mark.slow
 @delete_output
+@requires_ams
 def test_package_wrapper() -> None:
     """Tests for :class:`PackageWrapper<qmflows.packages.package_wrapper.PackageWrapper>`."""
     s1 = Settings()

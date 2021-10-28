@@ -273,7 +273,7 @@ class DFTB(Package):
         super().__init__(pkg_name)
 
     @classmethod
-    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str = "DFTBJob",
                 work_dir: Union[None, str, os.PathLike] = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> DFTB_Result:

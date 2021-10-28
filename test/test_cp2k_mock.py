@@ -1,6 +1,5 @@
 """Mock CP2K funcionality."""
 import copy
-from distutils.spawn import find_executable
 
 import pytest
 import numpy as np
@@ -10,7 +9,7 @@ from scm.plams import Molecule
 
 from qmflows import cp2k, templates
 from qmflows.packages.cp2k_package import CP2K_Result
-from qmflows.test_utils import PATH, PATH_MOLECULES, fill_cp2k_defaults
+from qmflows.test_utils import PATH, PATH_MOLECULES, fill_cp2k_defaults, requires_cp2k
 from qmflows.utils import init_restart
 
 
@@ -24,17 +23,9 @@ def mock_runner(mocker_instance, jobname: str) -> CP2K_Result:
 
     return run_mocked
 
-
-def cp2k_available() -> bool:
-    """Check if cp2k is installed."""
-    path = find_executable("cp2k.popt")
-    return path is not None
-
-
 # module constants
 WORKDIR = PATH / "output_cp2k"
 ETHYLENE = Molecule(PATH_MOLECULES / "ethylene.xyz")
-HAS_CP2K = cp2k_available()
 
 
 def test_deepcopy():
@@ -55,7 +46,7 @@ def test_deepcopy():
 
 # See https://github.com/SCM-NV/qmflows/issues/225
 @pytest.mark.xfail(raises=AssertionError)
-@pytest.mark.skipif(not HAS_CP2K, reason="CP2K is not install or not loaded")
+@requires_cp2k
 def test_cp2k_singlepoint_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
     # single point calculation

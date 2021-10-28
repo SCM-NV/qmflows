@@ -1,26 +1,14 @@
 """Run an small cp2k calculation."""
-from distutils.spawn import find_executable
-
-import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import cp2k, run, templates
-from qmflows.test_utils import PATH_MOLECULES, fill_cp2k_defaults, delete_output
+from qmflows.test_utils import PATH_MOLECULES, fill_cp2k_defaults, delete_output, requires_cp2k
 from qmflows.type_hints import PathLike
 
 
-def cp2k_available() -> bool:
-    """Check if cp2k is installed."""
-    path = find_executable("cp2k.popt")
-    return path is not None
-
-
-HAS_CP2K = cp2k_available()
-
-
 @delete_output
-@pytest.mark.skipif(not HAS_CP2K, reason="CP2K is not install or not loaded")
+@requires_cp2k
 def test_cp2k_opt(tmp_path: PathLike) -> None:
     """Run a simple molecular optimization."""
     s = fill_cp2k_defaults(templates.geometry)

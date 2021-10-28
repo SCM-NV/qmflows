@@ -3,13 +3,14 @@ import pytest
 from scm.plams import Molecule
 
 from qmflows import adf, dftb, run, templates
-from qmflows.test_utils import PATH
+from qmflows.test_utils import PATH, requires_adf
 
 HF = Molecule(PATH / "HF.xyz")
 HF.guess_bonds()
 
 
 @pytest.mark.slow
+@requires_adf
 def test_dftb_props():
     """Get properties from DFTB freq calc."""
     mol = HF.copy()
@@ -24,6 +25,7 @@ def test_dftb_props():
 
 
 @pytest.mark.slow
+@requires_adf
 def test_adf_props():
     """Get properties from ADF freq calc."""
     mol = HF.copy()

@@ -1,4 +1,4 @@
-name: build with conda
+name: Tests
 
 on:
   push:
@@ -20,12 +20,15 @@ jobs:
             special: 'pre-release'
             version: 3.9
           - os: ubuntu-latest
-            special: 'no RDKit'
+            special: 'no optional'
+            version: 3.9
+          - os: ubuntu-latest
+            special: 'slow'
             version: 3.9
 
     steps:
     - name: Cancel Previous Runs
-      uses: styfle/cancel-workflow-action@0.9.0
+      uses: styfle/cancel-workflow-action@0.9.1
       with:
         access_token: ${{ github.token }}
 
@@ -47,46 +50,50 @@ jobs:
       uses: s-weigand/setup-conda@v1
       with:
         update-conda: true
-        conda-channels: anaconda
+        conda-channels: anaconda, conda-forge
 
     - name: Install dependencies
-      if: matrix.special == ''
+      shell: bash
       run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter pandoc
-        source $CONDA/bin/activate test
-        pip install -e .[test]
-
-    - name: Install dependencies (pre-release)
-      if: matrix.special == 'pre-release'
-      run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py rdkit nbsphinx jupyter pandoc
-        source $CONDA/bin/activate test
-        pip install --pre -e .[test] --upgrade --force-reinstall
-
-    - name: Install dependencies (no RDKit)
-      if: matrix.special == 'no RDKit'
-      run: |
-        conda create -n test -c conda-forge python=${{ matrix.version }} h5py nbsphinx jupyter pandoc
-        source $CONDA/bin/activate test
-        pip install -e .[test]
+        case "${{ matrix.special }}" in
+          "pre-release")
+            conda create -n test -c conda-forge python=${{ matrix.version }} rdkit nbsphinx jupyter pandoc
+            source $CONDA/bin/activate test
+            pip install --pre -e .[test] --upgrade --force-reinstall
+            ;;
+          "no optional")
+            conda create -n test -c conda-forge python=${{ matrix.version }}
+            source $CONDA/bin/activate test
+            pip install -e .[test_no_optional]
+            ;;
+          *)
+            conda create -n test -c conda-forge python=${{ matrix.version }} rdkit nbsphinx jupyter pandoc
+            source $CONDA/bin/activate test
+            pip install -e .[test]
+            ;;
+        esac
 
     - name: Conda info
-      run: conda info
+      run: |
+        source $CONDA/bin/activate test
+        conda info
 
     - name: Conda list
       run: conda list -n test
 
     - name: Test with pytest
-      if: matrix.special != 'no RDKit'
+      shell: bash
       run: |
         source $CONDA/bin/activate test
-        pytest -m "not (slow or long)"
 
-    - name: Test with pytest (no RDKit)
-      if: matrix.special == 'no RDKit'
-      run: |
-        source $CONDA/bin/activate test
-        pytest -m "not (slow or long)" test
+        case "${{ matrix.special }}" in
+          "no optional")
+            pytest -m 'not (slow or long)' test ;;
+          "slow")
+            pytest -m '(slow or long)' ;;
+          *)
+            pytest -m 'not (slow or long)' ;;
+        esac
 
     - uses: codecov/codecov-action@v2
       with:

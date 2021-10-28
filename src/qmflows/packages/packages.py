@@ -538,7 +538,7 @@ class Package(ABC):
 
     @classmethod
     @abstractmethod
-    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str,
+    def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str = "job",
                 work_dir: Union[None, str, os.PathLike] = None,
                 validate_output: bool = False,
                 **kwargs: Any) -> Result:

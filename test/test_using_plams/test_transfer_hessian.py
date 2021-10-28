@@ -8,13 +8,14 @@ from qmflows import Settings, templates, logger
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
-from qmflows.test_utils import PATH
+from qmflows.test_utils import PATH, requires_adf
 
 WATER = Molecule(PATH / "water.xyz")
 WATER.guess_bonds()
 
 
 @pytest.mark.slow
+@requires_adf
 def test_hessian_transfer():
     """Test DFTB -> Orca hessian transfer."""
     h2o = WATER.copy()
