@@ -34,6 +34,8 @@ tests_no_optional_require = [
 
 tests_require =  [
     'mypy',
+    'types-PyYAML',
+    'types-setuptools',
 ]
 tests_require += tests_no_optional_require
 tests_require += docs_require
