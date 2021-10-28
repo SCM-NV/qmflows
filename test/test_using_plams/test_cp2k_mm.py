@@ -4,7 +4,7 @@ from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
-from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES
+from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES, requires_cp2k
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 
@@ -32,6 +32,7 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
 
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
+@requires_cp2k
 def test_singlepoint() -> None:
     """Test CP2K singlepoint calculations with the :class:`CP2K_MM` class."""
     s = SETTINGS.copy()
@@ -48,6 +49,7 @@ def test_singlepoint() -> None:
 
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
+@requires_cp2k
 def test_geometry() -> None:
     """Test CP2K geometry optimization calculations with the :class:`CP2K_MM` class."""
     s = SETTINGS.copy()
@@ -73,6 +75,7 @@ def test_geometry() -> None:
 
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
+@requires_cp2k
 def test_freq() -> None:
     """Test CP2K frequency calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(
@@ -97,6 +100,7 @@ def test_freq() -> None:
 
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
+@requires_cp2k
 def test_md() -> None:
     """Test CP2K molecular dynamics calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(
@@ -115,6 +119,7 @@ def test_md() -> None:
 
 @pytest.mark.slow
 @delete_output(delete_workdir=True)
+@requires_cp2k
 def test_c2pk_cell_opt() -> None:
     """Test CP2K cell optimization calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(PATH / 'cspbbr3_3d.xyz')

@@ -11,10 +11,11 @@ from qmflows import Settings, templates, logger
 from qmflows.packages import run
 from qmflows.packages.orca import orca
 from qmflows.packages.SCM import dftb
-from qmflows.test_utils import PATH_MOLECULES
+from qmflows.test_utils import PATH_MOLECULES, requires_orca
 
 
 @pytest.mark.slow
+@requires_orca
 def test_opt_orca():
     """Test Orca input generation and run functions."""
     h2o = Molecule(PATH_MOLECULES / "h2o.xyz",
@@ -44,6 +45,7 @@ def test_opt_orca():
 
 
 @pytest.mark.slow
+@requires_orca
 def test_methanol_opt_orca():
     """Run a methanol optimization and retrieve the optimized geom."""
     methanol = Molecule(PATH_MOLECULES / "methanol.xyz")

@@ -7,12 +7,13 @@ from scm.plams import Molecule
 
 from qmflows import Settings, run, templates, logger
 from qmflows.packages import adf, dftb, orca
-from qmflows.test_utils import PATH_MOLECULES, delete_output
+from qmflows.test_utils import PATH_MOLECULES, delete_output, requires_adf, requires_orca
 from qmflows.warnings_qmflows import QMFlows_Warning
 
 
 @delete_output
 @pytest.mark.xfail
+@requires_adf
 def test_fail_scm(tmpdir):
     """Test that both ADF and DFTB returns ``None`` if a computation fails."""
     # Temporary mute all QMFlows_Warnings
@@ -35,6 +36,7 @@ def test_fail_scm(tmpdir):
 
 
 @delete_output
+@requires_orca
 def test_fail_orca(tmpdir):
     """Orca package should returns ``None`` if the computation fails."""
     methanol = Molecule(PATH_MOLECULES / 'methanol.xyz')

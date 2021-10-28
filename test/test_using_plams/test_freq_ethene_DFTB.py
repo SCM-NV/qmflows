@@ -4,10 +4,11 @@ import pytest
 from scm.plams import Molecule
 from assertionlib import assertion
 from qmflows import (dftb, run, templates)
-from qmflows.test_utils import PATH_MOLECULES
+from qmflows.test_utils import PATH_MOLECULES, requires_adf
 
 
 @pytest.mark.slow
+@requires_adf
 def test_freq():
     """Do some constraint optimizations then launch a freq calc."""
     mol = Molecule(PATH_MOLECULES / "ethene.xyz", "xyz")
