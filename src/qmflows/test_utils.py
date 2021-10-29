@@ -4,7 +4,6 @@ Index
 -----
 .. currentmodule:: qmflows.test_utils
 .. autosummary::
-    delete_output
     fill_cp2k_defaults
     get_mm_settings
     PATH
@@ -17,7 +16,6 @@ Index
 
 API
 ---
-.. autofunction:: delete_output
 .. autofunction:: fill_cp2k_defaults
 .. autofunction:: get_mm_settings
 .. autodata:: PATH
@@ -34,10 +32,7 @@ API
 """
 
 import os
-import shutil
-from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Union
 
 import pytest
 from distutils.spawn import find_executable
@@ -47,7 +42,6 @@ from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
 
 __all__ = [
-    'delete_output',
     'get_mm_settings',
     'PATH',
     'PATH_MOLECULES',
@@ -114,75 +108,6 @@ def add_basis_potential(s: Settings) -> None:
         PATH / "GTH_POTENTIALS").absolute().as_posix()
     s.specific.cp2k.force_eval.dft.basis_set_file_name = (
         PATH / "BASIS_MOLOPT").absolute().as_posix()
-
-
-def delete_output(delete_db: Union[Callable, bool] = True,
-                  delete_workdir: bool = True) -> Callable:
-    """A decorator for deleting ``cache.db`` and the plams workdir after a test is done.
-
-    Examples
-    --------
-    Can be used in one of two ways:
-
-    .. code:: python
-
-        >>> from qmflows.test_utils import delete_output
-
-        >>> @delete_output
-        ... def test1(*args, **kwargs):
-        ...     ...
-
-        >>> @delete_output(delete_db=True, delete_workdir=False)
-        ... def test2(*args, **kwargs):
-        ...     ...
-
-    Parameters
-    ----------
-    delete_db : :class:`bool`
-        If ``True``, delete the ``cache.db`` file.
-
-    delete_workdir : :class:`bool`
-        If ``True``, delete the PLAMS workdir located at "{workdir}".
-
-    """
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            try:
-                ret = func(*args, **kwargs)
-            finally:
-                if delete_db and os.path.isfile('cache.db'):
-                    os.remove('cache.db')
-
-                workdir = PATH / 'plams_workdir'
-                if delete_workdir and os.path.isdir(workdir):
-                    shutil.rmtree(workdir)
-                    _del_all_workdir(workdir)
-            return ret
-        return wrapper
-
-    if callable(delete_db):
-        func, delete_db = delete_db, True
-        return decorator(func)
-    else:
-        return decorator
-
-
-delete_output.__doc__ = delete_output.__doc__.format(  # type: ignore
-    workdir=PATH / 'plams_workdir'
-)
-
-
-def _del_all_workdir(workdir: Union[str, os.PathLike]) -> None:
-    """Delete all working directories with a ``"workdir.{iii}"``-style name."""
-    i = 2
-    while True:
-        workdir_i = f'{workdir}.{str(i).zfill(3)}'
-        if os.path.isdir(workdir_i) and i < 1000:
-            shutil.rmtree(workdir_i)
-            i += 1
-        else:
-            break
 
 
 def get_mm_settings() -> Settings:

@@ -1,8 +1,7 @@
 """Test the :mod:`sphinx` documentation generation."""
 
-import shutil
 import warnings
-from os.path import join, isdir
+from pathlib import Path
 
 import pytest
 
@@ -15,16 +14,20 @@ else:
     HAS_SPHINX = True
 
 SRCDIR = CONFDIR = 'docs'
-OUTDIR = join('test', 'test_files', 'build')
-DOCTREEDIR = join('test', 'test_files', 'build', 'doctrees')
 
 
 @pytest.mark.skipif(not HAS_SPHINX, reason='Requires Sphinx')
-def test_sphinx_build() -> None:
+def test_sphinx_build(tmp_path: Path) -> None:
     """Test :meth:`sphinx.application.Sphinx.build`."""
     try:
-        app = Sphinx(SRCDIR, CONFDIR, OUTDIR, DOCTREEDIR,
-                     buildername='html', warningiserror=True)
+        app = Sphinx(
+            SRCDIR,
+            CONFDIR,
+            tmp_path / "build",
+            tmp_path / "build" / "doctrees",
+            buildername='html',
+            warningiserror=True,
+        )
         app.build(force_all=True)
     except SphinxWarning as ex:
         # Do not raise if the exception is connection related
@@ -34,6 +37,3 @@ def test_sphinx_build() -> None:
             warning = RuntimeWarning(str(ex))
             warning.__cause__ = ex
             warnings.warn(warning)
-    finally:
-        if isdir(OUTDIR):
-            shutil.rmtree(OUTDIR)

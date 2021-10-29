@@ -12,7 +12,7 @@ def is_successful(result):
     return result.status not in {"failed", "crashed"}
 
 
-def example_freqs():
+def example_freqs(*args, n_processes=1, **kwargs):
     """An examples which illustrates the possibility using different packages interchangeably.
 
     Analytical frequencies are not available for B3LYP in ADF.
@@ -37,7 +37,7 @@ def example_freqs():
         jobs.append(freqjob)
 
     # Run workflow
-    results = run(gather(*jobs), n_processes=1)
+    results = run(gather(*jobs), *args, n_processes=n_processes, **kwargs)
 
     # extrac results
     freqs = [r.frequencies[-3:] for r in results]

@@ -1,8 +1,8 @@
 """Tests for :mod:`qmflows.utils`."""
 
-import shutil
 from os.path import isdir
 from io import TextIOBase, StringIO
+from pathlib import Path
 from contextlib import AbstractContextManager
 
 from assertionlib import assertion
@@ -60,23 +60,19 @@ def test_file_to_context() -> None:
     assertion.assert_(file_to_context, 5.0, exception=TypeError)
 
 
-def test_restart_init() -> None:
+def test_restart_init(tmp_path: Path) -> None:
     """Tests for :func:`restart_init` and :class:`RestartInit`."""
-    workdir = PATH / 'plams_workdir'
-    try:
-        init(PATH)
-        finish()
-        assertion.isdir(workdir)
+    workdir = tmp_path / 'test_restart_init'
 
-        init_restart(PATH)
+    init(path=tmp_path, folder="test_restart_init")
+    finish()
+    assertion.isdir(workdir)
+
+    init_restart(path=tmp_path, folder="test_restart_init")
+    assertion.isdir(workdir)
+    assertion.isdir(f'{workdir}.002', invert=True)
+    finish()
+
+    with InitRestart(path=tmp_path, folder="test_restart_init"):
         assertion.isdir(workdir)
         assertion.isdir(f'{workdir}.002', invert=True)
-        finish()
-
-        with InitRestart(PATH):
-            assertion.isdir(workdir)
-            assertion.isdir(f'{workdir}.002', invert=True)
-
-    finally:
-        shutil.rmtree(workdir) if isdir(workdir) else None
-        shutil.rmtree(f'{workdir}.002') if isdir(f'{workdir}.002') else None

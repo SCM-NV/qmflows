@@ -1,6 +1,7 @@
 """Tests for Orca functionality."""
 
 from math import sqrt
+from pathlib import Path
 
 import pytest
 from more_itertools import collapse
@@ -16,7 +17,7 @@ from qmflows.test_utils import PATH_MOLECULES, requires_orca
 
 @pytest.mark.slow
 @requires_orca
-def test_opt_orca():
+def test_opt_orca(tmp_path: Path) -> None:
     """Test Orca input generation and run functions."""
     h2o = Molecule(PATH_MOLECULES / "h2o.xyz",
                    'xyz', charge=0, multiplicity=1)
@@ -33,7 +34,7 @@ def test_opt_orca():
 
     dipole = h2o_singlepoint.dipole
 
-    final_result = run(dipole, n_processes=1)
+    final_result = run(dipole, n_processes=1, path=tmp_path, folder="test_opt_orca")
 
     expected_dipole = [0.82409, 0.1933, -0.08316]
     diff = sqrt(sum((x - y) ** 2 for x, y in zip(final_result,
@@ -46,7 +47,7 @@ def test_opt_orca():
 
 @pytest.mark.slow
 @requires_orca
-def test_methanol_opt_orca():
+def test_methanol_opt_orca(tmp_path: Path) -> None:
     """Run a methanol optimization and retrieve the optimized geom."""
     methanol = Molecule(PATH_MOLECULES / "methanol.xyz")
 
@@ -57,11 +58,6 @@ def test_methanol_opt_orca():
     opt = orca(s, methanol)
 
     # extract coordinates
-    mol_opt = run(opt.molecule)
+    mol_opt = run(opt.molecule, path=tmp_path, folder="test_methanol_opt_orca")
     coords = collapse([a.coords for a in mol_opt.atoms])
     logger.info(coords)
-
-
-if __name__ == "__main__":
-    test_methanol_opt_orca()
-    test_opt_orca()

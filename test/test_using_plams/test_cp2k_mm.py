@@ -1,10 +1,12 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
-from qmflows.test_utils import delete_output, get_mm_settings, PATH, PATH_MOLECULES, requires_cp2k
+from qmflows.test_utils import get_mm_settings, PATH, PATH_MOLECULES, requires_cp2k
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 
@@ -31,15 +33,14 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
 
 
 @pytest.mark.slow
-@delete_output(delete_workdir=True)
 @requires_cp2k
-def test_singlepoint() -> None:
+def test_singlepoint(tmp_path: Path) -> None:
     """Test CP2K singlepoint calculations with the :class:`CP2K_MM` class."""
     s = SETTINGS.copy()
     s.specific.cp2k += singlepoint.specific.cp2k_mm
 
     job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_sp')
-    result = run(job, path=PATH)
+    result = run(job, path=tmp_path, folder="test_singlepoint")
     assertion.eq(result.status, 'successful')
 
     # Compare energies
@@ -48,15 +49,14 @@ def test_singlepoint() -> None:
 
 
 @pytest.mark.slow
-@delete_output(delete_workdir=True)
 @requires_cp2k
-def test_geometry() -> None:
+def test_geometry(tmp_path: Path) -> None:
     """Test CP2K geometry optimization calculations with the :class:`CP2K_MM` class."""
     s = SETTINGS.copy()
     s.specific.cp2k += geometry.specific.cp2k_mm
 
     job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_opt')
-    result = run(job, path=PATH)
+    result = run(job, path=tmp_path, folder="test_geometry")
     assertion.eq(result.status, 'successful')
 
     # Compare energies
@@ -74,9 +74,8 @@ def test_geometry() -> None:
 
 
 @pytest.mark.slow
-@delete_output(delete_workdir=True)
 @requires_cp2k
-def test_freq() -> None:
+def test_freq(tmp_path: Path) -> None:
     """Test CP2K frequency calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(
         PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
@@ -84,7 +83,7 @@ def test_freq() -> None:
     s.specific.cp2k += freq.specific.cp2k_mm
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_freq')
-    result = run(job, path=PATH)
+    result = run(job, path=tmp_path, folder="test_freq")
     assertion.eq(result.status, 'successful')
 
     freqs = result.frequencies
@@ -99,9 +98,8 @@ def test_freq() -> None:
 
 
 @pytest.mark.slow
-@delete_output(delete_workdir=True)
 @requires_cp2k
-def test_md() -> None:
+def test_md(tmp_path: Path) -> None:
     """Test CP2K molecular dynamics calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(
         PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.freq.xyz')  # Optimized coordinates
@@ -110,7 +108,7 @@ def test_md() -> None:
     s.specific.cp2k.motion.md.steps = 1000
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_md')
-    result = run(job, path=PATH)
+    result = run(job, path=tmp_path, folder="test_md")
     assertion.eq(result.status, 'successful')
 
     plams_results = result.results
@@ -118,9 +116,8 @@ def test_md() -> None:
 
 
 @pytest.mark.slow
-@delete_output(delete_workdir=True)
 @requires_cp2k
-def test_c2pk_cell_opt() -> None:
+def test_c2pk_cell_opt(tmp_path: Path) -> None:
     """Test CP2K cell optimization calculations with the :class:`CP2K_MM` class."""
     mol = Molecule(PATH / 'cspbbr3_3d.xyz')
 
@@ -149,5 +146,5 @@ def test_c2pk_cell_opt() -> None:
     }
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_cell_opt')
-    result = run(job, path=PATH)
+    result = run(job, path=tmp_path, folder="test_c2pk_cell_opt")
     assertion.eq(result.status, 'successful')

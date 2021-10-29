@@ -1,15 +1,16 @@
 """Run an small cp2k calculation."""
+
+from pathlib import Path
+
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import cp2k, run, templates
-from qmflows.test_utils import PATH_MOLECULES, fill_cp2k_defaults, delete_output, requires_cp2k
-from qmflows.type_hints import PathLike
+from qmflows.test_utils import PATH_MOLECULES, fill_cp2k_defaults, requires_cp2k
 
 
-@delete_output
 @requires_cp2k
-def test_cp2k_opt(tmp_path: PathLike) -> None:
+def test_cp2k_opt(tmp_path: Path) -> None:
     """Run a simple molecular optimization."""
     s = fill_cp2k_defaults(templates.geometry)
 
@@ -21,5 +22,5 @@ def test_cp2k_opt(tmp_path: PathLike) -> None:
                      'xyz', charge=0, multiplicity=1)
 
     job = cp2k(s, water)
-    mol = run(job, folder=tmp_path)
+    mol = run(job, path=tmp_path, folder="test_cp2k_opt")
     assertion.isinstance(mol.molecule, Molecule)
