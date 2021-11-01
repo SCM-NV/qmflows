@@ -98,7 +98,6 @@ jobs:
       shell: bash
       run: |
         source $CONDA/bin/activate test
-        export PATH=$PATH:"cp2k/bin"
         export CP2K_DATA_DIR="/usr/share/cp2k"
 
         case "${{ matrix.special }}" in
