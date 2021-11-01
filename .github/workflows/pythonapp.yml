@@ -25,6 +25,9 @@ jobs:
           - os: ubuntu-latest
             special: 'slow'
             version: 3.9
+          - os: ubuntu-latest
+            special: 'CP2K 8.2'
+            version: 3.9
 
     steps:
     - name: Cancel Previous Runs
@@ -32,15 +35,25 @@ jobs:
       with:
         access_token: ${{ github.token }}
 
-    - name: git checkout
-      uses: actions/checkout@v2
-
-    - name: git ls-files
-      run: git ls-files --full-name --recurse-submodules
+    - uses: actions/checkout@v2
 
     - name: Install cp2k
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install cp2k --fix-missing
+      run: |
+        case "${{ matrix.special }}" in
+          "CP2K 8.2")
+            git clone https://github.com/cp2k/cp2k
+            cd cp2k
+            git checkout tags/v8.2.0
+            ln -s data /usr/share/cp2k
+
+            wget -nv https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
+            chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
+            mv cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
+            ;;
+          *)
+            sudo apt install cp2k ;;
+         esac
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
@@ -85,11 +98,12 @@ jobs:
       shell: bash
       run: |
         source $CONDA/bin/activate test
+        export CP2K_DATA_DIR="/usr/share/cp2k"
 
         case "${{ matrix.special }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
-          "slow")
+          "slow"|"CP2K 8.2")
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
