@@ -45,13 +45,11 @@ jobs:
             git clone https://github.com/cp2k/cp2k
             cd cp2k
             git checkout tags/v8.2.0
-            wget -nv https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
-            chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
-            sudo cp cp2k-8.2-Linux-x86_64.ssmp /usr/bin/cp2k.popt
             ln -s data /usr/share/cp2k
 
-            ./cp2k-8.2-Linux-x86_64.ssmp --version
-            /usr/bin/cp2k.popt --version
+            wget -nv https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
+            chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
+            mv cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
             ;;
           *)
             sudo apt install cp2k ;;
