@@ -47,8 +47,7 @@ jobs:
             git checkout tags/v8.2.0
             wget https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
             ln -s cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
-            mkdir -p /usr/share
-            ln -s data /usr/share/cp2k/
+            ln -s data /usr/share/cp2k
             ;;
           *)
             sudo apt install cp2k --fix-missing ;;
