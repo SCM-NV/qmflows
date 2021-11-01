@@ -51,22 +51,16 @@ jobs:
             git checkout tags/v8.2.0
             mkdir bin
             wget https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp --directory-prefix="$PWD/bin"
-            ln -s bin/cp2k-8.2-Linux-x86_64.ssmp bin/cp2k.popt
-            export PATH=$PATH:"$PWD/bin"
-            export CP2K_DATA_DIR="$PWD/data"
+            ln -s bin/cp2k-8.2-Linux-x86_64.ssmp /usr/bin/cp2k.popt
+            ln -s data /usr/share/cp2k/
             ;;
           *)
-            sudo apt install cp2k --fix-missing
-            export CP2K_DATA_DIR="/usr/share/cp2k"
-            ;;
+            sudo apt install cp2k --fix-missing ;;
          esac
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
       run: |
-        echo $PATH
-        ls -la
-        whereis cp2k.popt
         cp2k.popt --version
 
     - name: Setup conda
@@ -108,6 +102,7 @@ jobs:
       shell: bash
       run: |
         source $CONDA/bin/activate test
+        export CP2K_DATA_DIR="/usr/share/cp2k"
 
         case "${{ matrix.special }}" in
           "no optional")
