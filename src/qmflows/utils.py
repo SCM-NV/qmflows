@@ -145,6 +145,7 @@ def init_restart(
     .. |load_all| replace:: :func:`plams.load_all()<scm.plams.core.functions.load_all>`
 
     """
+    is_init: bool = config.init
     with open(os.devnull, 'w') as f, redirect_stdout(f):  # Temporary supress printing
         init(path, folder)
 
@@ -161,9 +162,15 @@ def init_restart(
         return
 
     # There is an actual preexisting workdir;
-    # Remove the freshly created workdir and change to the previously created one
-    else:
+    # Remove the freshly created workdir and change to the previously created one.
+    #
+    # This branch is only relevant the first time `plams.init` is called (`config.init is False`)
+    elif not is_init:
         shutil.rmtree(jobmanager.workdir)
+
+    # This can happen if `init_restart` is launched multiple times
+    elif not os.path.isdir(workdir):
+        os.mkdir(workdir)
 
     # Update the files and folders in the default JobManager
     jobmanager.foldername = folder_
