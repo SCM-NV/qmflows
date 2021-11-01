@@ -57,15 +57,16 @@ jobs:
             ;;
           *)
             sudo apt install cp2k --fix-missing
-            cd /usr/share/cp2k
-            ls -l
-            export CP2K_DATA_DIR="/usr/share/cp2k/data"
+            export CP2K_DATA_DIR="/usr/share/cp2k"
             ;;
          esac
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
-      run: cp2k.popt --version
+      run: |
+        echo $PATH
+        echo $CP2K_DATA_DIR
+        cp2k.popt --version
 
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
