@@ -49,6 +49,7 @@ jobs:
             chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
             ln -s cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
             ln -s data /usr/share/cp2k
+            echo $PATH
             ;;
           *)
             sudo apt install cp2k ;;
