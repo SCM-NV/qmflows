@@ -56,6 +56,8 @@ jobs:
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
       run: |
+        echo $PATH
+        ls -l /usr/local/bin
         cp2k.popt --version
 
     - name: Setup conda
