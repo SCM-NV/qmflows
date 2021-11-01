@@ -1,5 +1,7 @@
 """Test the constrained optimization functionality."""
 
+from pathlib import Path
+
 import numpy as np
 import pytest
 from qmflows.test_utils import HAS_RDKIT, requires_adf
@@ -13,22 +15,22 @@ if HAS_RDKIT:
 @pytest.mark.slow
 @pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 @requires_adf
-def test_partial_geometry_opt():
+def test_partial_geometry_opt(tmp_path: Path) -> None:
     """Test partial geometry optimization."""
-    geom1, geom2 = example_partial_geometry_opt()
+    geom1, geom2 = example_partial_geometry_opt(path=tmp_path, folder="test_partial_geometry_opt")
     assert str(geom1) == str(geom2)
 
 
 @pytest.mark.slow
 @pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 @requires_adf
-def test_h2o2_ts():
+def test_h2o2_ts(tmp_path: Path) -> None:
     """Test a TS optimization.
 
     Check the rotational barrier in hydrogen peroxide
     with ORCA using init hessian from DFTB.
     """
-    ts_dihe, n_optcycles = example_H2O2_TS()
+    ts_dihe, n_optcycles = example_H2O2_TS(path=tmp_path, folder="test_h2o2_ts")
     assert (n_optcycles < 10)
     assert ts_dihe == 0.0
 
@@ -36,11 +38,11 @@ def test_h2o2_ts():
 @pytest.mark.slow
 @pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 @requires_adf
-def test_generic_constraints():
+def test_generic_constraints(tmp_path: Path) -> None:
     """
     Test generic distance constraints on all packages
     """
-    test_energies = example_generic_constraints()[1]
+    test_energies = example_generic_constraints(path=tmp_path, folder="test_generic_constraints")[1]
     expected_energies = [
         -4.76019173, -0.28400262, -99.43865603, -4.74740691,
         -0.27647907, -99.43097285, -4.73227438, -0.25874316,

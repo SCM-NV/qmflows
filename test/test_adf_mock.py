@@ -63,7 +63,7 @@ def test_getattr_warning(tmp_path: Path, name: str, match: str, status: Optional
         result.status = status
 
     # Need to fire up `plams.init` so the .dill file can be unpickled by `plams.load_job`
-    with InitRestart(tmp_path):
+    with InitRestart(path=tmp_path, folder="test_getattr_warning"):
         with pytest.warns(QMFlows_Warning, match=match) as rec:
             getattr(result, name)
             assertion.len_eq(rec.list, 1)

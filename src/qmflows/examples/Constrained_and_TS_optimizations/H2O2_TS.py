@@ -6,7 +6,7 @@ import scm.plams.interfaces.molecule.rdkit as molkit
 from qmflows import (orca, dftb, templates, Dihedral, run, Settings, logger)
 
 
-def example_H2O2_TS():
+def example_H2O2_TS(*args, **kwargs):
     """Am example which generates an approximate TS for rotation in hydrogen peroxide using DFTB, and performs a full TS optimization in Orca.
 
     It illustrates using a hessian from one package, DFTB in this case,
@@ -33,7 +33,7 @@ def example_H2O2_TS():
     orca_ts = orca(templates.ts.overlay(s2), dftb_opt.molecule)
 
     # Execute the workflow
-    result = run(orca_ts)
+    result = run(orca_ts, *args, **kwargs)
 
     # Analyse the result
     ts_dihe = round(dihe.get_current_value(result.molecule))

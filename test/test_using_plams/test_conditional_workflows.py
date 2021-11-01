@@ -1,4 +1,7 @@
 """Check conditional workflows funcionality."""
+
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -12,9 +15,9 @@ if HAS_RDKIT:
 @pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 @requires_orca
 @requires_adf
-def test_calc_freqs():
+def test_calc_freqs(tmp_path: Path) -> None:
     """Test conditional workflow for freq calculation."""
-    test = example_freqs()
+    test = example_freqs(path=tmp_path, folder="test_calc_freqs")
     expected = np.array(
         [[1533.26703326, 3676.16470838, 3817.0971787],
          [1515.798647, 3670.390391, 3825.813363],

@@ -7,7 +7,7 @@ from noodles import gather
 from qmflows import (dftb, adf, orca, run, Settings, templates, logger)
 
 
-def example_generic_constraints():
+def example_generic_constraints(*args, **kwargs):
     """Run different job with geometric constrains.
 
     This examples illustrates that, by using generic keywords, it is possible
@@ -29,7 +29,7 @@ def example_generic_constraints():
             jobs.append(constraint_opt)
 
     # run the jobs
-    results = run(gather(*jobs))
+    results = run(gather(*jobs), *args, **kwargs)
     energies = [r.energy for r in results]
     names = [r.job_name for r in results]
 

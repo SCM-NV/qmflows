@@ -1,4 +1,7 @@
 """Test Hessian utilities."""
+
+from pathlib import Path
+
 import pytest
 import scm.plams.interfaces.molecule.rdkit as molkit
 from noodles import gather
@@ -16,7 +19,7 @@ WATER.guess_bonds()
 
 @pytest.mark.slow
 @requires_adf
-def test_hessian_transfer():
+def test_hessian_transfer(tmp_path: Path) -> None:
     """Test DFTB -> Orca hessian transfer."""
     h2o = WATER.copy()
     h2o.properties.symmetry = 'C1'
@@ -33,4 +36,4 @@ def test_hessian_transfer():
 
     wf = gather(energy, dipole)
 
-    logger.info(run(wf))
+    logger.info(run(wf, path=tmp_path, folder="test_hessian_transfer"))

@@ -1,4 +1,7 @@
 """Test the rdkit/Molecule interface."""
+
+from pathlib import Path
+
 import pytest
 from scm.plams import Molecule
 
@@ -11,10 +14,12 @@ HF.guess_bonds()
 
 @pytest.mark.slow
 @requires_adf
-def test_dftb_props():
+def test_dftb_props(tmp_path: Path) -> None:
     """Get properties from DFTB freq calc."""
     mol = HF.copy()
-    result = run(dftb(templates.freq, mol, job_name='dftb_FH'))
+    job = dftb(templates.freq, mol, job_name='dftb_FH')
+    result = run(job, path=tmp_path, folder="test_dftb_props")
+
     expected_energy = -4.76
     assert abs(result.energy - expected_energy) < 0.01
     assert len(result.dipole) == 3
@@ -26,10 +31,11 @@ def test_dftb_props():
 
 @pytest.mark.slow
 @requires_adf
-def test_adf_props():
+def test_adf_props(tmp_path: Path) -> None:
     """Get properties from ADF freq calc."""
     mol = HF.copy()
-    result = run(adf(templates.freq, mol, job_name='adf_FH'))
+    job = adf(templates.freq, mol, job_name='adf_FH')
+    result = run(job, path=tmp_path, folder="test_adf_props")
     expected_energy = -0.30
     assert abs(result.energy - expected_energy) < 0.01
     assert len(result.dipole) == 3
