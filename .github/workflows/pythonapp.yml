@@ -25,6 +25,9 @@ jobs:
           - os: ubuntu-latest
             special: 'slow'
             version: 3.9
+          - os: ubuntu-latest
+            special: 'CP2K 8.2'
+            version: 3.9
 
     steps:
     - name: Cancel Previous Runs
@@ -40,7 +43,25 @@ jobs:
 
     - name: Install cp2k
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt install cp2k --fix-missing
+      run: |
+        case "${{ matrix.special }}" in
+          "CP2K 8.2")
+            git clone --recursive https://github.com/cp2k/cp2k
+            cd cp2k
+            git checkout tags/v8.2.0
+            mkdir bin
+            wget https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp --directory-prefix="$PWD/bin"
+            ln -s bin/cp2k-8.2-Linux-x86_64.ssmp bin/cp2k.popt
+            export PATH=$PATH:"$PWD/bin"
+            export CP2K_DATA_DIR="$PWD/data"
+            ;;
+          *)
+            sudo apt install cp2k --fix-missing
+            cd /usr/share/cp2k
+            ls -l
+            export CP2K_DATA_DIR="/usr/share/cp2k/data"
+            ;;
+         esac
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
