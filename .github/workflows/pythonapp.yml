@@ -42,11 +42,11 @@ jobs:
       run: |
         case "${{ matrix.special }}" in
           "CP2K 8.2")
-            git clone https://github.com/cp2k/cp2k
+            git clone -q https://github.com/cp2k/cp2k
             cd cp2k
             mkdir bin
             git checkout tags/v8.2.0
-            wget -q https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp --P bin
+            wget -q https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp -P bin
             ln bin/cp2k-8.2-Linux-x86_64.ssmp bin/cp2k.popt
             ln -s data /usr/share/cp2k
             ;;
