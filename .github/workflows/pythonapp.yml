@@ -42,13 +42,12 @@ jobs:
       run: |
         case "${{ matrix.special }}" in
           "CP2K 8.2")
-            git clone -q https://github.com/cp2k/cp2k
+            git clone https://github.com/cp2k/cp2k
             cd cp2k
-            mkdir bin
             git checkout tags/v8.2.0
-            wget -q https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp -P bin
-            chmod u+rx bin/cp2k-8.2-Linux-x86_64.ssmp
-            ln bin/cp2k-8.2-Linux-x86_64.ssmp bin/cp2k.popt
+            wget -nv https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
+            chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
+            ln -s cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin
             ln -s data /usr/share/cp2k
             ;;
           *)
@@ -57,9 +56,7 @@ jobs:
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        export PATH=$PATH:"cp2k/bin"
-        cp2k.popt --version
+      run: cp2k.popt --version
 
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
