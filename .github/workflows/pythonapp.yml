@@ -104,7 +104,7 @@ jobs:
         case "${{ matrix.special }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
-          "slow")
+          "slow"|"CP2K 8.2")
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
