@@ -46,22 +46,16 @@ jobs:
             cd cp2k
             git checkout tags/v8.2.0
             wget https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
-            ln -s cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
+            ln -s cp2k-8.2-Linux-x86_64.ssmp $GITHUB_WORKSPACE/cp2k.popt
             ln -s data /usr/share/cp2k
-            /usr/local/bin/cp2k.popt --version
-            whereis cp2k.popt
-            cp2k.popt --version
             ;;
           *)
-            sudo apt install cp2k --fix-missing ;;
+            sudo apt install cp2k ;;
          esac
 
     - name: Info CP2K
       if: matrix.os == 'ubuntu-latest'
-      run: |
-        echo $PATH
-        ls -l /usr/local/bin
-        cp2k.popt --version
+      run: cp2k.popt --version
 
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
