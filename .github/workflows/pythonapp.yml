@@ -51,6 +51,7 @@ jobs:
             git checkout tags/v8.2.0
             mkdir bin
             wget https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp --directory-prefix="$PWD/bin"
+            chmod u+rwx /usr/bin
             ln -s bin/cp2k-8.2-Linux-x86_64.ssmp /usr/bin/cp2k.popt
             ln -s data /usr/share/cp2k/
             ;;
