@@ -751,7 +751,7 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
     return CP2KVersion(0, 0)
 
 
-EXECUTABLE_PATTERN = re.compile(r"(.+\s+)?(\S+)\s+-i")
+EXECUTABLE_PATTERN = re.compile(r".+?(\S+)\s+-i")
 VERSION_PATTERN = re.compile(r"\s+CP2K version (\d+).(\d+)")
 
 
@@ -762,7 +762,7 @@ def get_cp2k_version_run(run_file: PathLike) -> CP2KVersion:
         for i in f:
             match = EXECUTABLE_PATTERN.match(i)
             if match is not None:
-                executable = match.groups()[1]
+                executable = match.groups()[0]
                 break
         else:
             filename = os.fsdecode(run_file)
