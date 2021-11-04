@@ -202,7 +202,7 @@ def read_coefficients(
     13     1  C  4d+2      0.0534202997324328     0.0000000021056315
     """
     if cp2k_version >= (8, 2):
-        rs = _get_mos_ge_82(path)
+        rs: Iterable[List[str]] = _get_mos_ge_82(path)
     else:
         rs = _get_mos(path)
 
@@ -239,22 +239,36 @@ def _get_mos(path: PathLike) -> List[List[str]]:
     return remove_trailing(rs[1:])
 
 
-def _get_mos_ge_82(path: PathLike) -> List[List[str]]:
+def _get_mos_ge_82(path: PathLike) -> Iterator[List[str]]:
     """Parse CP2k >=8.2 MOs."""
-    # Find the begining and end of the MO-range of interest
-    lineno_range = []
     with open(path, 'r') as f:
-        for i, item in enumerate(f, start=1):
-            if item == " MO| EIGENVALUES, OCCUPATION NUMBERS, AND SPHERICAL EIGENVECTORS\n":
-                lineno_range.append(i)
-        if not lineno_range:
-            raise ValueError("Failed to identify the start of the MO range")
-        lineno_range.append(i - 4)  # Strip the band gap and Fermi info
+        xs = f.read().split("\n MO|")
+    lineno_range = []
+
+    # Find the begining of the MO-range
+    #
+    # Note that, depending on the type of CP2K executable, multiple headers may be present
+    # (this seems to be a bug?)
+    header = " EIGENVALUES, OCCUPATION NUMBERS, AND SPHERICAL EIGENVECTORS"
+    for i, item in enumerate(xs, start=1):
+        if item == header:
+            lineno_range.append(i)
+    if not lineno_range:
+        raise ValueError("Failed to identify the start of the MO range")
+
+    # Find the end of the MO-range
+    footer_list = ["Fermi", "HOMO-LUMO"]
+    for j, item in enumerate(reversed(xs)):
+        if not item or any(footer in item for footer in footer_list):
+            continue
+        lineno_range.append(i - j)
+        break
+    else:
+        raise ValueError("Failed to identify the end of the MO range")
 
     # Only read the relevant MOs
-    with open(path, 'r') as f:
-        iterator = (x.split()[1:] for x in islice(f, *lineno_range[-2:]))
-        return [i for i in iterator if i]
+    *_, start, stop = lineno_range
+    return (x.split() for x in islice(xs, start, stop) if x)
 
 
 def remove_trailing(xs: List[List[str]]) -> List[List[str]]:
