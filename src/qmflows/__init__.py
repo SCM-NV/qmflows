@@ -57,7 +57,7 @@ if TYPE_CHECKING or sys.version_info < (3, 7) or _RDKIT_EX is None:
     )
     from . import components, examples
 
-if sys.version_info >= (3, 7):
+if not TYPE_CHECKING and sys.version_info >= (3, 7):
     from ._init_utils import (
         getattr_method as __getattr__,
         dir_method as __dir__,
@@ -69,7 +69,6 @@ if sys.version_info >= (3, 7):
 else:
     # Initalize the sub-module such that `_RDKIT_EX` can enter its namespace
     from . import _init_utils
-    del _init_utils
 
 # Clean up the namespace
 del sys, TYPE_CHECKING, _RDKIT_EX

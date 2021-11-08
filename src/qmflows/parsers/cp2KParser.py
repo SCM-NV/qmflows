@@ -751,28 +751,30 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
     return CP2KVersion(0, 0)
 
 
-EXECUTABLE_PATTERN = re.compile(r".+?(\S+)\s+-i")
-VERSION_PATTERN = re.compile(r"\s+CP2K version (\d+).(\d+)")
+EXECUTABLE_PATTERN = re.compile(r"""(".+"|'.+'|\S+)\s+-i""")
+VERSION_PATTERN = re.compile(r"CP2K version (\d+).(\d+)")
 
 
 def get_cp2k_version_run(run_file: PathLike) -> CP2KVersion:
     """Get the CP2K version using the PLAMS .run."""
     # Extract the executable
     with open(run_file, 'r') as f:
-        for i in f:
-            match = EXECUTABLE_PATTERN.match(i)
-            if match is not None:
-                executable = match.groups()[0]
-                break
-        else:
-            filename = os.fsdecode(run_file)
-            raise ValueError(f"Failed to extract the CP2K executable from {filename!r}")
+        match = EXECUTABLE_PATTERN.search(f.read())
+    if match is None:
+        raise ValueError(f"Failed to extract the CP2K executable from {f.name!r}")
+    executable = match.groups()[0]
 
     # Get the `--version` of the executable
-    out = subprocess.run(
-        [executable, "--version"], check=True, stdout=subprocess.PIPE, encoding="utf8"
-    )
-    match = VERSION_PATTERN.match(out.stdout)
+    try:
+        out = subprocess.run(
+            f"{executable} --version",
+            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf8", shell=True
+        )
+    except subprocess.CalledProcessError as ex:
+        raise ValueError(f"Failed to execute `{executable} --version`:\n\n{ex.stderr}") from ex
+
+    # Parse the `--version` output
+    match = VERSION_PATTERN.search(out.stdout)
     if match is None:
-        raise ValueError(f"Failed to parse the `{executable} --version` output")
+        raise ValueError(f"Failed to parse the `{executable} --version` output:\n\n{out.stdout}")
     return CP2KVersion._make(int(i) for i in match.groups())
