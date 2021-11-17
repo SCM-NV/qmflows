@@ -1,10 +1,39 @@
-# Version 0.10.5 (Unreleased)
+# Version 0.11.1 (Unreleased)
 
 ## New
- * Read molecular orbitals from unrestricted calculations (#211)
+ * n.a.
+
+
+# Version 0.11.0 (17/11/2021)
+
+## New
+ * Add support for reading CP2K MOs from unrestricted calculations.
+ * Add support for reading CP2K >=8.2 MOs.
+ * Add a template for (CP2K) cell optimizations: ``qmflows.cell_opt``.
+ * Add a generic keyword for the CP2K GAL19 non-bonded forcefield.
+ * Add 6 new generic properties to ``qmflows.cp2k`` and ``qmflows.cp2k_mm`` outputs:
+   * ``volume``
+   * ``forces``
+   * ``coordinates``
+   * ``temperature``
+   * ``lattice``
+   * ``pressure``
+
+## Changed
+ * Make ``qmflows.Package`` instance more compatible with builtin functions.
+ * Remove the unused ``__block_replace`` functionality.
+ * Remove the cell parameters from the ``qmflows.cp2k_mm`` templates.
+ * Remove the 2-digit restriction from CP2K cell parameters.
+ * Check for duplicate keys when parsing .yaml inputs.
+ * QMFlows templates are now always copied when getting them (requires Python >= 3.7).
+ * Make RDKit an optional dependency (requires Python >= 3.7).
 
 ## Fix
- * Solve CP2K molecular orbital parsing issue (#212)
+ * Fix the ``ResultWrapper`` parameters being ordered incorrectly.
+ * Fix ``qmflows.cp2m_mm`` ignoring the ``executable`` key.
+ * Fix ``qmflows.InitRestart`` failing on consecutive calls.
+ * Fix ``qmflows.CP2KMM_Result`` not inheriting from ``qmflows.CP2K_Result``.
+ * Remove usage of the CP2K ``USE_ELEMENT_AS_KIND`` keyword.
 
 
 # Version 0.10.4 (07/09/2020)
@@ -13,6 +42,7 @@
 
 ## Fix
  * Improve CP2K error reporting (#209)
+
 
 # Version 0.10.3 (12/06/2020)
 
@@ -36,6 +66,7 @@
   * Exposed ``InitRestart`` to the main QMFlows ``__init__.py`` file.
   * Exchanged ``plams.init()`` / ``plams.finish()`` for ``qmflows.InitRestart`` in the ``qmflows.run()`` function.
   * Store the ``cache.db`` file in the PLAMS working directory.
+
 
 # Version 0.10.0 (XX/03/2020)
 

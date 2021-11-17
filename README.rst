@@ -90,7 +90,7 @@ Package installation
 Finally install the package:
 
 - Install **QMFlows** using pip:
-  - ``pip install git+https://github.com/SCM-NV/qmflows@master#egg=qmflows``
+  - ``pip install qmflows``
 
 Now you are ready to use *qmflows*.
 
