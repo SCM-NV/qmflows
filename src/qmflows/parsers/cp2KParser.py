@@ -257,7 +257,7 @@ def _get_mos_ge_82(path: PathLike) -> Iterator[List[str]]:
         raise ValueError("Failed to identify the start of the MO range")
 
     # Find the end of the MO-range
-    footer_list = ["Fermi", "HOMO-LUMO"]
+    footer_list = ["Fermi", "HOMO-LUMO", "Band"]
     for j, item in enumerate(reversed(xs)):
         if not item or any(footer in item for footer in footer_list):
             continue
