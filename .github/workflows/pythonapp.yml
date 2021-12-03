@@ -26,7 +26,10 @@ jobs:
             special: 'no optional'
             version: '3.10'
           - os: ubuntu-latest
-            special: 'slow'
+            special: 'CP2K 6.1'
+            version: '3.9'
+          - os: ubuntu-latest
+            special: 'CP2K 7.1'
             version: '3.9'
           - os: ubuntu-latest
             special: 'CP2K 8.2'
@@ -44,15 +47,18 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         case "${{ matrix.special }}" in
-          "CP2K 8.2")
-            git clone https://github.com/cp2k/cp2k
+          "CP2K 6.1"|"CP2K 7.1"|"CP2K 8.2")
+            VERSION_SHORT=$(echo "${{ matrix.special }}" | grep -P -o "CP2K \K([\.0-9]+)")
+            VERSION=v"$VERSION_SHORT".0
+
+            git clone https://github.com/cp2k/cp2k -q
             cd cp2k
-            git checkout tags/v8.2.0
+            git -c advice.detachedHead=false checkout tags/$VERSION
             ln -s data /usr/share/cp2k
 
-            wget -nv https://github.com/cp2k/cp2k/releases/download/v8.2.0/cp2k-8.2-Linux-x86_64.ssmp
-            chmod u+rx cp2k-8.2-Linux-x86_64.ssmp
-            mv cp2k-8.2-Linux-x86_64.ssmp /usr/local/bin/cp2k.popt
+            wget -nv https://github.com/cp2k/cp2k/releases/download/$VERSION/cp2k-$VERSION_SHORT-Linux-x86_64.ssmp -O cp2k.ssmp
+            chmod u+rx cp2k.ssmp
+            mv cp2k.ssmp /usr/local/bin/cp2k.popt
             ;;
           *)
             sudo apt install cp2k ;;
@@ -107,7 +113,7 @@ jobs:
         case "${{ matrix.special }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
-          "slow"|"CP2K 8.2")
+          "CP2K 6.1"|"CP2K 7.1"|"CP2K 8.2")
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
