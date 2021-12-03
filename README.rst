@@ -8,6 +8,8 @@
    :alt: Documentation Status
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3274284.svg
    :target: https://doi.org/10.5281/zenodo.3274284
+.. image:: https://badge.fury.io/py/qmflows.svg
+   :target: https://badge.fury.io/py/qmflows
 .. image:: qmflows.png
 
 QMFlows
