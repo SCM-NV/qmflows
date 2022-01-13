@@ -34,6 +34,9 @@ jobs:
           - os: ubuntu-latest
             special: 'CP2K 8.2'
             version: '3.9'
+          - os: ubuntu-latest
+            special: 'CP2K 9.1'
+            version: '3.9'
 
     steps:
     - name: Cancel Previous Runs
@@ -47,7 +50,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: |
         case "${{ matrix.special }}" in
-          "CP2K 6.1"|"CP2K 7.1"|"CP2K 8.2")
+          "CP2K"*)
             VERSION_SHORT=$(echo "${{ matrix.special }}" | grep -P -o "CP2K \K([\.0-9]+)")
             VERSION=v"$VERSION_SHORT".0
 
@@ -113,7 +116,7 @@ jobs:
         case "${{ matrix.special }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
-          "CP2K 6.1"|"CP2K 7.1"|"CP2K 8.2")
+          "CP2K"*)
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
