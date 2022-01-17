@@ -1,7 +1,7 @@
 # Version 0.11.1 (Unreleased)
 
 ## New
- * n.a.
+ * Introduced a new template for frequency analyses with CP2K (#278).
 
 
 # Version 0.11.0 (17/11/2021)

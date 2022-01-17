@@ -253,7 +253,27 @@ specific:
         dftb:
             resourcesdir: "DFTB.org/3ob-3-1"
 
-    cp2k : Null
+    cp2k:
+        force_eval:
+            dft:
+                mgrid:
+                    cutoff: 400
+                    ngrids: 4
+                qs:
+                    method: gpw
+                scf:
+                    eps_scf: 1e-06
+                    max_scf: 200
+                    scf_guess: restart
+            subsys:
+                cell:
+                    periodic: xyz
+        vibrational_analysis:
+            thermochemistry: .TRUE.
+        global:
+            print_level: low
+            project: cp2k
+            run_type: VIBRATIONAL_ANALYSIS
 
     cp2k_mm:
         force_eval:

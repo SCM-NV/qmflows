@@ -59,3 +59,19 @@ def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
     assertion.is_not(orbitals, None)
     np.testing.assert_allclose(orbitals.eigenvalues, ref.eigenvalues)
     np.testing.assert_allclose(np.abs(orbitals.eigenvectors).T, ref.eigenvectors)
+
+
+@requires_cp2k
+@pytest.mark.slow
+def test_cp2k_freq(tmp_path: Path) -> None:
+    """Run a simple single point."""
+    mol = Molecule(PATH_MOLECULES / "h2o.xyz", 'xyz', charge=0, multiplicity=1)
+    s = fill_cp2k_defaults(templates.freq)
+
+    job = cp2k(s, mol)
+    result = run(job, path=tmp_path, folder="test_cp2k_freq")
+
+    assertion.eq(result.status, "successful")
+    assertion.isclose(result.free_energy, -10801.971213467135)
+    assertion.isclose(result.enthalpy, -10790.423489727531)
+    np.testing.assert_allclose(result.frequencies, [1622.952012, 3366.668885, 3513.89377])
