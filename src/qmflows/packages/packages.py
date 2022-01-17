@@ -13,7 +13,7 @@ from functools import partial
 from os.path import join
 from warnings import warn
 from typing import (
-    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict, TypeVar, Tuple
+    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict, TypeVar, Tuple, List
 )
 
 import numpy as np
@@ -151,6 +151,12 @@ class Result:
             `module load AwesomeQuantumPackage/3.141592`
             """, category=QMFlows_Warning, stacklevel=2)
         return None
+
+    def __dir__(self) -> List[str]:
+        """Implement ``dir(self)``."""
+        # Insert the highly dynamic `get_property`-based attributes
+        dir_set = set(super().__dir__()) | self.prop_mapping.keys()
+        return sorted(dir_set)
 
     def get_property(self, prop: str) -> Any:
         """Look for the optional arguments to parse a property, which are stored in the properties dictionary."""  # noqa

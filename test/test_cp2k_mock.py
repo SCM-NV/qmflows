@@ -114,3 +114,14 @@ def test_c2pk_freq_mock(mocker: MockFixture):
     # check properties
     assertion.isfinite(rs.enthalpy)
     assertion.isfinite(rs.free_energy)
+
+
+def test_dir(mocker: MockFixture) -> None:
+    s = fill_cp2k_defaults(templates.geometry)
+    jobname = "cp2k_opt"
+    run_mocked = mock_runner(mocker, jobname)
+
+    job = cp2k(s, ETHYLENE, job_name=jobname)
+    r = run_mocked(job)
+
+    assertion.issubset(CP2K_Result.prop_mapping.keys(), dir(r))
