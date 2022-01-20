@@ -88,6 +88,44 @@ def _ignore_keyword(s: Settings, key: str, value: list, mol: plams.Molecule) -> 
     pass
 
 
+def _write_basis(s: Settings, key: str, value: list, mol: plams.Molecule) -> None:
+    """Write the basis set for all atoms in ``mol``.
+
+    .. code-block::
+
+        &SUBSYS
+            &KIND  C
+            BASIS_SET  DZVP-MOLOPT-SR-GTH
+            &END
+            &KIND  H
+            BASIS_SET  DZVP-MOLOPT-SR-GTH
+            &END
+    """
+    subsys = s.specific.cp2k.force_eval.subsys
+    symbol_set = {at.symbol for at in mol}
+    for symbol in symbol_set:
+        subsys[f'kind {symbol}'].basis_set = value
+
+
+def _write_potential(s: Settings, key: str, value: list, mol: plams.Molecule) -> None:
+    """Write the pseudopotential set for all atoms in ``mol``.
+
+    .. code-block::
+
+        &SUBSYS
+            &KIND  C
+            POTENTIAL  GTH-PBE
+            &END
+            &KIND  H
+            POTENTIAL  GTH-PBE
+            &END
+    """
+    subsys = s.specific.cp2k.force_eval.subsys
+    symbol_set = {at.symbol for at in mol}
+    for symbol in symbol_set:
+        subsys[f'kind {symbol}'].potential = value
+
+
 class CP2K_Result(Result):
     """Class providing access to CP2K result."""
 
@@ -179,6 +217,8 @@ class CP2K(Package):
         'cell_angles': _write_cell_angles,
         'periodic': _write_periodic,
         'executable': _ignore_keyword,
+        'basis': _write_basis,
+        'potential': _write_potential,
     }
 
     @classmethod

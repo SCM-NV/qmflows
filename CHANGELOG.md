@@ -2,6 +2,8 @@
 
 ## New
  * Introduced a new template for frequency analyses with CP2K (#278).
+ * Allow ``dir()`` to work on result-based generic properties.
+ * Added the ``basis`` and ``potential`` generic keywords to CP2K.
 
 
 # Version 0.11.0 (17/11/2021)
