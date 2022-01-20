@@ -69,7 +69,11 @@ PATH_MOLECULES = PATH / "molecules"
 
 
 def fill_cp2k_defaults(s: Settings) -> Settings:
-    """Fill missing values from a job template."""
+    """Fill missing values from a job template.
+
+    Returns a copy of passed template.
+    """
+    s = s.copy()
     s.periodic = "None"
     s.cell_parameters = 10
 
