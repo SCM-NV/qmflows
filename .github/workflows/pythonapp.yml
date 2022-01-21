@@ -37,6 +37,8 @@ jobs:
           - os: ubuntu-latest
             special: 'CP2K 9.1'
             version: '3.9'
+    env:
+      CP2K_DATA_DIR: "/home/runner/work/qmflows/qmflows/cp2k/data"
 
     steps:
     - name: Cancel Previous Runs
@@ -57,7 +59,6 @@ jobs:
             git clone https://github.com/cp2k/cp2k -q
             cd cp2k
             git -c advice.detachedHead=false checkout tags/$VERSION
-            ln -s data /usr/share/cp2k
 
             wget -nv https://github.com/cp2k/cp2k/releases/download/$VERSION/cp2k-$VERSION_SHORT-Linux-x86_64.ssmp -O cp2k.ssmp
             chmod u+rx cp2k.ssmp
@@ -111,8 +112,6 @@ jobs:
       shell: bash
       run: |
         source $CONDA/bin/activate test
-        export CP2K_DATA_DIR="/usr/share/cp2k"
-
         case "${{ matrix.special }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
