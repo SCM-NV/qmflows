@@ -6,7 +6,7 @@ from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, run, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
-from qmflows.test_utils import get_mm_settings, PATH, PATH_MOLECULES, requires_cp2k
+from qmflows.test_utils import get_mm_settings, validate_status, PATH, PATH_MOLECULES, requires_cp2k
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 
@@ -41,7 +41,7 @@ def test_singlepoint(tmp_path: Path) -> None:
 
     job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_sp')
     result = run(job, path=tmp_path, folder="test_singlepoint")
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     # Compare energies
     ref = -15.4431781758
@@ -57,7 +57,7 @@ def test_geometry(tmp_path: Path) -> None:
 
     job = cp2k_mm(settings=s, mol=MOL, job_name='cp2k_mm_opt')
     result = run(job, path=tmp_path, folder="test_geometry")
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     # Compare energies
     ref = -16.865587192150834
@@ -84,7 +84,7 @@ def test_freq(tmp_path: Path) -> None:
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_freq')
     result = run(job, path=tmp_path, folder="test_freq")
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     freqs = result.frequencies
     freqs_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.freq.npy')
@@ -109,7 +109,7 @@ def test_md(tmp_path: Path) -> None:
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_md')
     result = run(job, path=tmp_path, folder="test_md")
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     plams_results = result.results
     assertion.isfile(plams_results['cp2k-1_1000.restart'])
@@ -147,4 +147,4 @@ def test_c2pk_cell_opt(tmp_path: Path) -> None:
 
     job = cp2k_mm(settings=s, mol=mol, job_name='cp2k_mm_cell_opt')
     result = run(job, path=tmp_path, folder="test_c2pk_cell_opt")
-    assertion.eq(result.status, 'successful')
+    validate_status(result)

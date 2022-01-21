@@ -1,5 +1,6 @@
 """Mock CP2K funcionality."""
 import copy
+from typing import Callable
 
 import pytest
 import numpy as np
@@ -9,10 +10,16 @@ from scm.plams import Molecule
 
 from qmflows import cp2k, templates
 from qmflows.packages.cp2k_package import CP2K_Result
-from qmflows.test_utils import PATH, PATH_MOLECULES, fill_cp2k_defaults, requires_cp2k
 from qmflows.utils import init_restart
 from qmflows.common import CP2KVersion
 from qmflows.parsers.cp2KParser import get_cp2k_version_run
+from qmflows.test_utils import (
+    PATH,
+    PATH_MOLECULES,
+    fill_cp2k_defaults,
+    requires_cp2k,
+    validate_status,
+)
 
 try:
     CP2K_VERSION = get_cp2k_version_run("cp2k.popt")
@@ -20,14 +27,17 @@ except Exception:
     CP2K_VERSION = CP2KVersion(0, 0)
 
 
-def mock_runner(mocker_instance, jobname: str) -> CP2K_Result:
+def mock_runner(mocker_instance, jobname: str) -> Callable[..., CP2K_Result]:
     """Create a Result instance using a mocked runner."""
     run_mocked = mocker_instance.patch("qmflows.run")
-    dill_path = WORKDIR / jobname / f"{jobname}.dill"
-    plams_dir = WORKDIR / jobname
-    run_mocked.return_value = CP2K_Result(templates.geometry, ETHYLENE, jobname,
-                                          dill_path=dill_path, plams_dir=plams_dir)
-
+    run_mocked.return_value = CP2K_Result(
+        templates.geometry,
+        ETHYLENE,
+        jobname,
+        status="successful",
+        dill_path=WORKDIR / jobname / f"{jobname}.dill",
+        plams_dir=WORKDIR / jobname,
+    )
     return run_mocked
 
 # module constants
@@ -71,6 +81,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
     jobname = "cp2k_job"
     run_mocked = mock_runner(mocker, jobname)
     rs = run_mocked(job)
+    validate_status(rs)
 
     # electronic energy
     assertion.isfinite(rs.energy)
@@ -91,6 +102,8 @@ def test_c2pk_opt_mock(mocker: MockFixture):
 
     job = cp2k(s, ETHYLENE, job_name=jobname)
     rs = run_mocked(job)
+    validate_status(rs)
+
     # check the optimized geometry
     mol = rs.geometry
     assertion.len_eq(mol, 6)
@@ -110,6 +123,7 @@ def test_c2pk_freq_mock(mocker: MockFixture):
     run_mocked = mock_runner(mocker, jobname)
     job = cp2k(s, ETHYLENE, job_name=jobname)
     rs = run_mocked(job)
+    validate_status(rs)
 
     # check properties
     assertion.isfinite(rs.enthalpy)
@@ -123,5 +137,6 @@ def test_dir(mocker: MockFixture) -> None:
 
     job = cp2k(s, ETHYLENE, job_name=jobname)
     r = run_mocked(job)
+    validate_status(r)
 
     assertion.issubset(CP2K_Result.prop_mapping.keys(), dir(r))

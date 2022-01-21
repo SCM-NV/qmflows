@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from typing import Callable
 
 import numpy as np
 from assertionlib import assertion
@@ -11,7 +12,7 @@ from scm.plams import Molecule
 from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
 from qmflows.utils import InitRestart
 from qmflows.packages.cp2k_mm import CP2KMM_Result
-from qmflows.test_utils import get_mm_settings, PATH, PATH_MOLECULES
+from qmflows.test_utils import get_mm_settings, validate_status, PATH, PATH_MOLECULES
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')
 WORKDIR = PATH / 'output_cp2k_mm'
@@ -46,7 +47,7 @@ def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
 
 def mock_runner(mocker_instance: MockFixture,
                 settings: Settings = SETTINGS,
-                jobname: str = 'job') -> CP2KMM_Result:
+                jobname: str = 'job') -> Callable[..., CP2KMM_Result]:
     """Create a Result instance using a mocked runner."""
     run_mocked = mocker_instance.patch("qmflows.run")
 
@@ -72,7 +73,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture) -> None:
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_sp")
 
     result = run_mocked(job)
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     # Compare energies
     ref = -15.4431781758
@@ -88,7 +89,7 @@ def test_c2pk_opt_mock(mocker: MockFixture) -> None:
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_opt")
 
     result = run_mocked(job)
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     # Compare energies
     ref = -16.865587192150834
@@ -114,7 +115,7 @@ def test_c2pk_freq_mock(mocker: MockFixture) -> None:
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_freq")
 
     result = run_mocked(job)
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     freqs = result.frequencies
     freqs_ref = np.load(PATH / 'Cd68Cl26Se55__26_acetate.freq.npy')
@@ -136,7 +137,7 @@ def test_c2pk_md_mock(mocker: MockFixture) -> None:
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_md")
 
     result = run_mocked(job)
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     assertion.isfile(result.results['cp2k-1_1000.restart'])
 
@@ -172,7 +173,7 @@ def test_c2pk_cell_opt_mock(mocker: MockFixture) -> None:
     job = cp2k_mm(s, mol)
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_cell_opt")
     result = run_mocked(job)
-    assertion.eq(result.status, 'successful')
+    validate_status(result)
 
     ref_volume = np.load(PATH / 'volume.npy')
     ref_coordinates = np.load(PATH / 'coordinates.npy')
@@ -191,6 +192,7 @@ def test_c2pk_npt_mock(mocker: MockFixture) -> None:
     job = cp2k_mm(s, None)
     run_mocked = mock_runner(mocker, settings=s, jobname="cp2k_mm_npt")
     result = run_mocked(job)
+    validate_status(result)
 
     ref_pressure = np.load(PATH / 'pressure.npy')
     np.testing.assert_allclose(result.pressure, ref_pressure)

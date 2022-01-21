@@ -6,6 +6,7 @@ Index
 .. autosummary::
     fill_cp2k_defaults
     get_mm_settings
+    validate_status
     PATH
     PATH_MOLECULES
     HAS_RDKIT
@@ -18,6 +19,7 @@ API
 ---
 .. autofunction:: fill_cp2k_defaults
 .. autofunction:: get_mm_settings
+.. autofunction:: validate_status
 .. autodata:: PATH
     :annotation: : pathlib.Path
 .. autodata:: PATH_MOLECULES
@@ -32,6 +34,7 @@ API
 """
 
 import os
+import textwrap
 from pathlib import Path
 
 import pytest
@@ -39,12 +42,14 @@ from distutils.spawn import find_executable
 
 from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
+from .packages import Result
 
 __all__ = [
     'get_mm_settings',
     'PATH',
     'PATH_MOLECULES',
     'Assertion_Warning',
+    'validate_status',
     'HAS_RDKIT',
     'requires_cp2k',
     'requires_orca'
@@ -124,6 +129,62 @@ def get_mm_settings() -> Settings:
     s.periodic = 'none'
     s.cell_parameters = [50, 50, 50]
     return s
+
+
+def _read_result_file(result: Result, extension: str, max_line: int = 100) -> "None | str":
+    """Find and read the first file in ``result`` with the provided file extension.
+
+    Returns ``None`` if no such file can be found.
+    """
+    root = result.archive["plams_dir"]
+    if root is None:
+        return None
+
+    iterator = (os.path.join(root, i) for i in os.listdir(root)
+                if os.path.splitext(i)[1] == extension)
+    for i in iterator:
+        with open(i, "r") as f:
+            ret_list = f.readlines()
+            ret = "..." if len(ret_list) > max_line else ""
+            ret += "".join(ret_list[-max_line:])
+            return textwrap.indent(ret, 4 * " ")
+    else:
+        return None
+
+
+def validate_status(result: Result, *, print_out: bool = True, print_err: bool = True) -> None:
+    """Validate the status of the ``qmflows.Result`` object is set to ``"successful"``.
+
+    Parameters
+    ----------
+    result : qmflows.Result
+        The to-be validated ``Result`` object.
+    print_out : bool
+        Whether to included the content of the ``Result`` objects' .out file in the exception.
+    print_err : bool
+        Whether to included the content of the ``Result`` objects' .err file in the exception.
+
+    Raises
+    ------
+    AssertionError
+        Raised when :code:`result.status != "successful"`.
+
+    """
+    if result.status == "successful":
+        return None
+
+    indent = 4 * " "
+    msg = f"Unexpected {result.job_name} status: {result.status!r}"
+
+    if print_out:
+        out = _read_result_file(result, ".out")
+        if out is not None:
+            msg += f"\n\nout_file:\n{out}"
+    if print_err:
+        err = _read_result_file(result, ".err")
+        if err is not None:
+            msg += f"\n\nerr_file:\n{err}"
+    raise AssertionError(msg)
 
 
 def _has_exec(executable: str) -> bool:
