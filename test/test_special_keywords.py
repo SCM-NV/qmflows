@@ -189,6 +189,22 @@ def test_cp2k_cell_parameters():
     assertion.eq(s.specific, ref.specific)
 
 
+def test_cp2k_basis_potential() -> None:
+    """Test the CP2K ``basis`` and ``potential`` generic keys."""
+    mol = Molecule(PATH_MOLECULES / "ethylene.xyz")
+
+    s = Settings(basis="DZVP-MOLOPT-SR-GTH", potential="GTH-PBE")
+    CP2K.handle_special_keywords(s, "basis", s.basis, mol)
+    CP2K.handle_special_keywords(s, "potential", s.potential, mol)
+
+    ref = Settings()
+    ref["kind C"].basis_set = "DZVP-MOLOPT-SR-GTH"
+    ref["kind H"].basis_set = "DZVP-MOLOPT-SR-GTH"
+    ref["kind C"].potential = "GTH-PBE"
+    ref["kind H"].potential = "GTH-PBE"
+    assertion.eq(s.specific.cp2k.force_eval.subsys, ref)
+
+
 def test_orca_init_hessian():
     """Test the translation from settings to CP2K specific keywords."""
     # Read Hessian from DFTB

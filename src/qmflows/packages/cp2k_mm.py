@@ -13,19 +13,19 @@ API
 """
 
 import os
-from os.path import join, abspath
-from typing import Union, Any, ClassVar, Dict, Type, TYPE_CHECKING
+from warnings import warn
+from os.path import abspath
+from typing import Any, ClassVar, Type, TYPE_CHECKING
 
 import numpy as np
 from scm import plams
 
-from .packages import parse_output_warnings, load_properties
+from .packages import load_properties
 from .cp2k_package import CP2K, CP2K_Result
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
-from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
-from ..warnings_qmflows import cp2k_warnings
-from ..type_hints import Generic2Special, Final, _Settings
+from ..warnings_qmflows import Key_Warning
+from ..type_hints import Final, _Settings
 
 __all__ = ['cp2k_mm']
 
@@ -103,8 +103,7 @@ class CP2KMM(CP2K):
         ) -> CP2KMM_Result: ...
 
     @classmethod
-    def handle_special_keywords(cls, settings: Settings, key: str,
-                                value: Any, mol: plams.Molecule) -> None:
+    def handle_special_keywords(cls, settings: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
         """Create the settings input for complex cp2k keys.
 
         :param settings: Job Settings.
@@ -117,17 +116,16 @@ class CP2KMM(CP2K):
         """
         # Function that handles the special keyword
         if isinstance(key, tuple):
-            set_prm(settings, key, value, mol)
-        else:
-            try:
-                f = cls.SPECIAL_FUNCS[key]
-            except KeyError:  # Plan B: fall back to the CP2K super-class
-                super().handle_special_keywords(settings, key, value, mol)
-            else:
-                f(settings, key, value, mol)
+            return set_prm(settings, key, value, mol)
 
-    #: A :class:`dict` mapping special keywords to the appropiate function.
-    SPECIAL_FUNCS: ClassVar[Dict[str, Generic2Special]]
+        f = cls.SPECIAL_FUNCS.get(key)
+        if f is None:
+            f = CP2K.SPECIAL_FUNCS.get(key)
+
+        if f is None:
+            warn(f'Generic keyword {key!r} not implemented for package CP2K', category=Key_Warning)
+        else:
+            f(settings, key, value, mol)
 
     @staticmethod
     def _parse_psf(settings: Settings, key: str,

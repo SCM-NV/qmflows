@@ -26,8 +26,10 @@ def test_cp2k_opt(tmp_path: Path) -> None:
                      'xyz', charge=0, multiplicity=1)
 
     job = cp2k(s, water)
-    mol = run(job, path=tmp_path, folder="test_cp2k_opt")
-    assertion.isinstance(mol.molecule, Molecule)
+    result = run(job, path=tmp_path, folder="test_cp2k_opt")
+
+    assertion.eq(result.status, "successful")
+    assertion.isinstance(result.molecule, Molecule)
 
 
 @requires_cp2k
@@ -55,6 +57,7 @@ def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
         key = f"test_using_plams/test_cp2k/test_cp2k_singlepoint/{mo_index_range}"
         ref = f[key][...].view(np.recarray)
 
+    assertion.eq(result.status, "successful")
     orbitals = result.orbitals
     assertion.is_not(orbitals, None)
     np.testing.assert_allclose(orbitals.eigenvalues, ref.eigenvalues)
