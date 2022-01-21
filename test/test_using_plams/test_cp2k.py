@@ -9,7 +9,13 @@ from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k, run, templates
-from qmflows.test_utils import PATH, PATH_MOLECULES, fill_cp2k_defaults, requires_cp2k
+from qmflows.test_utils import (
+    PATH,
+    PATH_MOLECULES,
+    fill_cp2k_defaults,
+    requires_cp2k,
+    validate_status,
+)
 
 
 @requires_cp2k
@@ -28,7 +34,7 @@ def test_cp2k_opt(tmp_path: Path) -> None:
     job = cp2k(s, water)
     result = run(job, path=tmp_path, folder="test_cp2k_opt")
 
-    assertion.eq(result.status, "successful")
+    validate_status(result)
     assertion.isinstance(result.molecule, Molecule)
 
 
@@ -57,7 +63,7 @@ def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
         key = f"test_using_plams/test_cp2k/test_cp2k_singlepoint/{mo_index_range}"
         ref = f[key][...].view(np.recarray)
 
-    assertion.eq(result.status, "successful")
+    validate_status(result)
     orbitals = result.orbitals
     assertion.is_not(orbitals, None)
     np.testing.assert_allclose(orbitals.eigenvalues, ref.eigenvalues)
@@ -74,7 +80,7 @@ def test_cp2k_freq(tmp_path: Path) -> None:
     job = cp2k(s, mol)
     result = run(job, path=tmp_path, folder="test_cp2k_freq")
 
-    assertion.eq(result.status, "successful")
+    validate_status(result)
     assertion.isclose(result.free_energy, -10801.971213467135)
     assertion.isclose(result.enthalpy, -10790.423489727531)
     np.testing.assert_allclose(result.frequencies, [1622.952012, 3366.668885, 3513.89377])

@@ -1,15 +1,18 @@
 """Tests for :mod:`qmflows.utils`."""
 
-from os.path import isdir
+import textwrap
 from io import TextIOBase, StringIO
 from pathlib import Path
 from contextlib import AbstractContextManager
 
+import pytest
 from assertionlib import assertion
 from scm.plams import init, finish
 
+from qmflows import Settings
+from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.utils import to_runtime_error, file_to_context, init_restart, InitRestart
-from qmflows.test_utils import PATH_MOLECULES, PATH
+from qmflows.test_utils import PATH_MOLECULES, PATH, validate_status
 
 PSF_STR: str = """
 PSF EXT
@@ -76,3 +79,29 @@ def test_restart_init(tmp_path: Path) -> None:
     with InitRestart(path=tmp_path, folder="test_restart_init"):
         assertion.isdir(workdir)
         assertion.isdir(f'{workdir}.002', invert=True)
+
+
+def test_validate_status() -> None:
+    root = PATH / "output_cp2k" / "cp2k_opt"
+    result = CP2K_Result(
+        settings=Settings(),
+        molecule=None,
+        job_name="cp2k_opt",
+        dill_path=root / "cp2k_opt.dill",
+        plams_dir=root,
+        work_dir=root,
+        status="failed",
+    )
+
+    with pytest.raises(AssertionError) as rec:
+        validate_status(result)
+    msg = str(rec.value)
+
+    with open(root / "cp2k_opt.out", "r") as f:
+        out_ref = textwrap.indent("".join(f.readlines()[-100:]), 4 * " ")
+    with open(root / "cp2k_opt.err", "r") as f:
+        err_ref = textwrap.indent("".join(f.readlines()[-100:]), 4 * " ")
+
+    assertion.contains(msg, out_ref)
+    assertion.contains(msg, err_ref)
+    assertion.contains(msg, f"Unexpected {result.job_name} status: {result.status!r}")

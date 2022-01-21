@@ -67,7 +67,7 @@ class Result:
                  dill_path: "None | str | os.PathLike[str]" = None,
                  plams_dir: "None | str | os.PathLike[str]" = None,
                  work_dir: "None | str | os.PathLike[str]" = None,
-                 status: str = 'done',
+                 status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         """Initialize a :class:`Result` instance.
 
