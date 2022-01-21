@@ -105,7 +105,7 @@ class ADF_Result(Result):
                  dill_path: "None | str | os.PathLike[str]" = None,
                  plams_dir: "None | str | os.PathLike[str]" = None,
                  work_dir: "None | str | os.PathLike[str]" = None,
-                 status: str = 'done',
+                 status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         # Load available property parser from yaml file.
         super().__init__(settings, molecule, job_name, dill_path,
@@ -157,7 +157,7 @@ class DFTB_Result(Result):
                  dill_path: "None | str | os.PathLike[str]" = None,
                  plams_dir: "None | str | os.PathLike[str]" = None,
                  work_dir: "None | str | os.PathLike[str]" = None,
-                 status: str = 'done',
+                 status: str = 'successful',
                  warnings: Optional[WarnMap] = None) -> None:
         # Read available propiety parsers from a yaml file
         super().__init__(settings, molecule, job_name, dill_path,
