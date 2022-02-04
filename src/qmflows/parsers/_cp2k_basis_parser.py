@@ -66,7 +66,7 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
                 basis_fmt = [int(j) for j in next(f).split()]
                 n_exp = basis_fmt[3]
                 basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
-                exp, coef = basis_data[:, 0], basis_data[:, 1:]
+                exp, coef = basis_data[:, 0], basis_data[:, 1:].T
 
                 # Two things happen whenever an basis set alias is encountered (i.e. `is_alias > 0`):
                 # 1. The `alias` field is set for the keys
