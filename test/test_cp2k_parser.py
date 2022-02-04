@@ -34,7 +34,7 @@ class TestReadBasis:
             "-".join(str(i) for i in key_tup.basisFormat),
         )
 
-    def test_pass(self):
+    def test_pass(self) -> None:
         basis_file = PATH / "BASIS_MOLOPT"
         keys, values = readCp2KBasis(basis_file)
 
@@ -48,6 +48,18 @@ class TestReadBasis:
                 np.testing.assert_allclose(value_tup.coefficients, group["coefficients"], err_msg=key)
                 if key_tup.alias is not None:
                     assertion.eq(self.get_key(key_tup.alias), alias, message=key)
+
+    PARAMS = {
+        "BASIS_INVALID_N_EXP": 11,
+        "BASIS_INVALID_FMT": 3,
+        "BASIS_NOTIMPLEMENTED": 2,
+    }
+
+    @pytest.mark.parametrize("filename,lineno", PARAMS.items(), ids=PARAMS)
+    def test_raise(self, filename: str, lineno: int) -> None:
+        pattern = r'Failed to parse the basis set ".+" on line {}'.format(lineno)
+        with pytest.raises(ValueError, match=pattern):
+            readCp2KBasis(PATH / filename)
 
 
 @requires_cp2k

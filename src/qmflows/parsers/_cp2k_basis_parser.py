@@ -1,6 +1,6 @@
 """Functions for reading CP2K basis set files."""
 
-from typing import Iterator, Generator, Tuple, List
+from typing import Iterator, Tuple, List, Tuple, Iterable
 from itertools import islice
 
 import numpy as np
@@ -13,18 +13,39 @@ __all__ = ["readCp2KBasis"]
 _Basis2Tuple = Tuple[List[AtomBasisKey], List[AtomBasisData]]
 
 
-def _basis_file_iter(f: Iterator[str]) -> Generator[str, None, None]:
-    """Iterate through `f` and remove all empty and commented lines."""
-    for i in f:
-        i = i.strip().rstrip("\n")
-        if not i or i.startswith("#"):
-            continue
-        yield i
+class _BasisFileIter:
+    """Enumerate through the passed ``iterable`` and remove all empty and commented lines."""
+
+    __slots__ = ("__weakref__", "_enumerator", "_name", "_index")
+
+    @property
+    def index(self) -> int:
+        """Get the index within the current iterator."""
+        return self._index
+
+    def __init__(self, iterable: Iterable[str], start: int = 0) -> None:
+        self._enumerator = enumerate(iterable, start=start)
+        self._name: "str | None" = getattr(iterable, "name", None)
+        self._index = start
+
+    def __iter__(self) -> "_BasisFileIter":
+        return self
+
+    def __next__(self) -> str:
+        i, item = next(self._enumerator)
+        item = item.strip().rstrip("\n")
+        if not item or item.startswith("#"):
+            return self.__next__()
+
+        self._index = i
+        return item
+
+    def __repr__(self) -> str:
+        return f"<{type(self).__name__} name={self._name!r} index={self._index!r}>"
 
 
-def _read_basis(iterator: Iterator[str]) -> _Basis2Tuple:
+def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
     """Helper function for parsing the opened basis set file."""
-    f = _basis_file_iter(iterator)
     keys = []
     values = []
     for i in f:
@@ -32,35 +53,40 @@ def _read_basis(iterator: Iterator[str]) -> _Basis2Tuple:
         atom, *basis_list = i.split()
         atom = atom.capitalize()
 
-        # Identify the number of exponent sets
-        n_sets = int(next(f))
-        if n_sets != 1:
-            raise NotImplementedError(
-                "Basis sets with more than 1 set of exponents are not supported yet"
-            )
+        try:
+            # Identify the number of exponent sets
+            n_sets = int(next(f))
+            if n_sets != 1:
+                raise NotImplementedError(
+                    "Basis sets with more than 1 set of exponents are not supported yet"
+                )
 
-        for _ in range(n_sets):
-            # Parse the basis format, its exponents and its coefficients
-            basis_fmt = [int(j) for j in next(f).split()]
-            n_exp = basis_fmt[3]
-            basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
-            exp, coef = basis_data[:, 0], basis_data[:, 1:]
+            for _ in range(n_sets):
+                # Parse the basis format, its exponents and its coefficients
+                basis_fmt = [int(j) for j in next(f).split()]
+                n_exp = basis_fmt[3]
+                basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
+                exp, coef = basis_data[:, 0], basis_data[:, 1:]
 
-            # Two things happen whenever an basis set alias is encountered (i.e. `is_alias > 0`):
-            # 1. The `alias` field is set for the keys
-            # 2. The `AtomBasisData` instance, used for the original value, is reused
-            for is_alias, basis in enumerate(basis_list):
-                if not is_alias:
-                    basis_key = AtomBasisKey(atom, basis, basis_fmt)
-                    basis_value = AtomBasisData(exp, coef)
-                    keys.append(basis_key)
-                else:
-                    keys.append(AtomBasisKey(atom, basis, basis_fmt, alias=basis_key))
-                values.append(basis_value)
+                # Two things happen whenever an basis set alias is encountered (i.e. `is_alias > 0`):
+                # 1. The `alias` field is set for the keys
+                # 2. The `AtomBasisData` instance, used for the original value, is reused
+                for is_alias, basis in enumerate(basis_list):
+                    if not is_alias:
+                        basis_key = AtomBasisKey(atom, basis, basis_fmt)
+                        basis_value = AtomBasisData(exp, coef)
+                        keys.append(basis_key)
+                    else:
+                        keys.append(AtomBasisKey(atom, basis, basis_fmt, alias=basis_key))
+                    values.append(basis_value)
+        except Exception as ex:
+            raise ValueError(
+                f'Failed to parse the basis set "{atom} {basis_list[0]}" on line {f.index}'
+            ) from ex
     return keys, values
 
 
 def readCp2KBasis(file: PathLike) -> _Basis2Tuple:
     """Read the Contracted Gauss function primitives format from a text file."""
     with open(file, "r") as f:
-        return _read_basis(f)
+        return _read_basis(_BasisFileIter(f, start=1))
