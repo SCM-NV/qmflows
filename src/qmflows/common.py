@@ -26,9 +26,6 @@ class AtomBasisKey(NamedTuple):
     #: The basis set format.
     basisFormat: Union[Sequence[int], Sequence[Tuple[str, int]]]
 
-    #: The primary basis key. Used if this instance is an alias of another `AtomBasisKey`.
-    alias: "None | AtomBasisKey" = None
-
 
 class AtomBasisData(NamedTuple):
     """Contraction coefficients and exponents for a gaussian basis."""

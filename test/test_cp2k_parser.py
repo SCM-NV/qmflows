@@ -41,13 +41,10 @@ class TestReadBasis:
         with h5py.File(PATH / "basis.hdf5", "r") as f:
             for key_tup, value_tup in zip(keys, values):
                 key = self.get_key(key_tup)
-                group = f[key]
-                alias = group["alias"][...].astype(str)
-
-                np.testing.assert_allclose(value_tup.exponents, group["exponents"][...].T, err_msg=key)
-                np.testing.assert_allclose(value_tup.coefficients, group["coefficients"][...].T, err_msg=key)
-                if key_tup.alias is not None:
-                    assertion.eq(self.get_key(key_tup.alias), alias, message=key)
+                exponents = f[key]["exponents"][...].T
+                coefficients = f[key]["coefficients"][...].T
+                np.testing.assert_allclose(value_tup.exponents, exponents, err_msg=key)
+                np.testing.assert_allclose(value_tup.coefficients, coefficients, err_msg=key)
 
     PARAMS = {
         "BASIS_INVALID_N_EXP": 11,

@@ -63,22 +63,13 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
 
             for _ in range(n_sets):
                 # Parse the basis format, its exponents and its coefficients
-                basis_fmt = [int(j) for j in next(f).split()]
+                basis_fmt = tuple(int(j) for j in next(f).split())
                 n_exp = basis_fmt[3]
                 basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
                 exp, coef = basis_data[:, 0], basis_data[:, 1:].T
-
-                # Two things happen whenever an basis set alias is encountered (i.e. `is_alias > 0`):
-                # 1. The `alias` field is set for the keys
-                # 2. The `AtomBasisData` instance, used for the original value, is reused
-                for is_alias, basis in enumerate(basis_list):
-                    if not is_alias:
-                        basis_key = AtomBasisKey(atom, basis, basis_fmt)
-                        basis_value = AtomBasisData(exp, coef)
-                        keys.append(basis_key)
-                    else:
-                        keys.append(AtomBasisKey(atom, basis, basis_fmt, alias=basis_key))
-                    values.append(basis_value)
+                for basis in basis_list:
+                    keys.append(AtomBasisKey(atom, basis, basis_fmt))
+                    values.append(AtomBasisData(exp, coef))
         except Exception as ex:
             raise ValueError(
                 f'Failed to parse the basis set "{atom} {basis_list[0]}" on line {f.index}'
