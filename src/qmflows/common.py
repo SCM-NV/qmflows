@@ -16,11 +16,18 @@ __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
 class AtomBasisKey(NamedTuple):
     """Namedtuple containing the `basisFormat` for a given `basis` and `atom`."""
 
+    #: Atomic symbol.
     atom: str
+
+    #: Name of the basis set.
     basis: str
-    basisFormat: Union[Sequence[int],
-                       Sequence[Tuple[str, int]]]
-    # Orca uses 2-tuples while CP2K uses integer
+
+    # NOTE: Orca uses 2-tuples while CP2K uses integer
+    #: The basis set format.
+    basisFormat: Union[Sequence[int], Sequence[Tuple[str, int]]]
+
+    #: The primary basis key. Used if this instance is an alias of another `AtomBasisKey`.
+    alias: "None | AtomBasisKey" = None
 
 
 class AtomBasisData(NamedTuple):

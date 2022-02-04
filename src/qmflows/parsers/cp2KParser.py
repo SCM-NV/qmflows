@@ -15,19 +15,20 @@ from typing import Sequence, Tuple, Type, TypeVar, Union, overload, Iterator
 
 import numpy as np
 from more_itertools import chunked
-from pyparsing import (FollowedBy, Group, Literal, NotAny, OneOrMore, Optional,
-                       SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas,
-                       nums, oneOf, restOfLine, srange)
+from pyparsing import (
+    Literal, Optional, SkipTo, Suppress, Word, ZeroOrMore, alphas,
+    nums, oneOf, srange,
+)
 from scm.plams import Molecule, Units
 
-from ..common import AtomBasisData, AtomBasisKey, InfoMO, MO_metadata, CP2KVersion
+from ..common import InfoMO, MO_metadata, CP2KVersion
 from ..type_hints import Literal as Literal_
 from ..type_hints import PathLike, T, WarnDict, WarnMap
 from ..utils import file_to_context
 from ..warnings_qmflows import QMFlows_Warning
-from .parser import (floatNumber, minusOrplus, natural, point,
-                     try_search_pattern)
+from .parser import minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
+from ._cp2k_basis_parser import readCp2KBasis
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
@@ -303,38 +304,6 @@ orbitals = Word(nums, max=1) + (orbS | orbP | orbD | orbF)
 # Orbital Information:"        12     1 cd  4d+1"
 orbInfo = natural * 2 + Word(alphas, max=2) + orbitals
 
-# ====================> Basis File <==========================
-comment = Literal("#") + restOfLine
-
-parser_atom_label = (
-    Word(srange("[A-Z]"), max=1) +
-    Optional(Word(srange("[a-z]"), max=1))
-)
-
-parser_basis_name = Word(alphanums + "-") + Suppress(restOfLine)
-
-parser_format = OneOrMore(natural + NotAny(FollowedBy(point)))
-
-parser_key = (
-    parser_atom_label.setResultsName("atom") +
-    parser_basis_name.setResultsName("basisName") +
-    Suppress(Literal("1"))
-)
-
-parser_basis_data = OneOrMore(floatNumber)
-
-parser_basis = (
-    parser_key +
-    parser_format.setResultsName("format") +
-    parser_basis_data.setResultsName("coeffs")
-)
-
-top_parser_basis = (
-    OneOrMore(Suppress(comment)) + OneOrMore(
-        Group(parser_basis + Suppress(Optional(OneOrMore(comment)))))
-)
-
-
 # ===============================<>====================================
 # Parsing From File
 
@@ -439,29 +408,6 @@ def split_log_file(path: PathLike, root: str, file_name: str) -> None:
     string = "HOMO-LUMO" if is_string_in_file("HOMO-LUMO", path) else "Fermi"
     cmd = f'csplit -f coeffs -n 1 {file_name} "/{string}/+2"'
     subprocess.check_call(cmd, shell=True, stdout=subprocess.DEVNULL, cwd=root)
-
-
-#: A 2-tuple; output of :func:`readCp2KBasis`.
-Tuple2List = Tuple[List[AtomBasisKey], List[AtomBasisData]]
-
-
-def readCp2KBasis(path: PathLike) -> Tuple2List:
-    """Read the Contracted Gauss function primitives format from a text file."""
-    bss = top_parser_basis.parseFile(path)
-    atoms = [''.join(xs.atom[:]).lower() for xs in bss]
-    names = [' '.join(xs.basisName[:]).upper() for xs in bss]
-    formats = [list(map(int, xs.format[:])) for xs in bss]
-
-    # for example 2 0 3 7 3 3 2 1 there are sum(3 3 2 1) =9 Lists
-    # of Coefficients + 1 lists of exponents
-    nCoeffs = [int(sum(xs[4:]) + 1) for xs in formats]
-    coefficients = [list(map(float, cs.coeffs[:])) for cs in bss]
-    rss = [swap_coefficients(*args) for args in zip(nCoeffs, coefficients)]
-    tss = [get_head_and_tail(xs) for xs in rss]
-    basisData = [AtomBasisData(xs[0], xs[1]) for xs in tss]
-    basiskey = [AtomBasisKey(at, name, fmt) for at, name, fmt in zip(atoms, names, formats)]
-
-    return (basiskey, basisData)
 
 
 #: A :class:`~collections.abc.Sequence` typevar.

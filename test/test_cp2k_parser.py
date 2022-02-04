@@ -4,12 +4,15 @@ import os
 import shutil
 from pathlib import Path
 
+import numpy as np
+import h5py
 import pytest
 from assertionlib import assertion
 
 from qmflows.parsers.cp2KParser import parse_cp2k_warnings, readCp2KBasis, get_cp2k_version_run
 from qmflows.test_utils import PATH, requires_cp2k
 from qmflows.warnings_qmflows import QMFlows_Warning, cp2k_warnings
+from qmflows.common import AtomBasisKey
 
 
 def test_parse_cp2k_warnings():
@@ -20,20 +23,31 @@ def test_parse_cp2k_warnings():
                         for val in map_warns.values()))
 
 
-def test_read_basis():
+class TestReadBasis:
     """Test that the basis are read correctly."""
-    BASIS_FILE = PATH / "BASIS_MOLOPT"
 
-    for key, data in zip(*readCp2KBasis(BASIS_FILE)):
-        # The formats contains a list
-        assertion.len(key.basisFormat)
-        # Atoms are either 1 or two characters
-        assertion.le(len(key.atom), 2)
-        # All basis are MOLOPT
-        assertion.contains(key.basis, "MOLOPT")
-        # There is a list of exponents and coefficinets
-        assertion.len(data.exponents)
-        assertion.len(data.coefficients[0])
+    @staticmethod
+    def get_key(key_tup: AtomBasisKey) -> str:
+        return os.path.join(
+            key_tup.atom,
+            key_tup.basis,
+            "-".join(str(i) for i in key_tup.basisFormat),
+        )
+
+    def test_pass(self):
+        basis_file = PATH / "BASIS_MOLOPT"
+        keys, values = readCp2KBasis(basis_file)
+
+        with h5py.File(PATH / "basis.hdf5", "r") as f:
+            for key_tup, value_tup in zip(keys, values):
+                key = self.get_key(key_tup)
+                group = f[key]
+                alias = group["alias"][...].astype(str)
+
+                np.testing.assert_allclose(value_tup.exponents, group["exponents"], err_msg=key)
+                np.testing.assert_allclose(value_tup.coefficients, group["coefficients"], err_msg=key)
+                if key_tup.alias is not None:
+                    assertion.eq(self.get_key(key_tup.alias), alias, message=key)
 
 
 @requires_cp2k
