@@ -63,7 +63,7 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
 
             for _ in range(n_sets):
                 # Parse the basis format, its exponents and its coefficients
-                basis_fmt = [int(j) for j in next(f).split()]
+                basis_fmt = tuple(int(j) for j in next(f).split())
                 n_exp = basis_fmt[3]
                 basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
                 exp, coef = basis_data[:, 0], basis_data[:, 1:].T
