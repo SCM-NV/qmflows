@@ -1,10 +1,16 @@
-# Version 0.11.2 (unreleased)
+# Version 0.11.3 (unreleased)
+
+## New
+ * *placeholder*.
+
+
+# Version 0.11.2 (07/01/2022)
 
 ## Changed
  * Reworked the CP2K basis set parser; allow it to return aliases of basis set names.
 
 
-# Version 0.11.1 (21/12/2022)
+# Version 0.11.1 (21/01/2022)
 
 ## New
  * Introduced a new template for frequency analyses with CP2K (#278).
