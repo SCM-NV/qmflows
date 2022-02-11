@@ -54,7 +54,7 @@ class TestReadBasis:
 
     @pytest.mark.parametrize("filename,lineno", PARAMS.items(), ids=PARAMS)
     def test_raise(self, filename: str, lineno: int) -> None:
-        pattern = r'Failed to parse the basis set ".+" on line {}'.format(lineno)
+        pattern = r"Failed to parse the '.+' basis set on line {}".format(lineno)
         with pytest.raises(ValueError, match=pattern):
             readCp2KBasis(PATH / filename)
 
