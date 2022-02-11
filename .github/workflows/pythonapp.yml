@@ -87,6 +87,7 @@ jobs:
             source $CONDA/bin/activate test
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
+            pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
             conda create -n test -c conda-forge python=${{ matrix.version }}

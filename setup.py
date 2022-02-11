@@ -84,7 +84,7 @@ setup(
         'h5py',
         'numpy',
         'pandas',
-        'noodles==0.3.3',
+        'noodles>=0.3.3',
         'plams>=1.5.1',
         'pyparsing<3.0',
         'pyyaml>=5.1',
