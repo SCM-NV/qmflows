@@ -13,7 +13,7 @@ __all__ = ["readCp2KBasis"]
 _Basis2Tuple = Tuple[List[AtomBasisKey], List[AtomBasisData]]
 
 
-class _BasisFileIter:
+class _BasisFileIter(Iterator[str]):
     """Enumerate through the passed ``iterable`` and remove all empty and commented lines."""
 
     __slots__ = ("__weakref__", "_enumerator", "_name", "_index")
@@ -71,9 +71,8 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
                     keys.append(AtomBasisKey(atom, basis, basis_fmt))
                     values.append(AtomBasisData(exp, coef))
         except Exception as ex:
-            raise ValueError(
-                f'Failed to parse the basis set "{atom} {basis_list[0]}" on line {f.index}'
-            ) from ex
+            basis = f"{atom} {basis_list[0]}" if len(basis_list) > 0 else atom
+            raise ValueError(f'Failed to parse the {basis!r} basis set on line {f.index}') from ex
     return keys, values
 
 
