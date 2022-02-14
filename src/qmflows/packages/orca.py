@@ -4,7 +4,7 @@ __all__ = ['orca']
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional, ClassVar, List, Type
+from typing import Any, Union, Optional, ClassVar, List, Type, TYPE_CHECKING
 
 import numpy as np
 from scm import plams
@@ -15,6 +15,11 @@ from ..settings import Settings
 from ..type_hints import Final, _Settings
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
+from ..common import InfoMO
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from numpy import float64 as f8
 
 # ============================= Orca ==========================================
 
@@ -23,6 +28,19 @@ class ORCA_Result(Result):
     """Class providing access to PLAMS OrcaJob results."""
 
     prop_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='properties')
+
+    # Attributes accessed via `__getattr__`
+    charges: "None | list[float]"
+    dipole: "None | list[float]"
+    energy: "None | float"
+    enthalpy: "None | float"
+    free_energy: "None | float"
+    frequencies: "None | NDArray[f8]"
+    hessian: "None | NDArray[f8]"
+    normal_modes: "None | NDArray[f8]"
+    optcycles: "None | int"
+    orbitals: "None | InfoMO"
+    runtime: "None | float"
 
     @property
     def molecule(self) -> Optional[plams.Molecule]:

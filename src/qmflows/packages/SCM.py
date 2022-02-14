@@ -99,6 +99,19 @@ class ADF_Result(Result):
 
     prop_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='properties')
 
+    # Attributes accessed via `__getattr__`
+    charges: "None | Any"
+    dipole: "None | Any"
+    energy: "None | Any"
+    enthalpy: "None | Any"
+    free_energy: "None | Any"
+    frequencies: "None | Any"
+    hessian: "None | Any"
+    homo: "None | Any"
+    lumo: "None | Any"
+    optcycles: "None | Any"
+    runtime: "None | Any"
+
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],
                  job_name: str,
@@ -150,6 +163,15 @@ class DFTB_Result(Result):
     """Class providing access to PLAMS DFTBJob result results."""
 
     prop_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='properties')
+
+    # Attributes accessed via `__getattr__`
+    charges: "None | Any"
+    dipole: "None | Any"
+    energy: "None | Any"
+    enthalpy: "None | Any"
+    free_energy: "None | Any"
+    frequencies: "None | Any"
+    hessian: "None | Any"
 
     def __init__(self, settings: Optional[Settings],
                  molecule: Optional[plams.Molecule],

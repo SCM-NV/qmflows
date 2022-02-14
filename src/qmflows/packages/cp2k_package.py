@@ -3,7 +3,7 @@ __all__ = ['CP2K_Result', 'cp2k']
 
 import os
 from os.path import join
-from typing import Any, Dict, Iterable, ClassVar, Type
+from typing import Any, Dict, Iterable, ClassVar, Type, TYPE_CHECKING
 from warnings import warn
 
 import numpy as np
@@ -14,6 +14,11 @@ from ..parsers.cp2KParser import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
 from ..type_hints import Final, _Settings, Generic2Special
+from ..common import InfoMO
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from numpy import float64 as f8
 
 __all__ = ['cp2k']
 
@@ -130,6 +135,20 @@ class CP2K_Result(Result):
     """Class providing access to CP2K result."""
 
     prop_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='properties')
+
+    # Attributes accessed via `__getattr__`
+    energy: "None | float"
+    frequencies: "None | NDArray[f8]"
+    geometry: "None | plams.Molecule"
+    enthalpy: "None | float"
+    free_energy: "None | float"
+    orbitals: "None | InfoMO | tuple[InfoMO, InfoMO]"
+    forces: "None | NDArray[f8]"
+    coordinates: "None | NDArray[f8]"
+    temperature: "None | NDArray[f8]"
+    volume: "None | NDArray[f8]"
+    lattice: "None | NDArray[f8]"
+    pressure: "None | NDArray[f8]"
 
     @property
     def molecule(self) -> "None | plams.Molecule":
