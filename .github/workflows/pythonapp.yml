@@ -7,7 +7,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  Test:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -126,3 +126,34 @@ jobs:
       with:
         file: ./coverage.xml
         name: codecov-umbrella
+
+  Linting:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.10 on ubuntu-latest
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: Install linters
+        run: pip install pydocstyle pycodestyle mypy "numpy>=1.21" pytest more_itertools types-PyYAML types-setuptools
+
+      - name: Python info
+        run: |
+          which python
+          python --version
+
+      - name: Installed packages
+        run: pip list
+
+      - name: Run pycodestyle
+        run: pycodestyle src test
+
+      - name: Run pydocstyle
+        run: pydocstyle src
+
+      - name: Run mypy
+        run: mypy src
+        continue-on-error: true

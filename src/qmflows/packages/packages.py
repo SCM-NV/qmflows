@@ -13,7 +13,8 @@ from functools import partial
 from os.path import join
 from warnings import warn
 from typing import (
-    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator, Type, Dict, TypeVar, Tuple, List
+    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator,
+    Type, Dict, TypeVar, Tuple, List, TYPE_CHECKING,
 )
 
 import numpy as np
@@ -109,48 +110,50 @@ class Result:
         copy_instance.__dict__ = self.__dict__.copy()
         return copy_instance
 
-    def __getattr__(self, prop: str) -> Any:
-        """Return a section of the results.
+    # Hide `__getattr__` from the type checker and use explicit attribute annotations
+    if not TYPE_CHECKING:
+        def __getattr__(self, prop: str) -> Any:
+            """Return a section of the results.
 
-        For example:
+            For example:
 
-        ..code:: python
+            ..code:: python
 
-            >>> from qmflows.packages.packages import Result
+                >>> from qmflows.packages.packages import Result
 
-            >>> result = Result(...)  # doctest: +SKIP
-            >>> dipole = result.dipole  # doctest: +SKIP
+                >>> result = Result(...)  # doctest: +SKIP
+                >>> dipole = result.dipole  # doctest: +SKIP
 
-        """
-        is_private = prop.startswith('__') and prop.endswith('__')
-        has_crashed = self.status in {'failed', 'crashed'}
+            """
+            is_private = prop.startswith('__') and prop.endswith('__')
+            has_crashed = self.status in {'failed', 'crashed'}
 
-        if not has_crashed and prop in self.prop_mapping:
-            return self.get_property(prop)
+            if not has_crashed and prop in self.prop_mapping:
+                return self.get_property(prop)
 
-        elif not (has_crashed or is_private or prop in self.prop_mapping):
-            if self._results_open:
-                warn(f"Generic property {prop!r} not defined",
-                     category=QMFlows_Warning, stacklevel=2)
-
-            # Do not issue this warning if the Results object is still pickled
-            else:  # Unpickle the Results instance and try again
-                self._unpack_results()
-                try:
-                    return vars(self)[prop]  # Avoid recursive `getattr` calls
-                except KeyError:
+            elif not (has_crashed or is_private or prop in self.prop_mapping):
+                if self._results_open:
                     warn(f"Generic property {prop!r} not defined",
-                         category=QMFlows_Warning, stacklevel=2)
+                        category=QMFlows_Warning, stacklevel=2)
 
-        elif has_crashed and not is_private:
-            warn(f"""
-            It is not possible to retrieve property: {prop!r}
-            Because Job: {self.job_name!r} has {self.status}. Check the output.\n
-            Are you sure that you have the package installed or
-             you have loaded the package in the cluster. For example:
-            `module load AwesomeQuantumPackage/3.141592`
-            """, category=QMFlows_Warning, stacklevel=2)
-        return None
+                # Do not issue this warning if the Results object is still pickled
+                else:  # Unpickle the Results instance and try again
+                    self._unpack_results()
+                    try:
+                        return vars(self)[prop]  # Avoid recursive `getattr` calls
+                    except KeyError:
+                        warn(f"Generic property {prop!r} not defined",
+                            category=QMFlows_Warning, stacklevel=2)
+
+            elif has_crashed and not is_private:
+                warn(f"""
+                It is not possible to retrieve property: {prop!r}
+                Because Job: {self.job_name!r} has {self.status}. Check the output.\n
+                Are you sure that you have the package installed or
+                you have loaded the package in the cluster. For example:
+                `module load AwesomeQuantumPackage/3.141592`
+                """, category=QMFlows_Warning, stacklevel=2)
+            return None
 
     def __dir__(self) -> List[str]:
         """Implement ``dir(self)``."""

@@ -99,7 +99,9 @@ API
 
 import os
 from os.path import join
-from typing import Type, TypeVar, Union, ClassVar, Any, Dict, Optional, TypeVar, Generic, Tuple
+from typing import (
+    Type, TypeVar, Union, ClassVar, Any, Dict, Optional, TypeVar, Generic, Tuple, TYPE_CHECKING
+)
 from warnings import warn
 
 from scm import plams
@@ -186,6 +188,9 @@ class PackageWrapper(Package, Generic[JT]):
     generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
     result_type: ClassVar[Type[ResultWrapper]] = ResultWrapper
     job_type: Type[JT]
+
+    if TYPE_CHECKING:
+        def __getattr__(self, name: str) -> Any: ...
 
     def __init__(self, job_type: Type[JT], name: Optional[str] = None) -> None:
         """Initialize this instance.

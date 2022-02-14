@@ -27,17 +27,10 @@ tests_no_optional_require = [
     'pytest>=5.4',
     'pytest-cov',
     'pytest-mock',
-    'pytest-pycodestyle',
-    'pytest-pydocstyle>=2.1',
     'typing_extensions'
 ]
 
-tests_require =  [
-    'mypy',
-    'types-PyYAML',
-    'types-setuptools',
-]
-tests_require += tests_no_optional_require
+tests_require = tests_no_optional_require.copy()
 tests_require += docs_require
 
 setup(
