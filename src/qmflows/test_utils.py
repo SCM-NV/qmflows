@@ -14,6 +14,7 @@ Index
     requires_orca
     requires_ams
     requires_adf
+    find_executable
 
 API
 ---
@@ -30,15 +31,16 @@ API
 .. autodata:: requires_orca
 .. autodata:: requires_ams
 .. autodata:: requires_adf
+.. autofunction:: find_executable
 
 """
 
 import os
+import sys
 import textwrap
 from pathlib import Path
 
 import pytest
-from distutils.spawn import find_executable
 
 from .settings import Settings
 from .warnings_qmflows import Assertion_Warning
@@ -55,6 +57,7 @@ __all__ = [
     'requires_orca'
     'requires_ams',
     'requires_adf',
+    'find_executable',
 ]
 
 try:
@@ -71,6 +74,49 @@ PATH = Path('test') / 'test_files'
 
 #: The path to the ``tests/test_files/molecules`` directory.
 PATH_MOLECULES = PATH / "molecules"
+
+
+def find_executable(executable: str, path: "str | None" = None) -> "str | None":
+    """Tries to find ``executable`` in the directories listed in ``path``.
+
+    A string listing directories separated by ``os.pathsep``; defaults to ``os.environ['PATH']``.
+    Returns the complete filename or ``None`` if not found.
+
+    Note
+    ----
+    Vendored copy of :func:`distutils.spawn.find_executable`,
+    as the entirety of distutils is deprecated per PEP 632.
+
+    """
+    _, ext = os.path.splitext(executable)
+    if (sys.platform == 'win32') and (ext != '.exe'):
+        executable = executable + '.exe'
+
+    if os.path.isfile(executable):
+        return executable
+
+    if path is None:
+        path = os.environ.get('PATH', None)
+        if path is None:
+            try:
+                path = os.confstr("CS_PATH")
+            except (AttributeError, ValueError):
+                # os.confstr() or CS_PATH is not available
+                path = os.defpath
+        # bpo-35755: Don't use os.defpath if the PATH environment variable is
+        # set to an empty string
+
+    # PATH='' doesn't match, whereas PATH=':' looks in the current directory
+    if not path:
+        return None
+
+    paths = path.split(os.pathsep)
+    for p in paths:
+        f = os.path.join(p, executable)
+        if os.path.isfile(f):
+            # the file exists, we have a shot at spawn working
+            return f
+    return None
 
 
 def fill_cp2k_defaults(s: Settings) -> Settings:

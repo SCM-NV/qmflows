@@ -13,30 +13,27 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        version: ['3.6', '3.7', '3.8', '3.9']
+        version: ['3.6', '3.7', '3.8', '3.9', '3.10']
         special: ['']
         include:
           - os: ubuntu-latest
             special: 'pre-release'
-            version: '3.9'
-          - os: ubuntu-latest
-            special: 'no optional'
-            version: '3.9'
+            version: '3.10'
           - os: ubuntu-latest
             special: 'no optional'
             version: '3.10'
           - os: ubuntu-latest
             special: 'CP2K 6.1'
-            version: '3.9'
+            version: '3.10'
           - os: ubuntu-latest
             special: 'CP2K 7.1'
-            version: '3.9'
+            version: '3.10'
           - os: ubuntu-latest
             special: 'CP2K 8.2'
-            version: '3.9'
+            version: '3.10'
           - os: ubuntu-latest
             special: 'CP2K 9.1'
-            version: '3.9'
+            version: '3.10'
     env:
       CP2K_DATA_DIR: "/home/runner/work/qmflows/qmflows/cp2k/data"
 
@@ -83,8 +80,9 @@ jobs:
       run: |
         case "${{ matrix.special }}" in
           "pre-release")
-            conda create -n test -c conda-forge python=${{ matrix.version }} rdkit nbsphinx jupyter pandoc
+            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
             source $CONDA/bin/activate test
+            pip install rdkit-pypi
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
@@ -95,8 +93,9 @@ jobs:
             pip install -e .[test_no_optional]
             ;;
           *)
-            conda create -n test -c conda-forge python=${{ matrix.version }} rdkit nbsphinx jupyter pandoc
+            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
             source $CONDA/bin/activate test
+            pip install rdkit-pypi
             pip install -e .[test]
             ;;
         esac
