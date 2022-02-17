@@ -32,7 +32,7 @@ from ._cp2k_basis_parser import readCp2KBasis
 
 __all__ = ['readCp2KBasis', 'read_cp2k_coefficients', 'get_cp2k_freq',
            'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
-           'read_cp2k_table_slc', 'get_cp2k_version', 'get_cp2k_version_run']
+           'read_cp2k_table_slc', 'get_cp2k_version']
 
 
 # Starting logger
@@ -97,11 +97,10 @@ def read_cp2k_coefficients(
 
     file_in = fnmatch.filter(os.listdir(plams_dir), '*in')[0]
     file_out = fnmatch.filter(os.listdir(plams_dir), '*out')[0]
-    file_run = fnmatch.filter(os.listdir(plams_dir), '*run')[0]
 
     path_in = plams_dir / file_in
     path_out = plams_dir / file_out
-    cp2k_version = get_cp2k_version_run(plams_dir / file_run)
+    cp2k_version = get_cp2k_version(plams_dir / file_out)
 
     orbitals_info = read_cp2k_number_of_orbitals(path_out)
     _, range_mos = read_mos_data_input(path_in)
@@ -677,6 +676,9 @@ def read_cp2k_pressure(
         return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)
 
 
+PATTERN = re.compile(r"CP2K version ([0-9]+)\.([0-9]+)")
+
+
 def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
     """Read the CP2K major and minor version from the passed .out file.
 
@@ -684,43 +686,15 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
     """
     with open(out_file, 'r') as f:
         for i in f:
-            if i.startswith(" CP2K| version string:"):
-                version_str = i.split()[-1]
+            i = i.strip()
+            if i.startswith("CP2K| version string:"):
+                match = PATTERN.search(i)
+                if match is None:
+                    continue
+                return CP2KVersion(int(match[1]), int(match[2]))
 
-                # if an error is encoutered here then we must be dealing with
-                # a very old CP2K version; fall back to `major = 0` in such case
-                try:
-                    return CP2KVersion._make(int(i) for i in version_str.split("."))
-                except ValueError:
-                    pass
-    warnings.warn("Failed to identify the CP2K version", QMFlows_Warning, stacklevel=2)
+    warnings.warn(
+        f"Failed extract the CP2K version from {os.fsdecode(out_file)!r}",
+        QMFlows_Warning, stacklevel=2,
+    )
     return CP2KVersion(0, 0)
-
-
-EXECUTABLE_PATTERN = re.compile(r"""(".+"|'.+'|\S+)\s+-i""")
-VERSION_PATTERN = re.compile(r"CP2K version (\d+).(\d+)")
-
-
-def get_cp2k_version_run(run_file: PathLike) -> CP2KVersion:
-    """Get the CP2K version using the PLAMS .run."""
-    # Extract the executable
-    with open(run_file, 'r') as f:
-        match = EXECUTABLE_PATTERN.search(f.read())
-    if match is None:
-        raise ValueError(f"Failed to extract the CP2K executable from {f.name!r}")
-    executable = match.groups()[0]
-
-    # Get the `--version` of the executable
-    try:
-        out = subprocess.run(
-            f"{executable} --version",
-            check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, encoding="utf8", shell=True
-        )
-    except subprocess.CalledProcessError as ex:
-        raise ValueError(f"Failed to execute `{executable} --version`:\n\n{ex.stderr}") from ex
-
-    # Parse the `--version` output
-    match = VERSION_PATTERN.search(out.stdout)
-    if match is None:
-        raise ValueError(f"Failed to parse the `{executable} --version` output:\n\n{out.stdout}")
-    return CP2KVersion._make(int(i) for i in match.groups())

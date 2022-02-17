@@ -12,7 +12,6 @@ from qmflows import cp2k, templates
 from qmflows.packages.cp2k_package import CP2K_Result
 from qmflows.utils import init_restart
 from qmflows.common import CP2KVersion
-from qmflows.parsers.cp2KParser import get_cp2k_version_run
 from qmflows.test_utils import (
     PATH,
     PATH_MOLECULES,
@@ -20,11 +19,6 @@ from qmflows.test_utils import (
     requires_cp2k,
     validate_status,
 )
-
-try:
-    CP2K_VERSION = get_cp2k_version_run("cp2k.popt")
-except Exception:
-    CP2K_VERSION = CP2KVersion(0, 0)
 
 
 def mock_runner(mocker_instance, jobname: str) -> Callable[..., CP2K_Result]:
@@ -63,7 +57,6 @@ def test_deepcopy():
 
 # See https://github.com/SCM-NV/qmflows/issues/225
 @pytest.mark.xfail(raises=AssertionError)
-@pytest.mark.skipif(CP2K_VERSION >= (8, 2), reason="Requires CP2K < 8.2")
 @requires_cp2k
 def test_cp2k_singlepoint_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
