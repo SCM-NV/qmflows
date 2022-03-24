@@ -29,22 +29,26 @@ class TestReadBasis:
     @staticmethod
     def get_key(key_tup: AtomBasisKey) -> str:
         return os.path.join(
-            key_tup.atom,
+            "cp2k",
+            "basis",
+            key_tup.atom.lower(),
             key_tup.basis,
-            "-".join(str(i) for i in key_tup.basisFormat),
+            str(key_tup.exponent_set),
         )
 
-    def test_pass(self) -> None:
-        basis_file = PATH / "BASIS_MOLOPT"
-        keys, values = readCp2KBasis(basis_file)
-
+    @pytest.mark.parametrize("filename", ["BASIS_MOLOPT", "BASIS_ADMM_MOLOPT"])
+    def test_pass(self, filename: str) -> None:
+        keys, values = readCp2KBasis(PATH / filename, allow_multiple_exponents=True)
         with h5py.File(PATH / "basis.hdf5", "r") as f:
             for key_tup, value_tup in zip(keys, values):
                 key = self.get_key(key_tup)
-                exponents = f[key]["exponents"][...].T
-                coefficients = f[key]["coefficients"][...].T
+
+                exponents = f[key]["exponents"][...]
+                coefficients = f[key]["coefficients"][...]
+                basis_fmt = f[key]["coefficients"].attrs["basisFormat"]
                 np.testing.assert_allclose(value_tup.exponents, exponents, err_msg=key)
                 np.testing.assert_allclose(value_tup.coefficients, coefficients, err_msg=key)
+                np.testing.assert_array_equal(key_tup.basisFormat, basis_fmt, err_msg=key)
 
     PARAMS = {
         "BASIS_INVALID_N_EXP": 11,

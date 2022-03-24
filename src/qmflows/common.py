@@ -26,6 +26,10 @@ class AtomBasisKey(NamedTuple):
     #: The basis set format.
     basisFormat: Union[Sequence[int], Sequence[Tuple[str, int]]]
 
+    #: The index of the exponent set.
+    #: Relevant for basis sets consisting of multiple :attr:`basisFormat` blocks.
+    exponent_set: int = 0
+
 
 class AtomBasisData(NamedTuple):
     """Contraction coefficients and exponents for a gaussian basis."""
