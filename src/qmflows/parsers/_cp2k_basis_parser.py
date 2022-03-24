@@ -41,7 +41,7 @@ class _BasisFileIter(Iterator[str]):
         return f"<{type(self).__name__} name={self._name!r} index={self._index!r}>"
 
 
-def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
+def _read_basis(f: _BasisFileIter, allow_multiple_exponents: bool) -> _Basis2Tuple:
     """Helper function for parsing the opened basis set file."""
     keys = []
     values = []
@@ -53,19 +53,20 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
         try:
             # Identify the number of exponent sets
             n_sets = int(next(f))
-            if n_sets != 1:
-                raise NotImplementedError(
-                    "Basis sets with more than 1 set of exponents are not supported yet"
+            if n_sets != 1 and not allow_multiple_exponents:
+                raise ValueError(
+                    "Basis sets with more than 1 set of exponents "
+                    "require `allow_multiple_exponens=True`"
                 )
 
-            for _ in range(n_sets):
+            for n in range(n_sets):
                 # Parse the basis format, its exponents and its coefficients
                 basis_fmt = tuple(int(j) for j in next(f).split())
                 n_exp = basis_fmt[3]
                 basis_data = np.array([j.split() for j in islice(f, 0, n_exp)], dtype=np.float64)
                 exp, coef = basis_data[:, 0], basis_data[:, 1:].T
                 for basis in basis_list:
-                    keys.append(AtomBasisKey(atom, basis, basis_fmt))
+                    keys.append(AtomBasisKey(atom, basis, basis_fmt, n))
                     values.append(AtomBasisData(exp, coef))
         except Exception as ex:
             basis = f"{atom} {basis_list[0]}" if len(basis_list) > 0 else atom
@@ -73,7 +74,16 @@ def _read_basis(f: _BasisFileIter) -> _Basis2Tuple:
     return keys, values
 
 
-def readCp2KBasis(file: PathLike) -> _Basis2Tuple:
-    """Read the Contracted Gauss function primitives format from a text file."""
+def readCp2KBasis(file: PathLike, *, allow_multiple_exponents: bool = False) -> _Basis2Tuple:
+    """Read the Contracted Gauss function primitives format from a text file.
+
+    Parameters
+    ----------
+    file : path-like
+        The to-be read CP2K basis set file.
+    allow_multiple_exponents : bool
+        Whether to allow the parsing of basis sets consisting of multiple exponent sets.
+
+    """
     with open(file, "r") as f:
-        return _read_basis(_BasisFileIter(f, start=1))
+        return _read_basis(_BasisFileIter(f, start=1), allow_multiple_exponents)
