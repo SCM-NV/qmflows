@@ -24,7 +24,7 @@ class _BasisFileIter(Iterator[str]):
         return self._index
 
     def __init__(self, iterable: Iterable[str], start: int = 0) -> None:
-        self._enumerator = enumerate(iterable, start=start)
+        self._enumerator = ((i, j.strip().rstrip()) for i, j in enumerate(iterable, start=start))
         self._name: "str | None" = getattr(iterable, "name", None)
         self._index = start
 
@@ -32,13 +32,10 @@ class _BasisFileIter(Iterator[str]):
         return self
 
     def __next__(self) -> str:
-        i, item = next(self._enumerator)
-        item = item.strip().rstrip("\n")
-        if not item or item.startswith("#"):
-            return self.__next__()
-
-        self._index = i
-        return item
+        while True:
+            self._index, item = next(self._enumerator)
+            if item and not item.startswith("#"):
+                return item
 
     def __repr__(self) -> str:
         return f"<{type(self).__name__} name={self._name!r} index={self._index!r}>"
