@@ -11,7 +11,7 @@ from .common import ParseWarning
 __all__ = [
     'QMFlows_Warning', 'Key_Warning', 'Assertion_Warning',
     'SCF_Convergence_Warning', 'Geometry_Convergence_Warning',
-    'Parameter_Warning', 'Charge_Warning',
+    'Parameter_Warning', 'Charge_Warning', 'Orbital_Warning',
     'cp2k_warnings'
 ]
 
@@ -42,6 +42,10 @@ class Parameter_Warning(QMFlows_Warning):
 
 class Charge_Warning(Parameter_Warning):
     """Warning class for charges in classical forcefields."""
+
+
+class Orbital_Warning(QMFlows_Warning):
+    """Warning class for orbital-related issues."""
 
 
 def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
