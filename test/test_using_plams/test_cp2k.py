@@ -1,14 +1,16 @@
 """Run an small cp2k calculation."""
 
+import warnings
 from pathlib import Path
 
+import pytest
 import numpy as np
 import h5py
-import pytest
 from assertionlib import assertion
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k, run, templates
+from qmflows.warnings_qmflows import Orbital_Warning
 from qmflows.test_utils import (
     PATH,
     PATH_MOLECULES,
@@ -40,7 +42,7 @@ def test_cp2k_opt(tmp_path: Path) -> None:
 
 @requires_cp2k
 @pytest.mark.slow
-@pytest.mark.parametrize("mo_index_range", ["1_4", "1_2", "3_4"])
+@pytest.mark.parametrize("mo_index_range", ["1_4", "1_2", "3_4", "0_99"])
 def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
     """Run a simple single point."""
     mol = Molecule(PATH_MOLECULES / "h2o.xyz", 'xyz', charge=0, multiplicity=1)
@@ -58,13 +60,20 @@ def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
     )
     job = cp2k(s, mol)
     result = run(job, path=tmp_path, folder="test_cp2k_singlepoint")
+    validate_status(result)
 
     with h5py.File(PATH / "test_output.hdf5", "r") as f:
         key = f"test_using_plams/test_cp2k/test_cp2k_singlepoint/{mo_index_range}"
         ref = f[key][...].view(np.recarray)
 
-    validate_status(result)
-    orbitals = result.orbitals
+    if mo_index_range == "0_99":
+        with pytest.warns(Orbital_Warning):
+            orbitals = result.orbitals
+    else:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Orbital_Warning)
+            orbitals = result.orbitals
+
     assertion.is_not(orbitals, None)
     np.testing.assert_allclose(orbitals.eigenvalues, ref.eigenvalues)
     np.testing.assert_allclose(np.abs(orbitals.eigenvectors).T, ref.eigenvectors)

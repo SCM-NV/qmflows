@@ -25,7 +25,7 @@ from ..common import InfoMO, MO_metadata, CP2KVersion
 from ..type_hints import Literal as Literal_
 from ..type_hints import PathLike, T, WarnDict, WarnMap
 from ..utils import file_to_context
-from ..warnings_qmflows import QMFlows_Warning
+from ..warnings_qmflows import QMFlows_Warning, Orbital_Warning
 from .parser import minusOrplus, natural, point, try_search_pattern
 from .xyzParser import manyXYZ, tuplesXYZ_to_plams
 from ._cp2k_basis_parser import readCp2KBasis
@@ -213,6 +213,7 @@ def read_coefficients(
     energies = np.empty(norbitals)
     coefficients = np.empty((norbital_functions, norbitals))
 
+    n_orb_actual = 0
     for i, lines in enumerate(chunks):
         j = 2 * i
         es = lines[1]
@@ -220,16 +221,29 @@ def read_coefficients(
         css = [k[4:] for k in lines[3:]]
         # There is an odd number of MO and this is the last one
         if len(es) == 1:
-            energies[-1] = float(es[0])
-            coefficients[:, -1] = np.concatenate(css)
+            n_orb_actual = j + 1
+            energies[j] = float(es[0])
+            coefficients[:, j] = np.concatenate(css)
         else:
             # rearrange the coefficients
+            n_orb_actual = j + 2
             css2 = np.transpose(css)
             energies[j: j + 2] = es
             coefficients[:, j] = css2[0]
             coefficients[:, j + 1] = css2[1]
 
-    return InfoMO(energies, coefficients)
+    # It's possible that the range of requested MOs is larger than the
+    # number of available MOs for a given basis set; the arrays will require
+    # some trimming in that case
+    if norbitals != n_orb_actual:
+        warnings.warn(
+            f"Trimming MOs, the requested number of MOs ({norbitals}) is larger "
+            f"than the available amount ({n_orb_actual})",
+            Orbital_Warning,
+        )
+        return InfoMO(energies[:n_orb_actual], coefficients[:, :n_orb_actual])
+    else:
+        return InfoMO(energies, coefficients)
 
 
 def _get_mos(path: PathLike) -> List[List[str]]:
