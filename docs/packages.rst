@@ -3,15 +3,15 @@
 Packages
 ========
 
-The base class :class:`~qmflows.packages.packages.Package` is the library core, it provides the general scaffold to call a quantum code.
+The base class :class:`~qmflows.packages.Package` is the library core, it provides the general scaffold to call a quantum code.
 On top of this infrastructure it has been created several subclasses that contain the specific details for each quantum code.
 The available interfaces to quantum codes are:
 
-* :class:`~qmflows.packages.SCM.ADF`
-* :class:`~qmflows.packages.SCM.DFTB`
-* :class:`~qmflows.packages.cp2k_package.CP2K`
-* :class:`~qmflows.packages.cp2k_mm.CP2KMM`
-* :class:`~qmflows.packages.orca.ORCA`
+* :class:`~qmflows.packages.ADF`
+* :class:`~qmflows.packages.DFTB`
+* :class:`~qmflows.packages.CP2K`
+* :class:`~qmflows.packages.CP2KMM`
+* :class:`~qmflows.packages.ORCA`
 
 
 

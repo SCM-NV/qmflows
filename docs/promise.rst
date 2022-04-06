@@ -43,10 +43,10 @@ A python script corresponding with this graph can be
    >>> print(result)
 
 
-Up to the invocation of the :func:`~qmflows.packages.packages.run` function none of the computations have been executed,
-it is the :func:`~qmflows.packages.packages.run` function which builds and executes the dependencies.
+Up to the invocation of the :func:`~qmflows.packages.run` function none of the computations have been executed,
+it is the :func:`~qmflows.packages.run` function which builds and executes the dependencies.
 Since *QMFlows* needs to figure out all the dependecies in the script,
-the :func:`~qmflows.packages.packages.run` function takes as argument last dependency (or inner most dependy),
+the :func:`~qmflows.packages.run` function takes as argument last dependency (or inner most dependy),
 which in this case are the frequencies. The reason behind this, is that from the last dependency it is possible to
 retrace all the dependecies.
 

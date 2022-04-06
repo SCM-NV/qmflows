@@ -1,21 +1,26 @@
 """A set of modules for managing various quantum-chemical packages."""
 
-from .packages import (
-    Package, Result, SerMolecule, SerSettings, load_properties,
-    run, registry)
+from ._packages import (
+    Package, Result, run,
+    _load_properties as load_properties,
+    _registry as registry,
+)
+from ._serializer import (
+    _SerMolecule as SerMolecule,
+    _SerSettings as SerSettings,
+)
 
-from .cp2k_package import cp2k
-from .cp2k_mm import cp2k_mm
-from .SCM import (adf, dftb)
-from .orca import orca
-
-from .package_wrapper import PackageWrapper
+from ._cp2k import CP2K_Result, CP2K, cp2k
+from ._cp2k_mm import CP2KMM_Result, CP2KMM, cp2k_mm
+from ._scm import ADF_Result, DFTB_Result, ADF, DFTB, adf, dftb
+from ._orca import ORCA_Result, ORCA, orca
+from ._package_wrapper import PackageWrapper, ResultWrapper, JOB_MAP
 
 __all__ = [
-    'Package', 'Result', 'SerMolecule', 'SerSettings', 'load_properties', 'run', 'registry',
-    'cp2k',
-    'cp2k_mm',
-    'adf', 'dftb',
-    'orca',
-    'PackageWrapper'
+    'Package', 'Result', 'run',
+    'CP2K_Result', 'CP2K', 'cp2k',
+    'CP2KMM_Result', 'CP2KMM', 'cp2k_mm',
+    'ADF_Result', 'DFTB_Result', 'ADF', 'DFTB', 'adf', 'dftb',
+    'ORCA_Result', 'ORCA', 'orca',
+    'PackageWrapper', 'ResultWrapper', 'JOB_MAP',
 ]

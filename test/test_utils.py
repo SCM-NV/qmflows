@@ -10,7 +10,7 @@ from assertionlib import assertion
 from scm.plams import init, finish
 
 from qmflows import Settings
-from qmflows.packages.cp2k_package import CP2K_Result
+from qmflows.packages import CP2K_Result
 from qmflows.utils import to_runtime_error, file_to_context, init_restart, InitRestart
 from qmflows.test_utils import PATH_MOLECULES, PATH, validate_status
 

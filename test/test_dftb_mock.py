@@ -5,7 +5,7 @@ from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import dftb, templates
-from qmflows.packages.SCM import DFTB_Result
+from qmflows.packages import DFTB_Result
 from qmflows.test_utils import PATH
 
 WORKDIR = PATH / "output_dftb"

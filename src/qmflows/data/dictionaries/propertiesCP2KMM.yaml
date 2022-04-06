@@ -4,7 +4,7 @@ energy:
     kwargs:
         pattern: ENERGY| Total FORCE_EVAL
         pos: -1
-    parser: generic_parsers
+    parser: null
 frequencies:
     file_pattern: '*-VIBRATIONS-1.mol'
     function: get_cp2k_freq

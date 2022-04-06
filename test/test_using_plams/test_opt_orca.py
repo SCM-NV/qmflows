@@ -9,9 +9,7 @@ from scm.plams import Molecule
 from assertionlib import assertion
 
 from qmflows import Settings, templates, logger
-from qmflows.packages import run
-from qmflows.packages.orca import orca
-from qmflows.packages.SCM import dftb
+from qmflows.packages import run, orca, dftb
 from qmflows.test_utils import PATH_MOLECULES, requires_orca
 
 

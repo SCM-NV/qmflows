@@ -53,14 +53,14 @@ homo:
     kwargs:
         pattern: HOMO
         pos: 4
-    parser: generic_parsers
+    parser: null
 lumo:
     file_ext: out
     function: extract_line_value
     kwargs:
         pattern: LUMO
         pos: 4
-    parser: generic_parsers
+    parser: null
 optcycles:
     file_ext: t21
     function: kfreader
@@ -73,4 +73,4 @@ runtime:
     function: awk_file
     kwargs:
         script: /Total Used/ {print $9}
-    parser: generic_parsers
+    parser: null

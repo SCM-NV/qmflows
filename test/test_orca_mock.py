@@ -5,7 +5,7 @@ from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import Settings, orca
-from qmflows.packages.orca import ORCA_Result
+from qmflows.packages import ORCA_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 
 WORKDIR = PATH / "output_orca"

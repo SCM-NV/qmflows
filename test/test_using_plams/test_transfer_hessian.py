@@ -8,9 +8,7 @@ from noodles import gather
 from scm.plams import Molecule
 
 from qmflows import Settings, templates, logger
-from qmflows.packages import run
-from qmflows.packages.orca import orca
-from qmflows.packages.SCM import dftb
+from qmflows.packages import run, orca, dftb
 from qmflows.test_utils import PATH, requires_adf
 
 WATER = Molecule(PATH / "water.xyz")
