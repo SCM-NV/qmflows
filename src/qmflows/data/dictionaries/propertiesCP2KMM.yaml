@@ -8,49 +8,49 @@ energy:
 frequencies:
     file_pattern: '*-VIBRATIONS-1.mol'
     function: get_cp2k_freq
-    parser: cp2KParser
+    parser: cp2k
 geometry:
     file_pattern: '*-pos-1.xyz'
     function: read_xyz_file
-    parser: cp2KParser
+    parser: cp2k
 enthalpy:
     file_ext: out
     function: get_cp2k_thermo
     kwargs:
         quantity: H
-    parser: cp2KParser
+    parser: cp2k
 free_energy:
     file_ext: out
     function: get_cp2k_thermo
     kwargs:
         quantity: G
-    parser: cp2KParser
+    parser: cp2k
 forces:
     file_pattern: '*-frc-1.xyz'
     function: read_cp2k_xyz
-    parser: cp2KParser
+    parser: cp2k
 coordinates:
     file_pattern: '*-pos-1.xyz'
     function: read_cp2k_xyz
-    parser: cp2KParser
+    parser: cp2k
 temperature:
     file_pattern: '*-1.ener'
     function: read_cp2k_table
-    parser: cp2KParser
+    parser: cp2k
     kwargs:
         column: 3
         start: 1
 volume:
     file_pattern: '*-1.cell'
     function: read_cp2k_table
-    parser: cp2KParser
+    parser: cp2k
     kwargs:
         column: -1
         start: 1
 lattice:
     file_pattern: '*-1.cell'
     function: read_cp2k_table_slc
-    parser: cp2KParser
+    parser: cp2k
     kwargs:
         shape: [-1, 3, 3]
         column_start: 2
@@ -59,4 +59,4 @@ lattice:
 pressure:
     file_ext: out
     function: read_cp2k_pressure
-    parser: cp2KParser
+    parser: cp2k

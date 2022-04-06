@@ -10,7 +10,7 @@ import numpy as np
 from scm import plams
 
 from .packages import Package, Result, load_properties
-from ..parsers.orca_parser import parse_molecule
+from ..parsers.orca import parse_molecule
 from ..settings import Settings
 from ..type_hints import Final, _Settings
 from ..utils import get_tmpfile_name

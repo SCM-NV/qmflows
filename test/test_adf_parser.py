@@ -2,8 +2,8 @@
 import numpy as np
 from assertionlib import assertion
 
-from qmflows.parsers.adf_parser import kfreader
-from qmflows.parsers.generic_parsers import awk_file, extract_line_value
+from qmflows.parsers import awk_file, extract_line_value
+from qmflows.parsers.adf import kfreader
 from qmflows.test_utils import PATH
 
 path_t21 = PATH / "output_adf" / "ADFjob" / "ADFjob.t21"

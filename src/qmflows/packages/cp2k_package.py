@@ -10,7 +10,7 @@ import numpy as np
 from scm import plams
 
 from .packages import Package, Result, parse_output_warnings, load_properties
-from ..parsers.cp2KParser import parse_cp2k_warnings
+from ..parsers.cp2k import parse_cp2k_warnings
 from ..settings import Settings
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
 from ..type_hints import Final, _Settings, Generic2Special

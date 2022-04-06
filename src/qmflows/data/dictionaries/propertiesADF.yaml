@@ -4,49 +4,49 @@ charges:
     kwargs:
         prop: AtomCharge Mulliken
         section: Properties
-    parser: adf_parser
+    parser: adf
 dipole:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Dipole
         section: Properties
-    parser: adf_parser
+    parser: adf
 energy:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Bond Energy
         section: Energy
-    parser: adf_parser
+    parser: adf
 enthalpy:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Enthalpy
         section: Thermodynamics
-    parser: adf_parser
+    parser: adf
 free_energy:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Gibbs free Energy
         section: Thermodynamics
-    parser: adf_parser
+    parser: adf
 frequencies:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Frequencies
         section: Freq
-    parser: adf_parser
+    parser: adf
 hessian:
     file_ext: t21
     function: kfreader
     kwargs:
         prop: Analytical Hessian
         section: Hessian
-    parser: adf_parser
+    parser: adf
 homo:
     file_ext: out
     function: extract_line_value
@@ -67,7 +67,7 @@ optcycles:
     kwargs:
         prop: nr of geometries
         section: History
-    parser: adf_parser
+    parser: adf
 runtime:
     file_ext: out
     function: awk_file

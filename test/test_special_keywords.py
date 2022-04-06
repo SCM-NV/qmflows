@@ -12,8 +12,8 @@ from qmflows.packages.cp2k_mm import CP2KMM
 from qmflows.packages.cp2k_package import CP2K
 from qmflows.packages.orca import ORCA
 from qmflows.packages.SCM import ADF
-from qmflows.parsers.adf_parser import kfreader
-from qmflows.parsers.orca_parser import parse_hessian
+from qmflows.parsers.adf import kfreader
+from qmflows.parsers.orca import parse_hessian
 from qmflows.test_utils import PATH, PATH_MOLECULES, get_mm_settings
 
 indices = [3, 4, 5, 6]

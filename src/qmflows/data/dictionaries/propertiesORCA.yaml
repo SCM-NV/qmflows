@@ -31,17 +31,17 @@ free_energy:
 frequencies:
     file_ext: hess
     function: parse_frequencies
-    parser: orca_parser
+    parser: orca
 hessian:
     file_ext: hess
     function: parse_hessian
     kwargs:
         start: "$hessian"
-    parser: orca_parser
+    parser: orca
 normal_modes:
     file_ext: hess
     function: parse_normal_modes
-    parser: orca_parser
+    parser: orca
 optcycles:
     file_ext: out
     function: awk_file
@@ -51,7 +51,7 @@ optcycles:
 orbitals:
     file_ext: out
     function: parse_molecular_orbitals
-    parser: orca_parser
+    parser: orca
 runtime:
     file_ext: out
     function: awk_file
