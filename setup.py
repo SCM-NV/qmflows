@@ -5,7 +5,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 version = {}
-with open(os.path.join(here, 'src', 'qmflows', '__version__.py')) as f:
+with open(os.path.join(here, 'src', 'qmflows', '_version.py')) as f:
     exec(f.read(), version)
 
 

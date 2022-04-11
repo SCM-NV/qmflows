@@ -3,7 +3,7 @@
 import sys
 from typing import TYPE_CHECKING
 
-from .__version__ import __version__
+from ._version import __version__ as __version__
 
 from .logger import logger
 
@@ -23,7 +23,6 @@ else:
     _RDKIT_EX = None
 
 __all__ = [
-    '__version__',
     'logger',
     'InitRestart',
     'Angle', 'Dihedral', 'Distance', 'Settings',
