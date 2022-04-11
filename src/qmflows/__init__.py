@@ -28,8 +28,6 @@ __all__ = [
     'InitRestart',
     'Angle', 'Dihedral', 'Distance', 'Settings',
     'adf', 'cp2k', 'cp2k_mm', 'dftb', 'orca', 'run', 'PackageWrapper',
-    'example_H2O2_TS', 'example_freqs', 'example_generic_constraints',
-    'example_partial_geometry_opt',
     'freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt',
     'find_first_job', 'select_max', 'select_min',
 ]
@@ -49,11 +47,11 @@ if TYPE_CHECKING or sys.version_info < (3, 7) or _RDKIT_EX is None:
         select_max,
         select_min,
     )
-    from .examples import (
-        example_H2O2_TS,
-        example_freqs,
-        example_generic_constraints,
-        example_partial_geometry_opt,
+    from .examples._deprecations import (
+        _example_H2O2_TS as example_H2O2_TS,
+        _example_freqs as example_freqs,
+        _example_generic_constraints as example_generic_constraints,
+        _example_partial_geometry_opt as example_partial_geometry_opt,
     )
     from . import components, examples
 
