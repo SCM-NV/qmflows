@@ -4,6 +4,7 @@ import sys
 from typing import TYPE_CHECKING
 
 from ._version import __version__ as __version__
+from ._version_info import version_info as version_info
 
 from .logger import logger
 

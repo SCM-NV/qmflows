@@ -82,6 +82,7 @@ setup(
         'pyparsing!=3.0.0',
         'pyyaml>=5.1',
         'filelock',
+        'packaging>=1.16.8',
     ],
     extras_require={
         'test': tests_require,
