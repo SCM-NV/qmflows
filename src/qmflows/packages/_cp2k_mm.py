@@ -11,7 +11,7 @@ from scm import plams
 from ._packages import load_properties
 from ._cp2k import CP2K, CP2K_Result
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
-from ..settings import Settings
+from .._settings import Settings
 from ..warnings_qmflows import Key_Warning
 from ..type_hints import Final, _Settings
 

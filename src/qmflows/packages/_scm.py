@@ -10,7 +10,7 @@ import numpy as np
 from scm import plams
 
 from ._packages import Package, Result, load_properties
-from ..settings import Settings
+from .._settings import Settings
 from ..type_hints import Final, WarnMap, _Settings
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
 from ..utils import get_tmpfile_name

@@ -215,5 +215,5 @@ autodoc_mock_imports = [
 
 rst_epilog = """
 .. |Package| replace:: :class:`~qmflows.packages.Package`
-.. |Settings| replace:: :class:`~qmflows.settings.Settings`
+.. |Settings| replace:: :class:`~qmflows.Settings`
 """

@@ -14,7 +14,7 @@ from .packages import (
     adf, cp2k, cp2k_mm, dftb, orca, run, PackageWrapper)
 
 from . import templates
-from .settings import Settings
+from ._settings import Settings
 
 try:
     import rdkit

@@ -112,7 +112,7 @@ from ._packages import Package, Result, load_properties
 from ._scm import adf, dftb
 from ._orca import orca
 from ._cp2k import cp2k
-from ..settings import Settings
+from .._settings import Settings
 from ..type_hints import _Settings, MolType
 from ..warnings_qmflows import Key_Warning
 

@@ -15,14 +15,14 @@ else:
     from collections import OrderedDict
 
 if TYPE_CHECKING:
-    from ..settings import Settings
+    from .._settings import Settings
     from scm.plams import Molecule
     from rdkit.Chem import Mol
     from pandas.core.generic import NDFrame
     from pandas import DataFrame, Series
 
 else:  # Don't bother importing all this stuff when not type checking
-    Settings = 'qmflows.settings.Settings'
+    Settings = 'qmflows.Settings'
     Molecule = 'scm.plams.mol.molecule.Molecule'
     Mol = 'rdkit.Chem.rdchem.Mol'
     NDFrame = 'pandas.core.generic.NDFrame'

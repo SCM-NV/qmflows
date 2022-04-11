@@ -6,9 +6,9 @@ them form an graph (specifically an acyclic direct graph) that represent these r
 
 **QMFlows** Builds the aforemention graph in order to realize the workflow evaluation order.
 For instance the figure below represent a simulation where firstly a molecular geometry optimization is carried out using the *ADF* package and
-some user defined :class:`~qmflows.settings.Settings` for the *ADF* simulation package.
+some user defined :class:`~qmflows.Settings` for the *ADF* simulation package.
 Subsequently, using the optimized molecular geometry from the previous step and
-another :class:`~qmflows.settings.Settings` for an orca simulation a job to compute the molecular frequencies is carried out.
+another :class:`~qmflows.Settings` for an orca simulation a job to compute the molecular frequencies is carried out.
 
 .. image:: _images/simple_graph.png
 

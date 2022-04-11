@@ -35,8 +35,7 @@ from ._serializer import SerMolecule, SerMol, SerSettings, SerNDFrame, SerReduce
 from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
-from ..settings import Settings
-from ..settings import _Settings as _SettingsType
+from .._settings import _Settings as _SettingsType, Settings
 from ..warnings_qmflows import QMFlows_Warning
 
 try:
@@ -87,7 +86,7 @@ class Result:
         """Initialize a :class:`Result` instance.
 
         :param settings: Job Settings.
-        :type settings: :class:`~qmflows.Settings`
+        :type settings: :class:`qmflows.Settings`
         :param molecule: molecular Geometry
         :type molecule: :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`
         :param job_name: Name of the computations
@@ -370,7 +369,7 @@ class Package(ABC):
 
         Parameters
         ----------
-        settings : :class:`~qmflows.settings.Settings`
+        settings : :class:`qmflows.Settings`
             The user settings.
         mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>` or :class:`rdkit.Mol<rdkit.Chem.rdchem.Mol>`
             A PLAMS or RDKit molecule to-be passed to the calculation.
@@ -466,14 +465,14 @@ class Package(ABC):
 
         Parameters
         ----------
-        settings : :class:`~qmflows.settings.Settings`
+        settings : :class:`qmflows.Settings`
             Settings provided by the user.
         mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`, optional
             A PLAMS molecule to-be passed to the calculation.
 
         Returns
         -------
-        :class:`~qmflows.settings.Settings`
+        :class:`qmflows.Settings`
             A new settings instance without any generic keys.
 
         """
@@ -512,7 +511,7 @@ class Package(ABC):
 
         Parameters
         ----------
-        settings : :class:`~qmflows.settings.Settings`
+        settings : :class:`qmflows.Settings`
             Settings provided by the user.
             Note that these settings can still contain generic keywords.
         mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`, optional
@@ -542,7 +541,7 @@ class Package(ABC):
             A Result instance.
         output_warnings : :class:`~collections.abc.Mapping` [:class:`str`, :class:`type` [:exc:`Warning`]], optional
             A Mapping which maps an error messages to Warning types.
-        settings : :class:`~qmflows.settings.Settings`, optional
+        settings : :class:`qmflows.Settings`, optional
             User-provided Settings as processed by :meth:`Package.generic2specific`.
             Will be ``None`` if an error occured before this point.
         mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`, optional
@@ -571,7 +570,7 @@ class Package(ABC):
 
         Parameters
         ----------
-        settings : :class:`~qmflows.settings.Settings`, optional
+        settings : :class:`qmflows.Settings`, optional
             User-provided Settings as being processed by :meth:`Package.generic2specific`.
         key : :class:`str`
             The key associated with the special keyword
@@ -601,7 +600,7 @@ class Package(ABC):
 
         Parameters
         ----------
-        settings : :class:`~qmflows.settings.Settings`, optional
+        settings : :class:`qmflows.Settings`, optional
             User-provided Settings as processed by :meth:`Package.generic2specific`.
         mol : :class:`plams.Molecule<scm.plams.mol.molecule.Molecule>`
             A PLAMS molecule to-be passed to the calculation.

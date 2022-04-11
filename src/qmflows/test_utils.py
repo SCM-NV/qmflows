@@ -42,7 +42,7 @@ from pathlib import Path
 
 import pytest
 
-from .settings import Settings
+from ._settings import Settings
 from .warnings_qmflows import Assertion_Warning
 from .packages import Result
 

@@ -10,7 +10,7 @@ from scm import plams
 
 from ._packages import Package, Result, load_properties
 from ..parsers.orca import parse_molecule
-from ..settings import Settings
+from .._settings import Settings
 from ..type_hints import Final, _Settings
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning

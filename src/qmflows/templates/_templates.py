@@ -4,7 +4,7 @@ __all__ = ['freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt']
 
 import yaml
 
-from ..settings import Settings
+from .._settings import Settings
 from ..yaml_utils import UniqueSafeLoader
 
 

@@ -8,7 +8,7 @@ from noodles import find_first, schedule
 from scm.plams import Molecule
 
 from ..packages import Result, Package
-from ..settings import Settings
+from .._settings import Settings
 from ..type_hints import PromisedObject
 
 #: A function which takes a PromisedObject as argument and returns a boolean.

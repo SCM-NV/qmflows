@@ -18,7 +18,7 @@ The available interfaces to quantum codes are:
 **This class must not be call directly**, instead the correspoding class for the quantum package should be called or in case that there is not an interface to your quantum code,
 you can make a new subclass that implement the following method:
 
-* ``run_job`` -- This methods takes a :class:`~qmflows.settings.Settings` object a molecule and call a function to create the input automatically and takes cares of the bookkeeping associated with creating new folders, calling the package and retrieving and Object-result.
+* ``run_job`` -- This methods takes a :class:`~qmflows.Settings` object a molecule and call a function to create the input automatically and takes cares of the bookkeeping associated with creating new folders, calling the package and retrieving and Object-result.
 
 
 Instead of implementing all the runners and the bookkeeping functions ourselves, we use the plams_ library.

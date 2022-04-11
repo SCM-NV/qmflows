@@ -7,7 +7,7 @@ from scm.plams import Molecule
 from rdkit.Chem import AllChem
 
 from ..type_hints import MolType
-from ..settings import Settings
+from .._settings import Settings
 
 __all__ = ['Distance', 'Angle', 'Dihedral']
 
