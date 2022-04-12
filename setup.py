@@ -17,6 +17,7 @@ docs_require = [
     'sphinx>=2.1,!=3.1.1',
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
+    'bleach<5; python_version<"3.7"',
     'nbsphinx',
     'jupyter',
     'pandoc',
