@@ -6,7 +6,7 @@ from typing import Union, Callable, overload, Dict, Any
 
 import yaml
 
-from .settings import Settings
+from ._settings import Settings
 from .type_hints import T
 from .yaml_utils import UniqueSafeLoader
 

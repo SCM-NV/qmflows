@@ -3,9 +3,8 @@ from assertionlib import assertion
 from scm import plams
 
 from qmflows import logger
-from qmflows.parsers.generic_parsers import awk_file
-from qmflows.parsers.orca_parser import (parse_hessian, parse_molecule,
-                                         parse_molecule_traj)
+from qmflows.parsers import awk_file
+from qmflows.parsers.orca import (parse_hessian, parse_molecule, parse_molecule_traj)
 from qmflows.test_utils import PATH
 
 ORCA_WORKDIR = PATH / "output_orca" / "ORCAjob"

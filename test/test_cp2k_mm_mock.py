@@ -11,7 +11,7 @@ from scm.plams import Molecule
 
 from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
 from qmflows.utils import InitRestart
-from qmflows.packages.cp2k_mm import CP2KMM_Result
+from qmflows.packages import CP2KMM_Result
 from qmflows.test_utils import get_mm_settings, validate_status, PATH, PATH_MOLECULES
 
 MOL = Molecule(PATH_MOLECULES / 'Cd68Cl26Se55__26_acetate.xyz')

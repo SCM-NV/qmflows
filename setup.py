@@ -5,7 +5,7 @@ import os
 
 here = os.path.abspath(os.path.dirname(__file__))
 version = {}
-with open(os.path.join(here, 'src', 'qmflows', '__version__.py')) as f:
+with open(os.path.join(here, 'src', 'qmflows', '_version.py')) as f:
     exec(f.read(), version)
 
 
@@ -17,6 +17,7 @@ docs_require = [
     'sphinx>=2.1,!=3.1.1',
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
+    'bleach<5; python_version<"3.7"',
     'nbsphinx',
     'jupyter',
     'pandoc',
@@ -82,6 +83,7 @@ setup(
         'pyparsing!=3.0.0',
         'pyyaml>=5.1',
         'filelock',
+        'packaging>=1.16.8',
     ],
     extras_require={
         'test': tests_require,

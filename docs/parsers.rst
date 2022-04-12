@@ -1,8 +1,8 @@
 Extracting numerical properties from output files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Quantum packages simulations generate output file in different formats. For examples the SCM_ simulation suite
-(:class:`~qmflows.packages.SCM.ADF` and :class:`~qmflows.packages.SCM.DFTB` in *QMFlows*) generate binary outputs,
-while other packages like :class:`~qmflows.packages.cp2k_package.CP2K` and :class:`~qmflows.packages.orca.ORCA` generate ascii text files.
+(:class:`~qmflows.packages.ADF` and :class:`~qmflows.packages.DFTB` in *QMFlows*) generate binary outputs,
+while other packages like :class:`~qmflows.packages.CP2K` and :class:`~qmflows.packages.ORCA` generate ascii text files.
 
 *QMFlows* abstract away all the different commmunication protocols with the different output formats, allowing the user to
 extract the desire property by using the convention:
@@ -21,8 +21,8 @@ pacakge are implemented*. **If the property of your interest is not available yo
 
 Parsers
 ~~~~~~~
-Internally *QMFlows* uses different mechanism to extract different properties from the output files. In the case of the :class:`~qmflows.packages.SCM.ADF` and
-:class:`~qmflows.packages.SCM.DFTB` packages, *QMFlows* take advantages of the python interface to kftools_ files developed by the SCM_. In the case of *XML* output,
+Internally *QMFlows* uses different mechanism to extract different properties from the output files. In the case of the :class:`~qmflows.packages.ADF` and
+:class:`~qmflows.packages.DFTB` packages, *QMFlows* take advantages of the python interface to kftools_ files developed by the SCM_. In the case of *XML* output,
 *QMFlows* direcltly uses the python built-in xml_ reader. For the output files in text format *Qmflows* uses a mixuture of awk_ and
 *parsers*.
 

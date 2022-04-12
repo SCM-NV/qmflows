@@ -1,1 +1,1 @@
-"""Various :class:`~qmflows.packages.packages.Package`-related .yaml files."""
+"""Various :class:`~qmflows.packages.Package`-related .yaml files."""

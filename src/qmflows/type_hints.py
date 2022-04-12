@@ -25,14 +25,14 @@ if TYPE_CHECKING:
     from rdkit.Chem import Mol
     from noodles.interface import PromisedObject
 
-    from .settings import Settings
+    from ._settings import Settings
 
 else:
     _PathLike = 'os.PathLike'
     Molecule = 'scm.plams.mol.molecule.Molecule'
     Mol = 'rdkit.Chem.rdchem.Mol'
     PromisedObject = 'noodles.interface.decorator.PromisedObject'
-    Settings = 'qmflows.settings.Settings'
+    Settings = 'qmflows.Settings'
 
 
 __all__ = [
@@ -88,7 +88,7 @@ PathLike = Union[str, bytes, _PathLike]
 #: An rdkit or PLAMS molecule.
 MolType = Union[Mol, Molecule]
 
-#: Type annotation for the private :class:`~qmflows.settings._Settings` class.
+#: Type annotation for the private :class:`~qmflows._settings._Settings` class.
 #: The purpose of this annotation is to override the signature of dict (the baseclass),
 #: the latter being actually mutable.
 _Settings = Mapping[str, Any]

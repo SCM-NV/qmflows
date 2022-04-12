@@ -8,12 +8,9 @@ from scm.plams import Molecule
 
 from qmflows import Settings, adf, dftb, orca
 from qmflows.fileFunctions import yaml2Settings
-from qmflows.packages.cp2k_mm import CP2KMM
-from qmflows.packages.cp2k_package import CP2K
-from qmflows.packages.orca import ORCA
-from qmflows.packages.SCM import ADF
-from qmflows.parsers.adf_parser import kfreader
-from qmflows.parsers.orca_parser import parse_hessian
+from qmflows.packages import CP2KMM, CP2K, ORCA, ADF
+from qmflows.parsers.adf import kfreader
+from qmflows.parsers.orca import parse_hessian
 from qmflows.test_utils import PATH, PATH_MOLECULES, get_mm_settings
 
 indices = [3, 4, 5, 6]

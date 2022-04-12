@@ -114,7 +114,7 @@
 
 ## Changed
 
- * Used [pyyaml](https://pyyaml.org/wiki/PyYAMLDocumentation) for the [templates](https://github.com/SCM-NV/qmflows/blob/master/src/qmflows/templates/templates.py) instead of *JSON*
+ * Used [pyyaml](https://pyyaml.org/wiki/PyYAMLDocumentation) for the [templates](https://github.com/SCM-NV/qmflows/blob/master/src/qmflows/templates/_templates.py) instead of *JSON*
  * Updated documentation
  * Test wiht python 3.7
 

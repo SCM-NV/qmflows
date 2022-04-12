@@ -3,7 +3,8 @@
 import sys
 from typing import TYPE_CHECKING
 
-from .__version__ import __version__
+from ._version import __version__ as __version__
+from ._version_info import version_info as version_info
 
 from .logger import logger
 
@@ -13,7 +14,7 @@ from .packages import (
     adf, cp2k, cp2k_mm, dftb, orca, run, PackageWrapper)
 
 from . import templates
-from .settings import Settings
+from ._settings import Settings
 
 try:
     import rdkit
@@ -23,13 +24,10 @@ else:
     _RDKIT_EX = None
 
 __all__ = [
-    '__version__',
     'logger',
     'InitRestart',
     'Angle', 'Dihedral', 'Distance', 'Settings',
     'adf', 'cp2k', 'cp2k_mm', 'dftb', 'orca', 'run', 'PackageWrapper',
-    'example_H2O2_TS', 'example_freqs', 'example_generic_constraints',
-    'example_partial_geometry_opt',
     'freq', 'geometry', 'singlepoint', 'ts', 'md', 'cell_opt',
     'find_first_job', 'select_max', 'select_min',
 ]
@@ -49,11 +47,11 @@ if TYPE_CHECKING or sys.version_info < (3, 7) or _RDKIT_EX is None:
         select_max,
         select_min,
     )
-    from .examples import (
-        example_H2O2_TS,
-        example_freqs,
-        example_generic_constraints,
-        example_partial_geometry_opt,
+    from .examples._deprecations import (
+        _example_H2O2_TS as example_H2O2_TS,
+        _example_freqs as example_freqs,
+        _example_generic_constraints as example_generic_constraints,
+        _example_partial_geometry_opt as example_partial_geometry_opt,
     )
     from . import components, examples
 

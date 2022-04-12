@@ -1,15 +1,17 @@
-"""Interface to call the ADF KFReader."""
-__all__ = ['kfreader']
+"""Deprecated alias for :mod:`qmflows.parsers.adf`."""
 
-from typing import Optional, Any
+import warnings
 
-from scm import plams
+from . import adf as module
+from ..warnings_qmflows import QMFlowsDeprecationWarning
 
-from ..type_hints import PathLike
+warnings.warn(
+    f"`{__name__}` is a deprecated alias for `{module.__name__}`",
+    QMFlowsDeprecationWarning, stacklevel=2,
+)
 
-
-def kfreader(path_t21: PathLike, section: Optional[str] = None,
-             prop: Optional[str] = None) -> Any:
-    """Use the plams KFfile to read the TAPE21 File."""
-    kf = plams.tools.kftools.KFFile(path_t21)
-    return kf.read(section, prop)
+__globals__ = globals()
+for k, v in vars(module).items():
+    if k not in __globals__:
+        __globals__[k] = v
+del __globals__, k, v, module

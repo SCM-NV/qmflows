@@ -9,7 +9,7 @@ from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import cp2k, templates
-from qmflows.packages.cp2k_package import CP2K_Result
+from qmflows.packages import CP2K_Result
 from qmflows.utils import init_restart
 from qmflows.common import CP2KVersion
 from qmflows.test_utils import (

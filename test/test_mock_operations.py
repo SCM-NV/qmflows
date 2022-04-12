@@ -39,7 +39,7 @@ def generate_mocked_results(
 def test_select_max_list(mocker: MockFixture):
     """Test select_max using mocked results."""
     results = generate_mocked_results(
-        mocker, 'qmflows.packages.SCM.ADF_Result', expected=1e3)
+        mocker, 'qmflows.packages.ADF_Result', expected=1e3)
     wf = select_max(results, prop='prop')
     xs = run_single(wf)
 
@@ -50,7 +50,7 @@ def test_select_max_list(mocker: MockFixture):
 def test_select_min(mocker: MockFixture):
     """Test select_min using mocked results."""
     results = generate_mocked_results(
-        mocker, 'qmflows.packages.SCM.DFTB_Result', expected=-1e3)
+        mocker, 'qmflows.packages.DFTB_Result', expected=-1e3)
     wf = select_min(results, prop='prop')
 
     xs = run_single(wf)

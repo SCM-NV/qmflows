@@ -7,4 +7,4 @@ translation of the generic keywords and properties extraction.
 
 
 to translate the generic keywords provided by the user to specific keywords used for each package.
-For instance these files are used by the :class:`~qmflows.packages.packages.Package` class.
+For instance these files are used by the :class:`~qmflows.packages.Package` class.

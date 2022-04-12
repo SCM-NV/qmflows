@@ -39,7 +39,7 @@ from pandas.core.generic import NDFrame
 
 from scm import plams
 
-from .settings import Settings
+from ._settings import Settings
 from .utils import to_runtime_error, file_to_context
 from .type_hints import MappingScalar, MappingSequence, PathLike
 
@@ -222,7 +222,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
     Parameters
     ----------
-    settings : :class:`qmflows.Settings<qmflows.settings.Settings>`
+    settings : :class:`qmflows.Settings`
         The input CP2K settings.
 
     key : :class:`str` or :class:`tuple` [:class:`str`, ...]
@@ -313,7 +313,7 @@ def set_prm_values(prm_key, prm_map, atom_map,
     atom_map : :class:`~collections.abc.MutableMapping` [:class:`str`, :class:`int`]
         A dictionary for keeping track of which *atom_key* blocks are present in *settings_base*.
 
-    settings_base : :class:`list` [:class:`qmflows.Settings<qmflows.settings.Settings>`]
+    settings_base : :class:`list` [:class:`qmflows.Settings`]
         A list of Settings to-be updated by *prm_map*.
 
     atom_key : :class:`str`
@@ -532,7 +532,7 @@ def prm_to_df(settings: MutableMapping) -> None:
 
     Parameters
     ----------
-    settings : :class:`~qmflows.settings.Settings`
+    settings : :class:`qmflows.Settings`
         The CP2K input Settings
 
     See Also

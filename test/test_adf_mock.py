@@ -9,7 +9,7 @@ from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import adf, templates
-from qmflows.packages.SCM import ADF_Result
+from qmflows.packages import ADF_Result
 from qmflows.test_utils import PATH, PATH_MOLECULES
 from qmflows.warnings_qmflows import QMFlows_Warning
 from qmflows.utils import InitRestart

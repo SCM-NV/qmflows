@@ -1,16 +1,14 @@
 """Test CP2K parser functions."""
 
 import os
-import shutil
-from pathlib import Path
 
 import numpy as np
 import h5py
 import pytest
 from assertionlib import assertion
 
-from qmflows.parsers.cp2KParser import parse_cp2k_warnings, readCp2KBasis
-from qmflows.test_utils import PATH, requires_cp2k
+from qmflows.parsers.cp2k import parse_cp2k_warnings, read_cp2k_basis
+from qmflows.test_utils import PATH
 from qmflows.warnings_qmflows import QMFlows_Warning, cp2k_warnings
 from qmflows.common import AtomBasisKey
 
@@ -38,7 +36,7 @@ class TestReadBasis:
 
     @pytest.mark.parametrize("filename", ["BASIS_MOLOPT", "BASIS_ADMM_MOLOPT"])
     def test_pass(self, filename: str) -> None:
-        keys, values = readCp2KBasis(PATH / filename, allow_multiple_exponents=True)
+        keys, values = read_cp2k_basis(PATH / filename, allow_multiple_exponents=True)
         with h5py.File(PATH / "basis.hdf5", "r") as f:
             for key_tup, value_tup in zip(keys, values):
                 key = self.get_key(key_tup)
@@ -60,4 +58,4 @@ class TestReadBasis:
     def test_raise(self, filename: str, lineno: int) -> None:
         pattern = r"Failed to parse the '.+' basis set on line {}".format(lineno)
         with pytest.raises(ValueError, match=pattern):
-            readCp2KBasis(PATH / filename)
+            read_cp2k_basis(PATH / filename)

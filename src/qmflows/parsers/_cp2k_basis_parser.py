@@ -8,7 +8,7 @@ import numpy as np
 from ..type_hints import PathLike
 from ..common import AtomBasisData, AtomBasisKey
 
-__all__ = ["readCp2KBasis"]
+__all__ = ["read_cp2k_basis"]
 
 _Basis2Tuple = Tuple[List[AtomBasisKey], List[AtomBasisData]]
 
@@ -74,7 +74,7 @@ def _read_basis(f: _BasisFileIter, allow_multiple_exponents: bool) -> _Basis2Tup
     return keys, values
 
 
-def readCp2KBasis(file: PathLike, *, allow_multiple_exponents: bool = False) -> _Basis2Tuple:
+def read_cp2k_basis(file: PathLike, *, allow_multiple_exponents: bool = False) -> _Basis2Tuple:
     """Read the Contracted Gauss function primitives format from a text file.
 
     Parameters

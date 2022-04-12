@@ -7,8 +7,7 @@ from scm.plams import ADFJob, AMSJob, Molecule
 from assertionlib import assertion
 
 from qmflows import PackageWrapper, run, Settings
-from qmflows.packages.SCM import ADF_Result
-from qmflows.packages.package_wrapper import ResultWrapper
+from qmflows.packages import ADF_Result, ResultWrapper
 from qmflows.test_utils import PATH, requires_ams
 
 WATER = Molecule(PATH / "water.xyz")
@@ -18,7 +17,7 @@ WATER.guess_bonds()
 @pytest.mark.slow
 @requires_ams
 def test_package_wrapper(tmp_path: Path) -> None:
-    """Tests for :class:`PackageWrapper<qmflows.packages.package_wrapper.PackageWrapper>`."""
+    """Tests for :class:`~qmflows.packages.PackageWrapper`."""
     s1 = Settings()
     s1.input.ams.Task = 'GeometryOptimization'
     s1.input.ams.GeometryOptimization.Convergence.Gradients = 1.0e-4

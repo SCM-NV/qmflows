@@ -1,4 +1,4 @@
 PackageWrapper
 ==============
 
-.. automodule:: qmflows.packages.package_wrapper
+.. automodule:: qmflows.packages._package_wrapper

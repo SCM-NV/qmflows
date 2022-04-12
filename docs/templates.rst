@@ -9,7 +9,7 @@ keywords.
 
 YAML
 ~~~~
-.. currentmodule:: qmflows.templates.templates
+.. currentmodule:: qmflows.templates
 
 The YAML_ markdown format is used together with the :mod:`yaml` module to implement the mechanism to load the templates.
 

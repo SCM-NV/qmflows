@@ -48,7 +48,7 @@ Finally in line **(4)** the user's keywords are merged with the defaults resulti
 
 API
 ~~~
-.. autoclass:: qmflows.settings.Settings
+.. autoclass:: qmflows.Settings
     :members:
     :special-members:
     :exclude-members: __weakref__

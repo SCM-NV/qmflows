@@ -33,7 +33,14 @@ def test_rdkit() -> None:
 
 def test_dir() -> None:
     """Test that RDKit functions are in-/excluded from ``dir``."""
-    all_names = RDKIT_SET - {"components", "examples"}
+    all_names = RDKIT_SET - {
+        "components",
+        "examples",
+        "example_H2O2_TS",
+        "example_freqs",
+        "example_generic_constraints",
+        "example_partial_geometry_opt",
+    }
     if HAS_RDKIT:
         assertion.issubset(RDKIT_SET, dir(qmflows))
         assertion.issubset(all_names, qmflows.__all__)
