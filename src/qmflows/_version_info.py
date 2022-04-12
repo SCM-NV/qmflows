@@ -38,4 +38,4 @@ class VersionInfo(NamedTuple):
 
 VERSION = Version(__version__)
 
-version_info: Final = VersionInfo(VERSION.release[:3])
+version_info: Final = VersionInfo._make(VERSION.release[:3])
