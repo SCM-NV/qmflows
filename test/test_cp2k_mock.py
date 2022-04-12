@@ -55,8 +55,6 @@ def test_deepcopy():
     assertion.eq(copy_result.settings, result.settings)
 
 
-# See https://github.com/SCM-NV/qmflows/issues/225
-@pytest.mark.xfail(raises=AssertionError)
 @requires_cp2k
 def test_cp2k_singlepoint_mock(mocker: MockFixture):
     """Mock a call to CP2K."""
@@ -66,7 +64,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
     # print orbitals
     s.specific.cp2k.force_eval.dft.print.mo.filename = (
         PATH / "orbitals.out").as_posix()
-    s.specific.cp2k.force_eval.dft.print.mo.mo_index_range = "7 46"
+    s.specific.cp2k.force_eval.dft.print.mo.mo_index_range = "7 26"
     s.specific.cp2k.force_eval.dft.scf.added_mos = 20
 
     # Construct a result objects
@@ -82,7 +80,7 @@ def test_cp2k_singlepoint_mock(mocker: MockFixture):
     # Molecular orbitals
     orbs = rs.orbitals
     assertion.assert_(np.isfinite, orbs.eigenvectors, post_process=np.all)  # eigenvalues
-    assertion.shape_eq(orbs.eigenvectors, (46, 40))
+    assertion.shape_eq(orbs.eigenvectors, (46, 20))
 
 
 def test_c2pk_opt_mock(mocker: MockFixture):

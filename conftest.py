@@ -1,7 +1,12 @@
 """A pytest ``conftest.py`` file."""
 
-import os
+import sys
+import types
+import importlib
+from typing import Generator
 from pathlib import Path
+
+import pytest
 
 _ROOT = Path("src") / "qmflows"
 _collect_ignore = [
@@ -23,3 +28,29 @@ _collect_ignore = [
 ]
 
 collect_ignore = [str(i) for i in _collect_ignore]
+
+
+def _del_all_attr(module: types.ModuleType) -> None:
+    """Delete all module attributes so they will be reloaded upon reloading the module."""
+    attr_names = [i for i in vars(module) if not (i.startswith("__") and i.endswith("__"))]
+    for name in attr_names:
+        delattr(module, name)
+
+
+@pytest.fixture(autouse=True, scope="session")
+def reload_qmflows() -> Generator[None, None, None]:
+    """Reload qmflows in order to re-trigger coverage.
+
+    This is necasary as the setup.cfg ``filterwarnings`` option will load qmflows prior
+    to code coverage being turned on, thus falsely excluding a large portion of qmflows
+    from the code coverage report.
+    s
+    """
+    yield None
+
+    module_names = [i for i in sys.modules if i.startswith("qmflows")]
+    for name in module_names:
+        module = sys.modules.pop(name)
+        _del_all_attr(module)
+
+    importlib.import_module("qmflows")

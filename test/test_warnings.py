@@ -1,23 +1,30 @@
 """Tests for :mod:`qmflows.warnings_qmflows`."""
 
+import pytest
 from assertionlib import assertion
 
 from qmflows.warnings_qmflows import (
     QMFlows_Warning, Key_Warning, SCF_Convergence_Warning, Assertion_Warning,
     Geometry_Convergence_Warning, Parameter_Warning, Charge_Warning,
-    _eval_charge, _eval_param
+    Orbital_Warning, QMFlowsDeprecationWarning, _eval_charge, _eval_param,
 )
 
 
-def test_warnings() -> None:
+@pytest.mark.parametrize("cls", [
+    QMFlows_Warning,
+    Key_Warning,
+    Assertion_Warning,
+    SCF_Convergence_Warning,
+    Geometry_Convergence_Warning,
+    Parameter_Warning,
+    Charge_Warning,
+    Orbital_Warning,
+    QMFlowsDeprecationWarning,
+])
+def test_warnings(cls: "type[QMFlows_Warning]") -> None:
     """Tests for all QMFlows :exc:`Warning` types."""
-    assertion.issubclass(QMFlows_Warning, Warning)
-    assertion.issubclass(Assertion_Warning, QMFlows_Warning)
-    assertion.issubclass(Key_Warning, QMFlows_Warning)
-    assertion.issubclass(SCF_Convergence_Warning, QMFlows_Warning)
-    assertion.issubclass(Geometry_Convergence_Warning, QMFlows_Warning)
-    assertion.issubclass(Parameter_Warning, QMFlows_Warning)
-    assertion.issubclass(Charge_Warning, Parameter_Warning)
+    warning = cls()
+    assertion.isinstance(warning, QMFlows_Warning)
 
 
 def test_eval_charge() -> None:

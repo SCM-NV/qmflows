@@ -15,7 +15,7 @@
         EIGENVALUES
         EIGENVECTORS
         FILENAME  workdir/cp2k_job/orbitals.out
-        MO_INDEX_RANGE  7 46
+        MO_INDEX_RANGE  7 26
         NDIGITS  36
         OCCUPATION_NUMBERS
       &END
@@ -41,7 +41,7 @@
       ABC   [angstrom] 10 10 10
       PERIODIC  None
     &END
-    &COORD 
+    &COORD
  C -2.58 0.068 0.0
  H -2.047 -0.859 0.0
  H -3.65 0.068 0.0
@@ -65,4 +65,3 @@
   PROJECT  cp2k
   RUN_TYPE  energy
 &END
-
