@@ -3,10 +3,11 @@
 import warnings
 
 from . import _cp2k as module
+from ..warnings_qmflows import QMFlowsDeprecationWarning
 
 warnings.warn(
     f"`{__name__}` is a deprecated alias for `qmflows.packages`",
-    DeprecationWarning, stacklevel=2,
+    QMFlowsDeprecationWarning, stacklevel=2,
 )
 
 __globals__ = globals()

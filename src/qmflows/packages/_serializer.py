@@ -9,6 +9,8 @@ from typing import (
 
 from noodles.serial import Serialiser
 
+from ..warnings_qmflows import QMFlowsDeprecationWarning
+
 if sys.version_info >= (3, 7):
     from builtins import dict as OrderedDict
 else:
@@ -56,7 +58,7 @@ class _SerMolecule:
     def __init__(self) -> None:
         warnings.warn(
             "`qmflows.packages.SerMolecule` is deprecated and will be removed in the future",
-            DeprecationWarning, stacklevel=2,
+            QMFlowsDeprecationWarning, stacklevel=2,
         )
         super().__init__()
 
@@ -99,7 +101,7 @@ class _SerSettings:
     def __init__(self) -> None:
         warnings.warn(
             "`qmflows.packages.SerSettings` is deprecated and will be removed in the future",
-            DeprecationWarning, stacklevel=2,
+            QMFlowsDeprecationWarning, stacklevel=2,
         )
         super().__init__()
 

@@ -12,6 +12,7 @@ __all__ = [
     'QMFlows_Warning', 'Key_Warning', 'Assertion_Warning',
     'SCF_Convergence_Warning', 'Geometry_Convergence_Warning',
     'Parameter_Warning', 'Charge_Warning', 'Orbital_Warning',
+    'QMFlowsDeprecationWarning',
     'cp2k_warnings'
 ]
 
@@ -46,6 +47,10 @@ class Charge_Warning(Parameter_Warning):
 
 class Orbital_Warning(QMFlows_Warning):
     """Warning class for orbital-related issues."""
+
+
+class QMFlowsDeprecationWarning(DeprecationWarning, QMFlows_Warning):
+    """Warning class for deprecations."""
 
 
 def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:

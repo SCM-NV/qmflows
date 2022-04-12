@@ -36,7 +36,7 @@ from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType,
 from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
 from .._settings import _Settings as _SettingsType, Settings
-from ..warnings_qmflows import QMFlows_Warning
+from ..warnings_qmflows import QMFlows_Warning, QMFlowsDeprecationWarning
 
 try:
     from rdkit import Chem
@@ -63,7 +63,7 @@ def _load_properties(name: str, prefix: str = 'properties') -> _Settings:
     """Deprecated alias for :func:`load_properties`."""
     warnings.warn(
         "`qmflows.packages.load_properties` is deprecated and will be removed in the future",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return load_properties(name, prefix)
 
@@ -731,7 +731,7 @@ def _registry() -> _Settings:
     """Deprecated alias for :func:`registry`."""
     warnings.warn(
         "`qmflows.packages.registry` is deprecated and will be removed in the future",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return registry()
 

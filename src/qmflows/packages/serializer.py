@@ -3,10 +3,11 @@
 import warnings
 
 from . import _serializer as module
+from ..warnings_qmflows import QMFlowsDeprecationWarning
 
 warnings.warn(
     f"`{__name__}` is deprecated and will be removed in the future",
-    DeprecationWarning, stacklevel=2,
+    QMFlowsDeprecationWarning, stacklevel=2,
 )
 
 __globals__ = globals()

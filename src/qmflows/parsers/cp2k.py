@@ -26,7 +26,7 @@ from ..common import InfoMO, MO_metadata, CP2KVersion
 from ..type_hints import Literal as Literal_
 from ..type_hints import PathLike, T, WarnDict, WarnMap
 from ..utils import file_to_context
-from ..warnings_qmflows import QMFlows_Warning, Orbital_Warning
+from ..warnings_qmflows import QMFlows_Warning, Orbital_Warning, QMFlowsDeprecationWarning
 from .utils import minusOrplus, natural, point, try_search_pattern
 from ._xyz import manyXYZ, tuplesXYZ_to_plams
 from ._cp2k_basis_parser import read_cp2k_basis
@@ -721,6 +721,6 @@ def readCp2KBasis(file, *, allow_multiple_exponents=False):
     warnings.warn(
         "`qmflows.parsers.cp2k.readCp2KBasis` is a deprecated alias for "
         "`qmflows.parsers.cp2k.read_cp2k_basis`",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return read_cp2k_basis(file, allow_multiple_exponents=allow_multiple_exponents)

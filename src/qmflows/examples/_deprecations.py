@@ -9,6 +9,7 @@ from . import (
     example_generic_constraints,
     example_partial_geometry_opt,
 )
+from ..warnings_qmflows import QMFlowsDeprecationWarning
 
 __all__ = [
     "_example_freqs",
@@ -24,7 +25,7 @@ def _example_freqs(*args, n_processes=1, **kwargs):
     warnings.warn(
         "`qmflows.example_freqs` is a deprecated alias for "
         "`qmflows.examples.example_freqs`",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return example_freqs(*args, n_processes=n_processes, **kwargs)
 
@@ -35,7 +36,7 @@ def _example_H2O2_TS(*args, **kwargs):
     warnings.warn(
         "`qmflows.example_H2O2_TS` is a deprecated alias for "
         "`qmflows.examples.example_H2O2_TS`",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return example_H2O2_TS(*args, **kwargs)
 
@@ -46,7 +47,7 @@ def _example_generic_constraints(*args, n_processes=1, **kwargs):
     warnings.warn(
         "`qmflows.example_generic_constraints` is a deprecated alias for "
         "`qmflows.examples.example_generic_constraints`",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return example_generic_constraints(*args, n_processes=n_processes, **kwargs)
 
@@ -57,6 +58,6 @@ def _example_partial_geometry_opt(*args, n_processes=1, **kwargs):
     warnings.warn(
         "`qmflows.example_partial_geometry_opt` is a deprecated alias for "
         "`qmflows.examples.example_partial_geometry_opt`",
-        DeprecationWarning, stacklevel=2,
+        QMFlowsDeprecationWarning, stacklevel=2,
     )
     return example_partial_geometry_opt(*args, n_processes=n_processes, **kwargs)
