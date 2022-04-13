@@ -1,7 +1,24 @@
-# Version 0.11.3 (unreleased)
+# Version 0.12.0 (13/04/2022)
 
 ## New
- * *placeholder*.
+ * Add support for parsing CP2K basis sets consisting of multiple exponent sets.
+
+## Changed
+ * Removed the upper version bounds of ``noodles`` and ``pyparsing``.
+ * Remove MO padding when the requested MO range in CP2K is larger than the number of available MOs.
+ * Restructured the layout of the QMFlows' submodules; the old layout has been deprecated.
+  * The nested sub-modules ``qmflows.packages``, ``.parsers`` and ``.templates``
+    have been flatened somewhat.
+  * Removal of the ``qmflows.settings`` module; the `Settings` class should
+    be imported from the main ``qmflows`` namespace.
+  * Renaming the ``qmflows.parsers.cp2k.cp2KBasisParser`` function to ``cp2k_basis_parser``.
+  * Removal of the ``registry``, ``load_properties``, ``SerMolecule`` and ``SerSettings``
+    functions from the `qmflows.packages` namespace.
+  * Moving the ``example_freqs``, ``example_H2O2_TS``, ``example_generic_constraints`` and
+    ``example_partial_geometry_opt`` functions from ``qmflows`` to the ``qmflows.examples`` namespace.
+
+## Fix
+ * Do not extract the CP2K version via ``cp2k.popt --version``, read it directly from the .out file.
 
 
 # Version 0.11.2 (07/01/2022)
