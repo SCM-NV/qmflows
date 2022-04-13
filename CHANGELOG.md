@@ -1,3 +1,9 @@
+# Version 0.12.1 (*unreleased*)
+
+## New
+ * *placeholder*.
+
+
 # Version 0.12.0 (13/04/2022)
 
 ## New
