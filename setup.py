@@ -3,14 +3,18 @@
 from setuptools import setup
 import os
 
-here = os.path.abspath(os.path.dirname(__file__))
-version = {}
-with open(os.path.join(here, 'src', 'qmflows', '_version.py')) as f:
+version_file = os.path.abspath(os.path.join(
+    os.path.dirname(__file__),
+    'src',
+    'qmflows',
+    '_version.py',
+))
+version: "dict[str, str]" = {}
+with open(version_file, 'r', encoding='utf8') as f:
     exec(f.read(), version)
 
-
 def readme():
-    with open('README.rst') as f:
+    with open('README.rst', 'r', encoding='utf8') as f:
         return f.read()
 
 docs_require = [
@@ -40,7 +44,7 @@ setup(
     description='Automation of computations in quantum chemistry',
     license='LGPLv3',
     url='https://github.com/SCM-NV/qmflows',
-    author=['Felipe Zapata'],
+    author='Felipe Zapata',
     author_email='f.zapata@esciencecenter.nl',
     keywords='chemistry workflows simulation materials',
     long_description=readme(),
