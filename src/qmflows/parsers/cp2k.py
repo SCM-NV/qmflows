@@ -336,18 +336,31 @@ def read_mos_data_input(path_input: PathLike) -> Tuple2:
     return added_mos, range_mos
 
 
+_NUMBER_PATTERN = re.compile("[0-9]+")
+
+
+def _orbital_number_parser(pattern: str, file_name: PathLike) -> int:
+    """Read the number of MOs from ``file_name`` as specified by ``pattern``."""
+    string = try_search_pattern(pattern, file_name)
+    if string is None:
+        return 0
+
+    # NOTE: There seems to be a CP2K bug (?) where the actual number of orbitals is
+    # omitted from the line containing... the number of orbitals
+    match = _NUMBER_PATTERN.search(string)
+    if match is None:
+        raise RuntimeError(f"Failed to extract the number of orbitals from {string!r}")
+    return int(match[0])
+
+
 def read_cp2k_number_of_orbitals(file_name: PathLike) -> MO_metadata:
     """Look for the line ' Number of molecular orbitals:'."""
-    def fun_split(string: Optional_[str]) -> int:
-        if string is not None:
-            return int(string.rsplit(maxsplit=1)[-1])
-        else:
-            return 0
-
-    properties = ["Number of occupied orbitals", "Number of molecular orbitals",
-                  "Number of orbital functions"]
-
-    values = [fun_split(try_search_pattern(x, file_name)) for x in properties]
+    properties = [
+        "Number of occupied orbitals",
+        "Number of molecular orbitals",
+        "Number of orbital functions",
+    ]
+    values = [_orbital_number_parser(x, file_name) for x in properties]
 
     # Search for the spin states
     spin_1 = try_search_pattern("Spin 1", file_name)
