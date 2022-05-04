@@ -55,8 +55,23 @@ class CGF(NamedTuple):
 class InfoMO(NamedTuple):
     """Energies and coefficients of the molecular orbitals."""
 
-    eigenvalues: np.ndarray  # Orbitals eigenvalues
-    eigenvectors: np.ndarray  # Orbitals eigenvectors
+    #: Orbital eigenvalues.
+    eigenvalues: np.ndarray
+
+    #: Orbital eigenvectors.
+    eigenvectors: np.ndarray
+
+    def __array__(self, dtype: "None | np.dtype" = None) -> np.ndarray:
+        """Convert this instance into a structured array."""
+        struc_dtype = np.dtype([
+            ("eigenvalues", "f8"),
+            ("eigenvectors", "f8", (self.eigenvectors.shape[0],)),
+        ])
+
+        ret = np.empty(self.eigenvalues.shape[0], dtype=struc_dtype)
+        ret["eigenvalues"] = self.eigenvalues
+        ret["eigenvectors"] = np.abs(self.eigenvectors.T)
+        return ret if dtype is None else ret.astype(dtype)
 
 
 class MO_metadata(NamedTuple):
@@ -80,10 +95,21 @@ class MO_metadata(NamedTuple):
 
     """
 
-    nOccupied: int
-    nOrbitals: int
+    #: The number of occupied orbitals.
+    #: Has either 1 or 2 elements depending on whether they're spin-orbitals or not.
+    nOccupied: "list[int]"
+
+    #: The number of orbitals.
+    #: Has either 1 or 2 elements depending on whether they're spin-orbitals or not.
+    nOrbitals: "list[int]"
+
+    #: The number of basis functions.
     nOrbFuns: int
-    nspinstates: int = 1
+
+    @property
+    def nspinstates(self) -> int:
+        """The number of spin states."""
+        return len(self.nOrbitals)
 
 
 class ParseWarning(NamedTuple):
