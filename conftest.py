@@ -12,7 +12,8 @@ from pathlib import Path
 import pytest
 from scm.plams import config
 
-from qmflows import InitRestart
+from qmflows import InitRestart, logger
+from qmflows._logger import stdout_handler
 
 _ROOT = Path("src") / "qmflows"
 _collect_ignore = [
@@ -77,3 +78,12 @@ def configure_plams_logger() -> "Generator[None, None, None]":
 
     yield None
     config.log = log_backup
+
+
+@pytest.fixture(autouse=True, scope="session")
+def prepare_logger() -> "Generator[None, None, None]":
+    """Remove logging output to the stdout stream while running tests."""
+    assert stdout_handler in logger.handlers
+    logger.removeHandler(stdout_handler)
+    yield None
+    logger.addHandler(stdout_handler)

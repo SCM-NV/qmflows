@@ -45,8 +45,7 @@ from pathlib import Path
 
 import pytest
 
-from .logger import logger
-from ._settings import Settings
+from . import logger, Settings
 from .warnings_qmflows import Assertion_Warning
 from .packages import Result
 
