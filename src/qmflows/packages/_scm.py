@@ -236,7 +236,7 @@ class ADF(Package):
         """Execute ADF job.
 
         :param settings: user input settings.
-        :type settings: |Settings|
+        :type settings: :class:`~qmflows.Settings`
         :param mol: Molecule to run the simulation
         :type mol: Plams Molecule
         :parameter input_file_name: The user can provide a name for the

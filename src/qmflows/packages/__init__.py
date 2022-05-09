@@ -1,5 +1,7 @@
 """A set of modules for managing various quantum-chemical packages."""
 
+from typing import TYPE_CHECKING
+
 from ._packages import (
     Package, Result, run,
     _load_properties as load_properties,
@@ -24,3 +26,8 @@ __all__ = [
     'ORCA_Result', 'ORCA', 'orca',
     'PackageWrapper', 'ResultWrapper', 'JOB_MAP',
 ]
+
+if not TYPE_CHECKING:
+    #: Placeholder docstring for sphinx.
+    JOB_MAP: "dict[type[plams.Job], Package]"
+del TYPE_CHECKING
