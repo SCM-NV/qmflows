@@ -3,25 +3,11 @@ plugins = "numpy.typing.mypy_plugin"
 show_error_codes = true
 
 [[tool.mypy.overrides]]
-module = "scm.plams.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "scm.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "noodles.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "rdkit.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "pandas.*"
-ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "pyparsing.*"
+module = [
+    "scm.plams.*",
+    "scm.*",
+    "noodles.*",
+    "rdkit.*",
+    "pandas.*",
+]
 ignore_missing_imports = true
