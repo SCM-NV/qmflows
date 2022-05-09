@@ -1,6 +1,7 @@
 """Test CP2K parser functions."""
 
 import os
+import sys
 
 import numpy as np
 import h5py
@@ -8,9 +9,15 @@ import pytest
 from assertionlib import assertion
 
 from qmflows.parsers.cp2k import parse_cp2k_warnings, read_cp2k_basis
+from qmflows.parsers._cp2k_orbital_parser import _find_mo_start, read_cp2k_number_of_orbitals
 from qmflows.test_utils import PATH
 from qmflows.warnings_qmflows import QMFlows_Warning, cp2k_warnings
 from qmflows.common import AtomBasisKey
+
+if sys.version_info >= (3, 7):
+    from builtins import dict as OrderedDict
+else:
+    from collections import OrderedDict
 
 
 def test_parse_cp2k_warnings():
@@ -48,14 +55,33 @@ class TestReadBasis:
                 np.testing.assert_allclose(value_tup.coefficients, coefficients, err_msg=key)
                 np.testing.assert_array_equal(key_tup.basisFormat, basis_fmt, err_msg=key)
 
-    PARAMS = {
+    PARAMS = OrderedDict({
         "BASIS_INVALID_N_EXP": 11,
         "BASIS_INVALID_FMT": 3,
         "BASIS_NOTIMPLEMENTED": 2,
-    }
+    })
 
     @pytest.mark.parametrize("filename,lineno", PARAMS.items(), ids=PARAMS)
     def test_raise(self, filename: str, lineno: int) -> None:
         pattern = r"Failed to parse the '.+' basis set on line {}".format(lineno)
         with pytest.raises(ValueError, match=pattern):
             read_cp2k_basis(PATH / filename)
+
+
+class TestFindMOStart:
+    PARAMS = OrderedDict({
+        "no_alpha": ("no_alpha.MOLog", True),
+        "no_beta": ("no_beta.MOLog", True),
+        "invalid_header":  ("invalid_header.MOLog", False),
+    })
+
+    @pytest.mark.parametrize("filename,unrestricted", PARAMS.values(), ids=PARAMS)
+    def test_raise(self, filename: str, unrestricted: bool) -> None:
+        with pytest.raises(ValueError):
+            _find_mo_start(PATH / filename, unrestricted=unrestricted)
+
+
+class TestReadNumberOfOrbitals:
+    def test_raise(self) -> None:
+        with pytest.raises(ValueError):
+            read_cp2k_number_of_orbitals(PATH / "output_cp2k" / "cp2k_freq" / "cp2k_freq.out")

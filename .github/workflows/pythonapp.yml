@@ -8,8 +8,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-    cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   Test:
@@ -79,13 +83,11 @@ jobs:
         update-conda: true
 
     - name: Install dependencies
-      shell: bash
       run: |
         case "${{ matrix.special }}" in
           "pre-release")
             conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
             source $CONDA/bin/activate test
-            pip install rdkit-pypi
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip uninstall plams -y; pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
@@ -98,7 +100,6 @@ jobs:
           *)
             conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
             source $CONDA/bin/activate test
-            pip install rdkit-pypi
             pip install -e .[test]
             ;;
         esac
@@ -112,7 +113,6 @@ jobs:
       run: conda list -n test
 
     - name: Test with pytest
-      shell: bash
       run: |
         source $CONDA/bin/activate test
         case "${{ matrix.special }}" in
@@ -134,10 +134,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python 3.10 on ubuntu-latest
+      - name: Set up Python
         uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
 
       - name: Install linters
         run: pip install pydocstyle pycodestyle mypy "numpy>=1.21" pytest more_itertools types-PyYAML types-setuptools "pyparsing>=3.0.8"
