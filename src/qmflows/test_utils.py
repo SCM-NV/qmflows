@@ -32,17 +32,20 @@ API
 .. autodata:: requires_ams
 .. autodata:: requires_adf
 .. autofunction:: find_executable
+.. autodata:: stdout_to_logger
 
 """
 
 import os
 import sys
 import textwrap
+import logging
+import contextlib
 from pathlib import Path
 
 import pytest
 
-from ._settings import Settings
+from . import logger, Settings
 from .warnings_qmflows import Assertion_Warning
 from .packages import Result
 
@@ -58,6 +61,7 @@ __all__ = [
     'requires_ams',
     'requires_adf',
     'find_executable',
+    'stdout_to_logger',
 ]
 
 try:
@@ -261,3 +265,37 @@ requires_adf = pytest.mark.skipif(
     not _has_env_vars("ADFBIN", "ADFHOME", "ADFRESOURCES"),
     reason="Requires ADF <=2019",
 )
+
+
+class _StdOutToLogger(contextlib.redirect_stdout, contextlib.ContextDecorator):
+    """A context decorator and file-like object for redirecting the stdout stream to a logger.
+
+    Attributes
+    ----------
+    logger : logging.Logger
+        The wrapped logger.
+    level : int
+        The logging level.
+
+    """
+
+    __slots__ = ("logger", "level")
+
+    def __init__(self, logger: logging.Logger, level: int = logging.INFO) -> None:
+        super().__init__(self)
+        self.logger = logger
+        self.level = level
+
+    def write(self, msg: str) -> None:
+        """Log '`msg'` with the integer severity :attr:`level`."""
+        self.logger.log(self.level, msg)
+
+    def flush(self) -> None:
+        """Ensure aqll logging output has been flushed."""
+        for handler in self.logger.handlers:
+            handler.flush()
+
+
+#: A context decorator and file-like object for redirecting the stdout
+#: stream to the qmflows logger.
+stdout_to_logger = _StdOutToLogger(logger)

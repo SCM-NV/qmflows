@@ -117,8 +117,8 @@ API
 
 |
 
-.. autofunction:: qmflows.packages.adf
-.. autofunction:: qmflows.packages.dftb
-.. autofunction:: qmflows.packages.cp2k
-.. autofunction:: qmflows.packages.cp2k_mm
-.. autofunction:: qmflows.packages.orca
+.. autofunction:: qmflows.adf
+.. autofunction:: qmflows.dftb
+.. autofunction:: qmflows.cp2k
+.. autofunction:: qmflows.cp2k_mm
+.. autofunction:: qmflows.orca

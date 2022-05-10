@@ -1,7 +1,5 @@
 """Mock CP2K funcionality."""
 
-import os
-import shutil
 from typing import Callable
 
 import numpy as np
@@ -10,7 +8,6 @@ from pytest_mock import MockFixture
 from scm.plams import Molecule
 
 from qmflows import Settings, cp2k_mm, singlepoint, geometry, freq, md, cell_opt
-from qmflows.utils import InitRestart
 from qmflows.packages import CP2KMM_Result
 from qmflows.test_utils import get_mm_settings, validate_status, PATH, PATH_MOLECULES
 
@@ -19,12 +16,6 @@ WORKDIR = PATH / 'output_cp2k_mm'
 
 #: Example input Settings for CP2K mm calculations.
 SETTINGS: Settings = get_mm_settings()
-
-# Ensure that plams.config is populated with a JobManager
-with InitRestart(PATH, 'tmp'):
-    pass
-if os.path.isdir(PATH / 'tmp'):
-    shutil.rmtree(PATH / 'tmp')
 
 
 def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:

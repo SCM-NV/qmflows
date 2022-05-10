@@ -60,7 +60,7 @@ class Settings(plams.core.settings.Settings, ):
         return self.copy()
 
     def overlay(self: _Self, other: Mapping[str, Any]) -> _Self:
-        """Return new instance of |Settings| that is a copy of this instance updated with *other*."""  # noqa: E501
+        """Return new instance of :class:`~qmflows.Settings` that is a copy of this instance updated with *other*."""  # noqa: E501
         ret = self.copy()
         ret.update(other)
         return ret

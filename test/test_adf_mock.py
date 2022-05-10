@@ -10,7 +10,7 @@ from scm.plams import Molecule
 
 from qmflows import adf, templates
 from qmflows.packages import ADF_Result
-from qmflows.test_utils import PATH, PATH_MOLECULES
+from qmflows.test_utils import PATH, PATH_MOLECULES, stdout_to_logger
 from qmflows.warnings_qmflows import QMFlows_Warning
 from qmflows.utils import InitRestart
 
@@ -51,6 +51,7 @@ def test_adf_mock(mocker: MockFixture):
     ("bob", "Generic property 'bob' not defined", None),
     ("energy", "It is not possible to retrieve property: 'energy'", "crashed"),
 ], ids=["undefined_property", "job_crashed"])
+@stdout_to_logger
 def test_getattr_warning(tmp_path: Path, name: str, match: str, status: Optional[str]) -> None:
     mol = Molecule(PATH_MOLECULES / "acetonitrile.xyz")
     jobname = "ADFjob"

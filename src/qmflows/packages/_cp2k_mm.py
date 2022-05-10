@@ -30,7 +30,7 @@ class CP2KMM(CP2K):
     It uses plams together with the templates to generate the stucture input
     and also uses Plams to invoke the binary CP2K code.
     This class is not intended to be called directly by the user, instead the
-    :func:`~qmflows.packages.cp2k_mm` function should be called.
+    :class:`~qmflows.cp2k_mm` function should be called.
 
     """  # noqa: E501
 

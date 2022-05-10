@@ -12,7 +12,7 @@ from scm.plams import init, finish
 from qmflows import Settings
 from qmflows.packages import CP2K_Result
 from qmflows.utils import to_runtime_error, file_to_context, init_restart, InitRestart
-from qmflows.test_utils import PATH_MOLECULES, PATH, validate_status
+from qmflows.test_utils import PATH_MOLECULES, PATH, validate_status, stdout_to_logger
 
 PSF_STR: str = """
 PSF EXT
@@ -63,6 +63,7 @@ def test_file_to_context() -> None:
     assertion.assert_(file_to_context, 5.0, exception=TypeError)
 
 
+@stdout_to_logger
 def test_restart_init(tmp_path: Path) -> None:
     """Tests for :func:`restart_init` and :class:`RestartInit`."""
     workdir = tmp_path / 'test_restart_init'

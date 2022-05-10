@@ -1,7 +1,7 @@
 Settings
 --------
 
-|Settings| is a :class:`dict` subclass implemented in PLAMS_ and modified in *Qmflows*.
+:class:`~qmflows.Settings` is a :class:`dict` subclass implemented in PLAMS_ and modified in *Qmflows*.
 This class represents the data in a hierarchical tree-like structure. for example:
 
 .. code:: python
@@ -19,7 +19,7 @@ This class represents the data in a hierarchical tree-like structure. for exampl
     >>> input_settings = templates.singlepoint.overlay(s)  # (4)
 
 
-The above code snippet shows how to create a |Settings| instance object in **(1)**,
+The above code snippet shows how to create a :class:`~qmflows.Settings` instance object in **(1)**,
 then in **(2)** the generic keyword *basis*  declares that the "DZP" should be used together with the *large* keyword
 of *ADF* as shown at **(3)**.
 Finally in line **(4)** the user's keywords are merged with the defaults resultin in a input like:

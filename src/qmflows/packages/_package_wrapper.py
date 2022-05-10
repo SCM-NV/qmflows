@@ -7,9 +7,9 @@ and, upon calling :class:`pkg = PackageWrapper(...); pkg()<PackageWrapper.__call
 appropiate instance of Package subclas instance is called.
 
 For example, passing :class:`plams.ADFJob<scm.plams.interfaces.adfsuite.adf.ADFJob>` will
-automatically call :data:`~qmflows.packages.adf`,
+automatically call :data:`~qmflows.adf`,
 :class:`plams.Cp2kJob<scm.plams.interfaces.thirdparty.cp2k.Cp2kJob>` will
-call :data:`~qmflows.packages.cp2k`, *etc*.
+call :data:`~qmflows.cp2k`, *etc*.
 
 When no appropiate Package is found, let's say after passing the :class:`MyFancyJob` type,
 the PackageWrapper class will still run the job as usual and return the matching
@@ -77,7 +77,7 @@ API
     :annotation: : dict[type[plams.Job], Package]
 
     A dictionary mapping PLAMS :class:`Job<scm.plams.core.basejob.Job>` types
-    to appropiate QMFlows :class:`~qmflows.packages.Package` instance
+    to appropiate QMFlows :class:`~qmflows.packages.Package` instance.
 
     .. code:: python
 
@@ -119,7 +119,7 @@ from ..warnings_qmflows import Key_Warning
 plams.Job = plams.core.basejob.Job
 plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
 
-__all__ = ['PackageWrapper', 'ResultWrapper']
+__all__ = ['PackageWrapper', 'ResultWrapper', 'JOB_MAP']
 
 JT = TypeVar("JT", bound=plams.core.basejob.Job)
 
@@ -177,7 +177,7 @@ class PackageWrapper(Package, Generic[JT]):
 
     See Also
     --------
-    :data:`~qmflows.packages.package_wrapper.JOB_MAP` : :class:`dict[type[plams.Job], Package] <dict>`
+    :data:`~qmflows.packages.JOB_MAP`
         A dictionary mapping PLAMS Job types to appropiate QMFlows Package instances.
 
     """  # noqa

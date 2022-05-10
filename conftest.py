@@ -1,12 +1,19 @@
 """A pytest ``conftest.py`` file."""
 
+import os
 import sys
 import types
+import tempfile
 import importlib
+import contextlib
 from typing import Generator
 from pathlib import Path
 
 import pytest
+from scm.plams import config
+
+from qmflows import InitRestart, logger
+from qmflows._logger import stdout_handler
 
 _ROOT = Path("src") / "qmflows"
 _collect_ignore = [
@@ -54,3 +61,29 @@ def reload_qmflows() -> Generator[None, None, None]:
         _del_all_attr(module)
 
     importlib.import_module("qmflows")
+
+
+@pytest.fixture(autouse=True, scope="session")
+def configure_plams_logger() -> "Generator[None, None, None]":
+    """Remove the date/time prefix from the PLAMS logging output."""
+    # Ensure the plams.config dict is populated by firing up plams.init once
+    with open(os.devnull, "w") as f1, tempfile.TemporaryDirectory() as f2:
+        with contextlib.redirect_stdout(f1), InitRestart(f2):
+            pass
+
+    assert "log" in config
+    log_backup = config.log.copy()
+    config.log.time = False
+    config.log.date = False
+
+    yield None
+    config.log = log_backup
+
+
+@pytest.fixture(autouse=True, scope="session")
+def prepare_logger() -> "Generator[None, None, None]":
+    """Remove logging output to the stdout stream while running tests."""
+    assert stdout_handler in logger.handlers
+    logger.removeHandler(stdout_handler)
+    yield None
+    logger.addHandler(stdout_handler)
