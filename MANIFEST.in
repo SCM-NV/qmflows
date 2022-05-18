@@ -1,0 +1,3 @@
+exclude test/*
+include src/qmflows/py.typed
+include src/qmflows/data/dictionaries/*yaml
