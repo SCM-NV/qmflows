@@ -13,7 +13,7 @@ from ..parsers.cp2k import parse_cp2k_warnings
 from .._settings import Settings
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
 from ..type_hints import Final, _Settings, Generic2Special
-from ..common import InfoMO
+from ..common import CP2KInfoMO
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -141,7 +141,7 @@ class CP2K_Result(Result):
     geometry: "None | plams.Molecule"
     enthalpy: "None | float"
     free_energy: "None | float"
-    orbitals: "None | InfoMO | tuple[InfoMO, InfoMO]"
+    orbitals: "None | CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]"
     forces: "None | NDArray[f8]"
     coordinates: "None | NDArray[f8]"
     temperature: "None | NDArray[f8]"
