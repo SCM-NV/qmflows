@@ -10,7 +10,7 @@ from collections import defaultdict
 
 import numpy as np
 
-from ..common import InfoMO, MO_metadata
+from ..common import CP2KInfoMO, MO_metadata
 
 __all__ = ["read_cp2k_coefficients"]
 
@@ -18,7 +18,7 @@ __all__ = ["read_cp2k_coefficients"]
 def read_cp2k_coefficients(
     path_mos: "str | os.PathLike[str]",
     plams_dir: "None | str | os.PathLike[str]" = None,
-) -> "InfoMO | tuple[InfoMO, InfoMO]":
+) -> "CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]":
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -39,7 +39,7 @@ def read_cp2k_coefficients(
 def read_log_file(
     path: "str | os.PathLike[str]",
     orbitals_info: MO_metadata,
-) -> "InfoMO | tuple[InfoMO, InfoMO]":
+) -> "CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]":
     """
     Read the orbitals from the Log file.
 
@@ -58,9 +58,9 @@ def read_log_file(
 
     Returns
     -------
-    InfoMO or tuple[InfoMO, InfoMO]
+    CP2KInfoMO or tuple[CP2KInfoMO, CP2KInfoMO]
         Molecular orbitals and orbital energies.
-        Returns a tuple of two ``InfoMO`` objects if its an unrestricted calculation.
+        Returns a tuple of two ``CP2KInfoMO`` objects if its an unrestricted calculation.
 
     """
     n_orb_list = orbitals_info.nOrbitals
@@ -114,7 +114,7 @@ def read_coefficients(
     n_orb: int,
     n_orb_funcs: int,
     start: int = 0,
-) -> InfoMO:
+) -> CP2KInfoMO:
     """Read the coefficients from the plain text output.
 
     MO coefficients are stored in Column-major order.
@@ -146,6 +146,8 @@ def read_coefficients(
     """
     energies = np.empty(n_orb, dtype=np.float64)
     coefs = np.empty((n_orb_funcs, n_orb), dtype=np.float64)
+    orb_index = np.empty(n_orb, dtype=np.int64)
+    occupation = np.empty(n_orb, dtype=np.float64)
 
     j0 = 0
     j1 = 0
@@ -159,13 +161,15 @@ def read_coefficients(
                 break
 
             j1 += len(headers)
+            orb_index[j0:j1] = headers
             energies[j0:j1] = next(iterator).split()
-            coefs[..., j0:j1] = [i.split()[4:] for i in islice(iterator, 1, 1 + n_orb_funcs)]
+            occupation[j0:j1] = next(iterator).split()
+            coefs[..., j0:j1] = [i.split()[4:] for i in islice(iterator, 0, n_orb_funcs)]
             j0 += len(headers)
 
     # `n_orb` is an upper bound to the actual printed number of orbitals,
     # so some trimming might be required
-    return InfoMO(energies[:j0], coefs[:, :j0])
+    return CP2KInfoMO(energies[:j0], coefs[:, :j0], orb_index[:j0], occupation[:j0])
 
 
 _ORBITAL_PATTERN = re.compile((

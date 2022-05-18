@@ -9,7 +9,7 @@ if TYPE_CHECKING:
 else:
     ParserElement = 'pyparsing.ParserElement'
 
-__all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF',
+__all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF', 'CP2KInfoMO',
            'InfoMO', 'MO_metadata', 'ParseWarning', 'CP2KVersion']
 
 
@@ -61,16 +61,60 @@ class InfoMO(NamedTuple):
     #: Orbital eigenvectors.
     eigenvectors: np.ndarray
 
+
+class CP2KInfoMO(NamedTuple):
+    """Energies and coefficients of the CP2K molecular orbitals."""
+
+    #: Orbital eigenvalues.
+    eigenvalues: np.ndarray
+
+    #: Orbital eigenvectors.
+    eigenvectors: np.ndarray
+
+    #: MO indices.
+    orb_index: np.ndarray
+
+    #: Occupation numbers.
+    occupation: np.ndarray
+
+    def get_nocc_nvirt(self, threshold: "None | float" = None) -> "tuple[int, int]":
+        """Return the number of occupied and virtual orbitals within the MO range spanned \
+        by this instance.
+
+        Parameters
+        ----------
+        threshold : None | float
+            The occupation number threshold for determining what consitutes an occupied orbital.
+            If ``None`` assume that all occupied orbitals are defined by a non-zero occupation
+            number (*e.g.* canonical orbitals).
+
+        Returns
+        -------
+        tuple[int, int]
+            A 2-tuple with the number of occupied and virtual orbitals.
+
+        """
+        if threshold is None:
+            is_occ = self.occupation != 0
+        else:
+            is_occ = self.occupation >= threshold
+        nocc = is_occ.sum().item()
+        return nocc, len(self.occupation) - nocc
+
     def __array__(self, dtype: "None | np.dtype" = None) -> np.ndarray:
         """Convert this instance into a structured array."""
         struc_dtype = np.dtype([
             ("eigenvalues", "f8"),
             ("eigenvectors", "f8", (self.eigenvectors.shape[0],)),
+            ("orb_index", "i8"),
+            ("occupation", "f8"),
         ])
 
         ret = np.empty(self.eigenvalues.shape[0], dtype=struc_dtype)
         ret["eigenvalues"] = self.eigenvalues
         ret["eigenvectors"] = np.abs(self.eigenvectors.T)
+        ret["orb_index"] = self.orb_index
+        ret["occupation"] = self.occupation
         return ret if dtype is None else ret.astype(dtype)
 
 
