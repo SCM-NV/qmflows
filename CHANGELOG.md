@@ -1,7 +1,13 @@
-# Version 0.12.1 (*unreleased*)
+# Version 0.12.1 (18/05/2022)
 
 ## New
- * *placeholder*.
+ * Add the MO index and occupation numbers to the CP2K orbital output.
+
+## Changed
+ * Explicitly raise when the line with the number of orbitals doesn't have any actual orbitals.
+
+## Fixed
+ * Fixed various bugs related to the parsing of unrestricted orbitals.
 
 
 # Version 0.12.0 (13/04/2022)

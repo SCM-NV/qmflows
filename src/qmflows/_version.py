@@ -1,3 +1,3 @@
 """The QMFlows version."""
 
-__version__ = "0.12.1.dev0"
+__version__ = "0.12.1"

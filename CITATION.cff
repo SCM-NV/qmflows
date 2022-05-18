@@ -1,8 +1,9 @@
 # YAML 1.2
 # Metadata for citation of this software according to the CFF format (https://citation-file-format.github.io/)
-cff-version: 1.0.3
+cff-version: 1.2.0
 message: If you use this software, please cite it as below.
 title: QMflows
+abstract: QMflows library tackles the construction and efficient execution of computational chemistry workflows.
 doi: 10.5281/zenodo.1045523
 authors:
 - given-names: Felipe
@@ -22,7 +23,7 @@ keywords:
  - materials-science
  - python
  - Workflows
-version: '0.12.0'
-date-released: 2022-04-13  # YYYY-MM-DD
+version: '0.12.1'
+date-released: 2022-05-18  # YYYY-MM-DD
 repository-code: https://github.com/SCM-NV/qmflows
 license: "LGPL-3.0"
