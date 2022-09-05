@@ -15,6 +15,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  CP2K_DATA_DIR: "${{ github.workspace }}/cp2k/data"
+
 jobs:
   Test:
     runs-on: ${{ matrix.os }}
@@ -26,56 +29,37 @@ jobs:
         special: ['']
         include:
           - os: ubuntu-latest
-            special: 'pre-release'
+            special: ['pre-release', '']
             version: '3.10'
           - os: ubuntu-latest
-            special: 'no optional'
+            special: ['no optional', '']
             version: '3.10'
           - os: ubuntu-latest
-            special: 'CP2K 6.1'
+            special: ['CP2K', '6.1']
             version: '3.10'
           - os: ubuntu-latest
-            special: 'CP2K 7.1'
+            special: ['CP2K', '7.1']
             version: '3.10'
           - os: ubuntu-latest
-            special: 'CP2K 8.2'
+            special: ['CP2K', '8.2']
             version: '3.10'
           - os: ubuntu-latest
-            special: 'CP2K 9.1'
+            special: ['CP2K', '9.1']
             version: '3.10'
-    env:
-      CP2K_DATA_DIR: "/home/runner/work/qmflows/qmflows/cp2k/data"
-
+          - os: ubuntu-latest
+            special: ['CP2K', '2022.1']
+            version: '3.10'
     steps:
     - uses: actions/checkout@v3
 
     - name: Install cp2k
-      if: matrix.os == 'ubuntu-latest'
+      if: matrix.special[0] == 'CP2K'
       run: |
-        case "${{ matrix.special }}" in
-          "CP2K"*)
-            VERSION_SHORT=$(echo "${{ matrix.special }}" | grep -P -o "CP2K \K([\.0-9]+)")
-            VERSION=v"$VERSION_SHORT".0
-
-            echo ::group::"Get CP2K $VERSION data"
-            git clone https://github.com/cp2k/cp2k -q
-            cd cp2k
-            git -c advice.detachedHead=false checkout tags/$VERSION
-            echo ::endgroup::
-
-            echo ::group::"Get CP2K $VERSION binaries"
-            wget -nv https://github.com/cp2k/cp2k/releases/download/$VERSION/cp2k-$VERSION_SHORT-Linux-x86_64.ssmp -O cp2k.ssmp
-            chmod u+rx cp2k.ssmp
-            mv cp2k.ssmp /usr/local/bin/cp2k.popt
-            echo ::endgroup::
-            ;;
-          *)
-            sudo apt install cp2k ;;
-         esac
+        bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }}
 
     - name: Info CP2K
-      if: matrix.os == 'ubuntu-latest'
-      run: cp2k.popt --version
+      if: matrix.special[0] == 'CP2K'
+      run: cp2k.ssmp --version
 
     - name: Setup conda
       uses: s-weigand/setup-conda@v1
@@ -84,7 +68,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        case "${{ matrix.special }}" in
+        case "${{ matrix.special[0] }}" in
           "pre-release")
             conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
             source $CONDA/bin/activate test
@@ -115,10 +99,10 @@ jobs:
     - name: Test with pytest
       run: |
         source $CONDA/bin/activate test
-        case "${{ matrix.special }}" in
+        case "${{ matrix.special[0] }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
-          "CP2K"*)
+          "CP2K")
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;

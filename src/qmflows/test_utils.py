@@ -249,7 +249,7 @@ def _has_env_vars(*env_vars: str) -> bool:
 
 
 #: A mark for skipping tests if CP2K is not installed
-requires_cp2k = pytest.mark.skipif(not _has_exec("cp2k.popt"), reason="Requires CP2K")
+requires_cp2k = pytest.mark.skipif(not _has_exec("cp2k.ssmp"), reason="Requires CP2K")
 
 #: A mark for skipping tests if Orca is not installed
 requires_orca = pytest.mark.skipif(not _has_exec("orca"), reason="Requires Orca")

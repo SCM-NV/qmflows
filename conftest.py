@@ -10,7 +10,7 @@ from typing import Generator
 from pathlib import Path
 
 import pytest
-from scm.plams import config
+from scm.plams import config, add_to_class, Cp2kJob
 
 from qmflows import InitRestart, logger
 from qmflows._logger import stdout_handler
@@ -87,3 +87,13 @@ def prepare_logger() -> "Generator[None, None, None]":
     logger.removeHandler(stdout_handler)
     yield None
     logger.addHandler(stdout_handler)
+
+
+@add_to_class(Cp2kJob)
+def get_runscript(self) -> str:
+    """Run a parallel version of CP2K without mpirun or srun, \
+    as this can cause issues with some executables.
+    This method is monkey-patched into the PLAMS ``Cp2kJob`` class.
+    """
+    cp2k_command = self.settings.get("executable", "cp2k.ssmp")
+    return  f"{cp2k_command} -i {self._filename('inp')} -o {self._filename('out')}"
