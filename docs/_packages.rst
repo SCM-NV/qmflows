@@ -8,6 +8,7 @@ Package-related Functions
 .. currentmodule:: qmflows.packages
 .. autosummary::
     run
+    registry
 
 The Package Class
 -----------------

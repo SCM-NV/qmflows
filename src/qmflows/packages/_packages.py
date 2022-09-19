@@ -722,18 +722,13 @@ def registry() -> Registry:
     This *Registry* class contains hints that help Noodles to encode
     and decode this Package object.
 
+    Returns
+    -------
+    :class:`dict[type, Serialiser] <dict>`
+        A dictionary mapping types to their respective noodles ``Serializer`` instance.
+
     """  # noqa
     return REGISTRY
-
-
-@functools.wraps(registry)
-def _registry() -> _Settings:
-    """Deprecated alias for :func:`registry`."""
-    warnings.warn(
-        "`qmflows.packages.registry` is deprecated and will be removed in the future",
-        QMFlowsDeprecationWarning, stacklevel=2,
-    )
-    return registry()
 
 
 def import_parser(

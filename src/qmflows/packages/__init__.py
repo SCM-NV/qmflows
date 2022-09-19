@@ -3,9 +3,8 @@
 from typing import TYPE_CHECKING
 
 from ._packages import (
-    Package, Result, run,
+    Package, Result, run, registry,
     _load_properties as load_properties,
-    _registry as registry,
 )
 from ._serializer import (
     _SerMolecule as SerMolecule,
@@ -19,7 +18,7 @@ from ._orca import ORCA_Result, ORCA, orca
 from ._package_wrapper import PackageWrapper, ResultWrapper, JOB_MAP
 
 __all__ = [
-    'Package', 'Result', 'run',
+    'Package', 'Result', 'run', 'registry',
     'CP2K_Result', 'CP2K', 'cp2k',
     'CP2KMM_Result', 'CP2KMM', 'cp2k_mm',
     'ADF_Result', 'DFTB_Result', 'ADF', 'DFTB', 'adf', 'dftb',

@@ -1,6 +1,6 @@
 """Test molecule serialization."""
 
-from qmflows.packages._packages import registry
+from qmflows.packages import registry
 from qmflows.test_utils import PATH
 from scm.plams import Molecule
 

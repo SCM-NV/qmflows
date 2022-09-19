@@ -59,7 +59,6 @@ class TestDeprecations:
         ),
 
         # qmflows.packages
-        registry=("qmflows.packages.registry", None, {}),
         load_properties=("qmflows.packages.load_properties", None, {"name": "CP2K"}),
         SerMolecule=("qmflows.packages.SerMolecule", None, {}),
         SerSettings=("qmflows.packages.SerSettings", None, {}),
