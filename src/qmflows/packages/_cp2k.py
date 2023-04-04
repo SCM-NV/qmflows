@@ -205,7 +205,7 @@ class CP2K(Package):
         # Input modifications
         cp2k_settings = Settings()
         cp2k_settings.input = settings.specific.cp2k
-        cp2k_settings.executable = settings.get("executable", "cp2k.popt")
+        cp2k_settings.executable = settings.get("executable", "cp2k.ssmp")
 
         # Create a Plams job
         job = plams.interfaces.thirdparty.cp2k.Cp2kJob(
