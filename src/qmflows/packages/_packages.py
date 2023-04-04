@@ -21,7 +21,6 @@ from typing import (
 
 import numpy as np
 import pandas as pd
-import pkg_resources as pkg
 from more_itertools import collapse
 from noodles import has_scheduled_methods, schedule, serial
 from noodles.run.threading.sqlite3 import run_parallel
@@ -31,6 +30,7 @@ from noodles.serial.path import SerPath
 from noodles.serial.reasonable import SerReasonableObject
 from scm import plams
 
+from .. import __file__ as _qmflows_file
 from ._serializer import SerMolecule, SerMol, SerSettings, SerNDFrame, SerReduce
 from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType, _Settings
 from ..utils import InitRestart
@@ -53,9 +53,9 @@ __all__ = ['Package', 'Result', 'run']
 
 def load_properties(name: str, prefix: str = 'properties') -> _Settings:
     """Load the properties-defining .yaml file from ."""
-    file_name = os.path.join('data', 'dictionaries', f'{prefix}{name}.yaml')
-    xs = pkg.resource_string("qmflows", file_name)
-    return yaml2Settings(xs, mapping_type=_SettingsType)
+    file_name = os.path.join(os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml')
+    with open(file_name, "r", encoding="utf8") as f:
+        return yaml2Settings(f.read(), mapping_type=_SettingsType)
 
 
 @functools.wraps(load_properties)
