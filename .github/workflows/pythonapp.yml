@@ -25,30 +25,33 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        version: ['3.6', '3.7', '3.8', '3.9', '3.10']
+        version: ['3.6', '3.7', '3.8', '3.9', '3.10', '3.11']
         special: ['']
         include:
           - os: ubuntu-latest
             special: ['pre-release', '']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['no optional', '']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['CP2K', '6.1']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['CP2K', '7.1']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['CP2K', '8.2']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['CP2K', '9.1']
-            version: '3.10'
+            version: '3.11'
           - os: ubuntu-latest
             special: ['CP2K', '2022.1']
-            version: '3.10'
+            version: '3.11'
+          - os: ubuntu-latest
+            special: ['CP2K', '2023.1']
+            version: '3.11'
     steps:
     - uses: actions/checkout@v3
 
