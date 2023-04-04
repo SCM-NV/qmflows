@@ -3,6 +3,7 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   publish:
@@ -29,8 +30,26 @@ jobs:
       - name: Build the package
         run: python -m build --sdist --wheel
 
+      - name: Validate wheels
+        run: |
+          tree dist
+          twine check dist/*
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: wheels
+          path: ./build/*
+
       - name: Publish the package
+        if: github.event_name == 'release'
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           user: __token__
           password: ${{ secrets.QMFLOWS_PYPI }}
+
+      - name: Attach wheels to GitHub release
+        if: github.event_name == 'release'
+        uses: AButler/upload-release-assets@v2.0.2
+        with:
+          files: 'dist/*'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
