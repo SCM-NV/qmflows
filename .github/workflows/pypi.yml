@@ -16,7 +16,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install wheel twine
+        run: pip install build twine
 
       - name: Python info
         run: |
@@ -27,7 +27,7 @@ jobs:
         run: pip list
 
       - name: Build the package
-        run: python setup.py sdist bdist_wheel
+        run: python -m build --sdist --wheel
 
       - name: Publish the package
         uses: pypa/gh-action-pypi-publish@release/v1
