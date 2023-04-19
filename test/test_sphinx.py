@@ -19,6 +19,7 @@ else:
     HAS_SPHINX = False
 SRCDIR = CONFDIR = 'docs'
 
+@pytest.mark.skipif(not sys.platform.startswith('linux'), reason='Requires Linux')
 @pytest.mark.skipif(sys.version_info < (3, 8), reason='Requires Python >=3.8')
 @pytest.mark.skipif(not HAS_SPHINX, reason='Requires Sphinx')
 def test_sphinx_build(tmp_path: Path) -> None:
