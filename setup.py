@@ -37,7 +37,10 @@ tests_no_optional_require = [
 
 tests_require = tests_no_optional_require.copy()
 tests_require += docs_require
-tests_require.append('rdkit-pypi')
+tests_require += [
+    'rdkit>=2018.03.1; python_version>="3.7"',
+    'rdkit-pypi>=2018.03.1; python_version=="3.6"',
+]
 
 setup(
     name='qmflows',
