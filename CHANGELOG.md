@@ -1,7 +1,12 @@
-# Version 0.12.2 (*unreleased*)
+# Version 0.13.0 (19/04/2023)
 
 ## New
- * *placeholder*.
+ * Revert the `qmflows.packages.registry` deprecation
+ * Add formal python 3.11 support
+ * General CI clean up
+
+## Changed
+ * Changed the default CP2K executable extension from .popt to .ssmp
 
 
 # Version 0.12.1 (18/05/2022)
