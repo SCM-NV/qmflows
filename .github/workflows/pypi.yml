@@ -38,7 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: wheels
-          path: ./build/*
+          path: ./dist/*
 
       - name: Publish the package
         if: github.event_name == 'release'
