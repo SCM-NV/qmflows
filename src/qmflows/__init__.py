@@ -34,7 +34,6 @@ __all__ = [
     'find_first_job', 'select_max', 'select_min',
 ]
 
-# Use `__getattr__` to raise a more descriptive error if RDKit
 if TYPE_CHECKING or _RDKIT_EX is None:
     from .components import (
         Angle,
@@ -44,14 +43,19 @@ if TYPE_CHECKING or _RDKIT_EX is None:
         select_max,
         select_min,
     )
-    from .examples._deprecations import (
-        _example_H2O2_TS as example_H2O2_TS,
-        _example_freqs as example_freqs,
-        _example_generic_constraints as example_generic_constraints,
-        _example_partial_geometry_opt as example_partial_geometry_opt,
-    )
     from . import components, examples
+
+if TYPE_CHECKING:
+    from .templates import (
+        freq,
+        geometry,
+        singlepoint,
+        ts,
+        md,
+        cell_opt,
+    )
 else:
+    # Use `__getattr__` to raise a more descriptive error if RDKit is not installed
     from ._init_utils import (
         getattr_method as __getattr__,
         dir_method as __dir__,

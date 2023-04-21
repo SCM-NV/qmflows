@@ -25,7 +25,6 @@ def test_rdkit() -> None:
     """Test that ``qmflows._init_utils.RDKIT_DICT`` and the sub-modules' ``__all__`` are synced."""
     name_set = {"components", "examples"}
     name_set.update(qmflows.components.__all__)
-    name_set.update(qmflows.examples.__all__)
     assertion.eq(name_set, RDKIT_SET)
 
 

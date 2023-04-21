@@ -17,7 +17,7 @@ from scm.plams import Molecule, Units
 from ..common import CP2KVersion
 from ..type_hints import PathLike, WarnDict, WarnMap
 from ..utils import file_to_context
-from ..warnings_qmflows import QMFlows_Warning, QMFlowsDeprecationWarning
+from ..warnings_qmflows import QMFlows_Warning
 from ._xyz import manyXYZ, tuplesXYZ_to_plams
 
 # Re-exports
@@ -324,14 +324,3 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
         QMFlows_Warning, stacklevel=2,
     )
     return CP2KVersion(0, 0)
-
-
-@functools.wraps(read_cp2k_basis)
-def readCp2KBasis(file, *, allow_multiple_exponents=False):
-    """Deprecated alias for :func:`read_cp2k_basis`."""
-    warnings.warn(
-        "`qmflows.parsers.cp2k.readCp2KBasis` is a deprecated alias for "
-        "`qmflows.parsers.cp2k.read_cp2k_basis`",
-        QMFlowsDeprecationWarning, stacklevel=2,
-    )
-    return read_cp2k_basis(file, allow_multiple_exponents=allow_multiple_exponents)

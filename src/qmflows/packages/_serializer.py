@@ -10,9 +10,6 @@ from typing import TypeVar, Any, TYPE_CHECKING
 
 from noodles.serial import Serialiser
 
-from ..warnings_qmflows import QMFlowsDeprecationWarning
-
-
 if TYPE_CHECKING:
     from .._settings import Settings
     from scm.plams import Molecule
@@ -39,17 +36,6 @@ class SerMolecule(Serialiser):
     def decode(self, cls: type[Molecule], data: Mapping) -> Molecule:
         """Decode the passed data into a PLAMS Molecule."""
         return cls.from_dict(data)
-
-
-class _SerMolecule:
-    """Deprecated alias for :class:`SerMolecule`."""
-
-    def __init__(self) -> None:
-        warnings.warn(
-            "`qmflows.packages.SerMolecule` is deprecated and will be removed in the future",
-            QMFlowsDeprecationWarning, stacklevel=2,
-        )
-        super().__init__()
 
 
 class SerMol(Serialiser):
@@ -82,17 +68,6 @@ class SerSettings(Serialiser):
     def decode(self, cls: type[Settings], data: Mapping) -> Settings:
         """Decode the passed data into a PLAMS Settings."""
         return cls(data)
-
-
-class _SerSettings:
-    """Deprecated alias for :class:`SerSettings`."""
-
-    def __init__(self) -> None:
-        warnings.warn(
-            "`qmflows.packages.SerSettings` is deprecated and will be removed in the future",
-            QMFlowsDeprecationWarning, stacklevel=2,
-        )
-        super().__init__()
 
 
 class SerNDFrame(Serialiser):

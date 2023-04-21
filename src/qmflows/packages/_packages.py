@@ -36,7 +36,7 @@ from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType,
 from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
 from .._settings import _Settings as _SettingsType, Settings
-from ..warnings_qmflows import QMFlows_Warning, QMFlowsDeprecationWarning
+from ..warnings_qmflows import QMFlows_Warning
 
 try:
     from rdkit import Chem
@@ -56,16 +56,6 @@ def load_properties(name: str, prefix: str = 'properties') -> _Settings:
     file_name = os.path.join(os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml')
     with open(file_name, "r", encoding="utf8") as f:
         return yaml2Settings(f.read(), mapping_type=_SettingsType)
-
-
-@functools.wraps(load_properties)
-def _load_properties(name: str, prefix: str = 'properties') -> _Settings:
-    """Deprecated alias for :func:`load_properties`."""
-    warnings.warn(
-        "`qmflows.packages.load_properties` is deprecated and will be removed in the future",
-        QMFlowsDeprecationWarning, stacklevel=2,
-    )
-    return load_properties(name, prefix)
 
 
 class Result:
