@@ -1,6 +1,5 @@
 """Test that the templates behave correctly."""
 
-import sys
 import qmflows
 from qmflows import Settings, templates
 from qmflows.templates import freq, geometry, singlepoint, ts
@@ -25,7 +24,6 @@ def test_templates():
 
 
 @pytest.mark.parametrize("name", templates.__all__)
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="Requires python >= 3.7")
 def test_id(name: str) -> None:
     """Test that getting a template returns a copy."""
     s1 = getattr(qmflows, name)

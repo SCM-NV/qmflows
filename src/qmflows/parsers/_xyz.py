@@ -1,9 +1,8 @@
 """XYZ file format readers."""
 
-__all__ = ['parse_string_xyz', 'readXYZ',
-           'manyXYZ', "string_to_plams_Molecule"]
+from __future__ import annotations
 
-from typing import List, Iterable
+from collections.abc import Iterable
 
 from pyparsing import (Group, LineEnd, OneOrMore, Suppress, Word, alphas,
                        restOfLine, ParseResults)
@@ -13,6 +12,8 @@ from .utils import floatNumber, natural
 from ..common import AtomXYZ
 from ..type_hints import PathLike
 
+__all__ = ['parse_string_xyz', 'readXYZ',
+           'manyXYZ', "string_to_plams_Molecule"]
 
 # =============================================================================
 
@@ -29,7 +30,7 @@ parser_xyz = Suppress(header) + OneOrMore(Group(atomParser))
 # ==============================<>====================================
 
 
-def parse_string_xyz(xs: str) -> List[AtomXYZ]:
+def parse_string_xyz(xs: str) -> list[AtomXYZ]:
     """Read a molecula geometry in XYZ format from a string.
 
     :param: xs
@@ -40,7 +41,7 @@ def parse_string_xyz(xs: str) -> List[AtomXYZ]:
     return createAtoms(rs)
 
 
-def readXYZ(pathXYZ: PathLike) -> List[AtomXYZ]:
+def readXYZ(pathXYZ: PathLike) -> list[AtomXYZ]:
     """Parse molecular geometry in XYZ format from a file.
 
     :param: pathXYZ
@@ -51,7 +52,7 @@ def readXYZ(pathXYZ: PathLike) -> List[AtomXYZ]:
     return createAtoms(xs)
 
 
-def manyXYZ(pathXYZ: PathLike) -> List[List[AtomXYZ]]:
+def manyXYZ(pathXYZ: PathLike) -> list[list[AtomXYZ]]:
     """Read one or more molecular geometries in XYZ format from a file.
 
     :param: pathXYZ
@@ -63,7 +64,7 @@ def manyXYZ(pathXYZ: PathLike) -> List[List[AtomXYZ]]:
     return list(map(createAtoms, xss))
 
 
-def createAtoms(xs: ParseResults) -> List[AtomXYZ]:
+def createAtoms(xs: ParseResults) -> list[AtomXYZ]:
     """Create an AtomXYZ tuple from a string."""
     ls = (a.label.lower() for a in xs)
     rs = (tuple(map(float, a.xyz)) for a in xs)

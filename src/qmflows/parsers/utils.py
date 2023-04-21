@@ -1,11 +1,8 @@
 """General utilities to parse both input/out files."""
 
-__all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
-           'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
-
+from __future__ import annotations
 
 import re
-from typing import Optional as Optional_
 
 import numpy as np
 from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
@@ -14,6 +11,9 @@ from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
 from scm.plams import Atom, Molecule
 
 from ..type_hints import PathLike
+
+__all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
+           'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
 
 # Literals
 point = Literal('.')
@@ -60,7 +60,7 @@ def parse_section(start: str, end: str) -> ParserElement:
 
 def string_array_to_molecule(parser_fun: ParserElement,
                              file_name: PathLike,
-                             mol: Optional_[Molecule] = None) -> Molecule:
+                             mol: None | Molecule = None) -> Molecule:
     """Convert a Numpy string array.
 
     It takes an array like:
@@ -91,7 +91,7 @@ def string_array_to_molecule(parser_fun: ParserElement,
     return mol
 
 
-def try_search_pattern(pat: str, file_name: PathLike) -> Optional_[str]:
+def try_search_pattern(pat: str, file_name: PathLike) -> None | str:
     """Search for an specific pattern in  a file."""
     try:
         with open(file_name, 'r') as f:

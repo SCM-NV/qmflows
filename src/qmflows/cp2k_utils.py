@@ -19,19 +19,18 @@ API
 
     .. code:: python
 
-        >>> from typing import Dict, Tuple
-
 {cp2k_keys_alias}
 
 """
+
+from __future__ import annotations
 
 import copy
 import textwrap
 from functools import singledispatch
 from itertools import repeat, islice
-from collections import abc
-from typing import (Union, Optional, List, Dict, Tuple, MutableMapping, NoReturn,
-                    Sequence, Any, Iterable, Iterator, overload, cast, IO)
+from collections.abc import MutableMapping, Sequence, Iterable, Iterator
+from typing import NoReturn, Any, overload, cast, IO, TYPE_CHECKING
 
 import numpy as np
 import pandas as pd
@@ -43,12 +42,20 @@ from ._settings import Settings
 from .utils import to_runtime_error, file_to_context
 from .type_hints import MappingScalar, MappingSequence, PathLike
 
+if TYPE_CHECKING:
+    PrmMapping = (
+        MappingScalar
+        | Sequence[MappingScalar]
+        | MappingSequence
+        | Sequence[MappingSequence]
+    )
+
 __all__ = ['set_prm', 'prm_to_df', 'map_psf_atoms', 'CP2K_KEYS_ALIAS']
 
 _BASE_PATH = ('specific', 'cp2k', 'force_eval', 'mm', 'forcefield')
 
 #: A dictionary mapping ``key_path`` aliases to the actual keys.
-CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = {
+CP2K_KEYS_ALIAS: dict[str, tuple[str, ...]] = {
     'bond': _BASE_PATH + ('bond',),
     'bend': _BASE_PATH + ('bend',),
     'opbend': _BASE_PATH + ('opbend',),
@@ -93,14 +100,17 @@ class LengthError(ValueError):
 
 
 @to_runtime_error
-def _map_psf_atoms(settings: None, key: str,
-                   value: Union[PathLike, IO[Any]],
-                   mol: None, **kwargs: Any) -> Dict[str, str]:
+def _map_psf_atoms(
+    settings: None,
+    key: str,
+    value: PathLike | IO[Any],
+    mol: None, **kwargs: Any,
+) -> dict[str, str]:
     """A small wrapper around :func:`map_psf_atoms`."""
     return map_psf_atoms(value, **kwargs)
 
 
-def map_psf_atoms(file: Union[PathLike, IO[Any]], **kwargs: Any) -> Dict[str, str]:
+def map_psf_atoms(file: PathLike | IO[Any], **kwargs: Any) -> dict[str, str]:
     r"""Take a .psf file and construct a :class:`dict` mapping atom types to atom names.
 
     Examples
@@ -177,13 +187,9 @@ def map_psf_atoms(file: Union[PathLike, IO[Any]], **kwargs: Any) -> Dict[str, st
                              f"'atom type'-containing rows in {f!r};\n{ex}") from ex
 
 
-PrmMapping = Union[MappingScalar, Sequence[MappingScalar],
-                   MappingSequence, Sequence[MappingSequence]]
-
-
 @to_runtime_error
-def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
-            value: PrmMapping, mol: Optional[plams.Molecule]) -> None:
+def set_prm(settings: Settings, key: str | tuple[str, ...],
+            value: PrmMapping, mol: None | plams.Molecule) -> None:
     """Assign a set of forcefield parameters to *settings* as specific keys.
 
     Examples
@@ -254,15 +260,15 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
         A dictionary mapping ``key_path`` aliases to the actual keys.
 
     """  # noqa: E501
-    if isinstance(value, abc.Sequence):
-        for prm_map in value:  # type: Union[MappingScalar, MappingSequence]
+    if isinstance(value, Sequence):
+        for prm_map in value:  # type: MappingScalar | MappingSequence
             set_prm(settings, key, prm_map, mol)
         return
     else:
         prm_map = copy.copy(value)
 
     try:
-        prm_key = cast(Union[str, Sequence[str]], prm_map.pop('param'))
+        prm_key = cast("str | Sequence[str]", prm_map.pop('param'))
     except KeyError as ex:
         raise KeyError(f"'param' has not been specified") from ex
     else:  # Extract the key path
@@ -282,7 +288,7 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
     atom_map = {item.get(atom_key, None): i for i, item in enumerate(settings_base)}
 
     args = atom_map, settings_base, atom_key
-    if isinstance(prm_key, abc.Iterable):
+    if isinstance(prm_key, Iterable):
         set_prm_values(prm_key, prm_map, *args)
         return
     raise TypeError(f"'param' expected a string or a sequence of strings; "
@@ -291,13 +297,13 @@ def set_prm(settings: Settings, key: Union[str, Tuple[str, ...]],
 
 @overload
 def set_prm_values(prm_key: str, prm_map: MappingScalar,
-                   atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None:
+                   atom_map: MutableMapping[None | str, int],
+                   settings_base: list[Settings], atom_key: str) -> None:
     ...
 @overload  # noqa: E302
 def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
-                   atom_map: MutableMapping[Optional[str], int],
-                   settings_base: List[Settings], atom_key: str) -> None:
+                   atom_map: MutableMapping[None | str, int],
+                   settings_base: list[Settings], atom_key: str) -> None:
     ...
 def set_prm_values(prm_key, prm_map, atom_map,
                    settings_base, atom_key) -> None:  # noqa: E302
@@ -353,7 +359,7 @@ def set_prm_values(prm_key, prm_map, atom_map,
 
 
 @singledispatch
-def _parse_unit(unit: Iterable[Optional[str]]) -> List[str]:
+def _parse_unit(unit: Iterable[None | str]) -> list[str]:
     """Convert *unit* into a to-be formatted string.
 
     *unit* can be eiher ``None``/ a string or an iterable consisting
@@ -365,7 +371,7 @@ def _parse_unit(unit: Iterable[Optional[str]]) -> List[str]:
 
 @_parse_unit.register(str)
 @_parse_unit.register(type(None))
-def _(unit: Optional[str]) -> List[str]:
+def _(unit: None | str) -> list[str]:
     if unit is None:
         return ['{}']
     else:
@@ -440,7 +446,7 @@ def _raise_df_exc_seq(columns: Sequence[str], prm_map: MappingSequence, ex: Exce
         raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
                         f"observed type: {v.__class__.__name__!r}") from ex2
 
-    if not (isinstance(v, abc.Sequence) or hasattr(v, '__array__')):
+    if not (isinstance(v, Sequence) or hasattr(v, '__array__')):
         raise TypeError(f"{k!r} expected a sequence with {column_count} {elements}; "
                         f"observed type: {v.__class__.__name__!r}") from ex
 
@@ -452,7 +458,7 @@ def _raise_df_exc_scalar(columns: str, prm_map: MappingScalar, ex: Exception) ->
     """Raise an exception for :func:`_construct_df` using a scalar-based input."""
     # One of the values in *prm_map* is an iterable while it shouldn't be
     for k, v in prm_map.items():
-        if isinstance(v, abc.Iterable) and not isinstance(v, str):
+        if isinstance(v, Iterable) and not isinstance(v, str):
             break
     else:
         raise ex  # This line should technically never be reached, but just in case
@@ -461,10 +467,10 @@ def _raise_df_exc_scalar(columns: str, prm_map: MappingScalar, ex: Exception) ->
                     f"{v.__class__.__name__!r}") from ex
 
 
-def _validate_unit(unit_iter: Union[Iterator[str], Sequence[str]], columns: Sequence[str]) -> None:
+def _validate_unit(unit_iter: Iterator[str] | Sequence[str], columns: Sequence[str]) -> None:
     """Check if *unit_str* and *columns* in :func:`set_prm_values` are of the same length."""
     column_count = len(columns)
-    if isinstance(unit_iter, abc.Iterator):
+    if isinstance(unit_iter, Iterator):
         return  # It's a itertools.repeat instance; this is fine
 
     elif len(unit_iter) != column_count:
@@ -474,7 +480,7 @@ def _validate_unit(unit_iter: Union[Iterator[str], Sequence[str]], columns: Sequ
         raise LengthError(ex) from ex
 
 
-def _get_key_path(key: Union[str, Tuple[str, ...]]) -> Tuple[str, ...]:
+def _get_key_path(key: str | tuple[str, ...]) -> tuple[str, ...]:
     """Extract a value from :data:`CP2K_KEYS_ALIAS` if *key* is not a :class:`tuple`; return *key* otherwise.
 
     Id *key* is a :class:`tuple` it can have one of the three following structures:
@@ -574,7 +580,7 @@ def _cp2k_keys_alias(indent: str = 8 * ' ') -> str:
     width = 4 + max(len(k) for k in CP2K_KEYS_ALIAS)
     _mid = ',\n'.join(f'{(repr(k)+":"):{width}}{v!r}' for k, v in CP2K_KEYS_ALIAS.items())
 
-    top = f'{indent}>>> CP2K_KEYS_ALIAS: Dict[str, Tuple[str, ...]] = ' + '{\n'
+    top = f'{indent}>>> CP2K_KEYS_ALIAS: dict[str, tuple[str, ...]] = ' + '{\n'
     mid = textwrap.indent(_mid, f'{indent}...     ')
     bot = f'\n{indent}... ' + '}'
     return f'{top}{mid}{bot}'

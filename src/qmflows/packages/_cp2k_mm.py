@@ -1,9 +1,11 @@
 """A :class:`~qmflows.packages.Package` subclass for classical CP2K calculations."""
 
+from __future__ import annotations
+
 import os
 from warnings import warn
 from os.path import abspath
-from typing import Any, ClassVar, Type, TYPE_CHECKING
+from typing import Any, ClassVar, TYPE_CHECKING, Final
 
 import numpy as np
 from scm import plams
@@ -13,7 +15,7 @@ from ._cp2k import CP2K, CP2K_Result
 from ..cp2k_utils import set_prm, _map_psf_atoms, CP2K_KEYS_ALIAS
 from .._settings import Settings
 from ..warnings_qmflows import Key_Warning
-from ..type_hints import Final, _Settings
+from ..type_hints import _Settings
 
 __all__ = ['CP2KMM_Result', 'CP2KMM', 'cp2k_mm']
 
@@ -35,7 +37,7 @@ class CP2KMM(CP2K):
     """  # noqa: E501
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='generic2')
-    result_type: ClassVar[Type[CP2KMM_Result]] = CP2KMM_Result
+    result_type: ClassVar[type[CP2KMM_Result]] = CP2KMM_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)
@@ -85,7 +87,7 @@ class CP2KMM(CP2K):
             settings: Settings,
             mol: plams.Molecule,
             job_name: str = 'cp2k_job',
-            work_dir: "None | str | os.PathLike[str]" = ...,
+            work_dir: None | str | os.PathLike[str] = ...,
             validate_output: bool = True,
             **kwargs: Any,
         ) -> CP2KMM_Result:
@@ -119,7 +121,7 @@ class CP2KMM(CP2K):
 
     @staticmethod
     def _parse_psf(settings: Settings, key: str,
-                   value: "None", mol: plams.Molecule) -> None:
+                   value: None, mol: plams.Molecule) -> None:
         """Assign a .psf file."""
         subsys = settings.specific.cp2k.force_eval.subsys
         if value is None:

@@ -81,7 +81,7 @@ API
 
     .. code:: python
 
-        >>> from typing import Dict, Type
+        >>> from __future__ import annotations
 
         >>> from qmflows.packages import Package, cp2k, adf, dftb, orca
         >>> from scm import plams
@@ -89,7 +89,7 @@ API
         >>> plams.Job = plams.core.basejob.Job
         >>> plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
 
-        >>> JOB_MAP: Dict[Type[plams.Job], Package] = {
+        >>> JOB_MAP: dict[type[plams.Job], Package] = {
         ...     plams.Cp2kJob: cp2k,
         ...     plams.ADFJob: adf,
         ...     plams.DFTBJob: dftb,
@@ -98,10 +98,12 @@ API
 
 """
 
+from __future__ import annotations
+
 import os
 from os.path import join
 from typing import (
-    Type, TypeVar, Union, ClassVar, Any, Dict, Optional, TypeVar, Generic, Tuple, TYPE_CHECKING
+    TypeVar, ClassVar, Any, Generic, TYPE_CHECKING
 )
 from warnings import warn
 
@@ -116,6 +118,9 @@ from .._settings import Settings
 from ..type_hints import _Settings, MolType
 from ..warnings_qmflows import Key_Warning
 
+if TYPE_CHECKING:
+    PT = TypeVar('PT', bound="PackageWrapper")
+
 plams.Job = plams.core.basejob.Job
 plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
 
@@ -123,17 +128,13 @@ __all__ = ['PackageWrapper', 'ResultWrapper', 'JOB_MAP']
 
 JT = TypeVar("JT", bound=plams.core.basejob.Job)
 
-JOB_MAP: Dict[Type[plams.Job], Package] = {
+JOB_MAP: dict[type[plams.Job], Package] = {
     plams.Cp2kJob: cp2k,
     plams.ADFJob: adf,
     plams.DFTBJob: dftb,
     plams.ORCAJob: orca
 }
 
-#: TypeVar for Result objects and its subclasses.
-RT = TypeVar('RT', bound=Result)
-
-PT = TypeVar('PT', bound="PackageWrapper")
 
 
 class ResultWrapper(Result):
@@ -183,13 +184,13 @@ class PackageWrapper(Package, Generic[JT]):
     """  # noqa
 
     generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
-    result_type: ClassVar[Type[ResultWrapper]] = ResultWrapper
-    job_type: Type[JT]
+    result_type: ClassVar[type[ResultWrapper]] = ResultWrapper
+    job_type: type[JT]
 
     if TYPE_CHECKING:
         def __getattr__(self, name: str) -> Any: ...
 
-    def __init__(self, job_type: Type[JT], name: Optional[str] = None) -> None:
+    def __init__(self, job_type: type[JT], name: None | str = None) -> None:
         """Initialize this instance.
 
         Parameters
@@ -210,14 +211,14 @@ class PackageWrapper(Package, Generic[JT]):
         super().__init__(pkg_name)
         self.job_type = job_type
 
-    def __reduce__(self: PT) -> Tuple[Type[PT], Tuple[Type[JT], str]]:
+    def __reduce__(self: PT) -> tuple[type[PT], tuple[type[JT], str]]:
         """A helper function for :mod:`pickle`."""
         return type(self), (self.job_type, self.pkg_name)
 
     @schedule(display="Running {self.pkg_name} {job_name}...", store=True, confirm=True)
     def __call__(self, settings: Settings,
                  mol: MolType,
-                 job_name: str = '', **kwargs: Any) -> RT:
+                 job_name: str = '', **kwargs: Any) -> Result:
         """If possible, call :meth:`__call__()` of the Package instance appropiate to :attr:`PackageWrapper.job_type`.
 
         If not, default to the base :meth:`~qmflows.packages.Package.__call__` method.
@@ -231,7 +232,7 @@ class PackageWrapper(Package, Generic[JT]):
 
     def run_job(self, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'job',
-                work_dir: Union[None, str, os.PathLike] = None,
+                work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> ResultWrapper:
         """Run the job and pass the resulting :class:`plams.Results<scm.plams.core.results.Results>` object to :class:`ResultWrapper`."""  # noqa

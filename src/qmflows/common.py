@@ -1,13 +1,16 @@
 """common (:class:`~typing.NamedTuple`) used mostly for parsing."""
-from typing import (Any, Type, NamedTuple, Callable, Optional, Tuple,
-                    Sequence, Union, TYPE_CHECKING)
+
+from __future__ import annotations
+
+from collections.abc import Callable, Sequence
+from typing import Any, NamedTuple, TYPE_CHECKING
 
 import numpy as np
 
 if TYPE_CHECKING:
-    from pyparsing import ParserElement
-else:
-    ParserElement = 'pyparsing.ParserElement'
+    from numpy.typing import NDArray
+    from numpy import float64 as f8, int64 as i8
+    import pyparsing
 
 __all__ = ['AtomBasisKey', 'AtomBasisData', 'AtomXYZ', 'CGF', 'CP2KInfoMO',
            'InfoMO', 'MO_metadata', 'ParseWarning', 'CP2KVersion']
@@ -24,7 +27,7 @@ class AtomBasisKey(NamedTuple):
 
     # NOTE: Orca uses 2-tuples while CP2K uses integer
     #: The basis set format.
-    basisFormat: Union[Sequence[int], Sequence[Tuple[str, int]]]
+    basisFormat: Sequence[int] | Sequence[tuple[str, int]]
 
     #: The index of the exponent set.
     #: Relevant for basis sets consisting of multiple :attr:`basisFormat` blocks.
@@ -34,15 +37,15 @@ class AtomBasisKey(NamedTuple):
 class AtomBasisData(NamedTuple):
     """Contraction coefficients and exponents for a gaussian basis."""
 
-    exponents: np.ndarray
-    coefficients: np.ndarray
+    exponents: NDArray[f8]
+    coefficients: NDArray[f8]
 
 
 class AtomXYZ(NamedTuple):
     """Symbol and coordinates of an Atom."""
 
     symbol: str
-    xyz: Tuple[float, float, float]
+    xyz: tuple[float, float, float]
 
 
 class CGF(NamedTuple):
@@ -56,28 +59,28 @@ class InfoMO(NamedTuple):
     """Energies and coefficients of the molecular orbitals."""
 
     #: Orbital eigenvalues.
-    eigenvalues: np.ndarray
+    eigenvalues: NDArray[f8]
 
     #: Orbital eigenvectors.
-    eigenvectors: np.ndarray
+    eigenvectors: NDArray[f8]
 
 
 class CP2KInfoMO(NamedTuple):
     """Energies and coefficients of the CP2K molecular orbitals."""
 
     #: Orbital eigenvalues.
-    eigenvalues: np.ndarray
+    eigenvalues: NDArray[f8]
 
     #: Orbital eigenvectors.
-    eigenvectors: np.ndarray
+    eigenvectors: NDArray[f8]
 
     #: MO indices.
-    orb_index: np.ndarray
+    orb_index: NDArray[i8]
 
     #: Occupation numbers.
-    occupation: np.ndarray
+    occupation: NDArray[f8]
 
-    def get_nocc_nvirt(self, threshold: "None | float" = None) -> "tuple[int, int]":
+    def get_nocc_nvirt(self, threshold: None | float = None) -> tuple[int, int]:
         """Return the number of occupied and virtual orbitals within the MO range spanned \
         by this instance.
 
@@ -101,7 +104,7 @@ class CP2KInfoMO(NamedTuple):
         nocc = is_occ.sum().item()
         return nocc, len(self.occupation) - nocc
 
-    def __array__(self, dtype: "None | np.dtype" = None) -> np.ndarray:
+    def __array__(self, dtype: None | np.dtype[Any] = None) -> NDArray[Any]:
         """Convert this instance into a structured array."""
         struc_dtype = np.dtype([
             ("eigenvalues", "f8"),
@@ -141,11 +144,11 @@ class MO_metadata(NamedTuple):
 
     #: The number of occupied orbitals.
     #: Has either 1 or 2 elements depending on whether they're spin-orbitals or not.
-    nOccupied: "list[int]"
+    nOccupied: list[int]
 
     #: The number of orbitals.
     #: Has either 1 or 2 elements depending on whether they're spin-orbitals or not.
-    nOrbitals: "list[int]"
+    nOrbitals: list[int]
 
     #: The number of basis functions.
     nOrbFuns: int
@@ -162,9 +165,9 @@ class ParseWarning(NamedTuple):
     see: https://docs.python.org/3/library/typing.html#typing.NamedTuple
     """
 
-    warn_type: Type[Warning]
-    parser: ParserElement
-    func: Callable[[str], Optional[str]] = NotImplemented
+    warn_type: type[Warning]
+    parser: pyparsing.ParserElement
+    func: Callable[[str], None | str] = NotImplemented
 
     @staticmethod
     def return_msg(msg: str) -> str:

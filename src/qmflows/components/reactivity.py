@@ -1,6 +1,9 @@
 """A module containing the :class:`Coordinate` baseclass and its subclasses."""
 
-from typing import Callable, Any, ClassVar, Tuple, overload
+from __future__ import annotations
+
+from collections.abc import Callable
+from typing import Any, ClassVar, overload
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 from scm.plams import Molecule
@@ -16,7 +19,7 @@ class Coordinate:
     """The :class:`Coordinate` base class."""
 
     fmt: ClassVar[str] = "{}"
-    atoms: Tuple[int, ...]
+    atoms: tuple[int, ...]
 
     @property
     def fun(self) -> Callable[..., float]:
@@ -52,7 +55,7 @@ class Coordinate:
         return self.fun(conf, *xs)
 
     @overload
-    def get_settings(self, value: Any, mol: None) -> Settings:
+    def get_settings(self, value: float, mol: None) -> Settings:
         ...
     @overload
     def get_settings(self, value: None, mol: MolType) -> Settings:
@@ -81,7 +84,7 @@ class Distance(Coordinate):
     def __init__(self, atom1: int, atom2: int) -> None:
         """Initialize a :class:`Distance` instance."""
         super().__init__(atom1, atom2)
-        self.fun = AllChem.GetBondLength  # type: ignore
+        self.fun = AllChem.GetBondLength
 
 
 class Angle(Coordinate):
@@ -97,7 +100,7 @@ class Angle(Coordinate):
     def get_current_value(self, mol: MolType,
                           rad: bool = False) -> float:
         """Return the value of the coordinate."""
-        self.fun = AllChem.GetAngleRad if rad else AllChem.GetAngleDeg  # type: ignore
+        self.fun = AllChem.GetAngleRad if rad else AllChem.GetAngleDeg
         return super().get_current_value(mol)
 
 
@@ -114,5 +117,5 @@ class Dihedral(Coordinate):
     def get_current_value(self, mol: MolType,
                           rad: bool = False) -> float:
         """Return the value of the coordinate."""
-        self.fun = AllChem.GetDihedralRad if rad else AllChem.GetDihedralDeg  # type: ignore
+        self.fun = AllChem.GetDihedralRad if rad else AllChem.GetDihedralDeg
         return super().get_current_value(mol)

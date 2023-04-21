@@ -1,9 +1,11 @@
 """Interface to the SCM funcionality."""
 
+from __future__ import annotations
+
 import os
 import struct
 from os.path import join, basename, normpath
-from typing import Any, ClassVar, Optional, Union, Type
+from typing import Any, ClassVar, Final
 from warnings import warn
 
 import numpy as np
@@ -11,7 +13,7 @@ from scm import plams
 
 from ._packages import Package, Result, load_properties
 from .._settings import Settings
-from ..type_hints import Final, WarnMap, _Settings
+from ..type_hints import WarnMap, _Settings
 from ..warnings_qmflows import Key_Warning, QMFlows_Warning
 from ..utils import get_tmpfile_name
 
@@ -101,26 +103,26 @@ class ADF_Result(Result):
     prop_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='properties')
 
     # Attributes accessed via `__getattr__`
-    charges: "None | Any"
-    dipole: "None | Any"
-    energy: "None | Any"
-    enthalpy: "None | Any"
-    free_energy: "None | Any"
-    frequencies: "None | Any"
-    hessian: "None | Any"
-    homo: "None | Any"
-    lumo: "None | Any"
-    optcycles: "None | Any"
-    runtime: "None | Any"
+    charges: None | Any
+    dipole: None | Any
+    energy: None | Any
+    enthalpy: None | Any
+    free_energy: None | Any
+    frequencies: None | Any
+    hessian: None | Any
+    homo: None | Any
+    lumo: None | Any
+    optcycles: None | Any
+    runtime: None | Any
 
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
+    def __init__(self, settings: None | Settings,
+                 molecule: None | plams.Molecule,
                  job_name: str,
-                 dill_path: "None | str | os.PathLike[str]" = None,
-                 plams_dir: "None | str | os.PathLike[str]" = None,
-                 work_dir: "None | str | os.PathLike[str]" = None,
+                 dill_path: None | str | os.PathLike[str] = None,
+                 plams_dir: None | str | os.PathLike[str] = None,
+                 work_dir: None | str | os.PathLike[str] = None,
                  status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
+                 warnings: None | WarnMap = None) -> None:
         # Load available property parser from yaml file.
         super().__init__(settings, molecule, job_name, dill_path,
                          plams_dir=plams_dir, status=status, warnings=warnings)
@@ -134,7 +136,7 @@ class ADF_Result(Result):
         else:
             self.kf = None
 
-    def get_property_kf(self, prop: str, section: Optional[str] = None) -> Optional[Any]:
+    def get_property_kf(self, prop: str, section: None | str = None) -> None | Any:
         """Interface for :meth:`plams.KFFile.read()<scm.plams.tools.kftools.KFFile.read>`."""
         if self.kf is None:
             return None
@@ -142,7 +144,7 @@ class ADF_Result(Result):
             return self.kf.read(section, prop)
 
     @property
-    def molecule(self) -> Optional[plams.Molecule]:
+    def molecule(self) -> None | plams.Molecule:
         """WARNING: Cheap copy from PLAMS, do not keep this!!!."""
         if self._molecule is None or self.kf is None:
             return None
@@ -155,7 +157,7 @@ class ADF_Result(Result):
         return m
 
     @property
-    def geometry(self) -> Optional[plams.Molecule]:
+    def geometry(self) -> None | plams.Molecule:
         """An alias for :attr:`ADF_Result.molecule`."""
         return self.molecule
 
@@ -174,14 +176,14 @@ class DFTB_Result(Result):
     frequencies: "None | Any"
     hessian: "None | Any"
 
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
+    def __init__(self, settings: None | Settings,
+                 molecule: None | plams.Molecule,
                  job_name: str,
-                 dill_path: "None | str | os.PathLike[str]" = None,
-                 plams_dir: "None | str | os.PathLike[str]" = None,
-                 work_dir: "None | str | os.PathLike[str]" = None,
+                 dill_path: None | str | os.PathLike[str] = None,
+                 plams_dir: None | str | os.PathLike[str] = None,
+                 work_dir: None | str | os.PathLike[str] = None,
                  status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
+                 warnings: None | WarnMap = None) -> None:
         # Read available propiety parsers from a yaml file
         super().__init__(settings, molecule, job_name, dill_path,
                          plams_dir=plams_dir, status=status, warnings=warnings)
@@ -194,7 +196,7 @@ class DFTB_Result(Result):
             self.kf = None
 
     @property
-    def molecule(self) -> Optional[plams.Molecule]:
+    def molecule(self) -> None | plams.Molecule:
         """Read molecule from output."""
         if self._molecule is None or self.kf is None:
             return None
@@ -206,7 +208,7 @@ class DFTB_Result(Result):
         return m
 
     @property
-    def geometry(self) -> Optional[plams.Molecule]:
+    def geometry(self) -> None | plams.Molecule:
         """An alias for :attr:`DFTB_Result.molecule`."""
         return self.molecule
 
@@ -223,14 +225,14 @@ class ADF(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='generic2')
-    result_type: ClassVar[Type[ADF_Result]] = ADF_Result
+    result_type: ClassVar[type[ADF_Result]] = ADF_Result
 
     def __init__(self, pkg_name: str = "adf") -> None:
         super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
-                job_name: str = 'ADFjob', nproc: Optional[int] = None,
+                job_name: str = 'ADFjob', nproc: None | int = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> ADF_Result:
         """Execute ADF job.
@@ -290,14 +292,14 @@ class DFTB(Package):
     """:class:`~qmflows.packages.Package` subclass for DFTB."""
 
     generic_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='generic2')
-    result_type: ClassVar[Type[DFTB_Result]] = DFTB_Result
+    result_type: ClassVar[type[DFTB_Result]] = DFTB_Result
 
     def __init__(self, pkg_name: str = "dftb") -> None:
         super().__init__(pkg_name)
 
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str = "DFTBJob",
-                work_dir: Union[None, str, os.PathLike] = None,
+                work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> DFTB_Result:
         """Execute an DFTB job with the AMS driver.
@@ -318,7 +320,7 @@ class DFTB(Package):
         try:
             result = job.run()
             name = result.job.name
-            path: "None | str" = result.job.path
+            path: None | str = result.job.path
         except struct.error:
             job.status = 'failed'
             name = job_name

@@ -1,6 +1,5 @@
 """Tests related to the optional rdkit dependency."""
 
-import sys
 import importlib
 
 import pytest
@@ -21,7 +20,6 @@ def test_sub_module(name: str) -> None:
             getattr(qmflows, name)
 
 
-@pytest.mark.skipif(sys.version_info < (3, 7), reason="requires python 3.7")
 @pytest.mark.skipif(not HAS_RDKIT, reason="requires RDKit")
 def test_rdkit() -> None:
     """Test that ``qmflows._init_utils.RDKIT_DICT`` and the sub-modules' ``__all__`` are synced."""

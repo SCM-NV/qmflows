@@ -1,5 +1,7 @@
 """``__getattr__`` and ``__dir__`` implementations for the main QMFlows namespace."""
 
+from __future__ import annotations
+
 import sys
 import types
 import importlib
@@ -47,7 +49,7 @@ def __getattr__(self: types.ModuleType, name: str) -> Any:
     raise AttributeError(f"module {self.__name__!r} has no attribute {name!r}")
 
 
-def __dir__(self: types.ModuleType) -> "list[str]":
+def __dir__(self: types.ModuleType) -> list[str]:
     """Manually insert the qmflows templates and RDKit functions into :func:`dir`."""
     try:
         return self._DIR_CACHE.copy()

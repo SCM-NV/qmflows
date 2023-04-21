@@ -1,8 +1,9 @@
 """Check yaml to Settings conversion."""
 
-__all__ = ['yaml2Settings']
+from __future__ import annotations
 
-from typing import Union, Callable, overload, Dict, Any
+from collections.abc import Callable
+from typing import overload, Any
 
 import yaml
 
@@ -10,11 +11,13 @@ from ._settings import Settings
 from .type_hints import T
 from .yaml_utils import UniqueSafeLoader
 
+__all__ = ['yaml2Settings']
+
 
 @overload
-def yaml2Settings(xs: Union[str, bytes]) -> Settings: ...
+def yaml2Settings(xs: str | bytes) -> Settings: ...
 @overload
-def yaml2Settings(xs: Union[str, bytes], mapping_type: Callable[[Dict[str, Any]], T]) -> T: ...
+def yaml2Settings(xs: str | bytes, mapping_type: Callable[[dict[str, Any]], T]) -> T: ...
 
 def yaml2Settings(xs, mapping_type=Settings):
     """Transform a string containing some data in .yaml format to a Settings object."""

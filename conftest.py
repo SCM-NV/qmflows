@@ -1,12 +1,14 @@
 """A pytest ``conftest.py`` file."""
 
+from __future__ import annotations
+
 import os
 import sys
 import types
 import tempfile
 import importlib
 import contextlib
-from typing import Generator
+from collections.abc import Generator
 from pathlib import Path
 
 import pytest

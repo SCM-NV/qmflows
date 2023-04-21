@@ -1,6 +1,9 @@
 """Functions for reading CP2K basis set files."""
 
-from typing import Iterator, Tuple, List, Tuple, Iterable
+from __future__ import annotations
+
+import sys
+from typing import TYPE_CHECKING, Iterator
 from itertools import islice
 
 import numpy as np
@@ -8,9 +11,13 @@ import numpy as np
 from ..type_hints import PathLike
 from ..common import AtomBasisData, AtomBasisKey
 
-__all__ = ["read_cp2k_basis"]
+if TYPE_CHECKING or sys.version_info >= (3, 9):
+    _Basis2Tuple = tuple[list[AtomBasisKey], list[AtomBasisData]]
+    from collections.abc import Iterator, Iterable
+else:
+    from typing import Iterator
 
-_Basis2Tuple = Tuple[List[AtomBasisKey], List[AtomBasisData]]
+__all__ = ["read_cp2k_basis"]
 
 
 class _BasisFileIter(Iterator[str]):
@@ -28,7 +35,7 @@ class _BasisFileIter(Iterator[str]):
         self._name: "str | None" = getattr(iterable, "name", None)
         self._index = start
 
-    def __iter__(self) -> "_BasisFileIter":
+    def __iter__(self) -> _BasisFileIter:
         return self
 
     def __next__(self) -> str:

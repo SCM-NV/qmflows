@@ -1,6 +1,5 @@
 """Run an small cp2k calculation."""
 
-import sys
 from pathlib import Path
 
 import pytest
@@ -17,11 +16,6 @@ from qmflows.test_utils import (
     requires_cp2k,
     validate_status,
 )
-
-if sys.version_info >= (3, 7):
-    from builtins import dict as OrderedDict
-else:
-    from collections import OrderedDict
 
 
 @requires_cp2k
@@ -76,10 +70,10 @@ def test_cp2k_singlepoint(tmp_path: Path, mo_index_range: str) -> None:
     np.testing.assert_allclose(np.abs(orbitals.eigenvectors).T, ref.eigenvectors)
 
 
-UNRESTRICTED = OrderedDict(
-    doublet=("doublet", 2, "ho"),
-    triplet=("triplet", 3, "o2"),
-)
+UNRESTRICTED = {
+    "doublet": ("doublet", 2, "ho"),
+    "triplet": ("triplet", 3, "o2"),
+}
 
 
 @requires_cp2k

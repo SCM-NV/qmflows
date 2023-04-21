@@ -7,20 +7,17 @@ from pathlib import Path
 import pytest
 from qmflows.test_utils import stdout_to_logger
 
-if sys.version_info >= (3, 8):
-    try:
-        from sphinx.application import Sphinx
-        from sphinx.errors import SphinxWarning
-    except ImportError:
-        HAS_SPHINX = False
-    else:
-        HAS_SPHINX = True
-else:
+try:
+    from sphinx.application import Sphinx
+    from sphinx.errors import SphinxWarning
+except ImportError:
     HAS_SPHINX = False
+else:
+    HAS_SPHINX = True
+
 SRCDIR = CONFDIR = 'docs'
 
 @pytest.mark.skipif(not sys.platform.startswith('linux'), reason='Requires Linux')
-@pytest.mark.skipif(sys.version_info < (3, 8), reason='Requires Python >=3.8')
 @pytest.mark.skipif(not HAS_SPHINX, reason='Requires Sphinx')
 def test_sphinx_build(tmp_path: Path) -> None:
     """Test :meth:`sphinx.application.Sphinx.build`."""

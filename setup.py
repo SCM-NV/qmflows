@@ -21,7 +21,6 @@ docs_require = [
     'sphinx>=2.1,!=3.1.1',
     'sphinx-autodoc-typehints',
     'sphinx_rtd_theme',
-    'bleach<5; python_version<"3.7"',
     'nbsphinx',
     'jupyter',
     'pandoc',
@@ -37,10 +36,7 @@ tests_no_optional_require = [
 
 tests_require = tests_no_optional_require.copy()
 tests_require += docs_require
-tests_require += [
-    'rdkit>=2018.03.1; python_version>="3.7"',
-    'rdkit-pypi>=2018.03.1; python_version=="3.6"',
-]
+tests_require.append("rdkit>=2018.03.1")
 
 setup(
     name='qmflows',
@@ -67,12 +63,10 @@ setup(
         "qmflows": ['data/dictionaries/*yaml',
                     'py.typed']
     },
-    python_requires='>=3.6',
+    python_requires='>=3.8',
     classifiers=[
         'License :: OSI Approved :: GNU Lesser General Public License v3 (LGPLv3)',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',

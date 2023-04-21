@@ -1,10 +1,9 @@
 """Read Orca output files."""
-__all__ = [
-    'parse_hessian', 'parse_frequencies', 'parse_molecule',
-    'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
-from typing import Sequence, Tuple
-from typing import Optional as Optional_
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import TYPE_CHECKING
 
 import numpy as np
 from more_itertools import chunked
@@ -18,10 +17,16 @@ from ._xyz import manyXYZ
 from ..common import InfoMO
 from ..type_hints import PathLike
 
-Vector = np.ndarray
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+    from numpy import float64 as f8
+
+__all__ = [
+    'parse_hessian', 'parse_frequencies', 'parse_molecule',
+    'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
 
-def parse_molecule(file_name: PathLike, mol: Optional_[Molecule] = None) -> Molecule:
+def parse_molecule(file_name: PathLike, mol: None | Molecule = None) -> Molecule:
     """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
@@ -48,7 +53,7 @@ def parse_molecule_traj(file_traj: PathLike) -> Molecule:
     return plams_mol
 
 
-def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> np.ndarray:
+def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> NDArray[f8]:
     """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
 
     :returns: Numpy array
@@ -56,21 +61,21 @@ def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> np.ndarray:
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_normal_modes(file_hess: PathLike) -> np.ndarray:
+def parse_normal_modes(file_hess: PathLike) -> NDArray[f8]:
     """Return the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_frequencies(file_hess: PathLike) -> np.ndarray:
+def parse_frequencies(file_hess: PathLike) -> NDArray[f8]:
     """Parse the vibrational frequencies from the job_name.hess file."""
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
 
-    return np.array([x.split()[-1] for x in lines[1:]], dtype=float)
+    return np.array([x.split()[-1] for x in lines[1:]], dtype=np.float64)
 
 
-def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> np.ndarray:
+def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> NDArray[f8]:
     """Read a matrix printed in block format.
 
     :param  start: token identifying the start of the block.
@@ -95,7 +100,7 @@ def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> np.ndarr
     return np.concatenate(blocks, axis=1)
 
 
-def read_block(lines: Sequence[str]) -> np.ndarray:
+def read_block(lines: Sequence[str]) -> NDArray[f8]:
     """Read a block containing the values of the block matrix.
 
     The format is similar to:
@@ -110,7 +115,7 @@ def read_block(lines: Sequence[str]) -> np.ndarray:
 
     :returns: Numpy array
     """
-    return np.array([x.split()[1:] for x in lines[1:]], dtype=float)
+    return np.array([x.split()[1:] for x in lines[1:]], dtype=np.float64)
 
 
 def parse_molecular_orbitals(file_name: PathLike) -> InfoMO:
@@ -142,7 +147,7 @@ def parse_molecular_orbitals(file_name: PathLike) -> InfoMO:
     return InfoMO(np.hstack(tuple_energies), np.hstack(tuple_coeffs))
 
 
-def read_column_orbitals(lines: Sequence[str]) -> Tuple[np.ndarray, np.ndarray]:
+def read_column_orbitals(lines: Sequence[str]) -> tuple[NDArray[f8], NDArray[f8]]:
     """Read a set of maximum 6 columns containing the Molecular orbitals.
 
     the format similar to:

@@ -1,9 +1,9 @@
 """Use the AWK command line to read output files."""
 
-__all__ = ['awk_file', 'extract_line_value', 'extract_line_values']
+from __future__ import annotations
 
 import subprocess
-from typing import Union, List, Optional, Any
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 from pyparsing import OneOrMore, SkipTo, Suppress
@@ -11,13 +11,15 @@ from pyparsing import OneOrMore, SkipTo, Suppress
 from .utils import parse_file
 from ..type_hints import PathLike
 
+if TYPE_CHECKING:
+    Scalar = int | float | str
 
-Scalar = Union[int, float, str]
+__all__ = ['awk_file', 'extract_line_value', 'extract_line_values']
 
 
 def awk_file(filename: PathLike, script: str = '',
-             progfile: Optional[PathLike] = None
-             ) -> Union[Scalar, List[Scalar]]:
+             progfile: None | PathLike = None
+             ) -> Scalar | list[Scalar]:
     r"""Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
@@ -46,7 +48,7 @@ def awk_file(filename: PathLike, script: str = '',
     if ret[-1] == '':
         ret = ret[:-1]
 
-    result: List[Scalar] = []
+    result: list[Scalar] = []
     for i in ret:
         try:
             v: Scalar = int(i)
@@ -60,7 +62,7 @@ def awk_file(filename: PathLike, script: str = '',
 
 
 def extract_line_value(file_name: PathLike,
-                       pattern: Optional[str] = None,
+                       pattern: None | str = None,
                        pos: int = 0) -> float:
     """Get a field record from a file.
 
@@ -77,11 +79,11 @@ def extract_line_value(file_name: PathLike,
 
 def extract_line_values(
     file_name: PathLike,
-    pattern: Optional[str] = None,
+    pattern: None | str = None,
     pos: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
-    step: Optional[int] = None,
+    start: None | int = None,
+    stop: None | int = None,
+    step: None | int = None,
     dtype: Any = np.float64,
 ) -> np.ndarray:
     """Get multiply field records from a file.
