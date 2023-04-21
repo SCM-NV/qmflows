@@ -17,6 +17,7 @@ defaults:
 
 env:
   CP2K_DATA_DIR: "${{ github.workspace }}/cp2k/data"
+  PY_COLORS: "1"
 
 jobs:
   Test:
@@ -57,8 +58,7 @@ jobs:
 
     - name: Install cp2k
       if: matrix.special[0] == 'CP2K'
-      run: |
-        bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }}
+      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }}
 
     - name: Info CP2K
       if: matrix.special[0] == 'CP2K'
