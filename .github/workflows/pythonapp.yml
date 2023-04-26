@@ -127,7 +127,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install linters
-        run: pip install "pydocstyle[toml]>=6.1" flake8 "Flake8-pyproject>=1.0.1" mypy "numpy>=1.21" pytest more_itertools types-PyYAML types-setuptools "pyparsing>=3.0.8"
+        run: pip install -r linting_requirements.txt
 
       - name: Python info
         run: |
@@ -137,8 +137,8 @@ jobs:
       - name: Installed packages
         run: pip list
 
-      - name: Run pycodestyle
-        run: pycodestyle src test
+      - name: Run flake8
+        run: flake8 src test
 
       - name: Run pydocstyle
         run: pydocstyle src
