@@ -11,3 +11,26 @@ module = [
     "pandas.*",
 ]
 ignore_missing_imports = true
+
+[tool.coverage.run]
+branch = true
+source = ["src"]
+
+[tool.flake8]
+max-line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = "src test"
+addopts = "--tb=short --cov --doctest-modules --cov-report xml --cov-report term --cov-report html -s --pdbcls=IPython.terminal.debugger:TerminalPdb"
+markers = [
+    "slow: A marker for slow tests requiring external quantum-chemical packages.",
+]
+filterwarnings = [
+    "error::qmflows.warnings_qmflows.QMFlows_Warning",
+    "ignore:Generic keyword '_pytestfixturefunction' not implemented for package \\w:qmflows.warnings_qmflows.Key_Warning",
+]
+
+[tool.pydocstyle]
+convention = "numpy"
+add-ignore = ["D401", "D105"]
+ignore-decorators = "overload"

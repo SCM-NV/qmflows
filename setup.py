@@ -28,7 +28,7 @@ docs_require = [
 
 tests_no_optional_require = [
     'assertionlib>=3.1.0',
-    'pytest>=5.4',
+    'pytest>=6.0',
     'pytest-cov',
     'pytest-mock',
     'typing_extensions'
