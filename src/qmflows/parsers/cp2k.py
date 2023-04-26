@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import warnings
 import re
-import functools
 from itertools import islice, chain
 from collections.abc import Generator, Iterable, Iterator, Sequence
 from typing import Any, IO, TYPE_CHECKING, Literal
@@ -33,9 +32,8 @@ if TYPE_CHECKING:
     Quantity = Literal['E', 'ZPE', 'H', 'S', 'G']
 
 __all__ = ['read_cp2k_basis', 'read_cp2k_coefficients', 'get_cp2k_freq',
-           'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
+           'read_cp2k_xyz', 'read_cp2k_table',
            'read_cp2k_table_slc', 'get_cp2k_version']
-
 
 
 def read_xyz_file(file_name: PathLike) -> Molecule:

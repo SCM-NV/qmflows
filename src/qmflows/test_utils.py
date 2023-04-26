@@ -59,7 +59,7 @@ __all__ = [
     'validate_status',
     'HAS_RDKIT',
     'requires_cp2k',
-    'requires_orca'
+    'requires_orca',
     'requires_ams',
     'requires_adf',
     'find_executable',
@@ -225,7 +225,6 @@ def validate_status(result: Result, *, print_out: bool = True, print_err: bool =
     if result.status == "successful":
         return None
 
-    indent = 4 * " "
     msg = f"Unexpected {result.job_name} status: {result.status!r}"
 
     if print_out:

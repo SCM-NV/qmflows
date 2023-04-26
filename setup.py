@@ -13,9 +13,12 @@ version: "dict[str, str]" = {}
 with open(version_file, 'r', encoding='utf8') as f:
     exec(f.read(), version)
 
-def readme():
+
+def readme() -> str:
+    """Load the readme file."""
     with open('README.rst', 'r', encoding='utf8') as f:
         return f.read()
+
 
 docs_require = [
     'sphinx>=2.1,!=3.1.1',

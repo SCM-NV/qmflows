@@ -56,11 +56,15 @@ def _construct_mapping(
     for key_node, value_node in node.value:
         key = loader.construct_object(key_node, deep=deep)
         if not isinstance(key, Hashable):
-            raise ConstructorError("while constructing a mapping", node.start_mark,
-                                    "found unhashable key", key_node.start_mark)
+            raise ConstructorError(
+                "while constructing a mapping", node.start_mark,
+                "found unhashable key", key_node.start_mark,
+            )
         elif key in mapping:
-            raise ConstructorError("while constructing a mapping", node.start_mark,
-                                    "found duplicate key", key_node.start_mark)
+            raise ConstructorError(
+                "while constructing a mapping", node.start_mark,
+                "found duplicate key", key_node.start_mark,
+            )
 
         value = loader.construct_object(value_node, deep=deep)
         mapping[key] = value

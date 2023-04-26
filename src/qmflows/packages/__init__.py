@@ -22,6 +22,9 @@ __all__ = [
 ]
 
 if not TYPE_CHECKING:
+    from scm import plams
+
     #: Placeholder docstring for sphinx.
     JOB_MAP: "dict[type[plams.Job], Package]"
+
 del TYPE_CHECKING

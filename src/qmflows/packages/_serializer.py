@@ -2,9 +2,7 @@
 
 from __future__ import annotations
 
-import sys
 import base64
-import warnings
 from collections.abc import Callable, Mapping, Iterable
 from typing import TypeVar, Any, TYPE_CHECKING
 
@@ -15,7 +13,6 @@ if TYPE_CHECKING:
     from scm.plams import Molecule
     from rdkit.Chem import Mol
     from pandas.core.generic import NDFrame
-    from pandas import DataFrame, Series
 
 __all__ = ['SerMolecule', 'SerMol', 'SerSettings', 'SerNDFrame', 'SerReduce']
 

@@ -3,7 +3,7 @@
 import sys
 import logging
 
-__all__ = ['logger', 'stdout_handlet']
+__all__ = ['logger', 'stdout_handler']
 
 #: The QMFlows :class:`~logging.Logger`.
 logger = logging.getLogger(__package__)

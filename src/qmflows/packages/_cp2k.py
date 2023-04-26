@@ -243,7 +243,9 @@ class CP2K(Package):
     }
 
     @classmethod
-    def handle_special_keywords(cls, settings: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
+    def handle_special_keywords(
+        cls, settings: Settings, key: str, value: Any, mol: plams.Molecule,
+    ) -> None:
         """Create the settings input for complex cp2k keys.
 
         :param settings: Job Settings.

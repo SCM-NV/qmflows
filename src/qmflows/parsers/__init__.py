@@ -9,6 +9,8 @@ Consists of the following four public submodules:
 
 """
 
+# flake8: noqa: E402
+
 from ._generic import (awk_file, extract_line_value, extract_line_values)
 from ._xyz import (parse_string_xyz, readXYZ, manyXYZ, string_to_plams_Molecule)
 

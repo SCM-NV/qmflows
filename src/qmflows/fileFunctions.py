@@ -19,6 +19,7 @@ def yaml2Settings(xs: str | bytes) -> Settings: ...
 @overload
 def yaml2Settings(xs: str | bytes, mapping_type: Callable[[dict[str, Any]], T]) -> T: ...
 
+
 def yaml2Settings(xs, mapping_type=Settings):
     """Transform a string containing some data in .yaml format to a Settings object."""
     if isinstance(xs, bytes):

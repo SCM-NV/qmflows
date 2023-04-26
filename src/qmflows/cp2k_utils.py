@@ -270,7 +270,7 @@ def set_prm(settings: Settings, key: str | tuple[str, ...],
     try:
         prm_key = cast("str | Sequence[str]", prm_map.pop('param'))
     except KeyError as ex:
-        raise KeyError(f"'param' has not been specified") from ex
+        raise KeyError("'param' has not been specified") from ex
     else:  # Extract the key path
         key_path = _get_key_path(key)
 
@@ -305,6 +305,8 @@ def set_prm_values(prm_key: Sequence[str], prm_map: MappingSequence,
                    atom_map: MutableMapping[None | str, int],
                    settings_base: list[Settings], atom_key: str) -> None:
     ...
+
+
 def set_prm_values(prm_key, prm_map, atom_map,
                    settings_base, atom_key) -> None:  # noqa: E302
     """Assign the actual values specified in :func:`set_prm`.

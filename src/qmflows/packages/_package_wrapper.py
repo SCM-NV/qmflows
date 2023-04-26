@@ -136,7 +136,6 @@ JOB_MAP: dict[type[plams.Job], Package] = {
 }
 
 
-
 class ResultWrapper(Result):
     """The matching :class:`~qmflows.packages.Result` subclass for :class:`PackageWrapper`."""  # noqa
 
@@ -198,7 +197,8 @@ class PackageWrapper(Package, Generic[JT]):
         job_type : :class:`type[plams.Job] <type>`
             The to-be executed :class:`plams.Job<scm.plams.core.basejob.Job>` type.
             Will be automatically translated, when possible, into to the appropiate
-            :class:`~qmflows.packages.Package` instance upon calling :meth:`PackageWrapper.__call__`.
+            :class:`~qmflows.packages.Package` instance upon
+            calling :meth:`PackageWrapper.__call__`.
             If not, default to the more bare-bones implementation within this class
             and the matching :class:`ResultWrapper` instance.
             See also :attr:`PackageWrapper.job_type`.
@@ -261,5 +261,4 @@ class PackageWrapper(Package, Generic[JT]):
     def handle_special_keywords(settings: Settings, key: str,
                                 value: Any, mol: plams.Molecule) -> None:
         """Method not implemented."""
-        warn(f'No generic keywords implemented for PackageWrapper',
-             category=Key_Warning)
+        warn('No generic keywords implemented for PackageWrapper', category=Key_Warning)

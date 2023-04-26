@@ -1,7 +1,5 @@
 """Tests related to the optional rdkit dependency."""
 
-import importlib
-
 import pytest
 import qmflows
 from qmflows.test_utils import HAS_RDKIT

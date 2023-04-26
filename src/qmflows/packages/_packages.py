@@ -8,7 +8,6 @@ import importlib
 import inspect
 import os
 import sys
-import functools
 import warnings
 from abc import abstractmethod, ABC
 from types import ModuleType
@@ -17,7 +16,7 @@ from functools import partial
 from os.path import join
 from warnings import warn
 from collections.abc import Callable, Mapping, Iterator
-from typing import Any, ClassVar, TypeVar, TYPE_CHECKING, overload, TYPE_CHECKING
+from typing import Any, ClassVar, TypeVar, TYPE_CHECKING, overload
 
 import numpy as np
 import pandas as pd
@@ -43,6 +42,7 @@ try:
     from scm.plams import from_rdmol
 except ImportError:
     Chem = None
+
     def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
         return mol
 
@@ -53,7 +53,9 @@ __all__ = ['Package', 'Result', 'run']
 
 def load_properties(name: str, prefix: str = 'properties') -> _Settings:
     """Load the properties-defining .yaml file from ."""
-    file_name = os.path.join(os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml')
+    file_name = os.path.join(
+        os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml',
+    )
     with open(file_name, "r", encoding="utf8") as f:
         return yaml2Settings(f.read(), mapping_type=_SettingsType)
 
@@ -135,8 +137,10 @@ class Result:
 
             elif not (has_crashed or is_private or prop in self.prop_mapping):
                 if self._results_open:
-                    warn(f"Generic property {prop!r} not defined",
-                        category=QMFlows_Warning, stacklevel=2)
+                    warn(
+                        f"Generic property {prop!r} not defined",
+                        category=QMFlows_Warning, stacklevel=2,
+                    )
 
                 # Do not issue this warning if the Results object is still pickled
                 else:  # Unpickle the Results instance and try again
@@ -144,8 +148,10 @@ class Result:
                     try:
                         return vars(self)[prop]  # Avoid recursive `getattr` calls
                     except KeyError:
-                        warn(f"Generic property {prop!r} not defined",
-                            category=QMFlows_Warning, stacklevel=2)
+                        warn(
+                            f"Generic property {prop!r} not defined",
+                            category=QMFlows_Warning, stacklevel=2,
+                        )
 
             elif has_crashed and not is_private:
                 warn(f"""

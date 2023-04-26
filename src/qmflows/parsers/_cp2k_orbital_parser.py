@@ -175,7 +175,7 @@ def read_coefficients(
 
 
 _ORBITAL_PATTERN = re.compile((
-    r"(?P<key>Number of occupied orbitals|Number of molecular orbitals|Number of orbital functions):"
+    r"(?P<key>Number of occupied orbitals|Number of molecular orbitals|Number of orbital functions):"  # noqa: E501
     r"\s+"
     r"(?P<value>[0-9]+)"
 ))

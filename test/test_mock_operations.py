@@ -16,7 +16,7 @@ if HAS_RDKIT:
 
 
 def generate_mocked_results(
-        mocker: MockFixture, target: str, instances: int=10,
+        mocker: MockFixture, target: str, instances: int = 10,
         expected: None | int = None) -> list[Any]:
     """Generate a list of mocked results with property `prop`.
 

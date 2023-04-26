@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from typing import TYPE_CHECKING, Iterator
+from typing import TYPE_CHECKING
 from itertools import islice
 
 import numpy as np

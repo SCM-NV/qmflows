@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any, ClassVar, overload
+from typing import ClassVar, overload
 
 import scm.plams.interfaces.molecule.rdkit as molkit
 from scm.plams import Molecule
@@ -55,11 +55,10 @@ class Coordinate:
         return self.fun(conf, *xs)
 
     @overload
-    def get_settings(self, value: float, mol: None) -> Settings:
-        ...
+    def get_settings(self, value: float, mol: None) -> Settings: ...
     @overload
-    def get_settings(self, value: None, mol: MolType) -> Settings:
-        ...
+    def get_settings(self, value: None, mol: MolType) -> Settings: ...
+
     def get_settings(self, value=None, mol=None):
         """Map a :class:`str` representation of :attr:`Coordinate.atoms` to *value*."""
         s = Settings()
