@@ -1,9 +1,8 @@
-from typing import NamedTuple
+from typing import NamedTuple, Final
 
 from packaging.version import Version
 
 from ._version import __version__
-from .type_hints import Final
 
 __all__ = ["version_info"]
 

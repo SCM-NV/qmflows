@@ -36,6 +36,8 @@ API
 
 """
 
+from __future__ import annotations
+
 import os
 import sys
 import textwrap
@@ -57,7 +59,7 @@ __all__ = [
     'validate_status',
     'HAS_RDKIT',
     'requires_cp2k',
-    'requires_orca'
+    'requires_orca',
     'requires_ams',
     'requires_adf',
     'find_executable',
@@ -80,7 +82,7 @@ PATH = Path('test') / 'test_files'
 PATH_MOLECULES = PATH / "molecules"
 
 
-def find_executable(executable: str, path: "str | None" = None) -> "str | None":
+def find_executable(executable: str, path: str | None = None) -> str | None:
     """Tries to find ``executable`` in the directories listed in ``path``.
 
     A string listing directories separated by ``os.pathsep``; defaults to ``os.environ['PATH']``.
@@ -181,7 +183,7 @@ def get_mm_settings() -> Settings:
     return s
 
 
-def _read_result_file(result: Result, extension: str, max_line: int = 100) -> "None | str":
+def _read_result_file(result: Result, extension: str, max_line: int = 100) -> None | str:
     """Find and read the first file in ``result`` with the provided file extension.
 
     Returns ``None`` if no such file can be found.
@@ -223,7 +225,6 @@ def validate_status(result: Result, *, print_out: bool = True, print_err: bool =
     if result.status == "successful":
         return None
 
-    indent = 4 * " "
     msg = f"Unexpected {result.job_name} status: {result.status!r}"
 
     if print_out:

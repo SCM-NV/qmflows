@@ -1,16 +1,19 @@
 """Settings use to describe the input of a Quantum chemistry package."""
 
-__all__ = ['Settings']
+from __future__ import annotations
 
 from functools import wraps
-from typing import Callable, NoReturn, Any, TypeVar, Mapping
+from collections.abc import Callable, Mapping
+from typing import NoReturn, Any, TypeVar
 
 from scm import plams
+
+__all__ = ['Settings']
 
 _Self = TypeVar("_Self", bound="Settings")
 
 
-class Settings(plams.core.settings.Settings, ):
+class Settings(plams.core.settings.Settings):
     """A subclass of :class:`plams.Settings<scm.plams.core.settings.Settings>`.
 
     The difference with respect to plams' Settings are:

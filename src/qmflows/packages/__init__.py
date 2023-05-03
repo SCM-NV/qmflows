@@ -4,11 +4,6 @@ from typing import TYPE_CHECKING
 
 from ._packages import (
     Package, Result, run, registry,
-    _load_properties as load_properties,
-)
-from ._serializer import (
-    _SerMolecule as SerMolecule,
-    _SerSettings as SerSettings,
 )
 
 from ._cp2k import CP2K_Result, CP2K, cp2k
@@ -27,6 +22,9 @@ __all__ = [
 ]
 
 if not TYPE_CHECKING:
+    from scm import plams
+
     #: Placeholder docstring for sphinx.
     JOB_MAP: "dict[type[plams.Job], Package]"
+
 del TYPE_CHECKING

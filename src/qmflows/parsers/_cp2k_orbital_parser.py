@@ -1,5 +1,7 @@
 """Functions for reading CP2K orbitals."""
 
+from __future__ import annotations
+
 import os
 import re
 import fnmatch
@@ -16,9 +18,9 @@ __all__ = ["read_cp2k_coefficients"]
 
 
 def read_cp2k_coefficients(
-    path_mos: "str | os.PathLike[str]",
-    plams_dir: "None | str | os.PathLike[str]" = None,
-) -> "CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]":
+    path_mos: str | os.PathLike[str],
+    plams_dir: None | str | os.PathLike[str] = None,
+) -> CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]:
     """Read the MO's from the CP2K output.
 
     First it reads the number of ``Orbitals`` and ``Orbital`` functions from the
@@ -37,9 +39,9 @@ def read_cp2k_coefficients(
 
 
 def read_log_file(
-    path: "str | os.PathLike[str]",
+    path: str | os.PathLike[str],
     orbitals_info: MO_metadata,
-) -> "CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]":
+) -> CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]:
     """
     Read the orbitals from the Log file.
 
@@ -77,7 +79,7 @@ def read_log_file(
         )
 
 
-def _find_mo_start(path: "str | os.PathLike[str]", unrestricted: bool) -> "int | tuple[int, int]":
+def _find_mo_start(path: str | os.PathLike[str], unrestricted: bool) -> int | tuple[int, int]:
     """Find the start of the final-most MO range in ``path``.
 
     Returns
@@ -110,7 +112,7 @@ def _find_mo_start(path: "str | os.PathLike[str]", unrestricted: bool) -> "int |
 
 
 def read_coefficients(
-    path: "str | os.PathLike[str]",
+    path: str | os.PathLike[str],
     n_orb: int,
     n_orb_funcs: int,
     start: int = 0,
@@ -173,7 +175,7 @@ def read_coefficients(
 
 
 _ORBITAL_PATTERN = re.compile((
-    r"(?P<key>Number of occupied orbitals|Number of molecular orbitals|Number of orbital functions):"
+    r"(?P<key>Number of occupied orbitals|Number of molecular orbitals|Number of orbital functions):"  # noqa: E501
     r"\s+"
     r"(?P<value>[0-9]+)"
 ))
@@ -188,7 +190,7 @@ _ORBITAL_NAMES = types.MappingProxyType({
 _REQUIRED_KEYS = frozenset(_ORBITAL_NAMES.values())
 
 
-def read_cp2k_number_of_orbitals(file_name: "str | os.PathLike[str]") -> MO_metadata:
+def read_cp2k_number_of_orbitals(file_name: str | os.PathLike[str]) -> MO_metadata:
     """Extract the number of (occupied) orbitals and basis functions."""
     with open(file_name, "r") as f:
         kwargs: "dict[str, list[int]]" = defaultdict(list)

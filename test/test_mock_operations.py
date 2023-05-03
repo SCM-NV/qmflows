@@ -1,11 +1,13 @@
 """Mock utilities."""
 
+from __future__ import annotations
+
 import pytest
 import numpy as np
 from assertionlib import assertion
 from noodles import run_single
 from pytest_mock import MockFixture
-from typing import Any, List, Optional
+from typing import Any
 
 from qmflows.test_utils import HAS_RDKIT
 
@@ -14,8 +16,8 @@ if HAS_RDKIT:
 
 
 def generate_mocked_results(
-        mocker: MockFixture, target: str, instances: int=10,
-        expected: Optional[int]=None) -> List[Any]:
+        mocker: MockFixture, target: str, instances: int = 10,
+        expected: None | int = None) -> list[Any]:
     """Generate a list of mocked results with property `prop`.
 
     One of the results is set to `expected`  and the rest are random values.

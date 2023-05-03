@@ -1,8 +1,9 @@
 """Module containing some schedule utilities."""
 
-__all__ = ['find_first_job', 'select_max', 'select_min']
+from __future__ import annotations
 
-from typing import Callable, Iterable, Any, Optional
+from collections.abc import Callable, Iterable
+from typing import Any, TYPE_CHECKING
 
 from noodles import find_first, schedule
 from scm.plams import Molecule
@@ -11,8 +12,11 @@ from ..packages import Result, Package
 from .._settings import Settings
 from ..type_hints import PromisedObject
 
-#: A function which takes a PromisedObject as argument and returns a boolean.
-Predicate = Callable[[PromisedObject], bool]
+if TYPE_CHECKING:
+    #: A function which takes a PromisedObject as argument and returns a boolean.
+    Predicate = Callable[[PromisedObject], bool]
+
+__all__ = ['find_first_job', 'select_max', 'select_min']
 
 
 @schedule
@@ -20,7 +24,7 @@ def find_first_job(pred: Predicate,
                    packagelist: Iterable[Package],
                    settings: Settings,
                    molecule: Molecule,
-                   job_name: str, **kwargs: Any) -> Optional[Result]:
+                   job_name: str, **kwargs: Any) -> None | Result:
     """Return the first job to finish."""
     joblist = [package(
         settings, molecule, job_name=f"{package.pkg_name}_{job_name}", **kwargs)
@@ -29,7 +33,7 @@ def find_first_job(pred: Predicate,
 
 
 @schedule
-def select_max(results: Iterable[Result], prop: str = 'energy') -> Optional[Result]:
+def select_max(results: Iterable[Result], prop: str = 'energy') -> None | Result:
     """Select a result with the maximum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because
@@ -43,7 +47,7 @@ def select_max(results: Iterable[Result], prop: str = 'energy') -> Optional[Resu
 
 
 @schedule
-def select_min(results: Iterable[Result], prop: str = 'energy') -> Optional[Result]:
+def select_min(results: Iterable[Result], prop: str = 'energy') -> None | Result:
     """Select a result with the minimum value of a property from a Results list.
 
     If the property is not available from a result (e.g. because

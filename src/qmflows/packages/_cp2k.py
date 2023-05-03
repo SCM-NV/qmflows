@@ -1,8 +1,11 @@
 """CP2K input/output handling."""
 
+from __future__ import annotations
+
 import os
 from os.path import join
-from typing import Any, Dict, Iterable, ClassVar, Type, TYPE_CHECKING
+from collections.abc import Iterable
+from typing import Any, ClassVar, TYPE_CHECKING, Final
 from warnings import warn
 
 import numpy as np
@@ -12,7 +15,7 @@ from ._packages import Package, Result, parse_output_warnings, load_properties
 from ..parsers.cp2k import parse_cp2k_warnings
 from .._settings import Settings
 from ..warnings_qmflows import cp2k_warnings, Key_Warning
-from ..type_hints import Final, _Settings, Generic2Special
+from ..type_hints import _Settings, Generic2Special
 from ..common import CP2KInfoMO
 
 if TYPE_CHECKING:
@@ -63,7 +66,7 @@ def _write_cell_parameters(s: Settings, key: str, value: list, mol: plams.Molecu
     &END CELL
 
     """
-    def fun(xs: Iterable[Any]) -> str:
+    def fun(xs: Iterable[object]) -> str:
         return '{:} {:} {:}'.format(*xs)
 
     ar = np.asarray(value, dtype=np.float64)
@@ -136,18 +139,18 @@ class CP2K_Result(Result):
     prop_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='properties')
 
     # Attributes accessed via `__getattr__`
-    energy: "None | float"
-    frequencies: "None | NDArray[f8]"
-    geometry: "None | plams.Molecule"
-    enthalpy: "None | float"
-    free_energy: "None | float"
-    orbitals: "None | CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]"
-    forces: "None | NDArray[f8]"
-    coordinates: "None | NDArray[f8]"
-    temperature: "None | NDArray[f8]"
-    volume: "None | NDArray[f8]"
-    lattice: "None | NDArray[f8]"
-    pressure: "None | NDArray[f8]"
+    energy: None | float
+    frequencies: None | NDArray[f8]
+    geometry: None | plams.Molecule
+    enthalpy: None | float
+    free_energy: None | float
+    orbitals: None | CP2KInfoMO | tuple[CP2KInfoMO, CP2KInfoMO]
+    forces: None | NDArray[f8]
+    coordinates: None | NDArray[f8]
+    temperature: None | NDArray[f8]
+    volume: None | NDArray[f8]
+    lattice: None | NDArray[f8]
+    pressure: None | NDArray[f8]
 
     @property
     def molecule(self) -> "None | plams.Molecule":
@@ -173,7 +176,7 @@ class CP2K(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='generic2')
-    result_type: ClassVar[Type[CP2K_Result]] = CP2K_Result
+    result_type: ClassVar[type[CP2K_Result]] = CP2K_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)
@@ -230,7 +233,7 @@ class CP2K(Package):
         return result
 
     #: A :class:`dict` mapping special keywords to the appropiate function.
-    SPECIAL_FUNCS: ClassVar[Dict[str, Generic2Special]] = {
+    SPECIAL_FUNCS: ClassVar[dict[str, Generic2Special]] = {
         'cell_parameters': _write_cell_parameters,
         'cell_angles': _write_cell_angles,
         'periodic': _write_periodic,
@@ -240,7 +243,9 @@ class CP2K(Package):
     }
 
     @classmethod
-    def handle_special_keywords(cls, settings: Settings, key: str, value: Any, mol: plams.Molecule) -> None:
+    def handle_special_keywords(
+        cls, settings: Settings, key: str, value: Any, mol: plams.Molecule,
+    ) -> None:
         """Create the settings input for complex cp2k keys.
 
         :param settings: Job Settings.

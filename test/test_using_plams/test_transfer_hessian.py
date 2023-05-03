@@ -3,7 +3,6 @@
 from pathlib import Path
 
 import pytest
-import scm.plams.interfaces.molecule.rdkit as molkit
 from noodles import gather
 from scm.plams import Molecule
 

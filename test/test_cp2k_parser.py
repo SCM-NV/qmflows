@@ -1,7 +1,6 @@
 """Test CP2K parser functions."""
 
 import os
-import sys
 
 import numpy as np
 import h5py
@@ -13,11 +12,6 @@ from qmflows.parsers._cp2k_orbital_parser import _find_mo_start, read_cp2k_numbe
 from qmflows.test_utils import PATH
 from qmflows.warnings_qmflows import QMFlows_Warning, cp2k_warnings
 from qmflows.common import AtomBasisKey
-
-if sys.version_info >= (3, 7):
-    from builtins import dict as OrderedDict
-else:
-    from collections import OrderedDict
 
 
 def test_parse_cp2k_warnings():
@@ -55,11 +49,11 @@ class TestReadBasis:
                 np.testing.assert_allclose(value_tup.coefficients, coefficients, err_msg=key)
                 np.testing.assert_array_equal(key_tup.basisFormat, basis_fmt, err_msg=key)
 
-    PARAMS = OrderedDict({
+    PARAMS = {
         "BASIS_INVALID_N_EXP": 11,
         "BASIS_INVALID_FMT": 3,
         "BASIS_NOTIMPLEMENTED": 2,
-    })
+    }
 
     @pytest.mark.parametrize("filename,lineno", PARAMS.items(), ids=PARAMS)
     def test_raise(self, filename: str, lineno: int) -> None:
@@ -69,11 +63,11 @@ class TestReadBasis:
 
 
 class TestFindMOStart:
-    PARAMS = OrderedDict({
+    PARAMS = {
         "no_alpha": ("no_alpha.MOLog", True),
         "no_beta": ("no_beta.MOLog", True),
         "invalid_header":  ("invalid_header.MOLog", False),
-    })
+    }
 
     @pytest.mark.parametrize("filename,unrestricted", PARAMS.values(), ids=PARAMS)
     def test_raise(self, filename: str, unrestricted: bool) -> None:

@@ -1,39 +1,61 @@
 """Various serialisers used in QMFlows."""
 
-import sys
+from __future__ import annotations
+
 import base64
-import warnings
-from typing import (
-    Type, TypeVar, Callable, Any, Dict, Mapping, TYPE_CHECKING, Iterable, Tuple, Optional
-)
+from collections.abc import Callable, Iterable, Sequence
+from typing import TypeVar, Any, TYPE_CHECKING
 
 from noodles.serial import Serialiser
-
-from ..warnings_qmflows import QMFlowsDeprecationWarning
-
-if sys.version_info >= (3, 7):
-    from builtins import dict as OrderedDict
-else:
-    from collections import OrderedDict
 
 if TYPE_CHECKING:
     from .._settings import Settings
     from scm.plams import Molecule
     from rdkit.Chem import Mol
     from pandas.core.generic import NDFrame
-    from pandas import DataFrame, Series
+    from typing import Protocol, TypedDict, Generic
+    from typing_extensions import NotRequired
 
-else:  # Don't bother importing all this stuff when not type checking
-    Settings = 'qmflows.Settings'
-    Molecule = 'scm.plams.mol.molecule.Molecule'
-    Mol = 'rdkit.Chem.rdchem.Mol'
-    NDFrame = 'pandas.core.generic.NDFrame'
-    DataFrame = 'pandas.core.frame.DataFrame'
-    Series = 'pandas.core.series.Series'
+    T = TypeVar('T')
+
+    _RecDictBase = TypedDict('_RecDictBase', {'type': str, 'class': str})
+
+    class _RecDict(_RecDictBase, Generic[T]):
+        _noodles: str
+        data: T
+        ref: NotRequired[bool]
+        host: NotRequired[None | str]
+        files: NotRequired[list[str]]
+
+    class _MakeRec(Protocol[T]):
+        def __call__(
+                self,
+                __data: T,
+                *,
+                ref: bool = ...,
+                files: list[str] = ...,
+            ) -> _RecDict[T]: ...
+
+    class _AtomDict(TypedDict):
+        atnum: int
+        bonds: list[int]
+        coords: tuple[float, float, float]
+        properties: Settings
+
+    class _BondDict(TypedDict):
+        atom1: int
+        atom2: int
+        order: float
+        properties: Settings
+
+    class _MolDict(TypedDict):
+        charge: NotRequired[int]
+        atoms: list[_AtomDict]
+        bonds: list[_BondDict]
+        lattice: list[Sequence[float]]
+        properties: Settings
 
 __all__ = ['SerMolecule', 'SerMol', 'SerSettings', 'SerNDFrame', 'SerReduce']
-
-T = TypeVar('T')
 
 
 class SerMolecule(Serialiser):
@@ -41,26 +63,15 @@ class SerMolecule(Serialiser):
 
     def __init__(self) -> None:
         """Initialize a :class:`SerMolecule` instance."""
-        super().__init__(Molecule)
+        super().__init__("Molecule")
 
-    def encode(self, obj: Molecule, make_rec: Callable[[T], Dict[str, T]]) -> Dict[str, T]:
+    def encode(self, obj: Molecule, make_rec: _MakeRec[_MolDict]) -> _RecDict[_MolDict]:
         """Encode the passed PLAMS Molecule."""
         return make_rec(obj.as_dict())
 
-    def decode(self, cls: Type[Molecule], data: Mapping) -> Molecule:
+    def decode(self, cls: type[Molecule], data: _MolDict) -> Molecule:
         """Decode the passed data into a PLAMS Molecule."""
         return cls.from_dict(data)
-
-
-class _SerMolecule:
-    """Deprecated alias for :class:`SerMolecule`."""
-
-    def __init__(self) -> None:
-        warnings.warn(
-            "`qmflows.packages.SerMolecule` is deprecated and will be removed in the future",
-            QMFlowsDeprecationWarning, stacklevel=2,
-        )
-        super().__init__()
 
 
 class SerMol(Serialiser):
@@ -68,13 +79,14 @@ class SerMol(Serialiser):
 
     def __init__(self) -> None:
         """Initialize a :class:`SerMol` instance."""
-        super().__init__(Mol)
+        super().__init__("Mol")
 
-    def encode(self, obj: Mol, make_rec: Callable[[T], Dict[str, T]]) -> Dict[str, T]:
+    def encode(self, obj: Mol, make_rec: _MakeRec[str]) -> _RecDict[str]:
         """Encode the passed RDKit Mol."""
-        return make_rec(base64.b64encode(obj.ToBinary()).decode('ascii'))
+        mol_bytes: bytes = obj.ToBinary()
+        return make_rec(base64.b64encode(mol_bytes).decode('ascii'))
 
-    def decode(self, cls: Type[Mol], data: str) -> Mol:
+    def decode(self, cls: type[Mol], data: str) -> Mol:
         """Decode the passed data into a RDKit Mol."""
         return cls(base64.b64decode(data.encode('ascii')))
 
@@ -84,40 +96,29 @@ class SerSettings(Serialiser):
 
     def __init__(self) -> None:
         """Initialize a :class:`SerSettings` instance."""
-        super().__init__(Settings)
+        super().__init__("Settings")
 
-    def encode(self, obj: Settings, make_rec: Callable[[T], Dict[str, T]]) -> Dict[str, T]:
+    def encode(self, obj: Settings, make_rec: _MakeRec[dict[Any, Any]]) -> _RecDict[dict[Any, Any]]:
         """Encode the passed PLAMS Settings."""
         return make_rec(obj.as_dict())
 
-    def decode(self, cls: Type[Settings], data: Mapping) -> Settings:
+    def decode(self, cls: type[Settings], data: dict[Any, Any]) -> Settings:
         """Decode the passed data into a PLAMS Settings."""
         return cls(data)
-
-
-class _SerSettings:
-    """Deprecated alias for :class:`SerSettings`."""
-
-    def __init__(self) -> None:
-        warnings.warn(
-            "`qmflows.packages.SerSettings` is deprecated and will be removed in the future",
-            QMFlowsDeprecationWarning, stacklevel=2,
-        )
-        super().__init__()
 
 
 class SerNDFrame(Serialiser):
     """Class to encode and decode the :class:`pandas.Series` and :class:`pandas.DataFrame` instances."""  # noqa: E501
 
-    def __init__(self, name: Any = NDFrame) -> None:
+    def __init__(self, name: Any = "NDFrame") -> None:
         """Initialize a :class:`SerNDFrame` instance."""
         super().__init__(name)
 
-    def encode(self, obj: NDFrame, make_rec: Callable[[T], Dict[str, T]]) -> Dict[str, T]:
+    def encode(self, obj: NDFrame, make_rec: _MakeRec[dict[str, Any]]) -> _RecDict[dict[str, Any]]:
         """Encode the passed pandas Series or DataFrame."""
         return make_rec(obj.to_dict())
 
-    def decode(self, cls: Type[NDFrame], data: Mapping) -> NDFrame:
+    def decode(self, cls: type[NDFrame], data: dict[str, Any]) -> NDFrame:
         """Decode the passed data into a pandas Series or DataFrame."""
         return cls(data)
 
@@ -131,16 +132,16 @@ class SerReduce(Serialiser):
 
     def encode(
         self, obj: Any, make_rec: Callable[[Any], Any]
-    ) -> Tuple[Tuple[Any, ...], Optional[Any]]:
+    ) -> tuple[tuple[Any, ...], None | Any]:
         """Encode the passed reduce-able object."""
         _, args, *tail = obj.__reduce__()
         state = tail[0] if len(tail) else None
         return args, state
 
-    def decode(self, cls: Type[T], data: Tuple[Iterable[Any], Optional[Any]]) -> T:
+    def decode(self, cls: type[T], data: tuple[Iterable[Any], None | Any]) -> T:
         """Decode the passed data into a PLAMS Molecule."""
         args, state = data
         ret = cls(*args)
-        if state is not None:
+        if state is not None and hasattr(ret, "__setstate__"):
             ret.__setstate__(state)
         return ret

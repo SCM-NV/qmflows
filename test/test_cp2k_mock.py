@@ -2,7 +2,6 @@
 import copy
 from typing import Callable
 
-import pytest
 import numpy as np
 from assertionlib import assertion
 from pytest_mock import MockFixture
@@ -11,7 +10,6 @@ from scm.plams import Molecule
 from qmflows import cp2k, templates
 from qmflows.packages import CP2K_Result
 from qmflows.utils import init_restart
-from qmflows.common import CP2KVersion
 from qmflows.test_utils import (
     PATH,
     PATH_MOLECULES,
@@ -33,6 +31,7 @@ def mock_runner(mocker_instance, jobname: str) -> Callable[..., CP2K_Result]:
         plams_dir=WORKDIR / jobname,
     )
     return run_mocked
+
 
 # module constants
 WORKDIR = PATH / "output_cp2k"

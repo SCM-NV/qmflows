@@ -1,23 +1,28 @@
 """Use the AWK command line to read output files."""
 
-__all__ = ['awk_file', 'extract_line_value', 'extract_line_values']
+from __future__ import annotations
 
+import os
 import subprocess
-from typing import Union, List, Optional, Any
+from typing import TYPE_CHECKING
 
 import numpy as np
-from pyparsing import OneOrMore, SkipTo, Suppress
+from pyparsing import OneOrMore, SkipTo, Suppress, ParserElement
 
 from .utils import parse_file
-from ..type_hints import PathLike
+
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
+    Scalar = int | float | str
+
+__all__ = ['awk_file', 'extract_line_value', 'extract_line_values']
 
 
-Scalar = Union[int, float, str]
-
-
-def awk_file(filename: PathLike, script: str = '',
-             progfile: Optional[PathLike] = None
-             ) -> Union[Scalar, List[Scalar]]:
+def awk_file(
+    filename: str | os.PathLike[str],
+    script: str = '',
+    progfile: None | str | os.PathLike[str] = None
+) -> Scalar | list[Scalar]:
     r"""Execute an AWK script on a file given by *filename*.
 
     The AWK script can be supplied in two ways: either by directly passing
@@ -46,7 +51,7 @@ def awk_file(filename: PathLike, script: str = '',
     if ret[-1] == '':
         ret = ret[:-1]
 
-    result: List[Scalar] = []
+    result: list[Scalar] = []
     for i in ret:
         try:
             v: Scalar = int(i)
@@ -59,16 +64,21 @@ def awk_file(filename: PathLike, script: str = '',
     return result[0] if len(result) == 1 else result
 
 
-def extract_line_value(file_name: PathLike,
-                       pattern: Optional[str] = None,
-                       pos: int = 0) -> float:
+def extract_line_value(
+    file_name: str | os.PathLike[str],
+    pattern: None | str = None,
+    pos: int = 0,
+) -> float:
     """Get a field record from a file.
 
     Search for lines containing `pattern` and return the last line
     containing that value.
     :returns: value at position `pos` in the last found line, containing pattern.
     """
-    parse_Line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
+    if pattern is not None:
+        parse_Line: ParserElement = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
+    else:
+        parse_Line = SkipTo('\n')
     properties = parse_file(parse_Line, file_name).asList()
     last_line = properties[-1].split()
 
@@ -76,13 +86,13 @@ def extract_line_value(file_name: PathLike,
 
 
 def extract_line_values(
-    file_name: PathLike,
-    pattern: Optional[str] = None,
+    file_name: str | os.PathLike[str],
+    pattern: None | str = None,
     pos: int = 0,
-    start: Optional[int] = None,
-    stop: Optional[int] = None,
-    step: Optional[int] = None,
-    dtype: Any = np.float64,
+    start: None | int = None,
+    stop: None | int = None,
+    step: None | int = None,
+    dtype: DTypeLike = np.float64,
 ) -> np.ndarray:
     """Get multiply field records from a file.
 
@@ -90,7 +100,10 @@ def extract_line_values(
     containing that value in the range defined by `start`, `stop` and `step`.
     :returns: value at position `pos` in all found lines, containing pattern.
     """
-    parse_Line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
-    properties = parse_file(parse_Line, file_name)
+    if pattern is None:
+        parse_line: ParserElement = SkipTo('\n')
+    else:
+        parse_line = OneOrMore(Suppress(SkipTo(pattern)) + SkipTo('\n'))
+    properties = parse_file(parse_line, file_name)
     iterator = (i.split()[pos] for i in properties[start:stop:step])
     return np.fromiter(iterator, dtype=dtype)

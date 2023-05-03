@@ -1,8 +1,8 @@
 """``__getattr__`` and ``__dir__`` implementations for the main QMFlows namespace."""
 
-import sys
+from __future__ import annotations
+
 import types
-import importlib
 from typing import Any
 
 import qmflows
@@ -26,10 +26,6 @@ RDKIT_SET = frozenset({
     "select_max",
     "select_min",
     "examples",
-    "example_H2O2_TS",
-    "example_freqs",
-    "example_generic_constraints",
-    "example_partial_geometry_opt",
 })
 
 
@@ -47,7 +43,7 @@ def __getattr__(self: types.ModuleType, name: str) -> Any:
     raise AttributeError(f"module {self.__name__!r} has no attribute {name!r}")
 
 
-def __dir__(self: types.ModuleType) -> "list[str]":
+def __dir__(self: types.ModuleType) -> list[str]:
     """Manually insert the qmflows templates and RDKit functions into :func:`dir`."""
     try:
         return self._DIR_CACHE.copy()

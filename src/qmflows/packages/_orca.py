@@ -1,9 +1,11 @@
 """Orca input/output bookkeeping."""
 
+from __future__ import annotations
+
 import os
 from os.path import join
 from warnings import warn
-from typing import Any, Union, Optional, ClassVar, List, Type, TYPE_CHECKING
+from typing import Any, ClassVar, TYPE_CHECKING, Final
 
 import numpy as np
 from scm import plams
@@ -11,7 +13,7 @@ from scm import plams
 from ._packages import Package, Result, load_properties
 from ..parsers.orca import parse_molecule
 from .._settings import Settings
-from ..type_hints import Final, _Settings
+from ..type_hints import _Settings
 from ..utils import get_tmpfile_name
 from ..warnings_qmflows import Key_Warning
 from ..common import InfoMO
@@ -31,20 +33,20 @@ class ORCA_Result(Result):
     prop_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='properties')
 
     # Attributes accessed via `__getattr__`
-    charges: "None | list[float]"
-    dipole: "None | list[float]"
-    energy: "None | float"
-    enthalpy: "None | float"
-    free_energy: "None | float"
-    frequencies: "None | NDArray[f8]"
-    hessian: "None | NDArray[f8]"
-    normal_modes: "None | NDArray[f8]"
-    optcycles: "None | int"
-    orbitals: "None | InfoMO"
-    runtime: "None | float"
+    charges: None | list[float]
+    dipole: None | list[float]
+    energy: None | float
+    enthalpy: None | float
+    free_energy: None | float
+    frequencies: None | NDArray[f8]
+    hessian: None | NDArray[f8]
+    normal_modes: None | NDArray[f8]
+    optcycles: None | int
+    orbitals: None | InfoMO
+    runtime: None | float
 
     @property
-    def molecule(self) -> Optional[plams.Molecule]:
+    def molecule(self) -> None | plams.Molecule:
         """Retrieve the molecule from the output file."""
         if self.status in {'crashed', 'failed'}:
             return None
@@ -67,7 +69,7 @@ class ORCA(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
-    result_type: ClassVar[Type[ORCA_Result]] = ORCA_Result
+    result_type: ClassVar[type[ORCA_Result]] = ORCA_Result
 
     def __init__(self, pkg_name: str = "orca") -> None:
         super().__init__(pkg_name)
@@ -75,7 +77,7 @@ class ORCA(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = "ORCAjob",
-                work_dir: "None | str | os.PathLike[str]" = None,
+                work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> ORCA_Result:
         """Call the ORCA binary using plams interface."""
@@ -113,7 +115,7 @@ class ORCA(Package):
                 symbol, mass, coords = atom.symbol, atom.mass, atom.coords
                 return '{:2s}{:12.4f}{:14.6f}{:14.6f}{:14.6f}\n'.format(symbol, mass, *coords)
 
-            def format_hessian(dim, hess: Union[List[List[float]], np.ndarray]) -> str:
+            def format_hessian(dim, hess: list[list[float]] | NDArray[f8]) -> str:
                 """Format numpy array to Orca matrix format."""
                 ret = ''
                 for i in range((dim - 1) // 6 + 1):
@@ -178,7 +180,7 @@ class ORCA(Package):
                             f'Invalid constraint key: {k}', category=Key_Warning)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def freeze(value: List[Union[int, str]]) -> None:
+        def freeze(value: list[int | str]) -> None:
             if not isinstance(value, list):
                 msg = f'selected_atoms {value} is not a list'
                 raise RuntimeError(msg)
@@ -192,7 +194,7 @@ class ORCA(Package):
                         cons += '{{ C {:d} C }}'.format(a)
             settings.specific.orca.geom.Constraints._end = cons
 
-        def selected_atoms(value: List[Union[int, str]]) -> None:
+        def selected_atoms(value: list[int | str]) -> None:
             if not isinstance(value, list):
                 raise RuntimeError(f'selected_atoms {value} is not a list')
             cons = ''

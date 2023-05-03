@@ -1,32 +1,39 @@
 """Utilities to read cp2k out files."""
 
+from __future__ import annotations
+
 import os
 import warnings
 import re
-import functools
 from itertools import islice, chain
-from typing import Any, Dict, FrozenSet, Generator, Iterable, IO
-from typing import Optional as Optional_
-from typing import Sequence, Tuple, Type, Union, Iterator
+from collections.abc import Generator, Iterable, Iterator, Sequence
+from typing import Any, IO, TYPE_CHECKING, Literal, cast
 
 import numpy as np
 from pyparsing import SkipTo, Suppress, ZeroOrMore
 from scm.plams import Molecule, Units
 
 from ..common import CP2KVersion
-from ..type_hints import Literal, PathLike, WarnDict, WarnMap
+from ..type_hints import PathLike, WarnDict, WarnMap
 from ..utils import file_to_context
-from ..warnings_qmflows import QMFlows_Warning, QMFlowsDeprecationWarning
+from ..warnings_qmflows import QMFlows_Warning
 from ._xyz import manyXYZ, tuplesXYZ_to_plams
 
 # Re-exports
 from ._cp2k_basis_parser import read_cp2k_basis
 from ._cp2k_orbital_parser import read_cp2k_coefficients
 
-__all__ = ['read_cp2k_basis', 'read_cp2k_coefficients', 'get_cp2k_freq',
-           'read_cp2k_number_of_orbitals', 'read_cp2k_xyz', 'read_cp2k_table',
-           'read_cp2k_table_slc', 'get_cp2k_version']
+if TYPE_CHECKING:
+    from numpy.typing import NDArray, DTypeLike
+    from numpy import float64 as f8
 
+    #: A generator yielding 2-tuples with warning messages and warning types.
+    WarnGenerator = Generator[tuple[str, type[Warning]], None, None]
+    Quantity = Literal['E', 'ZPE', 'H', 'S', 'G']
+
+__all__ = ['read_cp2k_basis', 'read_cp2k_coefficients', 'get_cp2k_freq',
+           'read_cp2k_xyz', 'read_cp2k_table',
+           'read_cp2k_table_slc', 'get_cp2k_version']
 
 
 def read_xyz_file(file_name: PathLike) -> Molecule:
@@ -35,12 +42,14 @@ def read_xyz_file(file_name: PathLike) -> Molecule:
     return tuplesXYZ_to_plams(geometries[-1])
 
 
-def parse_cp2k_warnings(file_name: PathLike,
-                        package_warnings: WarnMap) -> Optional_[WarnDict]:
+def parse_cp2k_warnings(
+    file_name: str | os.PathLike[str],
+    package_warnings: WarnMap,
+) -> None | WarnDict:
     """Parse All the warnings found in an output file."""
     warnings: WarnDict = {}
     for msg, named_tup in package_warnings.items():
-        msg_list = named_tup.parser.parseFile(file_name).asList()
+        msg_list = named_tup.parser.parseFile(os.fspath(file_name)).asList()
 
         # Search for warnings that match the ones provided by the user
         iterator = assign_warning(named_tup.warn_type, msg, msg_list)
@@ -56,11 +65,7 @@ def parse_cp2k_warnings(file_name: PathLike,
     return warnings or None
 
 
-#: A generator yielding 2-tuples with warning messages and warning types.
-WarnGenerator = Generator[Tuple[str, Type[Warning]], None, None]
-
-
-def assign_warning(warning_type: Type[Warning], msg: str,
+def assign_warning(warning_type: type[Warning], msg: str,
                    msg_list: Iterable[str]) -> WarnGenerator:
     """Assign an specific Warning from the ``package_warnings`` or a generic warnings."""
     for m in msg_list:
@@ -70,8 +75,8 @@ def assign_warning(warning_type: Type[Warning], msg: str,
             yield m, QMFlows_Warning
 
 
-def get_cp2k_freq(file: Union[PathLike, IO[Any]],
-                  unit: str = 'cm-1', **kwargs: Any) -> np.ndarray:
+def get_cp2k_freq(file: PathLike | IO[Any],
+                  unit: str = 'cm-1', **kwargs: Any) -> NDArray[f8]:
     r"""Extract vibrational frequencies from *file*, a CP2K .mol file in the Molden format.
 
     Paramters
@@ -131,12 +136,12 @@ def get_cp2k_freq(file: Union[PathLike, IO[Any]],
 
         # Gather and return the frequencies
         iterator = islice(f, 0, count)
-        ret = np.fromiter(iterator, dtype=float, count=count)
+        ret = np.fromiter(iterator, dtype=np.float64, count=count)
         ret *= Units.conversion_ratio('cm-1', unit)
         return ret
 
 
-QUANTITY_MAPPING: Dict[str, str] = {
+QUANTITY_MAPPING = {
     ' VIB|              Electronic energy (U) [kJ/mol]:': 'E',
     ' VIB|              Zero-point correction [kJ/mol]:': 'ZPE',
     ' VIB|              Enthalpy correction (H-U) [kJ/mol]:': 'H',
@@ -144,13 +149,14 @@ QUANTITY_MAPPING: Dict[str, str] = {
     'VIB|              Temperature [K]:': 'T'
 }
 
-QUANTITY_SET: FrozenSet[str] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
-
-Quantity = Literal['E', 'ZPE', 'H', 'S', 'G']
+QUANTITY_SET: frozenset[Quantity] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
 
 
-def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
-                    unit: str = 'kcal/mol') -> float:
+def get_cp2k_thermo(
+    file_name: str | os.PathLike[str],
+    quantity: Quantity = 'G',
+    unit: str = 'kcal/mol',
+) -> float:
     """Return thermochemical properties as extracted from a CP2K .out file.
 
     Note
@@ -177,14 +183,14 @@ def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
         A user-specified *quantity* expressed in *unit* as extracted from *file_name*.
 
     """
-    quantity = quantity.upper()
+    quantity = cast("Quantity", quantity.upper())
     if quantity not in QUANTITY_SET:
         raise ValueError(f"'quantity' has an invalid value ({quantity!r}); "
                          f"expected values: {tuple(QUANTITY_SET)!r}")
 
     parser = ZeroOrMore(Suppress(SkipTo(" VIB|              Temperature ")) + SkipTo('\n\n\n\n'))
 
-    energy = next(iter(parser.parseFile(file_name)))
+    energy = next(iter(parser.parseFile(os.fspath(file_name))))
     energy_iter = (i.rsplit(maxsplit=1) for i in energy.splitlines() if i)
     energy_dict = {QUANTITY_MAPPING.get(k): float(v) for k, v in energy_iter}
 
@@ -195,7 +201,7 @@ def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
     return energy_dict[quantity] * Units.conversion_ratio('kj/mol', unit)
 
 
-def read_cp2k_xyz(path: PathLike, dtype: Any = np.float64) -> np.ndarray:
+def read_cp2k_xyz(path: PathLike, dtype: DTypeLike = np.float64) -> NDArray[Any]:
     """Extract a 3D array from **path** with the atomic forces of all molecules.
 
     Requires a CP2K ``*.xyz`` file.
@@ -222,11 +228,11 @@ def _read_cp2k_xyz(f: Iterable[str], n_atom: int) -> Generator[Iterator[str], No
 def read_cp2k_table(
     path: PathLike,
     column: int,
-    start: Optional_[int] = None,
-    stop: Optional_[int] = None,
-    step: Optional_[int] = None,
-    dtype: Any = np.float64,
-) -> np.ndarray:
+    start: None | int = None,
+    stop: None | int = None,
+    step: None | int = None,
+    dtype: DTypeLike = np.float64,
+) -> NDArray[Any]:
     """Extract a 1D array from the specified **column** in **path**.
 
     **start**, **stop** and **step** can be used for specifiying the to-be parsed rows.
@@ -240,14 +246,14 @@ def read_cp2k_table(
 def read_cp2k_table_slc(
     path: PathLike,
     shape: Sequence[int],
-    column_start: Optional_[int] = None,
-    column_stop: Optional_[int] = None,
-    column_step: Optional_[int] = None,
-    row_start: Optional_[int] = None,
-    row_stop: Optional_[int] = None,
-    row_step: Optional_[int] = None,
-    dtype: Any = np.float64,
-) -> np.ndarray:
+    column_start: None | int = None,
+    column_stop: None | int = None,
+    column_step: None | int = None,
+    row_start: None | int = None,
+    row_stop: None | int = None,
+    row_step: None | int = None,
+    dtype: DTypeLike = np.float64,
+) -> NDArray[Any]:
     """Extract an ND array of the given **shape** from **path**.
 
     **column_start**, **column_stop** and **column_step** can be used for
@@ -285,11 +291,11 @@ def _get_pressure_iter(major: int, f: IO[str]) -> Generator[str, None, None]:
 
 def read_cp2k_pressure(
     path: PathLike,
-    start: Optional_[int] = None,
-    stop: Optional_[int] = None,
-    step: Optional_[int] = None,
-    dtype: Any = np.float64,
-) -> np.ndarray:
+    start: None | int = None,
+    stop: None | int = None,
+    step: None | int = None,
+    dtype: DTypeLike = np.float64,
+) -> NDArray[Any]:
     """Return all pressures from the passed cp2k ``.out`` file as an array."""
     major, _ = get_cp2k_version(path)
 
@@ -321,14 +327,3 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
         QMFlows_Warning, stacklevel=2,
     )
     return CP2KVersion(0, 0)
-
-
-@functools.wraps(read_cp2k_basis)
-def readCp2KBasis(file, *, allow_multiple_exponents=False):
-    """Deprecated alias for :func:`read_cp2k_basis`."""
-    warnings.warn(
-        "`qmflows.parsers.cp2k.readCp2KBasis` is a deprecated alias for "
-        "`qmflows.parsers.cp2k.read_cp2k_basis`",
-        QMFlowsDeprecationWarning, stacklevel=2,
-    )
-    return read_cp2k_basis(file, allow_multiple_exponents=allow_multiple_exponents)

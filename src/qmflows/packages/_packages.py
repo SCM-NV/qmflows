@@ -1,12 +1,13 @@
 """Common funcionality to call all the quantum packages."""
 
+from __future__ import annotations
+
 import types
 import fnmatch
 import importlib
 import inspect
 import os
 import sys
-import functools
 import warnings
 from abc import abstractmethod, ABC
 from types import ModuleType
@@ -14,10 +15,8 @@ from pathlib import Path
 from functools import partial
 from os.path import join
 from warnings import warn
-from typing import (
-    Any, Callable, Optional, Union, ClassVar, Mapping, Iterator,
-    Type, Dict, TypeVar, Tuple, List, TYPE_CHECKING, overload,
-)
+from collections.abc import Callable, Mapping, Iterator
+from typing import Any, ClassVar, TypeVar, TYPE_CHECKING, overload
 
 import numpy as np
 import pandas as pd
@@ -36,15 +35,20 @@ from ..type_hints import WarnMap, WarnDict, WarnParser, PromisedObject, MolType,
 from ..utils import InitRestart
 from ..fileFunctions import yaml2Settings
 from .._settings import _Settings as _SettingsType, Settings
-from ..warnings_qmflows import QMFlows_Warning, QMFlowsDeprecationWarning
+from ..warnings_qmflows import QMFlows_Warning
 
-try:
+if TYPE_CHECKING:
     from rdkit import Chem
     from scm.plams import from_rdmol
-except ImportError:
-    Chem = None
-    def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
-        return mol
+else:
+    try:
+        from rdkit import Chem
+        from scm.plams import from_rdmol
+    except ImportError:
+        Chem = None
+
+        def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
+            return mol
 
 _Self = TypeVar("_Self", bound="Package")
 
@@ -53,19 +57,11 @@ __all__ = ['Package', 'Result', 'run']
 
 def load_properties(name: str, prefix: str = 'properties') -> _Settings:
     """Load the properties-defining .yaml file from ."""
-    file_name = os.path.join(os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml')
+    file_name = os.path.join(
+        os.path.dirname(_qmflows_file), 'data', 'dictionaries', f'{prefix}{name}.yaml',
+    )
     with open(file_name, "r", encoding="utf8") as f:
         return yaml2Settings(f.read(), mapping_type=_SettingsType)
-
-
-@functools.wraps(load_properties)
-def _load_properties(name: str, prefix: str = 'properties') -> _Settings:
-    """Deprecated alias for :func:`load_properties`."""
-    warnings.warn(
-        "`qmflows.packages.load_properties` is deprecated and will be removed in the future",
-        QMFlowsDeprecationWarning, stacklevel=2,
-    )
-    return load_properties(name, prefix)
 
 
 class Result:
@@ -75,14 +71,14 @@ class Result:
     #: Should be set when creating a subclass.
     prop_mapping: ClassVar[_Settings] = NotImplemented
 
-    def __init__(self, settings: Optional[Settings],
-                 molecule: Optional[plams.Molecule],
+    def __init__(self, settings: None | Settings,
+                 molecule: None | plams.Molecule,
                  job_name: str,
-                 dill_path: "None | str | os.PathLike[str]" = None,
-                 plams_dir: "None | str | os.PathLike[str]" = None,
-                 work_dir: "None | str | os.PathLike[str]" = None,
+                 dill_path: None | str | os.PathLike[str] = None,
+                 plams_dir: None | str | os.PathLike[str] = None,
+                 work_dir: None | str | os.PathLike[str] = None,
                  status: str = 'successful',
-                 warnings: Optional[WarnMap] = None) -> None:
+                 warnings: None | WarnMap = None) -> None:
         """Initialize a :class:`Result` instance.
 
         :param settings: Job Settings.
@@ -111,7 +107,7 @@ class Result:
         self._results_open = False
         self._results = dill_path
 
-    def __deepcopy__(self, memo: Optional[Dict[int, Any]] = None) -> 'Result':
+    def __deepcopy__(self, memo: None | dict[int, Any] = None) -> Result:
         """Return a deep copy of this instance."""
         cls = type(self)
 
@@ -145,8 +141,10 @@ class Result:
 
             elif not (has_crashed or is_private or prop in self.prop_mapping):
                 if self._results_open:
-                    warn(f"Generic property {prop!r} not defined",
-                        category=QMFlows_Warning, stacklevel=2)
+                    warn(
+                        f"Generic property {prop!r} not defined",
+                        category=QMFlows_Warning, stacklevel=2,
+                    )
 
                 # Do not issue this warning if the Results object is still pickled
                 else:  # Unpickle the Results instance and try again
@@ -154,8 +152,10 @@ class Result:
                     try:
                         return vars(self)[prop]  # Avoid recursive `getattr` calls
                     except KeyError:
-                        warn(f"Generic property {prop!r} not defined",
-                            category=QMFlows_Warning, stacklevel=2)
+                        warn(
+                            f"Generic property {prop!r} not defined",
+                            category=QMFlows_Warning, stacklevel=2,
+                        )
 
             elif has_crashed and not is_private:
                 warn(f"""
@@ -167,7 +167,7 @@ class Result:
                 """, category=QMFlows_Warning, stacklevel=2)
             return None
 
-    def __dir__(self) -> List[str]:
+    def __dir__(self) -> list[str]:
         """Implement ``dir(self)``."""
         # Insert the highly dynamic `get_property`-based attributes
         dir_set = set(super().__dir__()) | self.prop_mapping.keys()
@@ -222,7 +222,7 @@ class Result:
             """)
 
     @property
-    def results(self) -> Optional[plams.Results]:
+    def results(self) -> None | plams.Results:
         """Getter for :attr:`Result.results`.
 
         Get will load the .dill file and add all of its class attributes to this instance,
@@ -301,7 +301,7 @@ class Package(ABC):
 
     #: A class variable pointing to the :class:`Package`-specific :class:`Result` class.
     #: Should be set when creating a subclass.
-    result_type: ClassVar[Type[Result]] = NotImplemented
+    result_type: ClassVar[type[Result]] = NotImplemented
 
     #: A class variable with the name of the generic .yaml file.
     #: Should be set when creating a subclass.
@@ -311,12 +311,12 @@ class Package(ABC):
     pkg_name: str
 
     @property
-    def __defaults__(self) -> "tuple[Any, ...] | None":
+    def __defaults__(self) -> tuple[Any, ...] | None:
         """Get access to :attr:`~__call__.__defaults__`."""
         return self.__call__.__defaults__
 
     @property
-    def __kwdefaults__(self) -> "dict[str, Any]":
+    def __kwdefaults__(self) -> dict[str, Any]:
         """Get access to :attr:`~__call__.__kwdefaults__`."""
         return self.__call__.__kwdefaults__
 
@@ -337,16 +337,16 @@ class Package(ABC):
         self.__name__: str = pkg_name
         self.__qualname__: str = pkg_name
         self.__module__: str = cls.__module__
-        self.__annotations__: Dict[str, Any] = cls.__call__.__annotations__
+        self.__annotations__: dict[str, Any] = cls.__call__.__annotations__
         self.__signature__: inspect.Signature = inspect.signature(cls.__call__)
         self.__doc__ = self.__call__.__doc__
 
     @overload
     def __get__(self: _Self, obj: None, type: type) -> _Self: ...
     @overload
-    def __get__(self, obj: object, type: "None | type" = ...) -> types.MethodType: ...
+    def __get__(self, obj: object, type: None | type = ...) -> types.MethodType: ...
 
-    def __get__(self, obj: object, type: "None | type" = None) -> Any:
+    def __get__(self, obj: object, type: None | type = None) -> Any:
         """Allows binding :class:`Package` instances as methods."""
         if obj is None and type is None:
             raise TypeError("__get__(None, None) is invalid")
@@ -355,7 +355,7 @@ class Package(ABC):
         else:
             return types.MethodType(self, obj)
 
-    def __reduce__(self: PT) -> Tuple[Type[PT], Tuple[str]]:
+    def __reduce__(self: PT) -> tuple[type[PT], tuple[str]]:
         """A helper function for :mod:`pickle`."""
         return type(self), (self.pkg_name,)
 
@@ -419,7 +419,7 @@ class Package(ABC):
                     "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
-                if None not in (warnings_tolerance, output_warnings):
+                if warnings_tolerance is not None and output_warnings is not None:
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
@@ -454,7 +454,7 @@ class Package(ABC):
         return result
 
     def generic2specific(self, settings: Settings,
-                         mol: Optional[plams.Molecule] = None) -> Settings:
+                         mol: None | plams.Molecule = None) -> Settings:
         """Traverse *settings* and convert generic into package specific keys.
 
         Traverse all the key, value pairs of the *settings*, translating
@@ -529,9 +529,9 @@ class Package(ABC):
         pass
 
     def postrun(self, result: Result,
-                output_warnings: Optional[WarnMap] = None,
-                settings: Optional[Settings] = None,
-                mol: Optional[plams.Molecule] = None,
+                output_warnings: None | WarnMap = None,
+                settings: None | Settings = None,
+                mol: None | plams.Molecule = None,
                 **kwargs: Any) -> None:
         r"""Run a set of tasks after running the actual job.
 
@@ -590,7 +590,7 @@ class Package(ABC):
     @classmethod
     @abstractmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str = "job",
-                work_dir: Union[None, str, os.PathLike] = None,
+                work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = False,
                 **kwargs: Any) -> Result:
         r"""`Abstract method <https://docs.python.org/3/library/abc.html#abc.abstractmethod>`_; should be implemented by the child class.
@@ -625,9 +625,9 @@ class Package(ABC):
                                   "should implement this method")
 
 
-def run(job: PromisedObject, runner: Optional[str] = None,
-        path: Union[None, str, os.PathLike] = None,
-        folder: Union[None, str, os.PathLike] = None,
+def run(job: PromisedObject, runner: None | str = None,
+        path: None | str | os.PathLike[str] = None,
+        folder: None | str | os.PathLike[str] = None,
         load_jobs: bool = False,
         **kwargs: Any) -> Result:
     r"""Pickup a runner and initialize it.
@@ -732,7 +732,7 @@ def registry() -> Registry:
 
 
 def import_parser(
-    ds: Mapping[str, "None | str"],
+    ds: Mapping[str, None | str],
     module_root: str = "qmflows.parsers",
 ) -> ModuleType:
     """Import parser for the corresponding property."""
@@ -744,11 +744,11 @@ def import_parser(
 
 
 def find_file_pattern(
-    path: "str | os.PathLike[str]",
-    folder: "None | str | os.PathLike[str]" = None,
+    path: str | os.PathLike[str],
+    folder: None | str | os.PathLike[str] = None,
 ) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
-        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
+        return (join(folder, x) for x in fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])
 
@@ -770,9 +770,9 @@ def ignore_unused_kwargs(fun: Callable[..., Any], *args: Any, **kwargs: Any) -> 
 
 
 def parse_output_warnings(job_name: str,
-                          plams_dir: Union[None, str, os.PathLike],
+                          plams_dir: None | str | os.PathLike[str],
                           parser: WarnParser,
-                          package_warnings: WarnMap) -> Optional[WarnDict]:
+                          package_warnings: WarnMap) -> None | WarnDict:
     """Look out for warnings in the output file."""
     output_files = find_file_pattern('*out', plams_dir)
     try:

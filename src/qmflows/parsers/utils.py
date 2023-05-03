@@ -1,11 +1,9 @@
 """General utilities to parse both input/out files."""
 
-__all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
-           'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
+from __future__ import annotations
 
-
+import os
 import re
-from typing import Optional as Optional_
 
 import numpy as np
 from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
@@ -13,7 +11,8 @@ from pyparsing import (CaselessKeyword, Combine, Literal, Optional,
                        SkipTo, Suppress, Word, nums)
 from scm.plams import Atom, Molecule
 
-from ..type_hints import PathLike
+__all__ = ['anyChar', 'integer', 'natural', 'parse_file', 'parse_section',
+           'skipAnyChar', 'skipLine', 'skipSupress', 'try_search_pattern']
 
 # Literals
 point = Literal('.')
@@ -42,10 +41,10 @@ skipLine = Suppress(skipSupress('\n'))
 # Generic Functions
 
 
-def parse_file(p: ParserElement, file_name: PathLike) -> ParseResults:
+def parse_file(p: ParserElement, file_name: str | os.PathLike[str]) -> ParseResults:
     """Apply parser `p` on file `file_name`."""
     try:
-        return p.parseFile(file_name)
+        return p.parseFile(os.fspath(file_name))
     except ParseException as ex:
         raise ParseException(f"Error Trying to parse: {p} in file: {file_name}") from ex
 
@@ -58,9 +57,11 @@ def parse_section(start: str, end: str) -> ParserElement:
     return Suppress(SkipTo(s)) + skipLine + SkipTo(e)
 
 
-def string_array_to_molecule(parser_fun: ParserElement,
-                             file_name: PathLike,
-                             mol: Optional_[Molecule] = None) -> Molecule:
+def string_array_to_molecule(
+    parser_fun: ParserElement,
+    file_name: str | os.PathLike[str],
+    mol: None | Molecule = None,
+) -> Molecule:
     """Convert a Numpy string array.
 
     It takes an array like:
@@ -76,7 +77,7 @@ def string_array_to_molecule(parser_fun: ParserElement,
     mols = parse_file(parser_fun, file_name).asList()
     last_mol = np.array(mols[-1])
     elems = last_mol[:, 0]
-    coords = np.array(last_mol[:, 1:], dtype=float)
+    coords = np.array(last_mol[:, 1:], dtype=np.float64)
 
     if mol:
         if len(coords) == len(mol):
@@ -91,7 +92,10 @@ def string_array_to_molecule(parser_fun: ParserElement,
     return mol
 
 
-def try_search_pattern(pat: str, file_name: PathLike) -> Optional_[str]:
+def try_search_pattern(
+    pat: str | re.Pattern[str],
+    file_name: str | os.PathLike[str],
+) -> None | str:
     """Search for an specific pattern in  a file."""
     try:
         with open(file_name, 'r') as f:

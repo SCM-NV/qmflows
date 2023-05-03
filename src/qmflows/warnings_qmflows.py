@@ -1,7 +1,9 @@
 """A module with warnings used throughout QMFlows."""
 
+from __future__ import annotations
+
 from math import isclose
-from typing import Optional, Iterable
+from collections.abc import Iterable
 
 from pyparsing import ZeroOrMore, Suppress, SkipTo
 
@@ -53,7 +55,7 @@ class QMFlowsDeprecationWarning(DeprecationWarning, QMFlows_Warning):
     """Warning class for deprecations."""
 
 
-def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
+def _eval_charge(msg: str, tolerance: float = 0.1) -> None | str:
     """Check of the total molecular charge is integer within a given *tolerance*."""
     charge = float(msg.rsplit(maxsplit=1)[1])
     charge_int = round(charge)
@@ -65,7 +67,7 @@ def _eval_charge(msg: str, tolerance: float = 0.1) -> Optional[str]:
 def _eval_param(
     msg: str,
     skip: Iterable[str] = ('Urey-Bradley', 'Out of plane bend'),
-) -> Optional[str]:
+) -> None | str:
     """Return missing forcefield warnings in *msg* except for all terms in *skip*."""
     for i in skip:
         if i in msg:

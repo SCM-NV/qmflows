@@ -13,10 +13,9 @@ API
 """
 
 from typing import (Mapping, Dict, Type, Callable, Optional, MutableMapping, Union,
-                    Sequence, Any, TYPE_CHECKING)
+                    Sequence, Any, TYPE_CHECKING, TypeVar)
 
 from .common import ParseWarning
-from .backports import Literal, T, Final
 
 if TYPE_CHECKING:
     from os import PathLike as _PathLike
@@ -36,7 +35,7 @@ else:
 
 
 __all__ = [
-    'T', 'Literal', 'Final',
+    'T',
     'WarnMap', 'WarnDict', 'WarnParser',
     'MappingScalar', 'MappingSequence',
     'Generic2Special',
@@ -46,20 +45,8 @@ __all__ = [
     '_Settings'
 ]
 
-#: Alias for :data:`typing.Literal`.
-#: Note this will only work as intended in python >= 3.8
-#: or if the ``typing_extensions`` package is installed;
-#: otherwise, for example, ``Literal[True]`` will default to ``type(True)``.
-Literal
-
-#: Alias for :data:`typing.Final`.
-#: Note this will only work as intended in python >= 3.8
-#: or if the ``typing_extensions`` package is installed;
-#: otherwise, for example, ``Final[True]`` will default to ``type(True)``.
-Final
-
 #: A generic TypeVar.
-T
+T = TypeVar("T")
 
 #: A Mapping which maps a :class:`str` to a :class:`ParseWarning` instance.
 WarnMap = Mapping[str, ParseWarning]

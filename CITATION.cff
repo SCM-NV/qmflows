@@ -23,7 +23,7 @@ keywords:
  - materials-science
  - python
  - Workflows
-version: '0.13.0'
-date-released: 2023-04-19  # YYYY-MM-DD
+version: '1.0.0b1'
+date-released: 2023-05-03  # YYYY-MM-DD
 repository-code: https://github.com/SCM-NV/qmflows
 license: "LGPL-3.0"
