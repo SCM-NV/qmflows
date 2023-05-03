@@ -16,8 +16,8 @@ SETTINGS: Settings = get_mm_settings()
 
 def overlap_coords(xyz1: np.ndarray, xyz2: np.ndarray) -> np.ndarray:
     """Rotate *xyz1* such that it overlaps with *xyz2* using the Kabsch algorithm."""
-    xyz1 = np.asarray(xyz1, dtype=float)
-    xyz2 = np.asarray(xyz2, dtype=float)
+    xyz1 = np.asarray(xyz1, dtype=np.float64)
+    xyz2 = np.asarray(xyz2, dtype=np.float64)
 
     # Peform a singular value decomposition on the covariance matrix
     H = xyz1.T @ xyz2

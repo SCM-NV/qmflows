@@ -37,14 +37,18 @@ from ..fileFunctions import yaml2Settings
 from .._settings import _Settings as _SettingsType, Settings
 from ..warnings_qmflows import QMFlows_Warning
 
-try:
+if TYPE_CHECKING:
     from rdkit import Chem
     from scm.plams import from_rdmol
-except ImportError:
-    Chem = None
+else:
+    try:
+        from rdkit import Chem
+        from scm.plams import from_rdmol
+    except ImportError:
+        Chem = None
 
-    def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
-        return mol
+        def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
+            return mol
 
 _Self = TypeVar("_Self", bound="Package")
 
@@ -415,7 +419,7 @@ class Package(ABC):
                     "terminate_job_in_case_of_warnings")
                 output_warnings = result.warnings
 
-                if None not in (warnings_tolerance, output_warnings):
+                if warnings_tolerance is not None and output_warnings is not None:
                     issues = [w(msg) for msg, w in output_warnings.items()
                               if w in warnings_tolerance]
                     if issues:
@@ -744,7 +748,7 @@ def find_file_pattern(
     folder: None | str | os.PathLike[str] = None,
 ) -> Iterator[str]:
     if folder is not None and os.path.exists(folder):
-        return map(lambda x: join(folder, x), fnmatch.filter(os.listdir(folder), str(path)))
+        return (join(folder, x) for x in fnmatch.filter(os.listdir(folder), str(path)))
     else:
         return iter([])
 

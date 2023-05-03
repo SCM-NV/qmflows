@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Sequence
 from typing import TYPE_CHECKING
 
@@ -15,7 +16,6 @@ from .utils import (floatNumber, parse_file, parse_section, skipLine,
                     try_search_pattern)
 from ._xyz import manyXYZ
 from ..common import InfoMO
-from ..type_hints import PathLike
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -26,7 +26,7 @@ __all__ = [
     'parse_molecular_orbitals', 'parse_molecule_traj', 'parse_normal_modes']
 
 
-def parse_molecule(file_name: PathLike, mol: None | Molecule = None) -> Molecule:
+def parse_molecule(file_name: str | os.PathLike[str], mol: None | Molecule = None) -> Molecule:
     """Parse The Cartesian coordinates from the output file."""
     header = "CARTESIAN COORDINATES (ANGSTROEM)"
     p1 = skipSupress(header) + skipLine * 2
@@ -38,7 +38,7 @@ def parse_molecule(file_name: PathLike, mol: None | Molecule = None) -> Molecule
     return string_array_to_molecule(parse_many_mol, file_name, mol=mol)
 
 
-def parse_molecule_traj(file_traj: PathLike) -> Molecule:
+def parse_molecule_traj(file_traj: str | os.PathLike[str]) -> Molecule:
     """Read Molecules from the job_name.traj file."""
     mols = manyXYZ(file_traj)
     # Last geometry corresponds to the optimized structure
@@ -53,7 +53,7 @@ def parse_molecule_traj(file_traj: PathLike) -> Molecule:
     return plams_mol
 
 
-def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> NDArray[f8]:
+def parse_hessian(file_hess: str | os.PathLike[str], start: str = '$hessian') -> NDArray[f8]:
     """Read the hessian matrix in cartesian coordinates from the job_name.hess file.
 
     :returns: Numpy array
@@ -61,13 +61,13 @@ def parse_hessian(file_hess: PathLike, start: str = '$hessian') -> NDArray[f8]:
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_normal_modes(file_hess: PathLike) -> NDArray[f8]:
+def parse_normal_modes(file_hess: str | os.PathLike[str]) -> NDArray[f8]:
     """Return the normal modes from the job_name.hess file."""
     start = '$normal_modes'
     return read_blocks_from_file(start, '\n\n', file_hess)
 
 
-def parse_frequencies(file_hess: PathLike) -> NDArray[f8]:
+def parse_frequencies(file_hess: str | os.PathLike[str]) -> NDArray[f8]:
     """Parse the vibrational frequencies from the job_name.hess file."""
     p = parse_section('$vibrational_frequencies', '\n\n')
     lines = parse_file(p, file_hess)[0].splitlines()
@@ -75,7 +75,7 @@ def parse_frequencies(file_hess: PathLike) -> NDArray[f8]:
     return np.array([x.split()[-1] for x in lines[1:]], dtype=np.float64)
 
 
-def read_blocks_from_file(start: str, end: str, file_name: PathLike) -> NDArray[f8]:
+def read_blocks_from_file(start: str, end: str, file_name: str | os.PathLike[str]) -> NDArray[f8]:
     """Read a matrix printed in block format.
 
     :param  start: token identifying the start of the block.
@@ -118,7 +118,7 @@ def read_block(lines: Sequence[str]) -> NDArray[f8]:
     return np.array([x.split()[1:] for x in lines[1:]], dtype=np.float64)
 
 
-def parse_molecular_orbitals(file_name: PathLike) -> InfoMO:
+def parse_molecular_orbitals(file_name: str | os.PathLike[str]) -> InfoMO:
     """Read the Molecular orbital from the orca output."""
     _n_contracted = try_search_pattern(
         "# of contracted basis functions", file_name)

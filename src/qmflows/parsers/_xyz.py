@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from collections.abc import Iterable
 
 from pyparsing import (Group, LineEnd, OneOrMore, Suppress, Word, alphas,
@@ -10,7 +11,6 @@ from scm.plams import Atom, Molecule
 
 from .utils import floatNumber, natural
 from ..common import AtomXYZ
-from ..type_hints import PathLike
 
 __all__ = ['parse_string_xyz', 'readXYZ',
            'manyXYZ', "string_to_plams_Molecule"]
@@ -41,18 +41,18 @@ def parse_string_xyz(xs: str) -> list[AtomXYZ]:
     return createAtoms(rs)
 
 
-def readXYZ(pathXYZ: PathLike) -> list[AtomXYZ]:
+def readXYZ(pathXYZ: str | os.PathLike[str]) -> list[AtomXYZ]:
     """Parse molecular geometry in XYZ format from a file.
 
     :param: pathXYZ
     :type:  string
     :return: [AtomXYZ]
     """
-    xs = parser_xyz.parseFile(pathXYZ)
+    xs = parser_xyz.parseFile(os.fspath(pathXYZ))
     return createAtoms(xs)
 
 
-def manyXYZ(pathXYZ: PathLike) -> list[list[AtomXYZ]]:
+def manyXYZ(pathXYZ: str | os.PathLike[str]) -> list[list[AtomXYZ]]:
     """Read one or more molecular geometries in XYZ format from a file.
 
     :param: pathXYZ
@@ -60,8 +60,8 @@ def manyXYZ(pathXYZ: PathLike) -> list[list[AtomXYZ]]:
     :return: [[AtomXYZ]]
     """
     manyMol = OneOrMore(Group(parser_xyz))
-    xss = manyMol.parseFile(pathXYZ)
-    return list(map(createAtoms, xss))
+    xss = manyMol.parseFile(os.fspath(pathXYZ))
+    return [createAtoms(i) for i in xss]
 
 
 def createAtoms(xs: ParseResults) -> list[AtomXYZ]:

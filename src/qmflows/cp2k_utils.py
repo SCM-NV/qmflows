@@ -402,7 +402,7 @@ def _construct_df(columns, prm_map) -> pd.DataFrame:  # noqa: E302
         if isinstance(prm_map, NDFrame):
             data = prm_map.values.T
         else:
-            data = np.array([v for v in prm_map.values()], dtype=str)
+            data = np.array([v for v in prm_map.values()], dtype=np.str_)
 
         if data.ndim == 1:
             data.shape = -1, 1
@@ -567,7 +567,7 @@ def prm_to_df(settings: MutableMapping) -> None:
         # All columns are now of the 'object' dtype; convert them into floats where possible
         for key, series in df.items():
             try:
-                df[key] = series.astype(float)
+                df[key] = series.astype(np.float64)
             except ValueError:  # Nop, not possible
                 pass
         settings[k] = df

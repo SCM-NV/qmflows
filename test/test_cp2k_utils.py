@@ -128,8 +128,8 @@ def test_construct_df() -> None:
     c1 = ['a', 'b']
     c2 = 'a'
 
-    ref1 = np.array([v for v in dict1.values()], dtype=str).astype(object)
-    ref2 = np.array([v for v in dict2.values()], dtype=str).astype(object)[..., None]
+    ref1 = np.array([v for v in dict1.values()], dtype=np.str_).astype(np.object_)
+    ref2 = np.array([v for v in dict2.values()], dtype=np.str_).astype(np.object_)[..., None]
 
     np.testing.assert_array_equal(_construct_df(c1, dict1), ref1)
     np.testing.assert_array_equal(_construct_df(c2, dict2), ref2)

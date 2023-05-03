@@ -7,7 +7,7 @@ import warnings
 import re
 from itertools import islice, chain
 from collections.abc import Generator, Iterable, Iterator, Sequence
-from typing import Any, IO, TYPE_CHECKING, Literal
+from typing import Any, IO, TYPE_CHECKING, Literal, cast
 
 import numpy as np
 from pyparsing import SkipTo, Suppress, ZeroOrMore
@@ -42,12 +42,14 @@ def read_xyz_file(file_name: PathLike) -> Molecule:
     return tuplesXYZ_to_plams(geometries[-1])
 
 
-def parse_cp2k_warnings(file_name: PathLike,
-                        package_warnings: WarnMap) -> None | WarnDict:
+def parse_cp2k_warnings(
+    file_name: str | os.PathLike[str],
+    package_warnings: WarnMap,
+) -> None | WarnDict:
     """Parse All the warnings found in an output file."""
     warnings: WarnDict = {}
     for msg, named_tup in package_warnings.items():
-        msg_list = named_tup.parser.parseFile(file_name).asList()
+        msg_list = named_tup.parser.parseFile(os.fspath(file_name)).asList()
 
         # Search for warnings that match the ones provided by the user
         iterator = assign_warning(named_tup.warn_type, msg, msg_list)
@@ -134,7 +136,7 @@ def get_cp2k_freq(file: PathLike | IO[Any],
 
         # Gather and return the frequencies
         iterator = islice(f, 0, count)
-        ret = np.fromiter(iterator, dtype=float, count=count)
+        ret = np.fromiter(iterator, dtype=np.float64, count=count)
         ret *= Units.conversion_ratio('cm-1', unit)
         return ret
 
@@ -147,11 +149,14 @@ QUANTITY_MAPPING = {
     'VIB|              Temperature [K]:': 'T'
 }
 
-QUANTITY_SET = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
+QUANTITY_SET: frozenset[Quantity] = frozenset({'E', 'ZPE', 'H', 'S', 'G'})
 
 
-def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
-                    unit: str = 'kcal/mol') -> float:
+def get_cp2k_thermo(
+    file_name: str | os.PathLike[str],
+    quantity: Quantity = 'G',
+    unit: str = 'kcal/mol',
+) -> float:
     """Return thermochemical properties as extracted from a CP2K .out file.
 
     Note
@@ -178,14 +183,14 @@ def get_cp2k_thermo(file_name: PathLike, quantity: Quantity = 'G',
         A user-specified *quantity* expressed in *unit* as extracted from *file_name*.
 
     """
-    quantity = quantity.upper()
+    quantity = cast("Quantity", quantity.upper())
     if quantity not in QUANTITY_SET:
         raise ValueError(f"'quantity' has an invalid value ({quantity!r}); "
                          f"expected values: {tuple(QUANTITY_SET)!r}")
 
     parser = ZeroOrMore(Suppress(SkipTo(" VIB|              Temperature ")) + SkipTo('\n\n\n\n'))
 
-    energy = next(iter(parser.parseFile(file_name)))
+    energy = next(iter(parser.parseFile(os.fspath(file_name))))
     energy_iter = (i.rsplit(maxsplit=1) for i in energy.splitlines() if i)
     energy_dict = {QUANTITY_MAPPING.get(k): float(v) for k, v in energy_iter}
 
