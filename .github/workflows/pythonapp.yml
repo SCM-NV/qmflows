@@ -53,12 +53,15 @@ jobs:
           - os: ubuntu-latest
             special: ['CP2K', '2023.1']
             version: '3.11'
+          - os: macos-latest
+            special: ['CP2K', '2023.1']
+            version: '3.11'
     steps:
     - uses: actions/checkout@v3
 
     - name: Install cp2k
       if: matrix.special[0] == 'CP2K'
-      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }}
+      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }} ${{ matrix.os }}
 
     - name: Info CP2K
       if: matrix.special[0] == 'CP2K'
