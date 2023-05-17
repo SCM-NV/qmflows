@@ -1,5 +1,7 @@
 """Tests for :mod:`qmflows.warnings_qmflows`."""
 
+from __future__ import annotations
+
 import pytest
 from assertionlib import assertion
 
@@ -21,7 +23,7 @@ from qmflows.warnings_qmflows import (
     Orbital_Warning,
     QMFlowsDeprecationWarning,
 ])
-def test_warnings(cls: "type[QMFlows_Warning]") -> None:
+def test_warnings(cls: type[QMFlows_Warning]) -> None:
     """Tests for all QMFlows :exc:`Warning` types."""
     warning = cls()
     assertion.isinstance(warning, QMFlows_Warning)

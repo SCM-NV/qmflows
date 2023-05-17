@@ -184,7 +184,7 @@ class CP2K(Package):
     @classmethod
     def run_job(cls, settings: Settings, mol: plams.Molecule,
                 job_name: str = 'cp2k_job',
-                work_dir: "None | str | os.PathLike[str]" = None,
+                work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = True,
                 **kwargs: Any) -> CP2K_Result:
         """Call the Cp2K binary using plams interface.

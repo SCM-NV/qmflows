@@ -32,7 +32,7 @@ class _BasisFileIter(Iterator[str]):
 
     def __init__(self, iterable: Iterable[str], start: int = 0) -> None:
         self._enumerator = ((i, j.strip().rstrip()) for i, j in enumerate(iterable, start=start))
-        self._name: "str | None" = getattr(iterable, "name", None)
+        self._name: str | None = getattr(iterable, "name", None)
         self._index = start
 
     def __iter__(self) -> _BasisFileIter:
