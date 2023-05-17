@@ -19,21 +19,7 @@ from qmflows._logger import stdout_handler
 
 _ROOT = Path("src") / "qmflows"
 _collect_ignore = [
-    _ROOT/ "settings.py",
-    _ROOT / "parsers" / "xyzParser.py",
-    _ROOT / "parsers" / "generic_parsers.py",
-    _ROOT / "parsers" / "parser.py",
-    _ROOT / "parsers" / "orca_parser.py",
-    _ROOT / "parsers" / "cp2KParser.py",
-    _ROOT / "parsers" / "adf_parser.py",
-    _ROOT / "templates" / "templates.py",
-    _ROOT / "packages" / "cp2k_mm.py",
-    _ROOT / "packages" / "cp2k_package.py",
-    _ROOT / "packages" / "orca.py",
-    _ROOT / "packages" / "package_wrapper.py",
-    _ROOT / "packages" / "packages.py",
-    _ROOT / "packages" / "serializer.py",
-    _ROOT / "packages" / "SCM.py",
+    _ROOT / "settings.py",
 ]
 
 collect_ignore = [str(i) for i in _collect_ignore]
@@ -53,7 +39,6 @@ def reload_qmflows() -> Generator[None, None, None]:
     This is necasary as the setup.cfg ``filterwarnings`` option will load qmflows prior
     to code coverage being turned on, thus falsely excluding a large portion of qmflows
     from the code coverage report.
-    s
     """
     yield None
 
