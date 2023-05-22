@@ -80,7 +80,10 @@ def prepare_logger() -> "Generator[None, None, None]":
 def get_runscript(self) -> str:
     """Run a parallel version of CP2K without mpirun or srun, \
     as this can cause issues with some executables.
+
     This method is monkey-patched into the PLAMS ``Cp2kJob`` class.
     """
-    cp2k_command = self.settings.get("executable", "cp2k.ssmp")
-    return  f"{cp2k_command} -i {self._filename('inp')} -o {self._filename('out')}"
+    cp2k_command = os.environ.get("QMFLOWS_CP2K_COMMAND")
+    if cp2k_command is None:
+        cp2k_command = self.settings.get("executable", "cp2k.ssmp")
+    return f"{cp2k_command} -i {self._filename('inp')} -o {self._filename('out')}"

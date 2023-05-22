@@ -30,42 +30,52 @@ jobs:
         special: ['']
         include:
           - os: ubuntu-latest
-            special: ['pre-release', '']
+            special: ['pre-release']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['no optional', '']
+            special: ['no optional']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '6.1']
+            special: ['CP2K', '6.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '7.1']
+            special: ['CP2K', '7.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '8.2']
+            special: ['CP2K', '8.2', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '9.1']
+            special: ['CP2K', '9.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '2022.1']
+            special: ['CP2K', '2022.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '2023.1']
+            special: ['CP2K', '2023.1', 'ssmp']
             version: '3.11'
           - os: macos-latest
-            special: ['CP2K', '2023.1']
+            special: ['CP2K', '2023.1', 'ssmp']
+            version: '3.11'
+          - os: ubuntu-latest
+            special: ['CP2K', '2023.1', 'psmp']
+            version: '3.11'
+          - os: macos-latest
+            special: ['CP2K', '2023.1', 'psmp']
             version: '3.11'
     steps:
     - uses: actions/checkout@v3
 
     - name: Install cp2k
       if: matrix.special[0] == 'CP2K'
-      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }} ${{ matrix.os }}
+      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }} ${{ matrix.os }} ${{ matrix.special[2] }}
 
     - name: Info CP2K
       if: matrix.special[0] == 'CP2K'
-      run: cp2k.ssmp --version
+      run: cp2k.${{ matrix.special[2] }} --version
+
+    - name: Info MPI
+      if: matrix.special[2] == 'psmp'
+      run: mpirun --version
 
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -103,6 +113,12 @@ jobs:
           "no optional")
             pytest -m 'not (slow or long)' test ;;
           "CP2K")
+            if [[ "${{ matrix.special[2] }}" == 'psmp' ]]; then
+              export QMFLOWS_CP2K_COMMAND='mpirun cp2k.psmp'
+            fi
+            if [[ "${{ matrix.os }}" == 'macos-latest' ]]; then
+              export VECLIB_MAXIMUM_THREADS=1
+            fi
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
@@ -135,7 +151,7 @@ jobs:
         run: pip list
 
       - name: Run flake8
-        run: flake8 src test
+        run: flake8 src test conftest.py setup.py
 
       - name: Run pydocstyle
         run: pydocstyle src
