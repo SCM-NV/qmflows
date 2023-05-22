@@ -38,7 +38,6 @@ tests_no_optional_require = [
 ]
 
 tests_require = tests_no_optional_require.copy()
-tests_require += docs_require
 tests_require.append("rdkit>=2018.03.1")
 
 setup(
