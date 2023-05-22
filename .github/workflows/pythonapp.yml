@@ -67,44 +67,38 @@ jobs:
       if: matrix.special[0] == 'CP2K'
       run: cp2k.ssmp --version
 
-    - name: Setup conda
-      uses: s-weigand/setup-conda@v1
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        update-conda: true
+        python-version: ${{ matrix.version }}
 
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         case "${{ matrix.special[0] }}" in
           "pre-release")
-            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
-            source $CONDA/bin/activate test
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip uninstall plams -y; pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
-            conda create -n test -c conda-forge python=${{ matrix.version }}
-            source $CONDA/bin/activate test
             pip install -e .[test_no_optional]
             ;;
           *)
-            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
-            source $CONDA/bin/activate test
             pip install -e .[test]
             ;;
         esac
 
-    - name: Conda info
+    - name: Python info
       run: |
-        source $CONDA/bin/activate test
-        conda info
+        which python
+        python --version
 
-    - name: Conda list
-      run: conda list -n test
+    - name: Installed packages
+      run: pip list
 
     - name: Test with pytest
       run: |
-        source $CONDA/bin/activate test
         case "${{ matrix.special[0] }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;

@@ -15,18 +15,20 @@ else
 fi
 
 # After the 9.1 release CP2K switched to a `<year>.<suffix>` version scheme (e.g. `2021.1`)
+echo ::group::"Installing CP2K $ARCH $VERSION binaries"
 case "$OS" in
     "ubuntu"*)
-        echo ::group::"Installing CP2K $ARCH $VERSION binaries"
-        curl -Lsf https://github.com/cp2k/cp2k/releases/download/$VERSION_LONG/cp2k-$VERSION-$LINUX_PLAT-$ARCH.ssmp -o /usr/local/bin/cp2k.ssmp
+        curl -Lsfv https://github.com/cp2k/cp2k/releases/download/$VERSION_LONG/cp2k-$VERSION-$LINUX_PLAT-$ARCH.ssmp -o /usr/local/bin/cp2k.ssmp
         chmod u+rx /usr/local/bin/cp2k.ssmp
         echo -e ::endgroup::\n
         ;;
     "macos"*)
         brew update
         brew install cp2k
+        echo -e ::endgroup::\n
         ;;
     *)
+        echo -e ::endgroup::\n
         exit 1
         ;;
 esac
