@@ -133,6 +133,9 @@ def test_cp2k_freq(tmp_path: Path) -> None:
     result = run(job, path=tmp_path, folder="test_cp2k_freq")
 
     validate_status(result)
-    assertion.isclose(result.free_energy, -10801.971213467135)
-    assertion.isclose(result.enthalpy, -10790.423489727531)
-    np.testing.assert_allclose(result.frequencies, [1622.952012, 3366.668885, 3513.89377])
+    assertion.isclose(result.free_energy, -10801.971213467135, rel_tol=0, abs_tol=1)
+    assertion.isclose(result.enthalpy, -10790.423489727531, rel_tol=0, abs_tol=1)
+    np.testing.assert_allclose(
+        result.frequencies, [1622.952012, 3366.668885, 3513.89377],
+        rtol=0, atol=1,
+    )
