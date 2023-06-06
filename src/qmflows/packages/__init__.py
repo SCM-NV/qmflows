@@ -1,5 +1,7 @@
 """A set of modules for managing various quantum-chemical packages."""
 
+from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 from ._packages import (
@@ -25,6 +27,6 @@ if not TYPE_CHECKING:
     from scm import plams
 
     #: Placeholder docstring for sphinx.
-    JOB_MAP: "dict[type[plams.Job], Package]"
+    JOB_MAP: dict[type[plams.Job], Package]
 
 del TYPE_CHECKING

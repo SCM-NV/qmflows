@@ -132,7 +132,7 @@ class ADF_Result(Result):
             # The t21 path has to be absolute: use workdir instead of plams_dir
             name_t21 = basename(normpath(work_dir))
             path_t21 = join(plams_dir, f'{name_t21}.t21')
-            self.kf: "None | plams.KFFile" = plams.KFFile(path_t21)
+            self.kf: None | plams.KFFile = plams.KFFile(path_t21)
         else:
             self.kf = None
 
@@ -168,13 +168,13 @@ class DFTB_Result(Result):
     prop_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='properties')
 
     # Attributes accessed via `__getattr__`
-    charges: "None | Any"
-    dipole: "None | Any"
-    energy: "None | Any"
-    enthalpy: "None | Any"
-    free_energy: "None | Any"
-    frequencies: "None | Any"
-    hessian: "None | Any"
+    charges: None | Any
+    dipole: None | Any
+    energy: None | Any
+    enthalpy: None | Any
+    free_energy: None | Any
+    frequencies: None | Any
+    hessian: None | Any
 
     def __init__(self, settings: None | Settings,
                  molecule: None | plams.Molecule,
@@ -191,7 +191,7 @@ class DFTB_Result(Result):
         if plams_dir is not None:
             kf_filename = join(plams_dir, 'dftb.rkf')
             # create a kf reader instance
-            self.kf: "None | plams.KFFile" = plams.KFFile(kf_filename)
+            self.kf: None | plams.KFFile = plams.KFFile(kf_filename)
         else:
             self.kf = None
 

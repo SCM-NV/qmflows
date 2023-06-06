@@ -30,82 +30,95 @@ jobs:
         special: ['']
         include:
           - os: ubuntu-latest
-            special: ['pre-release', '']
+            special: ['pre-release']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['no optional', '']
+            special: ['no optional']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '6.1']
+            special: ['CP2K', '6.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '7.1']
+            special: ['CP2K', '7.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '8.2']
+            special: ['CP2K', '8.2', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '9.1']
+            special: ['CP2K', '9.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '2022.1']
+            special: ['CP2K', '2022.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
-            special: ['CP2K', '2023.1']
+            special: ['CP2K', '2023.1', 'ssmp']
+            version: '3.11'
+          - os: macos-latest
+            special: ['CP2K', '2023.1', 'ssmp']
+            version: '3.11'
+          - os: ubuntu-latest
+            special: ['CP2K', '2023.1', 'psmp']
+            version: '3.11'
+          - os: macos-latest
+            special: ['CP2K', '2023.1', 'psmp']
             version: '3.11'
     steps:
     - uses: actions/checkout@v3
 
     - name: Install cp2k
       if: matrix.special[0] == 'CP2K'
-      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }}
+      run: bash scripts/download_cp2k.sh x86_64 ${{ matrix.special[1] }} ${{ matrix.os }} ${{ matrix.special[2] }}
 
     - name: Info CP2K
       if: matrix.special[0] == 'CP2K'
-      run: cp2k.ssmp --version
+      run: cp2k.${{ matrix.special[2] }} --version
 
-    - name: Setup conda
-      uses: s-weigand/setup-conda@v1
+    - name: Info MPI
+      if: matrix.special[2] == 'psmp'
+      run: mpirun --version
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
       with:
-        update-conda: true
+        python-version: ${{ matrix.version }}
 
     - name: Install dependencies
       run: |
+        pip install --upgrade pip
         case "${{ matrix.special[0] }}" in
           "pre-release")
-            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
-            source $CONDA/bin/activate test
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip uninstall plams -y; pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
-            conda create -n test -c conda-forge python=${{ matrix.version }}
-            source $CONDA/bin/activate test
             pip install -e .[test_no_optional]
             ;;
           *)
-            conda create -n test -c conda-forge python=${{ matrix.version }} nbsphinx jupyter pandoc
-            source $CONDA/bin/activate test
             pip install -e .[test]
             ;;
         esac
 
-    - name: Conda info
+    - name: Python info
       run: |
-        source $CONDA/bin/activate test
-        conda info
+        which python
+        python --version
 
-    - name: Conda list
-      run: conda list -n test
+    - name: Installed packages
+      run: pip list
 
     - name: Test with pytest
       run: |
-        source $CONDA/bin/activate test
         case "${{ matrix.special[0] }}" in
           "no optional")
             pytest -m 'not (slow or long)' test ;;
           "CP2K")
+            if [[ "${{ matrix.special[2] }}" == 'psmp' ]]; then
+              export QMFLOWS_CP2K_COMMAND='mpirun cp2k.psmp'
+            fi
+            if [[ "${{ matrix.os }}" == 'macos-latest' ]]; then
+              export VECLIB_MAXIMUM_THREADS=1
+            fi
             pytest -m '(slow or long)' ;;
           *)
             pytest -m 'not (slow or long)' ;;
@@ -138,7 +151,7 @@ jobs:
         run: pip list
 
       - name: Run flake8
-        run: flake8 src test
+        run: flake8 src test conftest.py setup.py
 
       - name: Run pydocstyle
         run: pydocstyle src
