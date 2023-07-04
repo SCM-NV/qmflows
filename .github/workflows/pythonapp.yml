@@ -64,6 +64,8 @@ jobs:
             version: '3.11'
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
 
     - name: Install cp2k
       if: matrix.special[0] == 'CP2K'
@@ -92,7 +94,7 @@ jobs:
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
-            pip install -e .[test_no_optional]
+            pip install -e .[test-no-optional]
             ;;
           *)
             pip install -e .[test]
@@ -133,6 +135,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -140,7 +144,7 @@ jobs:
           python-version: '3.x'
 
       - name: Install linters
-        run: pip install -r linting_requirements.txt
+        run: pip install .[lint]
 
       - name: Python info
         run: |
@@ -151,7 +155,7 @@ jobs:
         run: pip list
 
       - name: Run flake8
-        run: flake8 src test conftest.py setup.py
+        run: flake8 src test conftest.py
 
       - name: Run pydocstyle
         run: pydocstyle src

@@ -22,6 +22,8 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+src/qmflows/_version.py
+qmflows-*/
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
