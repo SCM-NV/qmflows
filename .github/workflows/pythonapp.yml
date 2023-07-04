@@ -90,7 +90,6 @@ jobs:
         case "${{ matrix.special[0] }}" in
           "pre-release")
             pip install --pre -e .[test] --upgrade --force-reinstall
-            pip uninstall plams -y; pip install git+https://github.com/SCM-NV/PLAMS@master --upgrade
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
