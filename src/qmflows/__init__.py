@@ -7,8 +7,7 @@ from __future__ import annotations
 import sys
 from typing import TYPE_CHECKING
 
-from ._version import __version__ as __version__
-from ._version_info import version_info as version_info
+from ._version import __version__, __version_tuple__
 
 from ._logger import logger
 
@@ -28,6 +27,7 @@ else:
     _RDKIT_EX = None
 
 __all__ = [
+    '__verion__', '__version_tuple__',
     'logger',
     'InitRestart',
     'Angle', 'Dihedral', 'Distance', 'Settings',

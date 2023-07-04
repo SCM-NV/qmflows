@@ -1,3 +1,7 @@
-exclude test/*
+exclude test/**
+exclude docs/**
+exclude jupyterNotebooks/**
+exclude scripts/**
+exclude qmflows.png
 include src/qmflows/py.typed
 include src/qmflows/data/dictionaries/*yaml
