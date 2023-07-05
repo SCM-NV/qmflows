@@ -39,7 +39,6 @@ case "$OS" in
         esac
         ;;
     "macos"*)
-        brew update
         brew install cp2k
         echo -e \n::endgroup::\n
         ;;
