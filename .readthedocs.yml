@@ -8,14 +8,7 @@ version: 2
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
   configuration: docs/conf.py
-
-# Configuration for the documentation build process.
-# This allows you to specify the base Read the Docs image used to build the documentation,
-# and control the versions of several tools: Python, Node.js, Rust, and Go.
-build:
-  os: ubuntu-22.04
-  tools:
-    python: "3.11"
+  fail_on_warning: true
 
 # Optionally build your docs in additional formats such as PDF
 formats:
@@ -23,6 +16,9 @@ formats:
   - epub
 
 # Optionally set the version of Python and requirements required to build your docs
+conda:
+  environment: doc_environment.yml
+
 python:
   install:
     - method: pip
