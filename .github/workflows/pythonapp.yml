@@ -143,7 +143,11 @@ jobs:
           python-version: '3.x'
 
       - name: Install linters
-        run: pip install .[lint]
+        run: |
+          pip install .[lint]
+          pip install git+https://github.com/BvB93/types-plams.git
+          pip install git+https://github.com/BvB93/types-rdkit.git
+          pip install git+https://github.com/BvB93/types-noodles.git
 
       - name: Python info
         run: |

@@ -109,10 +109,6 @@ show_error_codes = true
 
 [[tool.mypy.overrides]]
 module = [
-    "scm.plams.*",
-    "scm.*",
-    "noodles.*",
-    "rdkit.*",
     "pandas.*",
 ]
 ignore_missing_imports = true
