@@ -4,3 +4,6 @@ channels:
 dependencies:
   - python
   - pandoc  # pandoc on pypi is poorly maintaned; use conda-forge instead
+  - pip
+  - pip:
+    - .[doc]
