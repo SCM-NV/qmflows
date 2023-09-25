@@ -165,7 +165,7 @@ class CP2K_Result(Result):
             return self._molecule
 
 
-class CP2K(Package):
+class CP2K(Package[CP2K_Result]):
     """A Package subclass for running `CP2K Jobs <https://www.cp2k.org/>`_.
 
     It uses plams together with the templates to generate the stucture input
@@ -176,7 +176,7 @@ class CP2K(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2K', prefix='generic2')
-    result_type: ClassVar[type[CP2K_Result]] = CP2K_Result
+    result_type: type[CP2K_Result] = CP2K_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)

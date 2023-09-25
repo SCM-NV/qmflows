@@ -213,7 +213,7 @@ class DFTB_Result(Result):
         return self.molecule
 
 
-class ADF(Package):
+class ADF(Package[ADF_Result]):
     """:class:`~qmflows.packages.Package` subclass for ADF.
 
     This class takes care of calling the *ADF* quantum package.
@@ -225,7 +225,7 @@ class ADF(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('ADF', prefix='generic2')
-    result_type: ClassVar[type[ADF_Result]] = ADF_Result
+    result_type: type[ADF_Result] = ADF_Result
 
     def __init__(self, pkg_name: str = "adf") -> None:
         super().__init__(pkg_name)
@@ -288,11 +288,11 @@ class ADF(Package):
         handle_SCM_special_keywords(settings, key, value, mol, "adf")
 
 
-class DFTB(Package):
+class DFTB(Package[DFTB_Result]):
     """:class:`~qmflows.packages.Package` subclass for DFTB."""
 
     generic_mapping: ClassVar[_Settings] = load_properties('DFTB', prefix='generic2')
-    result_type: ClassVar[type[DFTB_Result]] = DFTB_Result
+    result_type: type[DFTB_Result] = DFTB_Result
 
     def __init__(self, pkg_name: str = "dftb") -> None:
         super().__init__(pkg_name)

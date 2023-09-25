@@ -37,7 +37,7 @@ class CP2KMM(CP2K):
     """  # noqa: E501
 
     generic_mapping: ClassVar[_Settings] = load_properties('CP2KMM', prefix='generic2')
-    result_type: ClassVar[type[CP2KMM_Result]] = CP2KMM_Result
+    result_type: type[CP2KMM_Result] = CP2KMM_Result
 
     def __init__(self, pkg_name: str = "cp2k") -> None:
         super().__init__(pkg_name)

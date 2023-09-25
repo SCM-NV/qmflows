@@ -119,20 +119,17 @@ from ..type_hints import _Settings, MolType
 from ..warnings_qmflows import Key_Warning
 
 if TYPE_CHECKING:
-    PT = TypeVar('PT', bound="PackageWrapper")
-
-plams.Job = plams.core.basejob.Job
-plams.ORCAJob = plams.interfaces.thirdparty.orca.ORCAJob
+    from typing_extensions import Self
 
 __all__ = ['PackageWrapper', 'ResultWrapper', 'JOB_MAP']
 
 JT = TypeVar("JT", bound=plams.core.basejob.Job)
 
-JOB_MAP: dict[type[plams.Job], Package] = {
+JOB_MAP: dict[type[plams.core.basejob.Job], Package] = {
     plams.Cp2kJob: cp2k,
     plams.ADFJob: adf,
     plams.DFTBJob: dftb,
-    plams.ORCAJob: orca
+    plams.interfaces.thirdparty.orca.ORCAJob: orca
 }
 
 
@@ -143,7 +140,7 @@ class ResultWrapper(Result):
 
 
 @has_scheduled_methods
-class PackageWrapper(Package, Generic[JT]):
+class PackageWrapper(Package[ResultWrapper], Generic[JT]):
     """A :class:`~qmflows.packages.Package` subclass for processing arbitrary :class:`plams.Job<scm.plams.core.basejob.Job>` types.
 
     Will automatically convert the passed Job type into the appropiate
@@ -183,7 +180,7 @@ class PackageWrapper(Package, Generic[JT]):
     """  # noqa
 
     generic_mapping: ClassVar[_Settings] = load_properties('PackageWrapper', prefix='generic2')
-    result_type: ClassVar[type[ResultWrapper]] = ResultWrapper
+    result_type: type[ResultWrapper] = ResultWrapper
     job_type: type[JT]
 
     if TYPE_CHECKING:
@@ -211,7 +208,7 @@ class PackageWrapper(Package, Generic[JT]):
         super().__init__(pkg_name)
         self.job_type = job_type
 
-    def __reduce__(self: PT) -> tuple[type[PT], tuple[type[JT], str]]:
+    def __reduce__(self) -> tuple[type[Self], tuple[Any, ...]]:
         """A helper function for :mod:`pickle`."""
         return type(self), (self.job_type, self.pkg_name)
 

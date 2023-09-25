@@ -16,12 +16,12 @@ from functools import partial
 from os.path import join
 from warnings import warn
 from collections.abc import Callable, Mapping, Iterator
-from typing import Any, ClassVar, TypeVar, TYPE_CHECKING, overload
+from typing import Any, ClassVar, TypeVar, TYPE_CHECKING, overload, Generic
 
 import numpy as np
 import pandas as pd
 from more_itertools import collapse
-from noodles import has_scheduled_methods, schedule, serial
+from noodles import has_scheduled_methods, serial
 from noodles.run.threading.sqlite3 import run_parallel
 from noodles.serial import AsDict, Registry
 from noodles.serial.numpy import SerNumpyScalar, arrays_to_hdf5
@@ -40,7 +40,15 @@ from ..warnings_qmflows import QMFlows_Warning
 if TYPE_CHECKING:
     from rdkit import Chem
     from scm.plams import from_rdmol
+    from typing_extensions import ParamSpec, Self
+
+    _T = TypeVar("_T")
+    _P = ParamSpec("_P")
+
+    def schedule(**kwargs: Any) -> Callable[[Callable[_P, _T]], Callable[_P, PromisedObject[_T]]]:
+        ...
 else:
+    from noodles import schedule
     try:
         from rdkit import Chem
         from scm.plams import from_rdmol
@@ -50,7 +58,7 @@ else:
         def from_rdmol(mol: plams.Molecule) -> plams.Molecule:
             return mol
 
-_Self = TypeVar("_Self", bound="Package")
+_RT = TypeVar("_RT", bound="Result")
 
 __all__ = ['Package', 'Result', 'run']
 
@@ -256,7 +264,7 @@ class Result:
                 results = plams.load(self._results).results
                 assert results is not None, f'Failed to unpickle {self._results!r}'
             except (AssertionError, plams.FileError) as ex:
-                file_exc = ex
+                file_exc: None | Exception = ex
             else:
                 file_exc = None
                 attr_set = set(dir(self))
@@ -280,7 +288,7 @@ PT = TypeVar("PT", bound="Package")
 
 
 @has_scheduled_methods
-class Package(ABC):
+class Package(ABC, Generic[_RT]):
     """:class:`Package` is the base class to handle the invocation to different quantum package.
 
     The only relevant (instance) attribute of this class is :attr:`Package.pkg_name` which is a
@@ -301,7 +309,7 @@ class Package(ABC):
 
     #: A class variable pointing to the :class:`Package`-specific :class:`Result` class.
     #: Should be set when creating a subclass.
-    result_type: ClassVar[type[Result]] = NotImplemented
+    result_type: type[_RT] = NotImplemented
 
     #: A class variable with the name of the generic .yaml file.
     #: Should be set when creating a subclass.
@@ -342,7 +350,7 @@ class Package(ABC):
         self.__doc__ = self.__call__.__doc__
 
     @overload
-    def __get__(self: _Self, obj: None, type: type) -> _Self: ...
+    def __get__(self, obj: None, type: type) -> Self: ...
     @overload
     def __get__(self, obj: object, type: None | type = ...) -> types.MethodType: ...
 
@@ -364,7 +372,7 @@ class Package(ABC):
         store=True, confirm=True)
     def __call__(self, settings: Settings,
                  mol: MolType, job_name: str = '',
-                 validate_output: bool = True, **kwargs: Any) -> Result:
+                 validate_output: bool = True, **kwargs: Any) -> _RT:
         r"""Perform a job with the package specified by :attr:`Package.pkg_name`.
 
         Parameters
@@ -592,7 +600,7 @@ class Package(ABC):
     def run_job(cls, settings: Settings, mol: plams.Molecule, job_name: str = "job",
                 work_dir: None | str | os.PathLike[str] = None,
                 validate_output: bool = False,
-                **kwargs: Any) -> Result:
+                **kwargs: Any) -> _RT:
         r"""`Abstract method <https://docs.python.org/3/library/abc.html#abc.abstractmethod>`_; should be implemented by the child class.
 
         A method which handles the running of
@@ -625,11 +633,11 @@ class Package(ABC):
                                   "should implement this method")
 
 
-def run(job: PromisedObject, runner: None | str = None,
+def run(job: PromisedObject[_T], runner: None | str = None,
         path: None | str | os.PathLike[str] = None,
         folder: None | str | os.PathLike[str] = None,
         load_jobs: bool = False,
-        **kwargs: Any) -> Result:
+        **kwargs: Any) -> _T:
     r"""Pickup a runner and initialize it.
 
     Serves as a wrapper around :func:`noodles.run_parallel`.
@@ -675,17 +683,17 @@ def run(job: PromisedObject, runner: None | str = None,
             raise ValueError(f"Don't know runner: {runner!r}")
 
 
-def call_default(wf: PromisedObject, n_processes: int, always_cache: bool) -> Result:
+def call_default(wf: PromisedObject[_T], n_processes: int, always_cache: bool) -> _T:
     """Run locally using several threads.
 
     Caching can be turned off by specifying ``cache=None``.
 
     """
     # In case 'default_jobmanager' is not set (for some reason)
-    try:
-        workdir = plams.config.get('default_jobmanager').workdir
-    except AttributeError as ex:
-        raise plams.PlamsError("Failed to initialize the PLAMS jobmanager") from ex
+    jobmanager = plams.config.get('default_jobmanager')
+    if jobmanager is None:
+        raise plams.PlamsError("Failed to initialize the PLAMS jobmanager")
+    workdir = jobmanager.workdir
 
     db_file = join(workdir, 'cache.db')
     return run_parallel(
@@ -753,7 +761,7 @@ def find_file_pattern(
         return iter([])
 
 
-def ignore_unused_kwargs(fun: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
+def ignore_unused_kwargs(fun: Callable[..., _T], *args: Any, **kwargs: Any) -> _T:
     """Inspect the signature of function `fun` and filter the keyword arguments.
 
     Searches for the keyword arguments that are present in both `**kwargs`

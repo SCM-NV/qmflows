@@ -59,7 +59,7 @@ class ORCA_Result(Result):
             return parse_molecule(file_name, self._molecule)
 
 
-class ORCA(Package):
+class ORCA(Package[ORCA_Result]):
     """A class for preparing the input for running a Orca job using both PLAMS and templates.
 
     It also does the manangement of the input/output files resulting
@@ -69,7 +69,7 @@ class ORCA(Package):
     """
 
     generic_mapping: ClassVar[_Settings] = load_properties('ORCA', prefix='generic2')
-    result_type: ClassVar[type[ORCA_Result]] = ORCA_Result
+    result_type: type[ORCA_Result] = ORCA_Result
 
     def __init__(self, pkg_name: str = "orca") -> None:
         super().__init__(pkg_name)
