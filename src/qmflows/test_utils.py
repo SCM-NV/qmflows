@@ -195,7 +195,7 @@ def _read_result_file(result: Result, extension: str, max_line: int = 100) -> No
     iterator = (os.path.join(root, i) for i in os.listdir(root)
                 if os.path.splitext(i)[1] == extension)
     for i in iterator:
-        with open(i, "r") as f:
+        with open(i, "r", encoding="utf8") as f:
             ret_list = f.readlines()
             ret = "..." if len(ret_list) > max_line else ""
             ret += "".join(ret_list[-max_line:])

@@ -54,7 +54,7 @@ def reload_qmflows() -> Generator[None, None, None]:
 def configure_plams_logger() -> "Generator[None, None, None]":
     """Remove the date/time prefix from the PLAMS logging output."""
     # Ensure the plams.config dict is populated by firing up plams.init once
-    with open(os.devnull, "w") as f1, tempfile.TemporaryDirectory() as f2:
+    with open(os.devnull, "w", encoding="utf8") as f1, tempfile.TemporaryDirectory() as f2:
         with contextlib.redirect_stdout(f1), InitRestart(f2):
             pass
 

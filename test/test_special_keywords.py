@@ -294,6 +294,6 @@ def test_cp2k_mm_keywords():
     s.specific.cp2k.force_eval.mm.forcefield.parm_file_name = basename(
         s.specific.cp2k.force_eval.mm.forcefield.parm_file_name)
 
-    with open(PATH / 'cp2k_mm_special_keyword.yaml', 'rb') as f:
+    with open(PATH / 'cp2k_mm_special_keyword.yaml', 'r', encoding="utf8") as f:
         ref = yaml2Settings(f)
     assertion.eq(s.specific, ref)
