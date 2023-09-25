@@ -98,7 +98,7 @@ def try_search_pattern(
 ) -> None | str:
     """Search for an specific pattern in  a file."""
     try:
-        with open(file_name, 'r') as f:
+        with open(file_name, 'r', encoding="utf8") as f:
             for line in f:
                 if re.search(pat, line):
                     return line

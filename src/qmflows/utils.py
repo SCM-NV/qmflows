@@ -123,6 +123,8 @@ def file_to_context(file: int | PathLike | IO[Any],
     """
     # path-like object
     try:
+        if "encoding" not in kwargs:
+            kwargs["encoding"] = "utf8"
         return open(file, **kwargs)  # type: ignore
 
     # a file-like object (hopefully)
@@ -148,7 +150,8 @@ def init_restart(
 
     """
     is_init: bool = config.init
-    with open(os.devnull, 'w') as f, redirect_stdout(f):  # Temporary supress printing
+    # Temporary supress printing
+    with open(os.devnull, 'w', encoding="utf8") as f, redirect_stdout(f):
         init(path, folder)
 
     # Parse variables

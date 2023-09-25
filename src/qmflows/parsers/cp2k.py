@@ -207,7 +207,7 @@ def read_cp2k_xyz(path: PathLike, dtype: DTypeLike = np.float64) -> NDArray[Any]
     Requires a CP2K ``*.xyz`` file.
 
     """
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding="utf8") as f:
         n_atom = int(next(f))
         flat_iter = chain.from_iterable(_read_cp2k_xyz(f, n_atom))
         ret = np.fromiter(flat_iter, dtype=dtype)
@@ -238,7 +238,7 @@ def read_cp2k_table(
     **start**, **stop** and **step** can be used for specifiying the to-be parsed rows.
 
     """
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding="utf8") as f:
         flat_iter = (i.split()[column] for i in islice(f, start, stop, step))
         return np.fromiter(flat_iter, dtype=dtype)
 
@@ -261,7 +261,7 @@ def read_cp2k_table_slc(
     **start**, **stop** and **step** can be used for specifiying the to-be parsed rows.
 
     """
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding="utf8") as f:
         clm_slc = slice(column_start, column_stop, column_step)
         row_slc = islice(f, row_start, row_stop, row_step)
         flat_iter = chain.from_iterable(i.split()[clm_slc] for i in row_slc)
@@ -300,7 +300,7 @@ def read_cp2k_pressure(
     major, _ = get_cp2k_version(path)
 
     # Read the pressures
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding="utf8") as f:
         iterator = _get_pressure_iter(major, f)
         return np.fromiter(islice(iterator, start, stop, step), dtype=dtype)
 
@@ -313,7 +313,7 @@ def get_cp2k_version(out_file: PathLike) -> CP2KVersion:
 
     Returns :code:`(0, 0)` if the versions cannot be identified.
     """
-    with open(out_file, 'r') as f:
+    with open(out_file, 'r', encoding="utf8") as f:
         for i in f:
             i = i.strip()
             if i.startswith("CP2K| version string:"):

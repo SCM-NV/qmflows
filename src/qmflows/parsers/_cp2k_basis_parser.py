@@ -92,5 +92,5 @@ def read_cp2k_basis(file: PathLike, *, allow_multiple_exponents: bool = False) -
         Whether to allow the parsing of basis sets consisting of multiple exponent sets.
 
     """
-    with open(file, "r") as f:
+    with open(file, "r", encoding="utf8") as f:
         return _read_basis(_BasisFileIter(f, start=1), allow_multiple_exponents)

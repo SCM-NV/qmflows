@@ -90,7 +90,7 @@ def _find_mo_start(path: str | os.PathLike[str], unrestricted: bool) -> int | tu
         and a single integer otherwise.
 
     """
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf8") as f:
         # Find all headers, but skip restarts
         enumerator = enumerate((h.strip("MO| \n") for h in f), start=1)
         headers = [(i, h) for i, h in enumerator if "EIGENVALUES" in h]
@@ -153,7 +153,7 @@ def read_coefficients(
 
     j0 = 0
     j1 = 0
-    with open(path, "r") as f:
+    with open(path, "r", encoding="utf8") as f:
         iterator = filter(None, (i.strip("MO| \n") for i in islice(f, start, None)))
         for h in iterator:
             # Each MO pair is preceded by their indices,
@@ -192,8 +192,8 @@ _REQUIRED_KEYS = frozenset(_ORBITAL_NAMES.values())
 
 def read_cp2k_number_of_orbitals(file_name: str | os.PathLike[str]) -> MO_metadata:
     """Extract the number of (occupied) orbitals and basis functions."""
-    with open(file_name, "r") as f:
-        kwargs: "dict[str, list[int]]" = defaultdict(list)
+    with open(file_name, "r", encoding="utf8") as f:
+        kwargs: defaultdict[str, list[int]] = defaultdict(list)
         for line in f:
             match = _ORBITAL_PATTERN.search(line)
             if match is None:

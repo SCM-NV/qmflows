@@ -58,7 +58,7 @@ def handle_SCM_special_keywords(settings: Settings, key: str,
 
     def inithess() -> None:
         hess_path = get_tmpfile_name("ADF_hessian_")
-        hess_file = open(hess_path, "w")
+        hess_file = open(hess_path, "w", encoding="utf8")
         hess_file.write(" ".join(['{:.6f}'.format(v) for v in value]))
         settings.specific[package].geometry.inithess = hess_path.as_posix()
 

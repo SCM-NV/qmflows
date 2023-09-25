@@ -10,7 +10,7 @@ def test_multiple_geometries():
     """Test the reading of multiples molecular geometries from a file."""
     path_xyz = PATH / "molecules" / "five_points_ethylene.xyz"
 
-    with open(path_xyz, 'r') as f:
+    with open(path_xyz, 'r', encoding="utf8") as f:
         ls = f.readlines()
 
     xs = [''.join(x) for x in chunked(ls, 8)]
