@@ -123,6 +123,9 @@ source = ["src"]
 
 [tool.flake8]
 max-line-length = 100
+exclude = [
+    "src/qmflows/_version.py ALL",
+]
 
 [tool.pytest.ini_options]
 testpaths = "src test"
