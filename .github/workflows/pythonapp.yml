@@ -36,6 +36,9 @@ jobs:
             special: ['no optional']
             version: '3.11'
           - os: ubuntu-latest
+            special: ['no optional']
+            version: '3.12'
+          - os: ubuntu-latest
             special: ['CP2K', '6.1', 'ssmp']
             version: '3.11'
           - os: ubuntu-latest
@@ -84,15 +87,20 @@ jobs:
       with:
         python-version: ${{ matrix.version }}
 
+    # TODO: Remove the manual h5py building once h5py 3.10 has been released with cp312 wheels
     - name: Install dependencies
       run: |
-        pip install --upgrade pip
         case "${{ matrix.special[0] }}" in
           "pre-release")
             pip install --pre -e .[test] --upgrade --force-reinstall
             pip install git+https://github.com/NLeSC/noodles@master --upgrade
             ;;
           "no optional")
+            if [[ "${{ matrix.version }}" == '3.12' ]]; then
+              sudo apt-get update
+              sudo apt-get install libhdf5-dev
+              pip install git+https://github.com/h5py/h5py@89e1e2e78d7fb167d2a67c9a8354ced6491160fe
+            fi
             pip install -e .[test-no-optional]
             ;;
           *)
