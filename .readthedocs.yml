@@ -26,10 +26,3 @@ build:
 # Optionally set the version of Python and requirements required to build your docs
 conda:
   environment: doc_environment.yml
-
-python:
-  install:
-    - method: pip
-      path: .
-      extra_requirements:
-        - doc

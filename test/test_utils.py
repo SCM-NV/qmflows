@@ -98,9 +98,9 @@ def test_validate_status() -> None:
         validate_status(result)
     msg = str(rec.value)
 
-    with open(root / "cp2k_opt.out", "r") as f:
+    with open(root / "cp2k_opt.out", "r", encoding="utf8") as f:
         out_ref = textwrap.indent("".join(f.readlines()[-100:]), 4 * " ")
-    with open(root / "cp2k_opt.err", "r") as f:
+    with open(root / "cp2k_opt.err", "r", encoding="utf8") as f:
         err_ref = textwrap.indent("".join(f.readlines()[-100:]), 4 * " ")
 
     assertion.contains(msg, out_ref)
