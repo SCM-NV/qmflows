@@ -1,5 +1,5 @@
 
-.. image:: https://github.com/SCM-NV/qmflows/workflows/build%20with%20conda/badge.svg
+.. image:: https://github.com/SCM-NV/qmflows/workflows/Tests/badge.svg
    :target: https://github.com/SCM-NV/qmflows/actions
 .. image:: https://codecov.io/gh/SCM-NV/qmflows/branch/master/graph/badge.svg
   :target: https://codecov.io/gh/SCM-NV/qmflows
