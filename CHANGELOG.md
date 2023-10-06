@@ -1,4 +1,4 @@
-# Version 1.0.0 (*unreleased*)
+# Version 1.0.0 (6/10/2023)
 
 ## New
  * Add new aliases for CP2K potentials
@@ -8,6 +8,8 @@
  * Finished the QMFlows 0.12.0 deprecations
  * Switched from setup.cfg to pyproject.toml
  * Misc annotation improvements
+ * Switch from setup.py to pyproject.toml
+ * Add support for Python 3.12
 
 
 # Version 0.13.0 (19/04/2023)
