@@ -42,7 +42,7 @@ requires-python = ">=3.8"
 dependencies = [
     "more-itertools",
     "h5py",
-    "numpy>=1.21",
+    "numpy>=1.21,<2",
     "pandas",
     "noodles>=0.3.3",
     "plams==1.5.1",
